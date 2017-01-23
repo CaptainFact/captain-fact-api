@@ -7,8 +7,9 @@ defmodule CaptainFact.User do
     field :name, :string
     field :nickname, :string
     field :email, :string
+    field :encrypted_password, :string
 
-    has_many :authorizations, CaptainFact.Authorization
+    field :password, :string, virtual: true
 
     timestamps()
   end
@@ -16,12 +17,6 @@ defmodule CaptainFact.User do
 
   @required_fields ~w(email nickname)a
   @optional_fields ~w(name)a
-
-  def registration_changeset(model, params \\ :empty) do
-    model
-    |> cast(params, ~w(email nickname)a)
-    |> validate_required(@required_fields)
-  end
 
   @doc """
   Creates a changeset based on the `model` and `params`.
@@ -37,5 +32,22 @@ defmodule CaptainFact.User do
     |> validate_length(:nickname, min: 3, max: 30)
     |> update_change(:nickname, &String.downcase/1)
     |> unique_constraint(:nickname)
+  end
+
+  def registration_changeset(model, params \\ :empty) do
+    model
+    |> changeset(params)
+    |> cast(params, ~w(password))
+    |> validate_length(:password, min: 6, max: 100)
+    |> put_encrypted_pw
+  end
+
+  defp put_encrypted_pw(changeset) do
+    case changeset do
+      %Ecto.Changeset{valid?: true, changes: %{password: pass}} ->
+        put_change(changeset, :encrypted_password, Comeonin.Bcrypt.hashpwsalt(pass))
+      _ ->
+        changeset
+    end
   end
 end

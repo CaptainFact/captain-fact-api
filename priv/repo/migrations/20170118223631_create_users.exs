@@ -3,9 +3,10 @@ defmodule CaptainFact.Repo.Migrations.CreateUsers do
 
   def change do
     create table(:users) do
-      add :name, :string
       add :nickname, :string
       add :email, :string
+      add :name, :string
+      add :encrypted_password, :string
 
       timestamps()
     end

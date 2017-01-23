@@ -22,6 +22,21 @@ config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
+config :ueberauth, Ueberauth,
+providers: [
+  identity: {
+    Ueberauth.Strategy.Identity,
+    [callback_methods: ["POST"]]
+  }
+]
+
+config :guardian, Guardian,
+  issuer: "CaptainFact",
+  ttl: {30, :days},
+  secret_key: "Qf+lilDob+feItWrI+b/Ls3gBglt8IFlnC+DoJIn1Bqvy3yy/oVRDGdlte4wTu/x",
+  serializer: CaptainFact.GuardianSerializer,
+  permissions: %{default: [:read, :write]}
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env}.exs"

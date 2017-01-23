@@ -13,6 +13,11 @@ defmodule CaptainFact.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :api_auth do
+    plug Guardian.Plug.VerifyHeader, realm: "Bearer"
+    plug Guardian.Plug.LoadResource
+  end
+
   scope "/", CaptainFact do
     pipe_through :browser # Use the default browser stack
 
@@ -23,5 +28,13 @@ defmodule CaptainFact.Router do
     pipe_through :api
 
     resources "/users", UserController, except: [:index]
+  end
+
+  scope "/auth", CaptainFact do
+    pipe_through [:api, :api_auth]
+
+    get "/me", AuthController, :me
+    post "/:identity/callback", AuthController, :callback
+    delete "/signout", AuthController, :delete
   end
 end
