@@ -27,10 +27,10 @@ defmodule CaptainFact.Router do
   scope "/api", CaptainFact do
     pipe_through :api
 
-    resources "/users", UserController, except: [:index]
+    resources "/users", UserController, except: [:index, :new]
   end
 
-  scope "/auth", CaptainFact do
+  scope "/api/auth", CaptainFact do
     pipe_through [:api, :api_auth]
 
     get "/me", AuthController, :me

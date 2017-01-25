@@ -11,6 +11,8 @@ defmodule CaptainFact.UserView do
     %{data: render_one(user, CaptainFact.UserView, "user.json")}
   end
 
+  # TODO: Should only render email if it is current user !
+
   def render("user.json", %{user: user}) do
     %{id: user.id,
       email: user.email,

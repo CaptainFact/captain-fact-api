@@ -23,10 +23,10 @@ config :logger, :console,
   metadata: [:request_id]
 
 config :ueberauth, Ueberauth,
+base_path: "/api/auth",
 providers: [
   identity: {
-    Ueberauth.Strategy.Identity,
-    [callback_methods: ["POST"]]
+    Ueberauth.Strategy.Identity, [callback_methods: ["POST"]]
   }
 ]
 

@@ -55,6 +55,14 @@ defmodule CaptainFact.AuthController do
     render(conn, UserView, "show.json", user: user)
   end
 
+  def delete(conn, _params) do
+    conn
+      |> Guardian.Plug.current_token
+      |> Guardian.revoke!
+
+    send_resp(conn, 204, "")
+  end
+
   def unauthenticated(conn, _params) do
     conn
     |> put_status(:unauthorized)
