@@ -28,6 +28,7 @@ defmodule CaptainFact.Router do
     pipe_through :api
 
     resources "/users", UserController, except: [:index, :new]
+    resources "/videos", VideoController, only: [:index, :create, :show, :update, :delete]
   end
 
   scope "/api/auth", CaptainFact do
