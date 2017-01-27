@@ -5,7 +5,7 @@ defmodule CaptainFact.User do
 
   schema "users" do
     field :name, :string
-    field :nickname, :string
+    field :username, :string
     field :email, :string
     field :encrypted_password, :string
 
@@ -15,7 +15,7 @@ defmodule CaptainFact.User do
   end
 
 
-  @required_fields ~w(email nickname)a
+  @required_fields ~w(email username)a
   @optional_fields ~w(name)a
 
   @doc """
@@ -29,9 +29,8 @@ defmodule CaptainFact.User do
     |> validate_required(@required_fields)
     |> validate_format(:email, ~r/@/)
     |> unique_constraint(:email)
-    |> validate_length(:nickname, min: 3, max: 30)
-    |> update_change(:nickname, &String.downcase/1)
-    |> unique_constraint(:nickname)
+    |> validate_length(:username, min: 3, max: 30)
+    |> unique_constraint(:username)
   end
 
   def registration_changeset(model, params \\ :empty) do

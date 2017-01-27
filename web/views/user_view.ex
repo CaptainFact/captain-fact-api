@@ -17,7 +17,7 @@ defmodule CaptainFact.UserView do
     %{id: user.id,
       email: user.email,
       name: user.name,
-      nickname: user.nickname
+      username: user.username
     }
   end
 
@@ -25,7 +25,7 @@ defmodule CaptainFact.UserView do
     %{id: user.id,
       email: user.email,
       name: user.name,
-      nickname: user.nickname,
+      username: user.username,
       token: token
     }
   end
