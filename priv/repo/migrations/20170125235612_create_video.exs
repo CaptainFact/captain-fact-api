@@ -6,11 +6,11 @@ defmodule CaptainFact.Repo.Migrations.CreateVideo do
       add :is_private, :boolean, default: false, null: false
       add :title, :string, null: false
       add :url, :string
-      add :owner, references(:users, on_delete: :delete_all)
+      add :owner_id, references(:users, on_delete: :delete_all)
 
       timestamps()
     end
-    create index(:videos, [:owner])
+    create index(:videos, [:owner_id])
 
   end
 end

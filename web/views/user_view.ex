@@ -4,11 +4,11 @@ defmodule CaptainFact.UserView do
   alias CaptainFact.{UserView}
 
   def render("show.json", %{user: user, token: token}) do
-    %{data: render_one(user, UserView, "user_token.json", token: token)}
+    render_one(user, UserView, "user_token.json", token: token)
   end
 
   def render("show.json", %{user: user}) do
-    %{data: render_one(user, CaptainFact.UserView, "user.json")}
+    render_one(user, CaptainFact.UserView, "user.json")
   end
 
   # TODO: Should only render email if it is current user !
