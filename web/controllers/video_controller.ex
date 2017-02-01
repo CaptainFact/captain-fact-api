@@ -2,6 +2,13 @@ defmodule CaptainFact.VideoController do
   use CaptainFact.Web, :controller
   alias CaptainFact.Video
 
+  def index(conn, %{"owner_id" => owner_id}) do
+    videos = Video
+              |> where([v], v.owner_id  == ^owner_id)
+              |> Repo.all
+    render(conn, "index.json", videos: videos)
+  end
+
   def index(conn, _params) do
     #TODO: Paginate
     videos = Repo.all(Video)

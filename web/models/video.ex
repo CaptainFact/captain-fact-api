@@ -15,7 +15,9 @@ defmodule CaptainFact.Video do
   """
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:is_private, :url])
+    |> cast(params, [:is_private, :url, :title])
     |> validate_required([:url, :title])
+    |> validate_length(:title, min: 5, max: 50)
+    # TODO: Validate URL format
   end
 end
