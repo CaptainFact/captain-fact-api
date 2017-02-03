@@ -1,8 +1,6 @@
 defmodule CaptainFact.User do
   use CaptainFact.Web, :model
 
-  alias CaptainFact.Repo
-
   schema "users" do
     field :name, :string
     field :username, :string
@@ -10,6 +8,8 @@ defmodule CaptainFact.User do
     field :encrypted_password, :string
 
     field :password, :string, virtual: true
+
+    has_many :videos, CaptainFact.Video, foreign_key: :owner_id
 
     timestamps()
   end
