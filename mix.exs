@@ -44,7 +44,8 @@ defmodule CaptainFact.Mixfile do
       {:comeonin, "~> 3.0"},
       {:ueberauth, "~> 0.4"},
       {:ueberauth_identity, "~> 0.2"},
-      {:guardian, "~> 0.10"}
+      {:guardian, "~> 0.10"},
+      {:ecto_enum, "~> 1.0"}
    ]
   end
 
