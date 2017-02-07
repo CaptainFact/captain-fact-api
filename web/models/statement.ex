@@ -3,8 +3,8 @@ defmodule CaptainFact.Statement do
 
   schema "statements" do
     field :text, :string
+    field :time, :integer
     field :status, StatementStatusEnum
-    field :truthiness, TruthinessEnum
     belongs_to :video, CaptainFact.Video
     belongs_to :speaker, CaptainFact.Speaker
 
@@ -16,7 +16,7 @@ defmodule CaptainFact.Statement do
   """
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:text, :status, :truthiness])
-    |> validate_required([:text, :status, :truthiness])
+    |> cast(params, [:text, :status, :time])
+    |> validate_required([:text, :status, :time])
   end
 end

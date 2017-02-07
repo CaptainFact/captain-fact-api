@@ -2,7 +2,7 @@ defmodule CaptainFact.UserSocket do
   use Phoenix.Socket
 
   ## Channels
-  # channel "room:*", CaptainFact.RoomChannel
+  channel "video_debate:*", CaptainFact.VideoDebateChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket
@@ -19,8 +19,12 @@ defmodule CaptainFact.UserSocket do
   #
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
-  def connect(_params, socket) do
+  def connect(params, socket) do
     {:ok, socket}
+      # |> assign(:user_id, params["id"])
+      # |> assign(:username, params["username"])
+      # |> assign(:email, params["email"])
+      # |> assign(:uuid, params["uuid"])
   end
 
   # Socket id's are topics that allow you to identify all sockets for a given user:
