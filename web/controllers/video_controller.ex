@@ -7,9 +7,10 @@ defmodule CaptainFact.VideoController do
 
   def index(conn, %{"user_id" => user_id}) do
     videos = Video
-              |> where([v], v.owner_id  == ^user_id)
-              |> order_by([v], desc: v.id)
-              |> Repo.all
+      |> Video.with_speakers
+      |> where([v], v.owner_id  == ^user_id)
+      |> order_by([v], desc: v.id)
+      |> Repo.all
     render(conn, "index.json", videos: videos)
   end
 
@@ -19,8 +20,8 @@ defmodule CaptainFact.VideoController do
   end
 
   def show(conn, %{"id" => id}) do
-    # TODO: Use video title
-    video = Repo.get!(Video, id)
+    # IDEA: Use video title instead of id
+    video = Repo.get!(Video.with_speakers(Video), id)
     render(conn, "show.json", video: video)
   end
 

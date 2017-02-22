@@ -13,7 +13,21 @@ defmodule CaptainFact.VideoView do
     %{id: video.id,
       url: video.url,
       title: video.title,
-      isPrivate: video.is_private
+      isPrivate: video.is_private,
+      owner_id: video.owner_id,
+      speakers: render_many(video.speakers, CaptainFact.SpeakerView, "speaker.json")
+    }
+  end
+
+  def render("video_with_statements.json", %{video: video}) do
+    %{
+      id: video.id,
+      url: video.url,
+      title: video.title,
+      isPrivate: video.is_private,
+      owner_id: video.owner_id,
+      speakers: render_many(video.speakers, CaptainFact.SpeakerView, "speaker.json"),
+      statements: render_many(video.statements, CaptainFact.StatementView, "statement.json")
     }
   end
 end

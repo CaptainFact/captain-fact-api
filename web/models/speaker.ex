@@ -5,7 +5,7 @@ defmodule CaptainFact.Speaker do
     field :full_name, :string
 
     has_many :statements, CaptainFact.Statement
-
+    many_to_many :videos, CaptainFact.Video, join_through: "videos_speakers"
     timestamps()
   end
 

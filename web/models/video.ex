@@ -7,7 +7,18 @@ defmodule CaptainFact.Video do
     field :url, :string
     belongs_to :owner, CaptainFact.User
 
+    many_to_many :speakers, CaptainFact.Speaker, join_through: "videos_speakers"
+    has_many :statements, CaptainFact.Statement
+
     timestamps()
+  end
+
+  def with_speakers(query) do
+    from v in query, preload: [:speakers]
+  end
+
+  def with_statements(query) do
+    from v in query, preload: [:statements]
   end
 
   @doc """
