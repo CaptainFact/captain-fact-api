@@ -18,7 +18,6 @@ defmodule CaptainFact.VideoDebateChannel do
         |> Video.with_statements()
         |> Repo.get!(video_id)
         |> Phoenix.View.render_one(CaptainFact.VideoView, "video_with_statements.json")
-      IO.inspect(video_with_statements)
       {:ok, video_with_statements, assign(socket, :video_id, video_id)}
     else
       {:error, %{reason: "unauthorized"}}
@@ -46,6 +45,13 @@ defmodule CaptainFact.VideoDebateChannel do
     end
   end
 
+  def handle_in("remove_statement", %{"id" => id}, socket) do
+    Statement
+    |> where(id: ^id)
+    |> Repo.delete_all()
+    {:reply, :ok, socket}
+  end
+
   @doc """
   Add an existing speaker to the video
   """
@@ -58,7 +64,6 @@ defmodule CaptainFact.VideoDebateChannel do
   """
   def handle_in("new_speaker", %{"full_name" => full_name}, socket) do
     speaker_changeset = Speaker.changeset(%Speaker{full_name: full_name})
-
     case Repo.insert(speaker_changeset) do
       {:ok, speaker} ->
         # Insert association between video and speaker
@@ -73,6 +78,18 @@ defmodule CaptainFact.VideoDebateChannel do
       {:error, _reason} ->
         {:reply, :error, socket}
     end
+  end
+
+  def handle_in("remove_speaker", %{"id" => id}, socket) do
+    # Delete association
+    VideoSpeaker
+    |> where(speaker_id: ^id, video_id: ^socket.assigns.video_id)
+    |> Repo.delete_all()
+    # TODO check is_user_defined
+    # TODO + check no other usages
+    # TODO finally remove speaker
+    broadcast!(socket, "speaker_removed", %{id: id})
+    {:reply, :ok, socket}
   end
 
   # Add authorization logic here as required.

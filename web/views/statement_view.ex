@@ -9,7 +9,8 @@ defmodule CaptainFact.StatementView do
     %{
       id: statement.id,
       text: statement.text,
-      time: statement.time
+      time: statement.time,
+      speaker_id: statement.speaker_id
     }
   end
 end
