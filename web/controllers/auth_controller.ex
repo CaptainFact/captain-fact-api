@@ -14,7 +14,6 @@ defmodule CaptainFact.AuthController do
     case result do
       {:ok, user, token} ->
         conn
-        |> put_status(:created)
         |> render(UserView, "show.json", user: user, token: token)
       {:error, reason} ->
         conn

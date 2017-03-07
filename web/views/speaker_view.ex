@@ -8,7 +8,8 @@ defmodule CaptainFact.SpeakerView do
   def render("speaker.json", %{speaker: speaker}) do
     %{
       id: speaker.id,
-      full_name: speaker.full_name
+      full_name: speaker.full_name,
+      title: speaker.title
     }
   end
 end

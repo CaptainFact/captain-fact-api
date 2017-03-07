@@ -3,9 +3,10 @@ defmodule CaptainFact.VideoController do
   alias CaptainFact.Video
 
   plug Guardian.Plug.EnsureAuthenticated, [handler: CaptainFact.AuthController]
-       when action in [:create, :index, :update, :delete]
+       when action in [:create, :update, :delete]
 
   def index(conn, %{"user_id" => user_id}) do
+    # TODO : Ensure authenticated before listing private videos
     videos = Video
       |> Video.with_speakers
       |> where([v], v.owner_id  == ^user_id)
@@ -15,7 +16,12 @@ defmodule CaptainFact.VideoController do
   end
 
   def index(conn, _params) do
-    videos = Video |> order_by([v], desc: v.id) |> Repo.all()
+    # TODO Pagination
+    videos = Video
+    |> Video.with_speakers
+    |> where([v], v.is_private == false)
+    |> order_by([v], desc: v.id)
+    |> Repo.all()
     render(conn, "index.json", videos: videos)
   end
 
@@ -25,11 +31,12 @@ defmodule CaptainFact.VideoController do
     render(conn, "show.json", video: video)
   end
 
-  def create(conn, params) do
+  def create(conn, %{"video" => video_params}) do
     user = Guardian.Plug.current_resource(conn)
-    changeset = Video.changeset(%Video{owner_id: user.id}, params)
+    changeset = Video.changeset(%Video{owner_id: user.id}, video_params)
     case Repo.insert(changeset) do
-      {:ok, video} -> render(conn, "show.json", video: video)
+      {:ok, video} ->
+        render(conn, "show_simple.json", video: video)
       {:error, changeset} ->
         conn
         |> put_status(:unprocessable_entity)
@@ -45,15 +52,16 @@ defmodule CaptainFact.VideoController do
     user = Guardian.Plug.current_resource(conn)
     video = Repo.get!(user_videos(user), id)
     Repo.delete!(video)
-    render(conn, "show.json", video: video)
+    send_resp(conn, :ok, "")
   end
 
   def update(conn, params = %{"id" => id}) do
     user = Guardian.Plug.current_resource(conn)
     video = Repo.get!(user_videos(user), id)
     changeset = Video.changeset(video, params)
+    IO.inspect(params)
     case Repo.update(changeset) do
-      {:ok, video} -> render(conn, "show.json", video: video)
+      {:ok, video} -> render(conn, "show_simple.json", video: video)
       {:error, changeset} ->
         conn
         |> put_status(:unprocessable_entity)

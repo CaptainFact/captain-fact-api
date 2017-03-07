@@ -28,7 +28,7 @@ defmodule CaptainFact.Video do
     struct
     |> cast(params, [:is_private, :url, :title])
     |> validate_required([:url, :title])
-    |> validate_length(:title, min: 5, max: 50)
+    |> validate_length(:title, min: 5, max: 120)
     # TODO: Validate URL format
   end
 end

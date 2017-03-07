@@ -85,11 +85,28 @@ defmodule CaptainFact.VideoDebateChannel do
     VideoSpeaker
     |> where(speaker_id: ^id, video_id: ^socket.assigns.video_id)
     |> Repo.delete_all()
+    # Delete all statements made by the speaker on this video
+    Statement
+    |> where(speaker_id: ^id, video_id: ^socket.assigns.video_id)
+    |> Repo.delete_all()
     # TODO check is_user_defined
     # TODO + check no other usages
     # TODO finally remove speaker
     broadcast!(socket, "speaker_removed", %{id: id})
     {:reply, :ok, socket}
+  end
+
+  def handle_in("update_speaker", %{"speaker" => params = %{"id" => id}}, socket) do
+    speaker = Repo.get!(Speaker, id)
+    changeset = Speaker.changeset(speaker, params)
+    case Repo.update(changeset) do
+      {:ok, speaker} ->
+        rendered_speaker = Phoenix.View.render_one(speaker, CaptainFact.SpeakerView, "speaker.json")
+        broadcast!(socket, "speaker_updated", rendered_speaker)
+        {:reply, :ok, socket}
+      {:error, error} ->
+        {:reply, :error, socket}
+    end
   end
 
   # Add authorization logic here as required.
