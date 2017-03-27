@@ -4,14 +4,16 @@ defmodule CaptainFact.Statement do
   schema "statements" do
     field :text, :string
     field :time, :integer
-    field :status, StatementStatusEnum
+
     belongs_to :video, CaptainFact.Video
     belongs_to :speaker, CaptainFact.Speaker
+    has_many :comments, CaptainFact.Comment
 
     timestamps()
   end
 
-  @required_fields ~w(text status time speaker_id)a
+  #TODO Add video to required fields
+  @required_fields ~w(text time speaker_id)a
 
   @doc """
   Builds a changeset based on the `struct` and `params`.

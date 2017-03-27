@@ -5,8 +5,8 @@ defmodule CaptainFact.Repo.Migrations.CreateVideo do
     create table(:videos) do
       add :is_private, :boolean, default: false, null: false
       add :title, :string, null: false
-      add :url, :string
-      add :owner_id, references(:users, on_delete: :delete_all)
+      add :url, :string, null: false
+      add :owner_id, references(:users, on_delete: :delete_all), null: false
 
       timestamps()
     end

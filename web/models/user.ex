@@ -10,7 +10,8 @@ defmodule CaptainFact.User do
     field :password, :string, virtual: true
 
     has_many :videos, CaptainFact.Video, foreign_key: :owner_id
-
+    has_many :comments, CaptainFact.Comment
+    
     timestamps()
   end
 
@@ -37,7 +38,7 @@ defmodule CaptainFact.User do
     model
     |> changeset(params)
     |> cast(params, ~w(password))
-    |> validate_length(:password, min: 6, max: 100)
+    |> validate_length(:password, min: 6, max: 256)
     |> put_encrypted_pw
   end
 

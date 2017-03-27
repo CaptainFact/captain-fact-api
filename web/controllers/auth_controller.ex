@@ -15,10 +15,10 @@ defmodule CaptainFact.AuthController do
       {:ok, user, token} ->
         conn
         |> render(UserView, "show.json", user: user, token: token)
-      {:error, reason} ->
+      {:error, _} ->
         conn
         |> put_status(:bad_request)
-        |> render(ErrorView, "error.json", error: reason)
+        |> render(ErrorView, "error.json", message: "Invalid email / password combination")
     end
   end
 

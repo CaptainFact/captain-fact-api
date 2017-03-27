@@ -1,30 +1,22 @@
 defmodule CaptainFact.UserSocket do
   use Phoenix.Socket
+  import Guardian.Phoenix.Socket
 
   ## Channels
   channel "video_debate:*", CaptainFact.VideoDebateChannel
+  channel "statements:video:*", CaptainFact.StatementsChannel
+  channel "comments:video:*", CaptainFact.CommentsChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket
-  # transport :longpoll, Phoenix.Transports.LongPoll
 
-  # Socket params are passed from the client and can
-  # be used to verify and authenticate a user. After
-  # verification, you can put default assigns into
-  # the socket that will be set for all channels, ie
-  #
-  #     {:ok, assign(socket, :user_id, verified_user_id)}
-  #
-  # To deny connection, return `:error`.
-  #
-  # See `Phoenix.Token` documentation for examples in
-  # performing token verification on connect.
-  def connect(params, socket) do
-    {:ok, socket}
-      # |> assign(:user_id, params["id"])
-      # |> assign(:username, params["username"])
-      # |> assign(:email, params["email"])
-      # |> assign(:uuid, params["uuid"])
+  def connect(%{"token" => token}, socket) do
+    case sign_in(socket, token) do
+      {:ok, authed_socket, guardian_params} ->
+        {:ok, authed_socket}
+      _ ->
+        {:ok, socket}
+    end
   end
 
   # Socket id's are topics that allow you to identify all sockets for a given user:

@@ -32,6 +32,7 @@ defmodule CaptainFact.VideoView do
       title: video.title,
       is_private: video.is_private,
       owner_id: video.owner_id,
+      posted_at: video.inserted_at,
       speakers: render_many(video.speakers, CaptainFact.SpeakerView, "speaker.json")
     }
   end

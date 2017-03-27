@@ -5,10 +5,10 @@ defmodule CaptainFact.Repo.Migrations.CreateUsers do
     execute("CREATE EXTENSION citext;")
 
     create table(:users) do
-      add :username, :citext
-      add :email, :citext
+      add :username, :citext, null: false
+      add :email, :citext, null: false
       add :name, :string
-      add :encrypted_password, :string
+      add :encrypted_password, :string, null: false
 
       timestamps()
     end

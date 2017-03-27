@@ -4,6 +4,7 @@ defmodule CaptainFact.Speaker do
   schema "speakers" do
     field :full_name, :string
     field :title, :string
+    field :is_user_defined, :boolean
 
     has_many :statements, CaptainFact.Statement
     many_to_many :videos, CaptainFact.Video, join_through: "videos_speakers"
