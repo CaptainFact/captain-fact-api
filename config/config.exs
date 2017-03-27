@@ -13,7 +13,6 @@ config :captain_fact,
 config :captain_fact, CaptainFact.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "avLUvr7bCD8k3H+fX+PQi7DvB7qocJBMmX4H05kdSYX3sHEmnsgalWU1RbpwP1Bh",
-  render_errors: [view: CaptainFact.ErrorView, accepts: ~w(html json)],
   render_errors: [view: CaptainFact.ErrorView, accepts: ~w(json), default_format: "json"],
   pubsub: [name: CaptainFact.PubSub,
            adapter: Phoenix.PubSub.PG2]
