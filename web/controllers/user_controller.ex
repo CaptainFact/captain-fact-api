@@ -15,14 +15,18 @@ defmodule CaptainFact.UserController do
         |> render("show.json", user: user, token: token)
       {:error, changeset} ->
         conn
-        |> put_status(:unprocessable_entity)
+        |> put_status(:bad_request)
         |> render(CaptainFact.ChangesetView, "error.json", changeset: changeset)
     end
   end
 
-  def show(conn, %{"id" => id}) do
-    user = Repo.get!(User, id)
-    render(conn, "show.json", user: user)
+  def show(conn, %{"username" => username}) do
+    current_user = Guardian.Plug.current_resource(conn)
+    if (current_user && current_user.username == username) do
+      render(conn, "show.json", user: current_user)
+    else
+      render(conn, "show_public.json", user: Repo.get_by!(User, username: username))
+    end
   end
 
   #

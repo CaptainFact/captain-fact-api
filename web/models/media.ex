@@ -5,6 +5,8 @@ defmodule CaptainFact.Media do
     field :name, :string
     field :url_pattern, :string
 
+    has_many :comments, CaptainFact.Comment
+
     timestamps()
   end
 

@@ -27,9 +27,10 @@ defmodule CaptainFact.Router do
   scope "/api", CaptainFact do
     pipe_through [:api, :api_auth]
 
-    resources "/users", UserController, except: [:index, :new]
+    post "/users", UserController, :create
+    get "/users/:username", UserController, :show
 
-    resources "/videos", VideoController, only: [:index, :create, :show, :update, :delete]
+    resources "/videos", VideoController, only: [:index, :create, :update, :delete]
     get "/users/:user_id/videos", VideoController, :index
   end
 
@@ -37,6 +38,7 @@ defmodule CaptainFact.Router do
     pipe_through [:api, :api_auth]
 
     get "/me", AuthController, :me
+    get "/:provider", AuthController, :request
     post "/:identity/callback", AuthController, :callback
     delete "/signout", AuthController, :delete
   end

@@ -2,68 +2,50 @@ defmodule CaptainFact.VideoDebateChannel do
   use CaptainFact.Web, :channel
 
   alias CaptainFact.Statement
-  alias CaptainFact.StatementView
   alias CaptainFact.Video
   alias CaptainFact.VideoView
   alias CaptainFact.Speaker
   alias CaptainFact.SpeakerView
   alias CaptainFact.VideoSpeaker
+  alias Phoenix.View
 
-  def join("video_debate:" <> video_id_str, payload, socket) do
+
+  def join("video_debate:" <> video_id_str, _payload, socket) do
     video_id = String.to_integer(video_id_str)
-    if authorized?(payload) do
-      video_with_statements =
-        Video
-        |> Video.with_speakers()
-        |> Video.with_statements()
-        |> Repo.get!(video_id)
-        |> Phoenix.View.render_one(CaptainFact.VideoView, "video_with_statements.json")
-      {:ok, video_with_statements, assign(socket, :video_id, video_id)}
+    video = Video
+    |> preload([:speakers])
+    |> Repo.get!(video_id)
+    user = Guardian.Phoenix.Socket.current_resource(socket)
+    if Video.has_access(video, user) do
+      rendered_video = View.render_one(video, VideoView, "video.json")
+      socket = socket
+      |> assign(:video_id, video_id)
+      |> assign(:is_admin, Video.is_admin(video, user))
+      {:ok, rendered_video, socket}
     else
-      {:error, %{reason: "unauthorized"}}
+      {:error, %{reason: "You're not authorized to see this video"}}
     end
   end
 
-  @doc """
-  Add a new statement
-  """
-  def handle_in("new_statement", params, socket) do
-    # TODO Verify user is owner / admin
-    changeset = Statement.changeset(
-      %Statement{
-        video_id: socket.assigns.video_id,
-        status: :voting
-      }, params
-    )
-    case Repo.insert(changeset) do
-      {:ok, statement} ->
-        socket |>
-          broadcast!("new_statement", StatementView.render("show.json", statement: statement))
-        {:reply, :ok, socket}
-      {:error, _reason} ->
-        {:reply, :error, socket}
+  def handle_in(command, params, socket) do
+    case socket.assigns.is_admin do
+      true -> admin_handle_in(command, params, socket)
+      false -> {:reply, :error, socket}
     end
-  end
-
-  def handle_in("remove_statement", %{"id" => id}, socket) do
-    Statement
-    |> where(id: ^id)
-    |> Repo.delete_all()
-    {:reply, :ok, socket}
   end
 
   @doc """
   Add an existing speaker to the video
   """
-  def handle_in("new_speaker", %{"id" => id}, socket) do
+  def admin_handle_in("new_speaker", %{"id" => _id}, _socket) do
     # TODO link existing speaker
   end
 
   @doc """
   Add a new speaker to the video
   """
-  def handle_in("new_speaker", %{"full_name" => full_name}, socket) do
-    speaker_changeset = Speaker.changeset(%Speaker{full_name: full_name})
+  def admin_handle_in("new_speaker", options, socket) do
+    speaker_changeset = Speaker.changeset(%Speaker{is_user_defined: true}, options)
     case Repo.insert(speaker_changeset) do
       {:ok, speaker} ->
         # Insert association between video and speaker
@@ -80,7 +62,7 @@ defmodule CaptainFact.VideoDebateChannel do
     end
   end
 
-  def handle_in("remove_speaker", %{"id" => id}, socket) do
+  def admin_handle_in("remove_speaker", %{"id" => id}, socket) do
     # Delete association
     VideoSpeaker
     |> where(speaker_id: ^id, video_id: ^socket.assigns.video_id)
@@ -96,22 +78,16 @@ defmodule CaptainFact.VideoDebateChannel do
     {:reply, :ok, socket}
   end
 
-  def handle_in("update_speaker", %{"speaker" => params = %{"id" => id}}, socket) do
-    speaker = Repo.get!(Speaker, id)
+  def admin_handle_in("update_speaker", params, socket) do
+    speaker = Repo.get!(Speaker, params["id"])
     changeset = Speaker.changeset(speaker, params)
     case Repo.update(changeset) do
       {:ok, speaker} ->
         rendered_speaker = Phoenix.View.render_one(speaker, CaptainFact.SpeakerView, "speaker.json")
         broadcast!(socket, "speaker_updated", rendered_speaker)
         {:reply, :ok, socket}
-      {:error, error} ->
+      {:error, _error} ->
         {:reply, :error, socket}
     end
-  end
-
-  # Add authorization logic here as required.
-  defp authorized?(_payload) do
-    # TODO Verify video exists and user is allowed for it (is_private)
-    true
   end
 end

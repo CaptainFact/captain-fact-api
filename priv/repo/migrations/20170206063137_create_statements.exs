@@ -2,14 +2,11 @@ defmodule CaptainFact.Repo.Migrations.CreateStatement do
   use Ecto.Migration
 
   def change do
-    StatementStatusEnum.create_type
-
     create table(:statements) do
-      add :text, :string
-      add :time, :integer
-      add :status, :statement_status_enum
-      add :video_id, references(:videos, on_delete: :nothing)
-      add :speaker_id, references(:speakers, on_delete: :nothing)
+      add :text, :string, null: false
+      add :time, :integer, null: false
+      add :video_id, references(:videos, on_delete: :delete_all), null: false
+      add :speaker_id, references(:speakers, on_delete: :delete_all), null: false
 
       timestamps()
     end
