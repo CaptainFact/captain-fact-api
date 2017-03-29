@@ -14,6 +14,7 @@ defmodule CaptainFact do
       supervisor(CaptainFact.Endpoint, []),
       # Start your own worker by calling: CaptainFact.Worker.start_link(arg1, arg2, arg3)
       # worker(CaptainFact.Worker, [arg1, arg2, arg3]),
+      worker(CaptainFact.VoteDebouncer, [])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html

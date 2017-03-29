@@ -68,7 +68,7 @@ defmodule CaptainFact.CommentsChannel do
         |> Map.put(:score, 0)
         broadcast!(socket, "comment_added", CommentView.render("comment.json", comment: full_comment))
         {:reply, :ok, socket}
-      {:error, error} ->
+      {:error, _error} ->
         {:reply, :error, socket}
     end
   end
@@ -95,6 +95,7 @@ defmodule CaptainFact.CommentsChannel do
     case Repo.insert_or_update(changeset) do
       {:ok, vote} ->
         # TODO Note that vote.statement_id votes must be refreshed
+        CaptainFact.VoteDebouncer.add_vote(socket.topic, vote.comment_id)
         {:reply, :ok, socket}
       {:error, _} ->
         {:reply, :error, socket}
