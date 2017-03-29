@@ -17,9 +17,11 @@ defmodule CaptainFact.Mixfile do
   #
   # Type `mix help compile.app` for more information.
   def application do
-    [mod: {CaptainFact, []},
-     applications: [:phoenix, :phoenix_pubsub, :phoenix_html, :cowboy, :logger, :gettext,
-                    :phoenix_ecto, :postgrex, :comeonin, :ueberauth, :ueberauth_identity]
+    [
+      mod: {CaptainFact, []},
+      applications: [:phoenix, :phoenix_pubsub, :phoenix_html, :cowboy, :logger, :gettext,
+                    :phoenix_ecto, :postgrex, :comeonin, :ueberauth, :ueberauth_identity],
+      registered: [CaptainFact.VoteDebouncer]
     ]
   end
 
