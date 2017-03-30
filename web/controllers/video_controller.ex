@@ -12,14 +12,17 @@ defmodule CaptainFact.VideoController do
       |> where([v], v.owner_id  == ^user_id)
       |> order_by([v], desc: v.id)
 
-    query = if !connected_user || connected_user.id !== String.to_integer(user_id) do
-      query |> where([v], v.is_private == false)
+    if !connected_user || connected_user.id !== String.to_integer(user_id) do
+      videos = query
+      |> where([v], v.is_private == false)
+      |> Repo.all()
+      render(conn, "index.json", videos: videos)
     else
-      query
+      videos = query
+      |> preload(:admins)
+      |> Repo.all()
+      render(conn, "index_admin.json", videos: videos)
     end
-
-    videos = Repo.all(query)
-    render(conn, "index.json", videos: videos)
   end
 
   def index(conn, _params) do

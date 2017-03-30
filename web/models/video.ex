@@ -11,6 +11,7 @@ defmodule CaptainFact.Video do
     belongs_to :owner, User
 
     many_to_many :speakers, CaptainFact.Speaker, join_through: "videos_speakers"
+    many_to_many :admins, CaptainFact.User, join_through: "videos_admins"
     has_many :statements, CaptainFact.Statement
 
     timestamps()

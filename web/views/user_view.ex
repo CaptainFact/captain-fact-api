@@ -8,11 +8,11 @@ defmodule CaptainFact.UserView do
   end
 
   def render("show.json", %{user: user}) do
-    render_one(user, CaptainFact.UserView, "user.json")
+    render_one(user, UserView, "user.json")
   end
 
   def render("show_public.json", %{user: user}) do
-    render_one(user, CaptainFact.UserView, "public_user.json")
+    render_one(user, UserView, "public_user.json")
   end
 
   def render("public_user.json", %{user: user}) do
