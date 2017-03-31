@@ -13,7 +13,8 @@ defmodule CaptainFact.VideoDebateChannel do
   def join("video_debate:" <> video_id_str, _payload, socket) do
     video_id = String.to_integer(video_id_str)
     video = Video
-    |> preload([:speakers])
+    |> Video.with_speakers
+    |> Video.with_admins
     |> Repo.get!(video_id)
     user = Guardian.Phoenix.Socket.current_resource(socket)
     if Video.has_access(video, user) do

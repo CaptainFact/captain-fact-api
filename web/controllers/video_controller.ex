@@ -9,26 +9,23 @@ defmodule CaptainFact.VideoController do
     connected_user = Guardian.Plug.current_resource(conn)
     query = Video
       |> Video.with_speakers
+      |> Video.with_admins
       |> where([v], v.owner_id  == ^user_id)
       |> order_by([v], desc: v.id)
 
-    if !connected_user || connected_user.id !== String.to_integer(user_id) do
-      videos = query
-      |> where([v], v.is_private == false)
-      |> Repo.all()
-      render(conn, "index.json", videos: videos)
+    query = if !connected_user || connected_user.id !== String.to_integer(user_id) do
+      query |> where([v], v.is_private == false)
     else
-      videos = query
-      |> preload(:admins)
-      |> Repo.all()
-      render(conn, "index_admin.json", videos: videos)
+      query
     end
+    render(conn, "index.json", videos: Repo.all(query))
   end
 
   def index(conn, _params) do
     # TODO Pagination
     videos = Video
     |> Video.with_speakers
+    |> Video.with_admins
     |> where([v], v.is_private == false)
     |> order_by([v], desc: v.id)
     |> Repo.all()
@@ -40,7 +37,13 @@ defmodule CaptainFact.VideoController do
     changeset = Video.changeset(%Video{owner_id: user.id}, video_params)
     case Repo.insert(changeset) do
       {:ok, video} ->
-        video = %{video | speakers: []}
+        admins = CaptainFact.VideoAdmin
+        |> where([v], v.video_id == ^video.id)
+        |> Repo.all()
+
+        video = video
+        |> Map.put(:admins, admins)
+        |> Map.put(:speakers, [])
         render(conn, "show.json", video: video)
       {:error, changeset} ->
         conn

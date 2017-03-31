@@ -7,7 +7,7 @@ defmodule CaptainFact.VoteDebouncer do
   import Ecto.Query
 
   @name __MODULE__
-  @update_delay 1000
+  @update_delay 5000 # 5 seconds
 
 
   def start_link, do: Agent.start_link(fn -> %{} end, name: @name)

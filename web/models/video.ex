@@ -25,8 +25,12 @@ defmodule CaptainFact.Video do
     from v in query, preload: [:statements]
   end
 
+  def with_admins(query) do
+    from v in query, preload: [:admins]
+  end
+
   def is_admin(%Video{owner_id: id}, %User{id: id}), do: true
-  def is_admin(_, _), do: false
+  def is_admin(%Video{admins: admins}, %User{id: id}), do: Enum.any?(admins, &(&1.id === id))
 
   def has_access(%Video{is_private: false}, _user_id), do: true
   def has_access(video, user), do: is_admin(video, user)
