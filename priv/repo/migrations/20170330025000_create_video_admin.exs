@@ -8,6 +8,6 @@ defmodule CaptainFact.Repo.Migrations.CreateVideoAdmin do
 
       timestamps()
     end
-    create unique_index(:videos_admins, [:user_id, :video_id], name: "video_admin_index")
+    create unique_index(:videos_admins, [:user_id, :video_id], name: :videos_admins_index)
   end
 end

@@ -11,7 +11,9 @@ defmodule CaptainFact.User do
 
     has_many :videos, CaptainFact.Video, foreign_key: :owner_id
     has_many :comments, CaptainFact.Comment
-    
+
+    many_to_many :administered_videos, CaptainFact.Video, join_through: VideoAdmin, on_delete: :delete_all, on_replace: :delete
+
     timestamps()
   end
 

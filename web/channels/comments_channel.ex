@@ -61,6 +61,7 @@ defmodule CaptainFact.CommentsChannel do
     # TODO Verify user is connected (persist user in state)
     user = Guardian.Phoenix.Socket.current_resource(socket)
     changeset = Comment.changeset(%Comment{user_id: user.id}, comment) # TODO
+
     # TODO Add a vote from user on its own comment (and set score to 1 by default)
     case Repo.insert(changeset) do
       {:ok, comment} ->
@@ -94,7 +95,6 @@ defmodule CaptainFact.CommentsChannel do
     changeset = Vote.changeset(base_vote, vote)
     case Repo.insert_or_update(changeset) do
       {:ok, vote} ->
-        # TODO Note that vote.statement_id votes must be refreshed
         CaptainFact.VoteDebouncer.add_vote(socket.topic, vote.comment_id)
         {:reply, :ok, socket}
       {:error, _} ->

@@ -3,6 +3,9 @@ defmodule CaptainFact.UserController do
 
   alias CaptainFact.User
 
+  plug Guardian.Plug.EnsureAuthenticated, [handler: CaptainFact.AuthController]
+  when action in [:search]
+
   def create(conn, %{"user" => user_params}) do
     changeset = User.registration_changeset(%User{}, user_params)
 
@@ -27,6 +30,22 @@ defmodule CaptainFact.UserController do
     else
       render(conn, "show_public.json", user: Repo.get_by!(User, username: username))
     end
+  end
+
+  @max_users_search_results 5
+  def search(conn, %{"query_string" => query_string}) do
+    current_user = Guardian.Plug.current_resource(conn)
+    query_string = query_string
+      |> URI.decode()
+      |> String.replace(~r/%|\*/, "", global: true)
+    query_string = "%#{query_string}%"
+    users = User
+      |> where([u], u.id != ^current_user.id)
+      |> where([u], like(u.username, ^query_string))
+      |> select([u], [:id, :username, :name])
+      |> limit(@max_users_search_results)
+      |> Repo.all
+    render(conn, "index_public.json", users: users)
   end
 
   #

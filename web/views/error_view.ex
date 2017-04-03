@@ -5,7 +5,8 @@ defmodule CaptainFact.ErrorView do
     render_one(message, CaptainFact.ErrorView, "error.json")
   end
 
-  def render("400.json", _) do
+  def render("400.json", error) do
+    IO.inspect(error)
     %{errors: [%{message: "Bad Request"}]}
   end
 

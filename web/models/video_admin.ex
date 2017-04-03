@@ -14,7 +14,8 @@ defmodule CaptainFact.VideoAdmin do
   """
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [])
-    |> validate_required([])
+    |> cast(params, [:user_id, :video_id])
+    |> validate_required([:user_id, :video_id])
+    |> unique_constraint(:video, name: :videos_admins_pkey)
   end
 end

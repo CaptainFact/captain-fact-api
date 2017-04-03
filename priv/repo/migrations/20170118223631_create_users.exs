@@ -7,7 +7,7 @@ defmodule CaptainFact.Repo.Migrations.CreateUsers do
     create table(:users) do
       add :username, :citext, null: false
       add :email, :citext, null: false
-      add :name, :string
+      add :name, :citext
       add :encrypted_password, :string, null: false
 
       timestamps()

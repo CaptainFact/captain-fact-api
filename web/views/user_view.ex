@@ -3,6 +3,10 @@ defmodule CaptainFact.UserView do
 
   alias CaptainFact.{UserView}
 
+  def render("index_public.json", %{users: users}) do
+    render_many(users, UserView, "public_user.json")
+  end
+
   def render("show.json", %{user: user, token: token}) do
     render_one(user, UserView, "user_token.json", token: token)
   end

@@ -1,8 +1,7 @@
 defmodule CaptainFact.Video do
   use CaptainFact.Web, :model
 
-  alias CaptainFact.Video
-  alias CaptainFact.User
+  alias CaptainFact.{Video, User, VideoAdmin, Speaker, VideoSpeaker, Statement}
 
   schema "videos" do
     field :is_private, :boolean, default: false
@@ -10,9 +9,11 @@ defmodule CaptainFact.Video do
     field :url, :string
     belongs_to :owner, User
 
-    many_to_many :speakers, CaptainFact.Speaker, join_through: "videos_speakers"
-    many_to_many :admins, CaptainFact.User, join_through: "videos_admins"
-    has_many :statements, CaptainFact.Statement
+    many_to_many :speakers, Speaker, join_through: VideoSpeaker
+    many_to_many :admins, User, join_through: VideoAdmin,
+      on_delete: :delete_all,
+      on_replace: :delete
+    has_many :statements, Statement
 
     timestamps()
   end
@@ -31,6 +32,7 @@ defmodule CaptainFact.Video do
 
   def is_admin(%Video{owner_id: id}, %User{id: id}), do: true
   def is_admin(%Video{admins: admins}, %User{id: id}), do: Enum.any?(admins, &(&1.id === id))
+  def is_admin(_, _), do: false
 
   def has_access(%Video{is_private: false}, _user_id), do: true
   def has_access(video, user), do: is_admin(video, user)
@@ -38,6 +40,7 @@ defmodule CaptainFact.Video do
   @doc """
   Builds a changeset based on the `struct` and `params`.
   """
+  # TODO Required fields !!
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(params, [:is_private, :url, :title])
