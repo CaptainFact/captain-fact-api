@@ -38,13 +38,8 @@ defmodule CaptainFact.VideoController do
     case Repo.insert(changeset) do
       {:ok, video} ->
         # TODO : User Ecto.Multi to make all this in one transaction
-        admins = CaptainFact.VideoAdmin
-        |> where([v], v.video_id == ^video.id)
-        |> Repo.all()
-
-        video = video
-        |> Map.put(:admins, admins)
-        |> Map.put(:speakers, [])
+        video = Map.put(video, :speakers, [])
+        video = update_admins(video, video_params)
         render(conn, "show.json", video: video)
       {:error, changeset} ->
         conn
@@ -70,17 +65,13 @@ defmodule CaptainFact.VideoController do
       |> where([v], v.owner_id == ^user.id)
       |> Video.with_admins()
       |> Repo.get!(id)
+
     #TODO UPDATE without get (from... where... update: ... |> Repo.update(_all))
     #TODO Check ueberauth features for access right
-    #TODO Use put_assoc
-    # existing_admins = Enum.map(video.admins, fn(u) -> u.id end)
-    # link_admins(video, admins -- existing_admins) # Link new users
-    # unlink_admins(video, admins -- existing_admins) # Unlink removed users
 
     changeset = Video.changeset(video, params)
     case Repo.update(changeset) do
       {:ok, video} ->
-        # admins = update_admins(video, params["admins"])
         # TODO REDUCE THE NUMBER OF QUERIES !
         video = Map.put(video, :speakers, Repo.all(
           from s in Speaker,
@@ -98,16 +89,24 @@ defmodule CaptainFact.VideoController do
   end
 
   defp update_admins(video, %{"admins" => admins}) do
-    # TODO insert_all ...
     # Delete old admins
-    # TODO Delete only old
+    admin_ids = Enum.map(admins, &(&1["id"]))
     Repo.delete_all(
       from va in VideoAdmin,
-      where: va.video_id == ^video.id
+      where: va.video_id == ^video.id,
+      where: not (va.user_id in ^admin_ids)
     )
+    
     # Insert new admins
-    video_admins = Enum.map(admins, &VideoAdmin.changeset(%VideoAdmin{}, %{video_id: video.id, user_id: &1["id"]}))
-    Enum.each(video_admins, fn(admin) -> Repo.insert(admin) end)
+    admin_ids
+    |> Enum.map(&VideoAdmin.changeset(%VideoAdmin{}, %{video_id: video.id, user_id: &1}))
+    |> Enum.each(fn(admin) -> Repo.insert(admin) end)
+
+    # Fetch & put them in video
+    update_admins(video, nil)
+  end
+
+  defp update_admins(video, _) do
     new_admins = Repo.all(
       from u in User,
       join: a in VideoAdmin, on: a.user_id == u.id,
@@ -115,18 +114,4 @@ defmodule CaptainFact.VideoController do
     )
     Map.put(video, :admins, new_admins)
   end
-
-  # defp link_admins(video, []), do: nil
-  # defp link_admins(video, admins) do
-  #   admins =  Enum.map(admins, fn(user_id) ->
-  #     %VideoAdmin{user_id: user_id, video_id: video.id}
-  #   end)
-  #   IO.inspect(admins)
-  #   Repo.insert_all(VideoAdmin, admins)
-  # end
-  #
-  # defp unlink_admins(video, []), do: nil
-  # defp unlink_admins(video, admins) do
-  #   from(a in VideoAdmin, where: a.id in ^admins) |> Repo.delete_all
-  # end
 end

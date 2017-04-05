@@ -29,9 +29,10 @@ defmodule CaptainFact.Router do
 
     post "/users", UserController, :create
     get "/users/", UserController, :show
-    get "/users/search/:query_string", UserController, :search
     get "/users/:username", UserController, :show
     get "/users/:user_id/videos", VideoController, :index
+
+    get "/search/users/:query_string", UserController, :search
 
     resources "/videos", VideoController, only: [:index, :create, :update, :delete]
   end

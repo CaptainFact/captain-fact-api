@@ -1,9 +1,10 @@
 defmodule CaptainFact.VideoSpeaker do
   use CaptainFact.Web, :model
 
+  @primary_key false
   schema "videos_speakers" do
-    field :video_id, :integer
-    field :speaker_id, :integer
+    belongs_to :video, CaptainFact.Video, primary_key: true
+    belongs_to :speaker, CaptainFact.Speaker, primary_key: true
 
     timestamps()
   end
@@ -17,5 +18,6 @@ defmodule CaptainFact.VideoSpeaker do
     struct
     |> cast(params, @required_fields)
     |> validate_required(@required_fields)
+    |> unique_constraint(:video, name: :videos_speakers_pkey)
   end
 end

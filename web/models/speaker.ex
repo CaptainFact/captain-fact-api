@@ -6,8 +6,8 @@ defmodule CaptainFact.Speaker do
     field :title, :string
     field :is_user_defined, :boolean
 
-    has_many :statements, CaptainFact.Statement
-    many_to_many :videos, CaptainFact.Video, join_through: "videos_speakers"
+    has_many :statements, CaptainFact.Statement, on_delete: :delete_all
+    many_to_many :videos, CaptainFact.Video, join_through: "videos_speakers", on_delete: :delete_all
     timestamps()
   end
 

@@ -12,7 +12,6 @@ defmodule CaptainFact.UserController do
     case Repo.insert(changeset) do
       {:ok, user} ->
         {:ok, token, _claims} = Guardian.encode_and_sign(user, :token)
-
         conn
         |> put_status(:created)
         |> render("show.json", user: user, token: token)
@@ -39,13 +38,14 @@ defmodule CaptainFact.UserController do
       |> URI.decode()
       |> String.replace(~r/%|\*/, "", global: true)
     query_string = "%#{query_string}%"
-    users = User
-      |> where([u], u.id != ^current_user.id)
-      |> where([u], like(u.username, ^query_string))
-      |> select([u], [:id, :username, :name])
-      |> limit(@max_users_search_results)
-      |> Repo.all
-    render(conn, "index_public.json", users: users)
+    users_query =
+      from u in User,
+      where: u.id != ^current_user.id,
+      where: like(u.username, ^query_string) or like(u.name, ^query_string),
+      select: [:id, :username, :name],
+      limit: @max_users_search_results
+
+    render(conn, "index_public.json", users: Repo.all(users_query))
   end
 
   #

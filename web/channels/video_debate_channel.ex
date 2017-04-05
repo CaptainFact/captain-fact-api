@@ -38,8 +38,14 @@ defmodule CaptainFact.VideoDebateChannel do
   @doc """
   Add an existing speaker to the video
   """
-  def admin_handle_in("new_speaker", %{"id" => _id}, _socket) do
-    # TODO link existing speaker
+  def admin_handle_in("new_speaker", %{"id" => id}, socket) do
+    speaker = Repo.get!(Speaker, id)
+    %VideoSpeaker{speaker_id: speaker.id, video_id: socket.assigns.video_id}
+      |> VideoSpeaker.changeset()
+      |> Repo.insert!()
+    rendered_speaker = SpeakerView.render("show.json", speaker: speaker)
+    broadcast!(socket, "new_speaker", rendered_speaker)
+    {:reply, :ok, socket}
   end
 
   @doc """
@@ -63,22 +69,6 @@ defmodule CaptainFact.VideoDebateChannel do
     end
   end
 
-  def admin_handle_in("remove_speaker", %{"id" => id}, socket) do
-    # Delete association
-    VideoSpeaker
-    |> where(speaker_id: ^id, video_id: ^socket.assigns.video_id)
-    |> Repo.delete_all()
-    # Delete all statements made by the speaker on this video
-    Statement
-    |> where(speaker_id: ^id, video_id: ^socket.assigns.video_id)
-    |> Repo.delete_all()
-    # TODO check is_user_defined
-    # TODO + check no other usages
-    # TODO finally remove speaker
-    broadcast!(socket, "speaker_removed", %{id: id})
-    {:reply, :ok, socket}
-  end
-
   def admin_handle_in("update_speaker", params, socket) do
     speaker = Repo.get!(Speaker, params["id"])
     changeset = Speaker.changeset(speaker, params)
@@ -91,4 +81,62 @@ defmodule CaptainFact.VideoDebateChannel do
         {:reply, :error, socket}
     end
   end
+
+  def admin_handle_in("remove_speaker", %{"id" => id}, socket) do
+    # Delete association
+    # VideoSpeaker
+    # |> where(speaker_id: ^id, video_id: ^socket.assigns.video_id)
+    # |> Repo.delete_all()
+    # Delete all statements made by the speaker on this video
+    # Statement
+    # |> where(speaker_id: ^id, video_id: ^socket.assigns.video_id)
+    # |> Repo.delete_all()
+    do_remove_speaker(Repo.get(Speaker, id), socket.assigns.video_id)
+    # TODO check is_user_defined
+    # TODO + check no other usages
+    # TODO finally remove speaker
+    broadcast!(socket, "speaker_removed", %{id: id})
+    {:reply, :ok, socket}
+  end
+
+  defp do_remove_speaker(speaker = %{is_user_defined: true}, _) do
+    Repo.delete!(speaker)
+  end
+
+  defp do_remove_speaker(speaker = %{is_user_defined: false}, video_id) do
+    # Delete all statements made by the speaker on this video
+    Statement
+    |> where(speaker_id: ^speaker.id, video_id: ^video_id)
+    |> Repo.delete_all()
+    # Delete link between speaker and video
+    Repo.delete!(VideoSpeaker.changeset(%VideoSpeaker{speaker_id: speaker.id, video_id: video_id}))
+  end
+
+  @max_speakers_search_results 5
+  def admin_handle_in("search_speaker", params, socket) do
+    query = "%#{params["query"]}%"
+    speakers_query =
+      from s in Speaker,
+      left_join: vs in VideoSpeaker, on: vs.speaker_id == s.id,
+      where: is_nil(vs.video_id) or vs.video_id != ^socket.assigns.video_id,
+      where: s.is_user_defined == false,
+      where: ilike(s.full_name, ^query),
+      select: %{id: s.id, full_name: s.full_name},
+      limit: @max_speakers_search_results
+    {:reply, {:ok, %{speakers: Repo.all(speakers_query)}}, socket}
+  end
+
+  # current_user = Guardian.Plug.current_resource(conn)
+  # query_string = query_string
+  #   |> URI.decode()
+  #   |> String.replace(~r/%|\*/, "", global: true)
+  # query_string = "%#{query_string}%"
+  # users_query =
+  #   from u in User,
+  #   where: u.id != ^current_user.id,
+  #   where: like(u.username, ^query_string) or like(u.name, ^query_string),
+  #   select: [:id, :username, :name],
+  #   limit: @max_users_search_results
+  #
+  # render(conn, "index_public.json", users: Repo.all(users_query))
 end
