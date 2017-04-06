@@ -28,20 +28,28 @@ defmodule CaptainFact.User do
   """
   def changeset(model, params \\ :empty) do
     model
+    |> common_changeset(params)
+    |> cast(params, ~w(password))
+    |> validate_length(:password, min: 6, max: 256)
+    |> put_encrypted_pw
+  end
+
+  def registration_changeset(model, params \\ :empty) do
+    model
+    |> common_changeset(params)
+    |> cast(params, ~w(password))
+    |> validate_length(:password, min: 6, max: 256)
+    |> put_encrypted_pw
+  end
+
+  defp common_changeset(model, params \\ :empty) do
+    model
     |> cast(params, @required_fields ++ @optional_fields)
     |> validate_required(@required_fields)
     |> validate_format(:email, ~r/@/)
     |> unique_constraint(:email)
     |> validate_length(:username, min: 3, max: 30)
     |> unique_constraint(:username)
-  end
-
-  def registration_changeset(model, params \\ :empty) do
-    model
-    |> changeset(params)
-    |> cast(params, ~w(password))
-    |> validate_length(:password, min: 6, max: 256)
-    |> put_encrypted_pw
   end
 
   defp put_encrypted_pw(changeset) do

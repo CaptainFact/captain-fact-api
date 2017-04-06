@@ -6,6 +6,14 @@ defmodule CaptainFact.AuthController do
   plug Ueberauth
   plug Guardian.Plug.EnsureAuthenticated, [handler: AuthController] when action in [:delete, :me]
 
+  def callback(%{assigns: %{ueberauth_auth: auth}} = conn, %{"type" => "session"}) do
+    conn = Plug.Conn.fetch_session(conn)
+    conn = with {:ok, user} <- user_from_auth(auth),
+              :ok <- validate_pass(user.encrypted_password, auth.credentials.other.password),
+              do: Guardian.Plug.sign_in(conn, user)
+    redirect(conn, to: "/admin")
+  end
+
   def callback(%{assigns: %{ueberauth_auth: auth}} = conn, _params) do
     result = with {:ok, user} <- user_from_auth(auth),
                   :ok <- validate_pass(user.encrypted_password, auth.credentials.other.password),
@@ -25,7 +33,7 @@ defmodule CaptainFact.AuthController do
   defp user_from_auth(auth) do
     result = Repo.get_by(User, email: auth.info.email)
     case result do
-      nil -> {:error, %{"email" => ["invalid email"]}}
+      nil -> {:error, %{"email" => ["Invalid email"]}}
       user -> {:ok, user}
     end
   end
@@ -44,8 +52,8 @@ defmodule CaptainFact.AuthController do
 
   defp signin_user(conn, user) do
     token = conn
-            |> Guardian.Plug.api_sign_in(user)
-            |> Guardian.Plug.current_token
+      |> Guardian.Plug.api_sign_in(user)
+      |> Guardian.Plug.current_token
     {:ok, user, token}
   end
 

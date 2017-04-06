@@ -7,7 +7,7 @@ defmodule CaptainFact.UserController do
   when action in [:search]
 
   def create(conn, %{"user" => user_params}) do
-    changeset = User.registration_changeset(%User{}, user_params)
+    changeset = User.changeset(%User{}, user_params)
 
     case Repo.insert(changeset) do
       {:ok, user} ->
@@ -46,6 +46,10 @@ defmodule CaptainFact.UserController do
       limit: @max_users_search_results
 
     render(conn, "index_public.json", users: Repo.all(users_query))
+  end
+
+  def admin_login(conn, _) do
+    render(conn, "admin_login.html")
   end
 
   #

@@ -47,7 +47,8 @@ defmodule CaptainFact.Mixfile do
       {:ueberauth, "~> 0.4"},
       {:ueberauth_identity, "~> 0.2"},
       {:guardian, "~> 0.10"},
-      {:ecto_enum, "~> 1.0"}
+      {:ecto_enum, "~> 1.0"},
+      {:ex_admin, github: "smpallen99/ex_admin"}
    ]
   end
 

@@ -14,7 +14,7 @@ alias CaptainFact.Repo
 alias CaptainFact.User
 alias CaptainFact.Speaker
 
-admin = User.registration_changeset(%User{}, %{
+admin = User.changeset(%User{}, %{
   username: "Betree",
   email: "admin@captainfact.com",
   password: "password"

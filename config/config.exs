@@ -30,6 +30,7 @@ providers: [
   }
 ]
 
+# Configure Guardian (authentication)
 config :guardian, Guardian,
   issuer: "CaptainFact",
   ttl: {30, :days},
@@ -37,6 +38,20 @@ config :guardian, Guardian,
   serializer: CaptainFact.GuardianSerializer,
   permissions: %{default: [:read, :write]}
 
+# Configure ex_admin (Admin platform)
+config :ex_admin,
+  theme: ExAdmin.Theme.ActiveAdmin,
+  repo: CaptainFact.Repo,
+  module: CaptainFact,
+  modules: [
+    CaptainFact.ExAdmin.Dashboard,
+    CaptainFact.ExAdmin.Speaker,
+    CaptainFact.ExAdmin.Comment,
+    CaptainFact.ExAdmin.User,
+  ]
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env}.exs"
+
+config :xain, :after_callback, {Phoenix.HTML, :raw}

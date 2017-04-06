@@ -2,14 +2,14 @@ defmodule CaptainFact.Comment do
   use CaptainFact.Web, :model
 
   schema "comments" do
-    belongs_to :user, CaptainFact.User
-    belongs_to :statement, CaptainFact.Statement
-
     field :text, :string
     field :approve, :boolean
 
     field :source_url, :string
     field :source_title, :string
+
+    belongs_to :user, CaptainFact.User
+    belongs_to :statement, CaptainFact.Statement
     belongs_to :media, CaptainFact.Media
     timestamps()
   end
