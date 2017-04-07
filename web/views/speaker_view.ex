@@ -9,7 +9,8 @@ defmodule CaptainFact.SpeakerView do
     %{
       id: speaker.id,
       full_name: speaker.full_name,
-      title: speaker.title
+      title: speaker.title,
+      picture: CaptainFact.SpeakerPicture.url({speaker.picture, speaker}, :thumb)
     }
   end
 end

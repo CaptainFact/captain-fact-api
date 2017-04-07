@@ -6,7 +6,8 @@ defmodule CaptainFact.Repo.Migrations.CreateSpeaker do
       add :full_name, :string, null: false
       add :title, :string
       add :is_user_defined, :boolean, null: false
-      
+      add :picture, :string
+
       timestamps()
     end
 
