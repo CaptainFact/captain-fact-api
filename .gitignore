@@ -16,4 +16,4 @@ erl_crash.dump
 /config/prod.secret.exs
 
 # Uploads
-./resources
+/resources

@@ -71,14 +71,18 @@ defmodule CaptainFact.VideoDebateChannel do
 
   def admin_handle_in("update_speaker", params, socket) do
     speaker = Repo.get!(Speaker, params["id"])
-    changeset = Speaker.changeset(speaker, params)
-    case Repo.update(changeset) do
-      {:ok, speaker} ->
-        rendered_speaker = Phoenix.View.render_one(speaker, CaptainFact.SpeakerView, "speaker.json")
-        broadcast!(socket, "speaker_updated", rendered_speaker)
-        {:reply, :ok, socket}
-      {:error, _error} ->
-        {:reply, :error, socket}
+    if speaker.is_user_defined do
+      changeset = Speaker.changeset(speaker, params)
+      case Repo.update(changeset) do
+        {:ok, speaker} ->
+          rendered_speaker = Phoenix.View.render_one(speaker, CaptainFact.SpeakerView, "speaker.json")
+          broadcast!(socket, "speaker_updated", rendered_speaker)
+          {:reply, :ok, socket}
+        {:error, _error} ->
+          {:reply, :error, socket}
+      end
+    else
+      {:reply, {:error, %{speaker: "Forbidden"}}, socket}
     end
   end
 

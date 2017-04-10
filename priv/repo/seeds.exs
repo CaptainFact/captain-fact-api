@@ -23,9 +23,16 @@ admin = User.changeset(%User{}, %{
 Repo.insert!(admin)
 
 # Some speakers
-Repo.insert!(%Speaker{full_name: "Nicolas Sarkozy", is_user_defined: false})
-Repo.insert!(%Speaker{full_name: "Donald Trump", is_user_defined: false})
-Repo.insert!(%Speaker{full_name: "Marine Lepen", is_user_defined: false})
-Repo.insert!(%Speaker{full_name: "Francois Fillon", is_user_defined: false})
-Repo.insert!(%Speaker{full_name: "Cécile Duflot", is_user_defined: false})
-Repo.insert!(%Speaker{full_name: "Jean-Luc Mélenchon", is_user_defined: false})
+speakers = [
+  %Speaker{full_name: "Nicolas Sarkozy", title: "Former French President"},
+  %Speaker{full_name: "Donald Trump", title: "President of the USA"},
+  %Speaker{full_name: "Marine Lepen", title: "French Politician"},
+  %Speaker{full_name: "Francois Fillon", title: "French Politician"},
+  %Speaker{full_name: "Cécile Duflot", title: "French Politician"},
+  %Speaker{full_name: "Jean-Luc Mélenchon", title: "French Politician"}
+]
+
+Enum.each speakers, fn(speaker) ->
+  speaker = Map.put(speaker, :is_user_defined, false)
+  Repo.insert!(speaker)
+end
