@@ -40,7 +40,6 @@ defmodule CaptainFact.Video do
   @doc """
   Builds a changeset based on the `struct` and `params`.
   """
-  # TODO Required fields !!
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(params, [:is_private, :url, :title])

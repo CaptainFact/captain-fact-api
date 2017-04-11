@@ -55,6 +55,7 @@ defmodule CaptainFact.Router do
     end
 
     post "/users", UserController, :create
+    put "/users/:user_id", UserController, :update
     get "/users/:username", UserController, :show
     get "/users/:user_id/videos", VideoController, :index
 

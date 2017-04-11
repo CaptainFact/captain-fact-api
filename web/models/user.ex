@@ -34,7 +34,6 @@ defmodule CaptainFact.User do
   end
 
   def registration_changeset(model, params \\ :empty) do
-    #TODO Validate real email and not yopmail...etc
     model
     |> common_changeset(params)
     |> validate_required([:password])

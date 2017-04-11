@@ -60,7 +60,7 @@ defmodule CaptainFact.CommentsChannel do
     # TODO Verify statement exists and user is allowed for it (is_private on video)
     # TODO Verify user is connected (persist user in state)
     user = Guardian.Phoenix.Socket.current_resource(socket)
-    changeset = Comment.changeset(%Comment{user_id: user.id}, comment) # TODO
+    changeset = Comment.changeset(%Comment{user_id: user.id}, comment)
 
     # TODO Add a vote from user on its own comment (and set score to 1 by default)
     case Repo.insert(changeset) do

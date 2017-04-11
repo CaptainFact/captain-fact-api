@@ -4,7 +4,7 @@ defmodule CaptainFact.UserController do
   alias CaptainFact.User
 
   plug Guardian.Plug.EnsureAuthenticated, [handler: CaptainFact.AuthController]
-  when action in [:search]
+  when action in [:search, :update]
 
   def create(conn, %{"user" => user_params}) do
     changeset = User.changeset(%User{}, user_params)
@@ -52,20 +52,25 @@ defmodule CaptainFact.UserController do
     render(conn, "admin_login.html")
   end
 
-  #
-  # def update(conn, %{"id" => id, "user" => user_params}) do
-  #   user = Repo.get!(User, id)
-  #   changeset = User.changeset(user, user_params)
-  #
-  #   case Repo.update(changeset) do
-  #     {:ok, user} ->
-  #       render(conn, "show.json", user: user)
-  #     {:error, changeset} ->
-  #       conn
-  #       |> put_status(:unprocessable_entity)
-  #       |> render(CaptainFact.ChangesetView, "error.json", changeset: changeset)
-  #   end
-  # end
+  def update(conn, params = %{"user_id" => user_id}) do
+    user_id = String.to_integer(user_id)
+    current_user = Guardian.Plug.current_resource(conn)
+    case current_user.id === user_id do
+      false -> send_resp(conn, 401, "Unauthorized")
+      true ->
+        Repo.get!(User, user_id)
+        |> User.changeset(params)
+        |> Repo.update()
+        |> case do
+          {:ok, user} ->
+            render(conn, :show, user: user)
+          {:error, changeset} ->
+            conn
+            |> put_status(:unprocessable_entity)
+            |> render(CaptainFact.ChangesetView, :error, changeset: changeset)
+        end
+    end
+  end
   #
   # def delete(conn, %{"id" => id}) do
   #   user = Repo.get!(User, id)
