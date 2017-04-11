@@ -46,6 +46,6 @@ defmodule CaptainFact.Video do
     |> cast(params, [:is_private, :url, :title])
     |> validate_required([:url, :title])
     |> validate_length(:title, min: 5, max: 120)
-    # TODO: Validate URL format
+    |> validate_format(:url, ~r/(?:youtube\.com\/\S*(?:(?:\/e(?:mbed))?\/|watch\/?\?(?:\S*?&?v\=))|youtu\.be\/)([a-zA-Z0-9_-]{6,11})/)
   end
 end

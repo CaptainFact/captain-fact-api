@@ -12,7 +12,7 @@ defmodule CaptainFact.UserSocket do
 
   def connect(%{"token" => token}, socket) do
     case sign_in(socket, token) do
-      {:ok, authed_socket, guardian_params} ->
+      {:ok, authed_socket, _guardian_params} ->
         {:ok, authed_socket}
       _ ->
         {:ok, socket}

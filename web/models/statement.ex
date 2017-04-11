@@ -12,8 +12,7 @@ defmodule CaptainFact.Statement do
     timestamps()
   end
 
-  #TODO Add video to required fields
-  @required_fields ~w(text time speaker_id)a
+  @required_fields ~w(text time speaker_id video_id)a
 
   @doc """
   Builds a changeset based on the `struct` and `params`.
@@ -22,6 +21,7 @@ defmodule CaptainFact.Statement do
     struct
     |> cast(params, @required_fields)
     |> validate_required(@required_fields)
+    |> validate_number(:time, greater_than_or_equal_to: 0)
     |> cast_assoc(:speaker)
   end
 end

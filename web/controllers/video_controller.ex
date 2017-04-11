@@ -18,7 +18,7 @@ defmodule CaptainFact.VideoController do
     else
       query
     end
-    render(conn, "index.json", videos: Repo.all(query))
+    render(conn, :index, videos: Repo.all(query))
   end
 
   def index(conn, _params) do
@@ -29,7 +29,7 @@ defmodule CaptainFact.VideoController do
     |> where([v], v.is_private == false)
     |> order_by([v], desc: v.id)
     |> Repo.all()
-    render(conn, "index.json", videos: videos)
+    render(conn, :index, videos: videos)
   end
 
   def create(conn, video_params) do
@@ -44,7 +44,7 @@ defmodule CaptainFact.VideoController do
       {:error, changeset} ->
         conn
         |> put_status(:unprocessable_entity)
-        |> render(CaptainFact.ChangesetView, "error.json", changeset: changeset)
+        |> render(CaptainFact.ChangesetView, :error, changeset: changeset)
     end
   end
 
@@ -60,32 +60,34 @@ defmodule CaptainFact.VideoController do
   end
 
   def update(conn, params = %{"id" => id}) do
+    # TODO UPDATE without get (from... where... update: ... |> Repo.update(_all))
+    # TODO REDUCE THE NUMBER OF QUERIES !
     user = Guardian.Plug.current_resource(conn)
-    video = Video
-      |> where([v], v.owner_id == ^user.id)
-      |> Video.with_admins()
-      |> Repo.get!(id)
-
-    #TODO UPDATE without get (from... where... update: ... |> Repo.update(_all))
-    #TODO Check ueberauth features for access right
-
-    changeset = Video.changeset(video, params)
-    case Repo.update(changeset) do
+    Video
+    |> where([v], v.owner_id == ^user.id)
+    |> Video.with_admins()
+    |> Repo.get!(id)
+    |> Video.changeset(params)
+    |> Repo.update()
+    |> case do
       {:ok, video} ->
-        # TODO REDUCE THE NUMBER OF QUERIES !
-        video = Map.put(video, :speakers, Repo.all(
-          from s in Speaker,
-          join: vs in VideoSpeaker, on: vs.speaker_id == s.id,
-          where: vs.video_id == ^video.id
-        ))
-        video = update_admins(video, params)
-        # video = Map.put(video, :admins, Repo.all(from a in VideoAdmin, where: a.video_id == ^video.id))
-        render(conn, "show.json", video: video)
+        video = video
+        |> Map.put(:speakers, video_speakers(video))
+        |> update_admins(params)
+        render(conn, :show, video: video)
       {:error, changeset} ->
         conn
         |> put_status(:unprocessable_entity)
-        |> render(CaptainFact.ChangesetView, "error.json", changeset: changeset)
+        |> render(CaptainFact.ChangesetView, :error, changeset: changeset)
     end
+  end
+
+  defp video_speakers(video) do
+    Repo.all(
+      from s in Speaker,
+      join: vs in VideoSpeaker, on: vs.speaker_id == s.id,
+      where: vs.video_id == ^video.id
+    )
   end
 
   defp update_admins(video, %{"admins" => admins}) do
@@ -96,7 +98,7 @@ defmodule CaptainFact.VideoController do
       where: va.video_id == ^video.id,
       where: not (va.user_id in ^admin_ids)
     )
-    
+
     # Insert new admins
     admin_ids
     |> Enum.map(&VideoAdmin.changeset(%VideoAdmin{}, %{video_id: video.id, user_id: &1}))

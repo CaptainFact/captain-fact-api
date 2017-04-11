@@ -19,8 +19,11 @@ defmodule CaptainFact.Mixfile do
   def application do
     [
       mod: {CaptainFact, []},
-      applications: [:phoenix, :phoenix_pubsub, :phoenix_html, :cowboy, :logger, :gettext,
-                    :phoenix_ecto, :postgrex, :comeonin, :ueberauth, :ueberauth_identity, :arc_ecto],
+      applications: [
+        :phoenix, :phoenix_pubsub, :phoenix_html, :cowboy, :logger, :gettext,
+        :phoenix_ecto, :postgrex, :comeonin, :ueberauth, :ueberauth_identity,
+        :arc_ecto
+      ],
       registered: [CaptainFact.VoteDebouncer]
     ]
   end
@@ -50,7 +53,8 @@ defmodule CaptainFact.Mixfile do
       {:ecto_enum, "~> 1.0"},
       {:ex_admin, github: "smpallen99/ex_admin"},
       {:arc, "~> 0.7.0"},
-      {:arc_ecto, "~> 0.6.0"}
+      {:arc_ecto, "~> 0.6.0"},
+      {:faker, "~> 0.7", only: :test}
    ]
   end
 

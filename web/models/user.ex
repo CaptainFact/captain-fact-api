@@ -19,7 +19,7 @@ defmodule CaptainFact.User do
 
 
   @required_fields ~w(email username)a
-  @optional_fields ~w(name)a
+  @optional_fields ~w(name password)a
 
   @doc """
   Creates a changeset based on the `model` and `params`.
@@ -29,26 +29,27 @@ defmodule CaptainFact.User do
   def changeset(model, params \\ :empty) do
     model
     |> common_changeset(params)
-    |> cast(params, ~w(password))
     |> validate_length(:password, min: 6, max: 256)
     |> put_encrypted_pw
   end
 
   def registration_changeset(model, params \\ :empty) do
+    #TODO Validate real email and not yopmail...etc
     model
     |> common_changeset(params)
-    |> cast(params, ~w(password))
+    |> validate_required([:password])
     |> validate_length(:password, min: 6, max: 256)
     |> put_encrypted_pw
   end
 
-  defp common_changeset(model, params \\ :empty) do
+  defp common_changeset(model, params) do
     model
     |> cast(params, @required_fields ++ @optional_fields)
     |> validate_required(@required_fields)
-    |> validate_format(:email, ~r/@/)
+    |> validate_email()
     |> unique_constraint(:email)
-    |> validate_length(:username, min: 3, max: 30)
+    |> validate_length(:username, min: 3, max: 20)
+    |> validate_length(:name, min: 2, max: 30)
     |> unique_constraint(:username)
   end
 
@@ -60,4 +61,16 @@ defmodule CaptainFact.User do
         changeset
     end
   end
+
+  defp validate_email(%{changes: %{email: email}} = changeset) do
+    case Regex.match?(~r/@/, email) do
+      true ->
+        case ForbiddenEmailProviders.is_forbidden(email) do
+          true -> add_error(changeset, :email, "this email provider is forbidden")
+          false -> changeset
+        end
+      false -> add_error(changeset, :email, "invalid format")
+    end
+  end
+  defp validate_email(changeset), do: changeset
 end

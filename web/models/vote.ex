@@ -3,7 +3,7 @@ defmodule CaptainFact.Vote do
 
   alias CaptainFact.Statement
   alias CaptainFact.Comment
-  
+
 
   @primary_key false
   schema "votes" do
@@ -41,11 +41,10 @@ defmodule CaptainFact.Vote do
 
   defp validate_vote_value(changeset) do
     validate_change changeset, :value, fn :value, value ->
-      if value in [-1, 1] do
-        []
-      else
-        [value: "Can only be -1 or +1"]
-      end
+      case value in [-1, 1] do
+        true -> []
+        false -> [value: "Can only be -1 or +1"]
+      end  
     end
   end
 end

@@ -17,7 +17,8 @@ defmodule CaptainFact.VoteDebouncer do
   @doc """
   Add a vote to the debouncer
   ## Examples
-    iex> CaptainFact.VoteDebouncer.add_vote(%{comment_id: 1})
+      iex> CaptainFact.VoteDebouncer.add_vote("test_topic", 42)
+      :ok
   """
   def add_vote(channel_topic, comment_id) do
     Agent.update(@name, &do_add_vote(&1, channel_topic, comment_id))

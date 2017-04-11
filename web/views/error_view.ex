@@ -5,8 +5,7 @@ defmodule CaptainFact.ErrorView do
     render_one(message, CaptainFact.ErrorView, "error.json")
   end
 
-  def render("400.json", error) do
-    IO.inspect(error)
+  def render("400.json", _error) do
     %{errors: [%{message: "Bad Request"}]}
   end
 
@@ -34,12 +33,11 @@ defmodule CaptainFact.ErrorView do
 
   def render("error.json", _) do
     %{
-      errors: ["Unknow error"]
+      errors: ["Server encountered an unexpected error. We're working on it !"]
     }
   end
 
-  def render(_, error) do
-    IO.inspect(error)
-    "Unknow error"
+  def render(_, _error) do
+    "Server encountered an unexpected error. We're working on it !"
   end
 end

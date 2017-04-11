@@ -5,7 +5,7 @@ defmodule CaptainFact.Speaker do
   schema "speakers" do
     field :full_name, :string
     field :title, :string
-    field :is_user_defined, :boolean
+    field :is_user_defined, :boolean, default: true
     field :picture, CaptainFact.SpeakerPicture.Type
 
     has_many :statements, CaptainFact.Statement, on_delete: :delete_all
@@ -15,8 +15,6 @@ defmodule CaptainFact.Speaker do
 
   @required_fields ~w(full_name)
   @optional_fields ~w(title)
-
-  @required_file_fields ~w()
   @optional_file_fields ~w(picture)
 
   @doc """
@@ -25,6 +23,9 @@ defmodule CaptainFact.Speaker do
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(params, @required_fields ++ @optional_fields)
-    |> cast_attachments(params, @required_file_fields ++ @optional_file_fields)
+    |> cast_attachments(params, @optional_file_fields)
+    |> validate_length(:full_name, min: 3, max: 60)
+    |> validate_length(:title, min: 3, max: 60)
+    |> validate_required(:full_name)
   end
 end
