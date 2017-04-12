@@ -8,10 +8,8 @@ defmodule CaptainFact.Repo.Migrations.CreateComment do
 
       add :text, :string
       add :approve, :boolean
-
       add :source_url, :string
       add :source_title, :string
-      add :media_id, references(:medias, on_delete: :nilify_all)
 
       timestamps()
     end

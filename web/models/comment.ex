@@ -10,12 +10,11 @@ defmodule CaptainFact.Comment do
 
     belongs_to :user, CaptainFact.User
     belongs_to :statement, CaptainFact.Statement
-    belongs_to :media, CaptainFact.Media
     timestamps()
   end
 
   @required_fields ~w(statement_id)a
-  @optional_fields ~w(source_url approve text)a
+  @optional_fields ~w(source_url source_title approve text)a
 
   @doc """
   Builds a changeset based on the `struct` and `params`.
@@ -29,11 +28,13 @@ defmodule CaptainFact.Comment do
     |> validate_format(:source_url, ~r/[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/)
   end
 
-  def validate_source_or_text(%{changes: %{text: _text}} = changeset), do: changeset
-  def validate_source_or_text(%{changes: %{source_url: _source_url}} = changeset), do: changeset
-  def validate_source_or_text(changeset) do
-    changeset
-    |> add_error(:text, "You must set at least a source or a text")
-    |> add_error(:source_url, "You must set at least a source or a text")
+  defp validate_source_or_text(changeset) do
+    case get_field(changeset, :text) || get_field(changeset, :source_url) do
+      nil ->
+        changeset
+        |> add_error(:text, "You must set at least a source or a text")
+        |> add_error(:source_url, "You must set at least a source or a text")
+      _ -> changeset
+    end
   end
 end

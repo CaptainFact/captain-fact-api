@@ -22,7 +22,7 @@ defmodule CaptainFact.Mixfile do
       applications: [
         :phoenix, :phoenix_pubsub, :phoenix_html, :cowboy, :logger, :gettext,
         :phoenix_ecto, :postgrex, :comeonin, :ueberauth, :ueberauth_identity,
-        :arc_ecto
+        :arc_ecto, :open_graph
       ],
       registered: [CaptainFact.VoteDebouncer]
     ]
@@ -54,6 +54,7 @@ defmodule CaptainFact.Mixfile do
       {:ex_admin, github: "smpallen99/ex_admin"},
       {:arc, "~> 0.7.0"},
       {:arc_ecto, "~> 0.6.0"},
+      {:open_graph, github: "Betree/open_graph"}, # TODO Pull request
       {:faker, "~> 0.7", only: :test}
    ]
   end

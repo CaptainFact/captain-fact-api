@@ -6,7 +6,8 @@ defmodule CaptainFact.CommentTest do
   @valid_attrs %{
     statement_id: 1,
     source_url: Faker.Internet.url,
-    text: Faker.Lorem.sentence
+    text: Faker.Lorem.sentence,
+    source_title: Faker.Lorem.sentence
   }
 
   test "can post with a source and no text (fact)" do

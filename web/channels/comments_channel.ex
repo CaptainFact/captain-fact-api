@@ -61,14 +61,12 @@ defmodule CaptainFact.CommentsChannel do
     # TODO Verify user is connected (persist user in state)
     user = Guardian.Phoenix.Socket.current_resource(socket)
     changeset = Comment.changeset(%Comment{user_id: user.id}, comment)
-
-    # TODO Add a vote from user on its own comment (and set score to 1 by default)
     case Repo.insert(changeset) do
       {:ok, comment} ->
-        full_comment = %Comment{comment | user: user}
-        |> Map.put(:score, 0)
+        full_comment = Map.put(%Comment{comment | user: user}, :score, 1)
         broadcast!(socket, "comment_added", CommentView.render("comment.json", comment: full_comment))
-        {:reply, :ok, socket}
+        Task.async(fn() -> get_fact_source_title(full_comment, socket.topic) end)
+        handle_in("vote", %{"comment_id" => comment.id, "value" => "1"}, socket)
       {:error, _error} ->
         {:reply, :error, socket}
     end
@@ -86,19 +84,37 @@ defmodule CaptainFact.CommentsChannel do
     end
   end
 
-  def handle_in("vote", vote, socket) do
+  def handle_in("vote", params = %{"comment_id" => comment_id}, socket) do
     current_user = Guardian.Phoenix.Socket.current_resource(socket)
-    base_vote = case Repo.get_by(Vote, user_id: current_user.id, comment_id: vote["comment_id"]) do
+    base_vote = case Repo.get_by(Vote, user_id: current_user.id, comment_id: comment_id) do
       nil -> %Vote{user_id: current_user.id}
       vote -> vote
     end
-    changeset = Vote.changeset(base_vote, vote)
+    changeset = Vote.changeset(base_vote, params)
     case Repo.insert_or_update(changeset) do
       {:ok, vote} ->
         CaptainFact.VoteDebouncer.add_vote(socket.topic, vote.comment_id)
         {:reply, :ok, socket}
       {:error, _} ->
         {:reply, :error, socket}
+    end
+  end
+
+  defp get_fact_source_title(%Comment{source_url: nil}, _), do: nil
+
+  defp get_fact_source_title(comment = %Comment{source_url: source_url}, topic) do
+    case OpenGraph.fetch(source_url) do
+      {_, %OpenGraph{title: nil}} -> nil
+      {:ok, %OpenGraph{title: title}} ->
+        updated_comment =
+          comment
+          |> Comment.changeset(%{source_title: title})
+          |> Repo.update!()
+        CaptainFact.Endpoint.broadcast(
+          topic, "update_comment",
+          CommentView.render("comment.json", comment: updated_comment)
+        )
+      {_, _} -> nil
     end
   end
 end
