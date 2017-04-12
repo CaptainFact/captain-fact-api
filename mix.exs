@@ -56,6 +56,7 @@ defmodule CaptainFact.Mixfile do
       {:arc_ecto, "~> 0.6.0"},
       {:open_graph, "~> 0.0.2"},
       {:hashids, "~> 2.0"},
+      {:html_entities, "~> 0.3"},
       {:faker, "~> 0.7", only: :test}
    ]
   end

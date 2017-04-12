@@ -5,7 +5,7 @@ defmodule CaptainFact.VideoController do
   alias CaptainFact.VideoHashId
 
   plug Guardian.Plug.EnsureAuthenticated, [handler: CaptainFact.AuthController]
-  when action in [:create, :update, :delete]
+  when action in [:create, :update, :delete, :youtube_title]
 
   def index(conn, %{"user_id" => user_id}) do
     connected_user = Guardian.Plug.current_resource(conn)
@@ -83,6 +83,23 @@ defmodule CaptainFact.VideoController do
         conn
         |> put_status(:unprocessable_entity)
         |> render(CaptainFact.ChangesetView, :error, changeset: changeset)
+    end
+  end
+
+  def youtube_title(conn, %{"video_uri" => video_uri}) do
+    if Regex.match?(~r/(?:youtube\.com\/\S*(?:(?:\/e(?:mbed))?\/|watch\/?\?(?:\S*?&?v\=))|youtu\.be\/)([a-zA-Z0-9_-]{6,11})/, video_uri) do
+      case OpenGraph.fetch(video_uri) do
+        {:ok, %OpenGraph{title: title}} ->
+          json(conn, %{title: HtmlEntities.decode(title)})
+        {_, _} ->
+          conn
+          |> put_status(404)
+          |> json(%{errors: ["Cannot fetch video's title"]})
+      end
+    else
+      conn
+      |> put_status(404)
+      |> json(%{errors: ["Invalid url"]})
     end
   end
 
