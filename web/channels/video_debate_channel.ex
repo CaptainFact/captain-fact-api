@@ -7,11 +7,12 @@ defmodule CaptainFact.VideoDebateChannel do
   alias CaptainFact.Speaker
   alias CaptainFact.SpeakerView
   alias CaptainFact.VideoSpeaker
+  alias CaptainFact.VideoHashId
   alias Phoenix.View
 
 
-  def join("video_debate:" <> video_id_str, _payload, socket) do
-    video_id = String.to_integer(video_id_str)
+  def join("video_debate:" <> video_id_hash, _payload, socket) do
+    video_id = VideoHashId.decode!(video_id_hash)
     video = Video
     |> Video.with_speakers
     |> Video.with_admins

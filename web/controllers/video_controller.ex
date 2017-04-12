@@ -1,6 +1,8 @@
 defmodule CaptainFact.VideoController do
   use CaptainFact.Web, :controller
+
   alias CaptainFact.{Video, VideoAdmin, User, Speaker, VideoSpeaker}
+  alias CaptainFact.VideoHashId
 
   plug Guardian.Plug.EnsureAuthenticated, [handler: CaptainFact.AuthController]
   when action in [:create, :update, :delete]
@@ -52,21 +54,23 @@ defmodule CaptainFact.VideoController do
     assoc(user, :videos)
   end
 
-  def delete(conn, %{"id" => id}) do
+  def delete(conn, %{"id" => params_id}) do
+    video_id = VideoHashId.decode!(params_id)
     user = Guardian.Plug.current_resource(conn)
-    video = Repo.get!(user_videos(user), id)
+    video = Repo.get!(user_videos(user), video_id)
     Repo.delete!(video)
     send_resp(conn, :ok, "")
   end
 
-  def update(conn, params = %{"id" => id}) do
+  def update(conn, params = %{"id" => params_id}) do
     # TODO UPDATE without get (from... where... update: ... |> Repo.update(_all))
     # TODO REDUCE THE NUMBER OF QUERIES !
+    video_id = VideoHashId.decode!(params_id)
     user = Guardian.Plug.current_resource(conn)
     Video
     |> where([v], v.owner_id == ^user.id)
     |> Video.with_admins()
-    |> Repo.get!(id)
+    |> Repo.get!(video_id)
     |> Video.changeset(params)
     |> Repo.update()
     |> case do

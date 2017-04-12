@@ -7,11 +7,12 @@ defmodule CaptainFact.CommentsChannel do
   alias CaptainFact.Statement
   alias CaptainFact.Vote
   alias CaptainFact.VoteView
+  alias CaptainFact.VideoHashId
 
 
-  def join("comments:video:" <> video_id_str, _payload, socket) do
+  def join("comments:video:" <> video_id_hash, _payload, socket) do
     user = Guardian.Phoenix.Socket.current_resource(socket)
-    video_id = String.to_integer(video_id_str)
+    video_id = VideoHashId.decode!(video_id_hash)
     socket = assign(socket, :video_id, video_id)
     # TODO store public user in socket
     # TODO verify user has_access

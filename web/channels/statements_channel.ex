@@ -4,10 +4,11 @@ defmodule CaptainFact.StatementsChannel do
   alias CaptainFact.Statement
   alias CaptainFact.StatementView
   alias CaptainFact.ErrorView
+  alias CaptainFact.VideoHashId
 
 
-  def join("statements:video:" <> video_id_str, _payload, socket) do
-    video_id = String.to_integer(video_id_str)
+  def join("statements:video:" <> video_id_hash, _payload, socket) do
+    video_id = VideoHashId.decode!(video_id_hash)
     socket = assign(socket, :video_id, video_id)
     # TODO store public user in socket
     # TODO verify user has_access

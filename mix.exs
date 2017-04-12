@@ -54,7 +54,8 @@ defmodule CaptainFact.Mixfile do
       {:ex_admin, github: "smpallen99/ex_admin"},
       {:arc, "~> 0.7.0"},
       {:arc_ecto, "~> 0.6.0"},
-      {:open_graph, github: "Betree/open_graph"}, # TODO Pull request
+      {:open_graph, "~> 0.0.2"},
+      {:hashids, "~> 2.0"},
       {:faker, "~> 0.7", only: :test}
    ]
   end
