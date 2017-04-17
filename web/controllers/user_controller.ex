@@ -2,6 +2,7 @@ defmodule CaptainFact.UserController do
   use CaptainFact.Web, :controller
 
   alias CaptainFact.User
+  alias CaptainFact.SendInBlueApi
 
   plug Guardian.Plug.EnsureAuthenticated, [handler: CaptainFact.AuthController]
   when action in [:search, :update]
@@ -71,6 +72,27 @@ defmodule CaptainFact.UserController do
         end
     end
   end
+
+  def newsletter_subscribe(conn, params = %{"email" => email}) do
+    case Regex.match?(~r/@/, email) do
+      false -> render_invalid_email_error(conn)
+      true -> case ForbiddenEmailProviders.is_forbidden(email) do
+        true -> render_invalid_email_error(conn)
+        false ->
+          %SendInBlueApi.User{email: email}
+          |> SendInBlueApi.User.create_or_update()
+          |> case do
+            {:ok, _} -> send_resp(conn, 200, "")
+            {:error, _} -> render_invalid_email_error(conn, "Email rejected")
+          end
+      end
+    end
+  end
+
+  defp render_invalid_email_error(conn, msg \\ "Invalid Email") do
+    conn |> put_status(400) |> json(%{error: msg})
+  end
+
   #
   # def delete(conn, %{"id" => id}) do
   #   user = Repo.get!(User, id)

@@ -61,8 +61,12 @@ defmodule CaptainFact.Router do
 
     resources "/videos", VideoController, only: [:index, :create, :update, :delete]
 
+    # Search methods
     get "/search/users/:query_string", UserController, :search
     get "/utils/external_video_title/:video_uri", VideoController, :youtube_title
+
+    # Subscribe to the newsletter
+    post "/newsletter/subscribe", UserController, :newsletter_subscribe
   end
 
 end

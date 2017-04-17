@@ -17,6 +17,8 @@ config :captain_fact, CaptainFact.Endpoint,
   pubsub: [name: CaptainFact.PubSub,
            adapter: Phoenix.PubSub.PG2]
 
+config :captain_fact, send_in_blue_api_key: "wSh1X2D0U4zvjgGQ"
+
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

@@ -107,6 +107,7 @@ defmodule CaptainFact.CommentsChannel do
     case OpenGraph.fetch(source_url) do
       {_, %OpenGraph{title: nil}} -> nil
       {:ok, %OpenGraph{title: title}} ->
+        title = HtmlEntities.decode(title)
         updated_comment =
           comment
           |> Comment.changeset(%{source_title: title})
