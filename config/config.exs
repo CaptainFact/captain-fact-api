@@ -50,6 +50,7 @@ config :ex_admin,
     CaptainFact.ExAdmin.Speaker,
     CaptainFact.ExAdmin.Comment,
     CaptainFact.ExAdmin.User,
+    CaptainFact.ExAdmin.Video
   ]
 
 # Configure file upload

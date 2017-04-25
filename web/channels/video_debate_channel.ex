@@ -1,13 +1,8 @@
 defmodule CaptainFact.VideoDebateChannel do
   use CaptainFact.Web, :channel
 
-  alias CaptainFact.Statement
-  alias CaptainFact.Video
-  alias CaptainFact.VideoView
-  alias CaptainFact.Speaker
-  alias CaptainFact.SpeakerView
-  alias CaptainFact.VideoSpeaker
-  alias CaptainFact.VideoHashId
+  alias CaptainFact.{ Statement, Video, VideoView, Speaker, SpeakerView}
+  alias CaptainFact.{ VideoSpeaker, VideoHashId }
   alias Phoenix.View
 
 
@@ -15,35 +10,26 @@ defmodule CaptainFact.VideoDebateChannel do
     video_id = VideoHashId.decode!(video_id_hash)
     video = Video
     |> Video.with_speakers
-    |> Video.with_admins
     |> Repo.get!(video_id)
-    user = Guardian.Phoenix.Socket.current_resource(socket)
-    if Video.has_access(video, user) do
-      rendered_video = View.render_one(video, VideoView, "video.json")
-      socket = socket
-      |> assign(:video_id, video_id)
-      |> assign(:is_admin, Video.is_admin(video, user))
-      {:ok, rendered_video, socket}
-    else
-      {:error, %{reason: "You're not authorized to see this video"}}
-    end
+    rendered_video = View.render_one(video, VideoView, "video.json")
+    {:ok, rendered_video, assign(socket, :video_id, video_id)}
   end
 
   def handle_in(command, params, socket) do
-    case socket.assigns.is_admin do
-      true -> admin_handle_in(command, params, socket)
-      false -> {:reply, :error, socket}
+    case Guardian.Phoenix.Socket.current_resource(socket) do
+      nil -> {:reply, :error, socket}
+      _ -> handle_in_authentified(command, params, socket)
     end
   end
 
   @doc """
   Add an existing speaker to the video
   """
-  def admin_handle_in("new_speaker", %{"id" => id}, socket) do
+  def handle_in_authentified("new_speaker", %{"id" => id}, socket) do
     speaker = Repo.get!(Speaker, id)
     %VideoSpeaker{speaker_id: speaker.id, video_id: socket.assigns.video_id}
-      |> VideoSpeaker.changeset()
-      |> Repo.insert!()
+    |> VideoSpeaker.changeset()
+    |> Repo.insert!()
     rendered_speaker = SpeakerView.render("show.json", speaker: speaker)
     broadcast!(socket, "new_speaker", rendered_speaker)
     {:reply, :ok, socket}
@@ -52,7 +38,7 @@ defmodule CaptainFact.VideoDebateChannel do
   @doc """
   Add a new speaker to the video
   """
-  def admin_handle_in("new_speaker", options, socket) do
+  def handle_in_authentified("new_speaker", options, socket) do
     speaker_changeset = Speaker.changeset(%Speaker{is_user_defined: true}, options)
     case Repo.insert(speaker_changeset) do
       {:ok, speaker} ->
@@ -70,7 +56,7 @@ defmodule CaptainFact.VideoDebateChannel do
     end
   end
 
-  def admin_handle_in("update_speaker", params, socket) do
+  def handle_in_authentified("update_speaker", params, socket) do
     speaker = Repo.get!(Speaker, params["id"])
     if speaker.is_user_defined do
       changeset = Speaker.changeset(speaker, params)
@@ -87,14 +73,14 @@ defmodule CaptainFact.VideoDebateChannel do
     end
   end
 
-  def admin_handle_in("remove_speaker", %{"id" => id}, socket) do
+  def handle_in_authentified("remove_speaker", %{"id" => id}, socket) do
     do_remove_speaker(Repo.get(Speaker, id), socket.assigns.video_id)
     broadcast!(socket, "speaker_removed", %{id: id})
     {:reply, :ok, socket}
   end
 
   @max_speakers_search_results 5
-  def admin_handle_in("search_speaker", params, socket) do
+  def handle_in_authentified("search_speaker", params, socket) do
     query = "%#{params["query"]}%"
     speakers_query =
       from s in Speaker,

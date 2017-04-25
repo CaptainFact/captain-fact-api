@@ -14,11 +14,8 @@ defmodule CaptainFact.VideoView do
       id: CaptainFact.VideoHashId.encode(video.id),
       url: video.url,
       title: video.title,
-      is_private: video.is_private,
-      owner_id: video.owner_id,
       posted_at: video.inserted_at,
-      speakers: render_many(video.speakers, CaptainFact.SpeakerView, "speaker.json"),
-      admins: render_many(video.admins, CaptainFact.UserView, "public_user.json")
+      speakers: render_many(video.speakers, CaptainFact.SpeakerView, "speaker.json")
     }
   end
 end

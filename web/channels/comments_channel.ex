@@ -1,27 +1,21 @@
 defmodule CaptainFact.CommentsChannel do
   use CaptainFact.Web, :channel
 
-  alias CaptainFact.Comment
-  alias CaptainFact.CommentView
-  alias CaptainFact.User
-  alias CaptainFact.Statement
-  alias CaptainFact.Vote
-  alias CaptainFact.VoteView
-  alias CaptainFact.VideoHashId
+  alias CaptainFact.{ Comment, CommentView, User, Statement, Vote, VoteView }
+  alias CaptainFact.{ VideoHashId, Source }
 
 
   def join("comments:video:" <> video_id_hash, _payload, socket) do
     user = Guardian.Phoenix.Socket.current_resource(socket)
     video_id = VideoHashId.decode!(video_id_hash)
     socket = assign(socket, :video_id, video_id)
-    # TODO store public user in socket
-    # TODO verify user has_access
     # TODO Move this query in Comment model multiple subqueries
     # Get comments
     query =
       from c in Comment,
       join: s in Statement, on: c.statement_id == s.id,
       join: u in User, on: u.id == c.user_id,
+      left_join: source in Source, on: c.source_id == source.id,
       left_join: v in fragment("
         SELECT sum(value) AS score, comment_id
         FROM   votes
@@ -31,8 +25,7 @@ defmodule CaptainFact.CommentsChannel do
       select: %{
         id: c.id,
         approve: c.approve,
-        source_url: c.source_url,
-        source_title: c.source_title,
+        source: source,
         statement_id: c.statement_id,
         text: c.text,
         inserted_at: c.inserted_at,
@@ -57,23 +50,37 @@ defmodule CaptainFact.CommentsChannel do
     {:ok, %{comments: rendered_comments, my_votes: rendered_votes}, socket}
   end
 
-  def handle_in("new_comment", comment, socket) do
-    # TODO Verify statement exists and user is allowed for it (is_private on video)
-    # TODO Verify user is connected (persist user in state)
+  def handle_in(command, params, socket) do
+    case Guardian.Phoenix.Socket.current_resource(socket) do
+      nil -> {:reply, :error, socket}
+      _ -> handle_in_authentified(command, params, socket)
+    end
+  end
+
+  def handle_in_authentified("new_comment", params, socket) do
     user = Guardian.Phoenix.Socket.current_resource(socket)
-    changeset = Comment.changeset(%Comment{user_id: user.id}, comment)
-    case Repo.insert(changeset) do
+    user
+    |> build_assoc(:comments)
+    |> Comment.changeset(params)
+    |> Repo.insert()
+    |> case do
       {:ok, comment} ->
-        full_comment = Map.put(%Comment{comment | user: user}, :score, 1)
+        full_comment =
+          %Comment{comment | user: user}
+          |> Map.put(:score, 1)
+          |> Repo.preload(:source)
         broadcast!(socket, "comment_added", CommentView.render("comment.json", comment: full_comment))
-        Task.async(fn() -> get_fact_source_title(full_comment, socket.topic) end)
-        handle_in("vote", %{"comment_id" => comment.id, "value" => "1"}, socket)
+        handle_in_authentified("vote", %{"comment_id" => comment.id, "value" => "1"}, socket)
+        Task.async(fn() ->
+          fetch_source_title_and_update_comment(full_comment, socket.topic)
+        end)
+        {:reply, :ok, socket}
       {:error, _error} ->
         {:reply, :error, socket}
     end
   end
 
-  def handle_in("delete_comment", %{"id" => id}, socket) do
+  def handle_in_authentified("delete_comment", %{"id" => id}, socket) do
     current_user = Guardian.Phoenix.Socket.current_resource(socket)
     comment = Repo.get!(Comment, id)
     if current_user.id === comment.user_id do
@@ -85,10 +92,10 @@ defmodule CaptainFact.CommentsChannel do
     end
   end
 
-  def handle_in("vote", params = %{"comment_id" => comment_id}, socket) do
+  def handle_in_authentified("vote", params = %{"comment_id" => comment_id}, socket) do
     current_user = Guardian.Phoenix.Socket.current_resource(socket)
     base_vote = case Repo.get_by(Vote, user_id: current_user.id, comment_id: comment_id) do
-      nil -> %Vote{user_id: current_user.id}
+      nil -> build_assoc(current_user, :votes)
       vote -> vote
     end
     changeset = Vote.changeset(base_vote, params)
@@ -101,17 +108,14 @@ defmodule CaptainFact.CommentsChannel do
     end
   end
 
-  defp get_fact_source_title(%Comment{source_url: nil}, _), do: nil
-
-  defp get_fact_source_title(comment = %Comment{source_url: source_url}, topic) do
-    case OpenGraph.fetch(source_url) do
+  def fetch_source_title_and_update_comment(comment = %Comment{source: source = %{title: nil, url: url}}, topic) do
+    case OpenGraph.fetch(url) do
       {_, %OpenGraph{title: nil}} -> nil
       {:ok, %OpenGraph{title: title}} ->
-        title = HtmlEntities.decode(title)
-        updated_comment =
-          comment
-          |> Comment.changeset(%{source_title: title})
+        source =
+          Source.changeset(source, %{title: HtmlEntities.decode(title)})
           |> Repo.update!()
+        updated_comment = Map.put(comment, :source, source)
         CaptainFact.Endpoint.broadcast(
           topic, "update_comment",
           CommentView.render("comment.json", comment: updated_comment)
@@ -119,4 +123,6 @@ defmodule CaptainFact.CommentsChannel do
       {_, _} -> nil
     end
   end
+
+  def fetch_source_title_and_update_comment(_, _), do: nil
 end

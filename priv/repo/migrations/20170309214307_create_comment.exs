@@ -5,11 +5,10 @@ defmodule CaptainFact.Repo.Migrations.CreateComment do
     create table(:comments) do
       add :user_id, references(:users, on_delete: :delete_all), null: false
       add :statement_id, references(:statements, on_delete: :delete_all), null: false
+      add :source_id, references(:sources, on_delete: :nothing), null: true
 
       add :text, :string
       add :approve, :boolean
-      add :source_url, :string
-      add :source_title, :string
 
       timestamps()
     end

@@ -20,13 +20,16 @@ defmodule CaptainFact.CommentView do
       approve: comment.approve,
       inserted_at: comment.inserted_at,
       score: comment.score || 0,
-      source: render_source(comment.source_url, comment.source_title)
+      source: render_source(comment.source)
     }
   end
 
-  defp render_source(nil, _), do: nil
+  defp render_source(nil), do: nil
 
-  defp render_source(url, title) do
-    %{url: url, title: title}
+  defp render_source(source) do
+    %{
+      url: source.url,
+      title: source.title
+    }
   end
 end

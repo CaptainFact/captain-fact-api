@@ -5,7 +5,7 @@ defmodule CaptainFact.CommentTest do
 
   @valid_attrs %{
     statement_id: 1,
-    source_url: Faker.Internet.url,
+    source: %{url: Faker.Internet.url},
     text: Faker.Lorem.sentence,
     source_title: Faker.Lorem.sentence
   }
@@ -16,12 +16,12 @@ defmodule CaptainFact.CommentTest do
   end
 
   test "can post with a text and no source (comment)" do
-    changeset = Comment.changeset(%Comment{}, Map.delete(@valid_attrs, :source_url))
+    changeset = Comment.changeset(%Comment{}, Map.delete(@valid_attrs, :source))
     assert changeset.valid?
   end
 
   test "cannot post if there's no source and no text" do
-    changeset = Comment.changeset(%Comment{}, Map.drop(@valid_attrs, [:source_url, :text]))
+    changeset = Comment.changeset(%Comment{}, Map.drop(@valid_attrs, [:source, :text]))
     refute changeset.valid?
   end
 
@@ -31,7 +31,7 @@ defmodule CaptainFact.CommentTest do
   end
 
   test "source url must be a valid URL" do
-    attrs = Map.put(@valid_attrs, :source_url, "INVALID URL")
+    attrs = put_in(@valid_attrs, [:source, :url], "INVALID URL")
     changeset = Comment.changeset(%Comment{}, attrs)
     refute changeset.valid?
   end

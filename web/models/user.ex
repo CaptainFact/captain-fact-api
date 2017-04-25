@@ -9,10 +9,8 @@ defmodule CaptainFact.User do
 
     field :password, :string, virtual: true
 
-    has_many :videos, CaptainFact.Video, foreign_key: :owner_id
-    has_many :comments, CaptainFact.Comment
-
-    many_to_many :administered_videos, CaptainFact.Video, join_through: VideoAdmin, on_delete: :delete_all, on_replace: :delete
+    has_many :comments, CaptainFact.Comment, on_delete: :delete_all
+    has_many :votes, CaptainFact.Vote, on_delete: :delete_all
 
     timestamps()
   end

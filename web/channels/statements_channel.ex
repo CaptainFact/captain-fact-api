@@ -10,9 +10,6 @@ defmodule CaptainFact.StatementsChannel do
   def join("statements:video:" <> video_id_hash, _payload, socket) do
     video_id = VideoHashId.decode!(video_id_hash)
     socket = assign(socket, :video_id, video_id)
-    # TODO store public user in socket
-    # TODO verify user has_access
-    # TODO user is admin
     statements = Statement
     |> where(video_id: ^video_id)
     |> Repo.all
@@ -21,10 +18,17 @@ defmodule CaptainFact.StatementsChannel do
     {:ok, rendered_statements, socket}
   end
 
+  def handle_in(command, params, socket) do
+    case Guardian.Phoenix.Socket.current_resource(socket) do
+      nil -> {:reply, :error, socket}
+      _ -> handle_in_authentified(command, params, socket)
+    end
+  end
+
   @doc """
   Add a new statement
   """
-  def handle_in("new_statement", params, socket) do
+  def handle_in_authentified("new_statement", params, socket) do
     changeset = Statement.changeset(
       %Statement{
         video_id: socket.assigns.video_id,
@@ -39,7 +43,7 @@ defmodule CaptainFact.StatementsChannel do
     end
   end
 
-  def handle_in("update_statement", params, socket) do
+  def handle_in_authentified("update_statement", params, socket) do
     statement = Repo.get!(Statement, params["id"])
     changeset = Statement.changeset(statement, params)
     case Repo.update(changeset) do
@@ -51,7 +55,7 @@ defmodule CaptainFact.StatementsChannel do
     end
   end
 
-  def handle_in("delete_statement", %{"id" => id}, socket) do
+  def handle_in_authentified("delete_statement", %{"id" => id}, socket) do
     Statement
     |> where(id: ^id)
     |> Repo.delete_all()

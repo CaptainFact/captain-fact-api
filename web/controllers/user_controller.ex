@@ -73,7 +73,7 @@ defmodule CaptainFact.UserController do
     end
   end
 
-  def newsletter_subscribe(conn, params = %{"email" => email}) do
+  def newsletter_subscribe(conn, %{"email" => email}) do
     case Regex.match?(~r/@/, email) do
       false -> render_invalid_email_error(conn)
       true -> case ForbiddenEmailProviders.is_forbidden(email) do
