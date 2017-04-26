@@ -3,7 +3,7 @@ defmodule CaptainFact.Repo.Migrations.CreateSpeaker do
 
   def change do
     create table(:speakers) do
-      add :full_name, :string, null: false
+      add :full_name, :citext, null: false
       add :title, :string
       add :is_user_defined, :boolean, null: false
       add :picture, :string

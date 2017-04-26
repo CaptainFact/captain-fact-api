@@ -87,7 +87,7 @@ defmodule CaptainFact.VideoDebateChannel do
       left_join: vs in VideoSpeaker, on: vs.speaker_id == s.id,
       where: is_nil(vs.video_id) or vs.video_id != ^socket.assigns.video_id,
       where: s.is_user_defined == false,
-      where: ilike(s.full_name, ^query),
+      where: fragment("unaccent(?) ILIKE unaccent(?)", s.full_name, ^query),
       select: %{id: s.id, full_name: s.full_name},
       limit: @max_speakers_search_results
     {:reply, {:ok, %{speakers: Repo.all(speakers_query)}}, socket}
