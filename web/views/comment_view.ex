@@ -29,7 +29,9 @@ defmodule CaptainFact.CommentView do
   defp render_source(source) do
     %{
       url: source.url,
-      title: source.title
+      title: source.title,
+      language: source.language,
+      site_name: source.site_name
     }
   end
 end

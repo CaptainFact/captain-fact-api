@@ -72,7 +72,7 @@ defmodule CaptainFact.CommentsChannel do
         broadcast!(socket, "comment_added", CommentView.render("comment.json", comment: full_comment))
         handle_in_authentified("vote", %{"comment_id" => comment.id, "value" => "1"}, socket)
         Task.async(fn() ->
-          fetch_source_title_and_update_comment(full_comment, socket.topic)
+          fetch_source_metadata_and_update_comment(full_comment, socket.topic)
         end)
         {:reply, :ok, socket}
       {:error, _error} ->
@@ -108,21 +108,48 @@ defmodule CaptainFact.CommentsChannel do
     end
   end
 
-  def fetch_source_title_and_update_comment(comment = %Comment{source: source = %{title: nil, url: url}}, topic) do
-    case OpenGraph.fetch(url) do
-      {_, %OpenGraph{title: nil}} -> nil
-      {:ok, %OpenGraph{title: title}} ->
-        source =
-          Source.changeset(source, %{title: HtmlEntities.decode(title)})
-          |> Repo.update!()
-        updated_comment = Map.put(comment, :source, source)
-        CaptainFact.Endpoint.broadcast(
-          topic, "update_comment",
-          CommentView.render("comment.json", comment: updated_comment)
-        )
-      {_, _} -> nil
+  defp fetch_source_metadata_and_update_comment(comment = %Comment{source: source = %{title: nil, url: url}}, topic) do
+    case fetch_source_metadata(url) do
+      {:error, _} -> nil
+      {:ok, source_params} when source_params == %{} -> nil
+      {:ok, source_params} ->
+        source_params = if source_params.url == url,
+          do: Map.delete(source_params, :url),
+          else: source_params
+        # TODO Check if this url already exists. If it does, merge it and remove this source
+        updated_source = Repo.update!(Source.changeset(source, source_params))
+        # TODO Comment may have been edited. Reload from DB
+        updated_comment = Map.put(comment, :source, updated_source)
+        rendered_comment = CommentView.render("comment.json", comment: updated_comment)
+        CaptainFact.Endpoint.broadcast(topic, "update_comment", rendered_comment)
     end
   end
 
-  def fetch_source_title_and_update_comment(_, _), do: nil
+  defp fetch_source_metadata_and_update_comment(_, _), do: nil
+
+  defp fetch_source_metadata(url) do
+    case HTTPoison.get(url, [], [follow_redirect: true, max_redirect: 5]) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        tree = Floki.parse(body)
+        source_params = %{
+            title: Floki.attribute(tree, "meta[property='og:title']", "content"),
+            language: Floki.attribute(tree, "html", "lang"),
+            site_name: Floki.attribute(tree, "meta[property='og:site_name']", "content"),
+            url: Floki.attribute(tree, "meta[property='og:url']", "content")
+          }
+          |> Enum.map(fn({key, value}) -> {key, List.first(value)} end)
+          |> Enum.filter(fn({_key, value}) -> value != nil end)
+          |> Enum.map(fn(entry = {key, value}) ->
+            if key in [:title, :site_name],
+              do: {key, HtmlEntities.decode(value)},
+              else: entry
+          end)
+          |> Enum.into(%{})
+        {:ok, source_params}
+      {:ok, %HTTPoison.Response{status_code: 404}} ->
+        {:error, "Not found :("}
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        {:error, reason}
+      end
+  end
 end

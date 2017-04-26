@@ -5,6 +5,8 @@ defmodule CaptainFact.Repo.Migrations.CreateSource do
     create table(:sources) do
       add :url, :string, null: false
       add :title, :string, null: true
+      add :language, :string, null: true
+      add :site_name, :string, null: true
 
       timestamps()
     end

@@ -53,9 +53,14 @@ defmodule CaptainFact.VideoController do
 
   defp fetch_video_title(url) do
     if Regex.match?(~r/(?:youtube\.com\/\S*(?:(?:\/e(?:mbed))?\/|watch\/?\?(?:\S*?&?v\=))|youtu\.be\/)([a-zA-Z0-9_-]{6,11})/, url) do
-      case OpenGraph.fetch(url) do
-        {:ok, %OpenGraph{title: title}} -> {:ok, HtmlEntities.decode(title)}
-        {_, _} -> {:error, "Cannot fetch video's title"}
+      case HTTPoison.get(url) do
+        {:ok, %HTTPoison.Response{body: body}} ->
+          meta = Floki.attribute(body, "meta[property='og:title']", "content")
+          case meta do
+            [] -> {:error, "Page does not contains an OpenGraph title attribute"}
+            [title] -> {:ok, HtmlEntities.decode(title)}
+          end
+        {_, _} -> {:error, "Remote URL didn't respond correctly"}
       end
     else
       {:error, "Invalid URL"}
