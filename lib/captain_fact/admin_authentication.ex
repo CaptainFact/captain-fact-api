@@ -3,7 +3,7 @@ defimpl ExAdmin.Authentication, for: Plug.Conn do
   def current_user(conn), do: Guardian.Plug.current_resource(conn)
   def current_user_name(conn), do: Guardian.Plug.current_resource(conn).name
 
-  def session_path(_conn, :destroy), do: "/api/auth/signout"
+  def session_path(_conn, :destroy), do: "/admin/logout"
   def session_path(_conn, _), do: ""
 end
 

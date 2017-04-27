@@ -8,17 +8,22 @@ defmodule CaptainFact.VideoDebateChannel do
 
   def join("video_debate:" <> video_id_hash, _payload, socket) do
     video_id = VideoHashId.decode!(video_id_hash)
+    is_authentified = if Guardian.Phoenix.Socket.current_resource(socket),
+      do: true, else: false
     video = Video
-    |> Video.with_speakers
-    |> Repo.get!(video_id)
+      |> Video.with_speakers
+      |> Repo.get!(video_id)
+    socket = socket
+      |> assign(:video_id, video_id)
+      |> assign(:is_authentified, is_authentified)
     rendered_video = View.render_one(video, VideoView, "video.json")
     {:ok, rendered_video, assign(socket, :video_id, video_id)}
   end
 
   def handle_in(command, params, socket) do
-    case Guardian.Phoenix.Socket.current_resource(socket) do
-      nil -> {:reply, :error, socket}
-      _ -> handle_in_authentified(command, params, socket)
+    case socket.assigns.is_authentified do
+      false -> {:reply, :error, socket}
+      true -> handle_in_authentified(command, params, socket)
     end
   end
 

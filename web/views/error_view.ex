@@ -13,15 +13,18 @@ defmodule CaptainFact.ErrorView do
     %{errors: [%{message: "You are not authorized to access this resource"}]}
   end
 
-  def render("404.json", _) do
+  def render("404.json", errors) do
+    if Mix.env == :dev, do: IO.inspect(errors)
     %{errors: [%{message: "Not Found"}]}
   end
 
-  def render("500.html", _assigns) do
+  def render("500.html", errors) do
+    if Mix.env == :dev, do: IO.inspect(errors)
     "Internal server error"
   end
 
-  def render("500.json", _) do
+  def render("500.json", errors) do
+    if Mix.env == :dev, do: IO.inspect(errors)
     %{errors: [%{message: "Server encountered an unexpected error. We're working on it !"}]}
   end
 
@@ -31,13 +34,15 @@ defmodule CaptainFact.ErrorView do
     }
   end
 
-  def render("error.json", _) do
+  def render("error.json", error) do
+    if Mix.env == :dev, do: IO.inspect(error)
     %{
       errors: ["Server encountered an unexpected error. We're working on it !"]
     }
   end
 
-  def render(_, _error) do
+  def render(_, error) do
+    if Mix.env == :dev, do: IO.inspect(error)
     "Server encountered an unexpected error. We're working on it !"
   end
 end

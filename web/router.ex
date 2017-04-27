@@ -37,6 +37,7 @@ defmodule CaptainFact.Router do
   scope "/admin", CaptainFact do
     pipe_through :browser
     get "/login", UserController, :admin_login
+    delete "/logout", UserController, :admin_logout
   end
 
   scope "/admin", ExAdmin do
@@ -60,11 +61,7 @@ defmodule CaptainFact.Router do
     get "/users/:user_id/videos", VideoController, :index
 
     get "/videos", VideoController, :index
-    post "/videos", VideoController, :get_or_create 
-
-    # Search methods
-    get "/search/users/:query_string", UserController, :search
-    get "/utils/external_video_title/:video_uri", VideoController, :video_title
+    post "/videos", VideoController, :get_or_create
 
     # Subscribe to the newsletter
     post "/newsletter/subscribe", UserController, :newsletter_subscribe

@@ -5,7 +5,7 @@ defmodule CaptainFact.UserController do
   alias CaptainFact.SendInBlueApi
 
   plug Guardian.Plug.EnsureAuthenticated, [handler: CaptainFact.AuthController]
-  when action in [:search, :update]
+  when action in [:search, :update, :admin_logout]
 
   def create(conn, %{"user" => user_params}) do
     changeset = User.changeset(%User{}, user_params)
@@ -32,25 +32,17 @@ defmodule CaptainFact.UserController do
     end
   end
 
-  @max_users_search_results 5
-  def search(conn, %{"query_string" => query_string}) do
-    current_user = Guardian.Plug.current_resource(conn)
-    query_string = query_string
-      |> URI.decode()
-      |> String.replace(~r/%|\*/, "", global: true)
-    query_string = "%#{query_string}%"
-    users_query =
-      from u in User,
-      where: u.id != ^current_user.id,
-      where: like(u.username, ^query_string) or like(u.name, ^query_string),
-      select: [:id, :username, :name],
-      limit: @max_users_search_results
-
-    render(conn, "index_public.json", users: Repo.all(users_query))
-  end
-
   def admin_login(conn, _) do
     render(conn, "admin_login.html")
+  end
+
+  def admin_logout(conn, _) do
+    conn
+      |> Guardian.Plug.current_token
+      |> Guardian.revoke!
+    conn
+      |> Plug.Conn.configure_session(drop: true)
+      |> redirect(to: "/admin/login")
   end
 
   def update(conn, params = %{"user_id" => user_id}) do
