@@ -1,14 +1,15 @@
 defmodule CaptainFact.Video do
   use CaptainFact.Web, :model
 
-  alias CaptainFact.{ VideoSpeaker, Statement, Speaker }
+  alias CaptainFact.{ VideoSpeaker, Statement, Speaker, VideoDebateAction }
 
   schema "videos" do
     field :title, :string
     field :url, :string
 
-    many_to_many :speakers, Speaker, join_through: VideoSpeaker
-    has_many :statements, Statement
+    many_to_many :speakers, Speaker, join_through: VideoSpeaker, on_delete: :delete_all
+    has_many :statements, Statement, on_delete: :delete_all
+    has_many :actions, VideoDebateAction, on_delete: :delete_all
 
     timestamps()
   end

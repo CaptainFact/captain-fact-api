@@ -4,6 +4,7 @@ defmodule CaptainFact.UserSocket do
 
   ## Channels
   channel "video_debate:*", CaptainFact.VideoDebateChannel
+  channel "video_debate_actions:*", CaptainFact.VideoDebateActionChannel
   channel "statements:video:*", CaptainFact.StatementsChannel
   channel "comments:video:*", CaptainFact.CommentsChannel
 
@@ -13,9 +14,13 @@ defmodule CaptainFact.UserSocket do
   def connect(%{"token" => token}, socket) do
     case sign_in(socket, token) do
       {:ok, authed_socket, _guardian_params} ->
-        {:ok, authed_socket}
+        user_id = case Guardian.Phoenix.Socket.current_resource(authed_socket) do
+          nil -> nil
+          user -> user.id
+        end
+        {:ok, assign(authed_socket, :user_id, user_id)}
       _ ->
-        {:ok, socket}
+        {:ok, assign(socket, :user_id, nil)}
     end
   end
 

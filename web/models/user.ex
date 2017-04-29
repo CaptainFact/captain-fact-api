@@ -11,6 +11,7 @@ defmodule CaptainFact.User do
 
     has_many :comments, CaptainFact.Comment, on_delete: :delete_all
     has_many :votes, CaptainFact.Vote, on_delete: :delete_all
+    has_many :video_debate_actions, CaptainFact.VideoDebateAction, on_delete: :nilify_all
 
     timestamps()
   end

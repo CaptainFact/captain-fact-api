@@ -51,7 +51,7 @@ defmodule CaptainFact.CommentsChannel do
   end
 
   def handle_in(command, params, socket) do
-    case Guardian.Phoenix.Socket.current_resource(socket) do
+    case socket.assigns.user_id do
       nil -> {:reply, :error, socket}
       _ -> handle_in_authentified(command, params, socket)
     end
