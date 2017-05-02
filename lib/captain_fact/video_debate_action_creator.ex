@@ -19,19 +19,23 @@ defmodule CaptainFact.VideoDebateActionCreator do
 
   def action_create(user_id, video_id, statement = %Statement{id: id}),
   do: action(user_id, video_id, "statement", id, "create", %{
-      text: statement.text,
-      time: statement.time
+    text: statement.text,
+    time: statement.time,
+    speaker_id: statement.speaker_id
   })
 
   def action_create(user_id, video_id, speaker = %Speaker{id: id}),
   do: action(user_id, video_id, "speaker", id, "create", %{
-      full_name: speaker.full_name,
-      title: speaker.title
+    full_name: speaker.full_name,
+    title: speaker.title
   })
 
   # Add
-  def action_add(user_id, video_id, %Speaker{id: id}),
-  do: action(user_id, video_id, "speaker", id, "add")
+  def action_add(user_id, video_id, speaker = %Speaker{id: id}),
+  do: action(user_id, video_id, "speaker", id, "add", %{
+    full_name: speaker.full_name,
+    title: speaker.title
+  })
 
   # Update
 

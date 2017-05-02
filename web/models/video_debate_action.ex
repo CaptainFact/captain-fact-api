@@ -14,6 +14,10 @@ defmodule CaptainFact.VideoDebateAction do
     timestamps(updated_at: false)
   end
 
+  def with_user(query) do
+    from a in query, preload: :user
+  end
+
   @required_fields ~w(user_id video_id entity entity_id type)a
   @optional_fields ~w(changes)a
 
@@ -32,7 +36,7 @@ defmodule CaptainFact.VideoDebateAction do
   defp validate_changes(changeset) do
     type = get_field(changeset, :type)
     changes = get_field(changeset, :changes)
-    if type in ~w(create update) do
+    if type in ~w(create add update) do
       must_have_changes(changeset, changes)
     else
       must_not_have_changes(changeset, changes)

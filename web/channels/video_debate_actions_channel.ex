@@ -1,13 +1,17 @@
-defmodule CaptainFact.VideoDebateActionChannel do
+defmodule CaptainFact.VideoDebateActionsChannel do
   use CaptainFact.Web, :channel
 
-  alias CaptainFact.{ VideoDebateAction, VideoHashId }
+  alias Phoenix.View
+  alias CaptainFact.{ VideoDebateAction, VideoHashId, VideoDebateActionView }
 
   def join("video_debate_actions:" <> video_id_hash, _payload, socket) do
     video_id = VideoHashId.decode!(video_id_hash)
-    query =
-      from a in VideoDebateAction,
-      where: a.video_id == ^video_id
-    {:ok, Repo.all(query), assign(socket, :video_id, video_id)}
+    rendered_actions =
+      VideoDebateAction
+      |> VideoDebateAction.with_user
+      |> where([a], a.video_id == ^video_id)
+      |> Repo.all()
+      |> View.render_many(VideoDebateActionView, "action.json")
+    {:ok, %{actions: rendered_actions}, assign(socket, :video_id, video_id)}
   end
 end

@@ -38,7 +38,7 @@ defmodule CaptainFact.VideoDebateActionTest do
   end
 
   test "some action types cannot have changes" do
-    must_not_have_changes = ~w(remove delete add)
+    must_not_have_changes = ~w(remove delete)
     for action_type <- must_not_have_changes do
       attrs = Map.merge @valid_attrs, %{
         type: action_type,
@@ -50,7 +50,7 @@ defmodule CaptainFact.VideoDebateActionTest do
   end
 
   test "some action types must have changes" do
-    must_have_changes = ~w(create update)
+    must_have_changes = ~w(create add update)
     for action_type <- must_have_changes do
       attrs = Map.merge @valid_attrs, %{
         type: action_type,
