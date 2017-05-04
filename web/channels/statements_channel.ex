@@ -17,6 +17,7 @@ defmodule CaptainFact.StatementsChannel do
     video_id = VideoHashId.decode!(video_id_hash)
     statements = Statement
       |> where(video_id: ^video_id)
+      |> where(is_deleted: false)
       |> Repo.all
     rendered_statements = StatementView.render("index.json", statements: statements)
     {:ok, rendered_statements, assign(socket, :video_id, video_id)}
@@ -70,11 +71,13 @@ defmodule CaptainFact.StatementsChannel do
   end
 
   def handle_in_authentified("delete_statement", %{"id" => id}, socket) do
-    statement = Repo.get!(Statement, id)
     %{user_id: user_id, video_id: video_id} = socket.assigns
+    statement = Repo.get_by!(Statement, id: id, is_deleted: false)
     Multi.new
-    |> Multi.delete(:statement, statement)
-    |> Multi.insert(:action_delete, action_delete(user_id, video_id, statement))
+    |> Multi.update(:statement, Statement.changeset_delete(statement))
+    |> Multi.run(:action_delete, fn %{statement: statement} ->
+      Repo.insert(action_delete(user_id, video_id, statement))
+     end)
     |> Repo.transaction()
     |> case do
         {:ok, _} ->

@@ -4,10 +4,11 @@ defmodule CaptainFact.Statement do
   schema "statements" do
     field :text, :string
     field :time, :integer
+    field :is_deleted, :boolean, default: false
 
     belongs_to :video, CaptainFact.Video
     belongs_to :speaker, CaptainFact.Speaker
-    
+
     has_many :comments, CaptainFact.Comment, on_delete: :delete_all
 
     timestamps()
@@ -25,5 +26,19 @@ defmodule CaptainFact.Statement do
     |> validate_number(:time, greater_than_or_equal_to: 0)
     |> validate_length(:text, min: 10, max: 240)
     |> cast_assoc(:speaker)
+  end
+
+  @doc """
+  Builds a deletion changeset for `struct`
+  """
+  def changeset_delete(struct) do
+    cast(struct, %{is_deleted: true}, [:is_deleted])
+  end
+
+  @doc """
+  Builds a restore changeset for `struct`
+  """
+  def changeset_restore(struct) do
+    cast(struct, %{is_deleted: false}, [:is_deleted])
   end
 end

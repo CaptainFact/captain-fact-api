@@ -55,4 +55,8 @@ defmodule CaptainFact.VideoDebateActionCreator do
 
   def action_delete(user_id, video_id, %Speaker{id: id}),
   do: action(user_id, video_id, "speaker", id, "delete")
+
+  # Restore
+  def action_restore(user_id, video_id, %Statement{id: id}),
+  do: action(user_id, video_id, "statement", id, "restore")
 end

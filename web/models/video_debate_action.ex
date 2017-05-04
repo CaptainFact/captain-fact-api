@@ -29,7 +29,7 @@ defmodule CaptainFact.VideoDebateAction do
     |> cast(params, @required_fields ++ @optional_fields)
     |> validate_required(@required_fields)
     |> validate_inclusion(:entity, ["statement", "speaker"])
-    |> validate_inclusion(:type, ["create", "remove", "update", "delete", "add"])
+    |> validate_inclusion(:type, ["create", "remove", "update", "delete", "add", "restore"])
     |> validate_changes()
   end
 
