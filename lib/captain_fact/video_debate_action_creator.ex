@@ -59,4 +59,7 @@ defmodule CaptainFact.VideoDebateActionCreator do
   # Restore
   def action_restore(user_id, video_id, %Statement{id: id}),
   do: action(user_id, video_id, "statement", id, "restore")
+
+  def action_restore(user_id, video_id, %Speaker{id: id}),
+  do: action(user_id, video_id, "speaker", id, "restore")
 end

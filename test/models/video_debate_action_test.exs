@@ -14,6 +14,11 @@ defmodule CaptainFact.VideoDebateActionTest do
     }
   }
   @invalid_attrs %{}
+  @must_have_changes ~w(create add update)
+  @must_not_have_changes ~w(remove delete restore)
+  @valid_action_types @must_have_changes ++ @must_not_have_changes
+
+
 
   test "changeset with valid attributes" do
     changeset = VideoDebateAction.changeset(%VideoDebateAction{}, @valid_attrs)
@@ -38,8 +43,7 @@ defmodule CaptainFact.VideoDebateActionTest do
   end
 
   test "some action types cannot have changes" do
-    must_not_have_changes = ~w(remove delete restore)
-    for action_type <- must_not_have_changes do
+    for action_type <- @must_not_have_changes do
       attrs = Map.merge @valid_attrs, %{
         type: action_type,
         changes: %{text: "Beer Time ! 🍺🍺🍺"}
@@ -50,11 +54,21 @@ defmodule CaptainFact.VideoDebateActionTest do
   end
 
   test "some action types must have changes" do
-    must_have_changes = ~w(create add update)
-    for action_type <- must_have_changes do
+    for action_type <- @must_have_changes do
       attrs = Map.merge @valid_attrs, %{
         type: action_type,
         changes: nil
+      }
+      changeset = VideoDebateAction.changeset(%VideoDebateAction{}, attrs)
+      refute changeset.valid?
+    end
+  end
+
+  test "empty changes must never be valids" do
+    for action_type <- @valid_action_types do
+      attrs = Map.merge @valid_attrs, %{
+        type: action_type,
+        changes: %{}
       }
       changeset = VideoDebateAction.changeset(%VideoDebateAction{}, attrs)
       refute changeset.valid?

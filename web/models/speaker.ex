@@ -7,8 +7,9 @@ defmodule CaptainFact.Speaker do
     field :title, :string
     field :is_user_defined, :boolean, default: true
     field :picture, CaptainFact.SpeakerPicture.Type
+    field :is_removed, :boolean, default: false
 
-    has_many :statements, CaptainFact.Statement, on_delete: :delete_all
+    has_many :statements, CaptainFact.Statement, on_delete: :nilify_all
     many_to_many :videos, CaptainFact.Video, join_through: "videos_speakers", on_delete: :delete_all
     timestamps()
   end
@@ -27,5 +28,19 @@ defmodule CaptainFact.Speaker do
     |> validate_length(:full_name, min: 3, max: 60)
     |> validate_length(:title, min: 3, max: 60)
     |> validate_required(:full_name)
+  end
+
+  @doc """
+  Builds a deletion changeset for `struct`
+  """
+  def changeset_remove(struct) do
+    cast(struct, %{is_removed: true}, [:is_removed])
+  end
+
+  @doc """
+  Builds a restore changeset for `struct`
+  """
+  def changeset_restore(struct) do
+    cast(struct, %{is_removed: false}, [:is_removed])
   end
 end

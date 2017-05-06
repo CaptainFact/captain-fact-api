@@ -46,8 +46,8 @@ defmodule CaptainFact.User do
     |> validate_required(@required_fields)
     |> validate_email()
     |> unique_constraint(:email)
-    |> validate_length(:username, min: 3, max: 20)
-    |> validate_length(:name, min: 2, max: 30)
+    |> validate_length(:username, min: 5, max: 15)
+    |> validate_length(:name, min: 2, max: 20)
     |> unique_constraint(:username)
   end
 

@@ -4,7 +4,7 @@ defmodule CaptainFact.UserTest do
   alias CaptainFact.User
 
   @valid_attrs %{
-    name: "#{Faker.Name.first_name} #{Faker.Name.last_name}",
+    name: "#{Faker.Name.first_name}",
     username: Faker.Internet.user_name,
     email: Faker.Internet.email,
     password: "@StrongP4ssword!"
@@ -21,24 +21,24 @@ defmodule CaptainFact.UserTest do
     refute changeset.valid?
   end
 
-  test "username should be between 3 and 20 characters" do
+  test "username should be between 5 and 15 characters" do
     # Too short
     attrs = %{username: "x"}
-    assert {:username, "should be at least 3 character(s)"} in errors_on(%User{}, attrs)
+    assert {:username, "should be at least 5 character(s)"} in errors_on(%User{}, attrs)
 
     # Too long
-    attrs = %{username: String.duplicate("x", 21)}
-    assert {:username, "should be at most 20 character(s)"} in errors_on(%User{}, attrs)
+    attrs = %{username: String.duplicate("x", 16)}
+    assert {:username, "should be at most 15 character(s)"} in errors_on(%User{}, attrs)
   end
 
-  test "name must be between 2 and 30 characters" do
+  test "name must be between 2 and 20 characters" do
     # Too short
     attrs = %{name: "x"}
     assert {:name, "should be at least 2 character(s)"} in errors_on(%User{}, attrs)
 
     # Too long
-    attrs = %{name: String.duplicate("x", 31)}
-    assert {:name, "should be at most 30 character(s)"} in errors_on(%User{}, attrs)
+    attrs = %{name: String.duplicate("x", 21)}
+    assert {:name, "should be at most 20 character(s)"} in errors_on(%User{}, attrs)
   end
 
   test "password must be between 6 and 256 characters" do

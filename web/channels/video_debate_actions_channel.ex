@@ -3,8 +3,8 @@ defmodule CaptainFact.VideoDebateActionsChannel do
 
   alias Phoenix.View
   alias Ecto.Multi
-  alias CaptainFact.{ VideoDebateAction, VideoHashId, Statement }
-  alias CaptainFact.{ VideoDebateActionView, StatementView }
+  alias CaptainFact.{ VideoDebateAction, VideoHashId, Statement, Speaker, VideoSpeaker }
+  alias CaptainFact.{ VideoDebateActionView, StatementView, SpeakerView }
 
   import CaptainFact.VideoDebateActionCreator, only: [action_restore: 3]
 
@@ -56,5 +56,42 @@ defmodule CaptainFact.VideoDebateActionsChannel do
           IO.inspect(reason)
           {:reply, :error, socket}
     end
+  end
+
+  def handle_in_authenticated("restore_speaker", %{"id" => id}, socket) do
+    %{user_id: user_id, video_id: video_id} = socket.assigns
+    speaker = Repo.get(Speaker, id)
+    video_speaker = VideoSpeaker.changeset(%VideoSpeaker{speaker_id: speaker.id, video_id: video_id})
+
+    Multi.new
+    |> multi_undelete_speaker(speaker)
+    |> Multi.insert(:video_speaker, video_speaker)
+    |> Multi.insert(:action_restore, action_restore(user_id, video_id, speaker))
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{action_restore: action}} ->
+        # Broadcast the action
+        rendered_action =
+          action
+          |> Map.put(:user, Repo.one!(Ecto.assoc(action, :user)))
+          |> View.render_one(VideoDebateActionView, "action.json")
+        broadcast!(socket, "new_action", rendered_action)
+        # Broadcast the speaker
+        CaptainFact.Endpoint.broadcast(
+          "video_debate:#{VideoHashId.encode(video_id)}",
+          "new_speaker",
+          SpeakerView.render("show.json", speaker: speaker)
+        )
+
+        {:reply, :ok, socket}
+      {:error, _reason} ->
+        {:reply, :error, socket}
+    end
+  end
+
+  # No need to do nothing if speaker is not user defined (cannot be removed)
+  defp multi_undelete_speaker(multi, %{is_user_defined: false}), do: multi
+  defp multi_undelete_speaker(multi, speaker) do
+    Multi.update(multi, :speaker, Speaker.changeset_restore(speaker))
   end
 end

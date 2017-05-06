@@ -4,7 +4,7 @@ defmodule CaptainFact.Statement do
   schema "statements" do
     field :text, :string
     field :time, :integer
-    field :is_deleted, :boolean, default: false
+    field :is_removed, :boolean, default: false
 
     belongs_to :video, CaptainFact.Video
     belongs_to :speaker, CaptainFact.Speaker
@@ -31,14 +31,14 @@ defmodule CaptainFact.Statement do
   @doc """
   Builds a deletion changeset for `struct`
   """
-  def changeset_delete(struct) do
-    cast(struct, %{is_deleted: true}, [:is_deleted])
+  def changeset_remove(struct) do
+    cast(struct, %{is_removed: true}, [:is_removed])
   end
 
   @doc """
   Builds a restore changeset for `struct`
   """
   def changeset_restore(struct) do
-    cast(struct, %{is_deleted: false}, [:is_deleted])
+    cast(struct, %{is_removed: false}, [:is_removed])
   end
 end

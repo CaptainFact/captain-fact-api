@@ -84,24 +84,27 @@ defmodule CaptainFact.VideoDebateChannel do
 
   def handle_in_authentified("update_speaker", params, socket) do
     speaker = Repo.get!(Speaker, params["id"])
-    if speaker.is_user_defined do
+    if !speaker.is_user_defined do
+      {:reply, {:error, %{speaker: "Forbidden"}}, socket}
+    else
       %{user_id: user_id, video_id: video_id} = socket.assigns
       changeset = Speaker.changeset(speaker, params)
-
-      Multi.new
-      |> Multi.update(:speaker, changeset)
-      |> Multi.insert(:action_update, action_update(user_id, video_id, changeset))
-      |> Repo.transaction()
-      |> case do
-        {:ok, %{speaker: speaker}} ->
-          rendered_speaker = View.render_one(speaker, SpeakerView, "speaker.json")
-          broadcast!(socket, "speaker_updated", rendered_speaker)
-          {:reply, :ok, socket}
-        {:error, _, _, _} ->
-          {:reply, :error, socket}
+      case changeset.changes do
+        changes when changes === %{} -> {:reply, :ok, socket}
+        changes ->
+          Multi.new
+          |> Multi.update(:speaker, changeset)
+          |> Multi.insert(:action_update, action_update(user_id, video_id, changeset))
+          |> Repo.transaction()
+          |> case do
+            {:ok, %{speaker: speaker}} ->
+              rendered_speaker = View.render_one(speaker, SpeakerView, "speaker.json")
+              broadcast!(socket, "speaker_updated", rendered_speaker)
+              {:reply, :ok, socket}
+            {:error, _, _, _} ->
+              {:reply, :error, socket}
+          end
       end
-    else
-      {:reply, {:error, %{speaker: "Forbidden"}}, socket}
     end
   end
 
@@ -128,8 +131,10 @@ defmodule CaptainFact.VideoDebateChannel do
 
   defp do_remove_speaker(socket, speaker = %{is_user_defined: true}) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
+    video_speaker = %VideoSpeaker{speaker_id: speaker.id, video_id: video_id}
     Multi.new
-    |> Multi.delete(:speaker, speaker)
+    |> Multi.update(:speaker, Speaker.changeset_remove(speaker))
+    |> Multi.delete(:video_speaker, VideoSpeaker.changeset(video_speaker))
     |> Multi.insert(:action_delete, action_delete(user_id, video_id, speaker))
     |> Repo.transaction()
   end
@@ -139,11 +144,6 @@ defmodule CaptainFact.VideoDebateChannel do
     video_speaker = %VideoSpeaker{speaker_id: speaker.id, video_id: video_id}
 
     Multi.new
-    |> Multi.delete_all(:statements, from(
-      s in Statement,
-      where: s.speaker_id == ^speaker.id,
-      where: s.video_id == ^video_id
-    ))
     |> Multi.delete(:video_speaker, VideoSpeaker.changeset(video_speaker))
     |> Multi.insert(:action_remove, action_remove(user_id, video_id, speaker))
     |> Repo.transaction()

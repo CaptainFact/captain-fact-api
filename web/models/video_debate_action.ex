@@ -43,7 +43,7 @@ defmodule CaptainFact.VideoDebateAction do
     end
   end
 
-  defp must_have_changes(changeset, nil),
+  defp must_have_changes(changeset, changes) when is_nil(changes) or changes === %{},
   do: add_error(changeset, :changes, "must have changes")
   defp must_have_changes(changeset, _), do: changeset
 
