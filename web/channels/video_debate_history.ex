@@ -9,7 +9,7 @@ defmodule CaptainFact.VideoDebateActionsChannel do
   import CaptainFact.VideoDebateActionCreator, only: [action_restore: 3]
 
 
-  def join("video_debate_actions:" <> video_id_hash, _payload, socket) do
+  def join("video_debate_history:" <> video_id_hash, _payload, socket) do
     video_id = VideoHashId.decode!(video_id_hash)
     rendered_actions =
       VideoDebateAction
