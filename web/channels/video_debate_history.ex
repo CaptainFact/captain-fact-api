@@ -29,7 +29,7 @@ defmodule CaptainFact.VideoDebateActionsChannel do
 
   def handle_in_authenticated("restore_statement", %{"id" => id}, socket) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
-    statement = Repo.get_by!(Statement, id: id, is_deleted: true)
+    statement = Repo.get_by!(Statement, id: id, is_removed: true)
     Multi.new
     |> Multi.update(:statement, Statement.changeset_restore(statement))
     |> Multi.run(:action_restore, fn %{statement: statement} ->

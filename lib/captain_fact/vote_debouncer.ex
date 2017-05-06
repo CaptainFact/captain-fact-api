@@ -5,6 +5,7 @@ defmodule CaptainFact.VoteDebouncer do
   """
 
   import Ecto.Query
+  alias CaptainFact.{ Vote, Comment, Repo }
 
   @name __MODULE__
   @update_delay 5000 # 5 seconds
@@ -56,19 +57,22 @@ defmodule CaptainFact.VoteDebouncer do
 
   defp do_update(state, channel_topic) do
     updated_comments = MapSet.to_list(state[channel_topic][:comments])
-    scores = CaptainFact.Vote
-    |> select([v], %{
-        comment_id: v.comment_id,
+    scores = from(
+      v in Vote,
+      join: c in Comment, on: c.id == v.comment_id,
+      select: %{
+        id: v.comment_id,
+        statement_id: c.statement_id,
         score: sum(v.value)
-      })
-    |> where([v], v.comment_id in ^updated_comments)
-    |> group_by([v], v.comment_id)
-    |> CaptainFact.Repo.all
+      },
+      where: v.comment_id in ^updated_comments,
+      group_by: [v.comment_id, c.statement_id]
+    ) |> Repo.all()
 
     CaptainFact.Endpoint.broadcast(
       channel_topic,
-      "update_comments_scores",
-      %{comments_scores: scores}
+      "comments_scores_updated",
+      %{comments: scores}
     )
     Map.delete(state, channel_topic)
   end

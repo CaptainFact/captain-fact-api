@@ -86,7 +86,7 @@ defmodule CaptainFact.StatementsChannel do
     |> Repo.transaction()
     |> case do
         {:ok, _} ->
-          broadcast!(socket, "statement_deleted", %{id: id})
+          broadcast!(socket, "statement_removed", %{id: id})
           {:reply, :ok, socket}
         {:error, _, _reason, _} -> {:reply, :error, socket}
     end

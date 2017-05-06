@@ -75,7 +75,7 @@ defmodule CaptainFact.VideoDebateChannel do
       {:ok, %{speaker: speaker}} ->
         # Broadcast the speaker
         rendered_speaker = SpeakerView.render("show.json", speaker: speaker)
-        broadcast!(socket, "new_speaker", rendered_speaker)
+        broadcast!(socket, "speaker_added", rendered_speaker)
         {:reply, :ok, socket}
       {:error, _reason} ->
         {:reply, :error, socket}

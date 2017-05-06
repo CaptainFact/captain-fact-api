@@ -121,7 +121,7 @@ defmodule CaptainFact.CommentsChannel do
         # TODO Comment may have been edited. Reload from DB
         updated_comment = Map.put(comment, :source, updated_source)
         rendered_comment = CommentView.render("comment.json", comment: updated_comment)
-        CaptainFact.Endpoint.broadcast(topic, "update_comment", rendered_comment)
+        CaptainFact.Endpoint.broadcast(topic, "comment_updated", rendered_comment)
     end
   end
 
