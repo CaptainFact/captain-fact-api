@@ -41,9 +41,9 @@ defmodule CaptainFact.Vote do
 
   defp validate_vote_value(changeset) do
     validate_change changeset, :value, fn :value, value ->
-      case value in [-1, 1] do
+      case value in [-1, 0, 1] do
         true -> []
-        false -> [value: "Can only be -1 or +1"]
+        false -> [value: "Can only be -1, 0 +1"]
       end  
     end
   end

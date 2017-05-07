@@ -43,7 +43,7 @@ defmodule CaptainFact.VideoDebateActionsChannel do
             action
             |> Map.put(:user, Repo.one!(Ecto.assoc(action, :user)))
             |> View.render_one(VideoDebateActionView, "action.json")
-          broadcast!(socket, "new_action", rendered_action)
+          broadcast!(socket, "action_added", rendered_action)
 
           # Broadcast statement
           CaptainFact.Endpoint.broadcast(
@@ -75,11 +75,11 @@ defmodule CaptainFact.VideoDebateActionsChannel do
           action
           |> Map.put(:user, Repo.one!(Ecto.assoc(action, :user)))
           |> View.render_one(VideoDebateActionView, "action.json")
-        broadcast!(socket, "new_action", rendered_action)
+        broadcast!(socket, "action_added", rendered_action)
         # Broadcast the speaker
         CaptainFact.Endpoint.broadcast(
           "video_debate:#{VideoHashId.encode(video_id)}",
-          "new_speaker",
+          "speaker_added",
           SpeakerView.render("show.json", speaker: speaker)
         )
 

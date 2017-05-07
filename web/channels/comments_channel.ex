@@ -81,9 +81,8 @@ defmodule CaptainFact.CommentsChannel do
   end
 
   def handle_in_authentified("delete_comment", %{"id" => id}, socket) do
-    current_user = Guardian.Phoenix.Socket.current_resource(socket)
     comment = Repo.get!(Comment, id)
-    if current_user.id === comment.user_id do
+    if socket.assigns.user_id === comment.user_id do
       Repo.delete!(comment)
       broadcast!(socket, "comment_removed", %{id: id, statement_id: comment.statement_id})
       {:reply, :ok, socket}
@@ -93,7 +92,7 @@ defmodule CaptainFact.CommentsChannel do
   end
 
   def handle_in_authentified("vote", params = %{"comment_id" => comment_id}, socket) do
-    current_user = Guardian.Phoenix.Socket.current_resource(socket)
+    current_user = %User{id: socket.assigns.user_id}
     base_vote = case Repo.get_by(Vote, user_id: current_user.id, comment_id: comment_id) do
       nil -> build_assoc(current_user, :votes)
       vote -> vote
