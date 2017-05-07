@@ -4,7 +4,8 @@ defmodule CaptainFact.UserSocket do
 
   ## Channels
   channel "video_debate:*", CaptainFact.VideoDebateChannel
-  channel "video_debate_history:*", CaptainFact.VideoDebateActionsChannel
+  channel "video_debate_history:*", CaptainFact.VideoDebateHistoryChannel
+  channel "statements_history:*", CaptainFact.VideoDebateHistoryChannel
   channel "statements:video:*", CaptainFact.StatementsChannel
   channel "comments:video:*", CaptainFact.CommentsChannel
 

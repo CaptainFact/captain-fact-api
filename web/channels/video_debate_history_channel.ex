@@ -1,4 +1,4 @@
-defmodule CaptainFact.VideoDebateActionsChannel do
+defmodule CaptainFact.VideoDebateHistoryChannel do
   use CaptainFact.Web, :channel
 
   alias Phoenix.View
@@ -18,6 +18,17 @@ defmodule CaptainFact.VideoDebateActionsChannel do
       |> Repo.all()
       |> View.render_many(VideoDebateActionView, "action.json")
     {:ok, %{actions: rendered_actions}, assign(socket, :video_id, video_id)}
+  end
+
+  def join("statements_history:" <> statement_id, _payload, socket) do
+    rendered_actions =
+      VideoDebateAction
+      |> VideoDebateAction.with_user
+      |> where([a], a.entity == "statement")
+      |> where([a], a.entity_id == ^statement_id)
+      |> Repo.all()
+      |> View.render_many(VideoDebateActionView, "action.json")
+    {:ok, %{actions: rendered_actions}, assign(socket, :statement_id, statement_id)}
   end
 
   def handle_in(command, params, socket) do
