@@ -34,6 +34,8 @@ defmodule CaptainFact.Router do
 
   # ---- Routes ----
 
+  # Browser (backadmin)
+
   scope "/admin", CaptainFact do
     pipe_through :browser
     get "/login", UserController, :admin_login
@@ -45,9 +47,12 @@ defmodule CaptainFact.Router do
     admin_routes()
   end
 
+  # API
+
   scope "/api", CaptainFact do
     pipe_through [:api, :api_auth]
 
+    # Authentication
     scope "/auth" do
       get "/me", AuthController, :me
       get "/:provider", AuthController, :request
@@ -55,11 +60,13 @@ defmodule CaptainFact.Router do
       delete "/signout", AuthController, :delete
     end
 
+    # Users
     post "/users", UserController, :create
     put "/users/:user_id", UserController, :update
     get "/users/:username", UserController, :show
     get "/users/:user_id/videos", VideoController, :index
 
+    # Videos
     get "/videos", VideoController, :index
     post "/videos", VideoController, :get_or_create
 
@@ -67,4 +74,11 @@ defmodule CaptainFact.Router do
     post "/newsletter/subscribe", UserController, :newsletter_subscribe
   end
 
+  scope "/extension_api", CaptainFact do
+    pipe_through [:api, :api_auth]
+
+    # Statements
+    get "/videos/:video_id/statements", StatementsController, :get
+    post "/search/video", VideoController, :search
+  end
 end

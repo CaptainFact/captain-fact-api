@@ -41,15 +41,23 @@ defmodule CaptainFact.VideoController do
     end
   end
 
-  def video_title(conn, %{"video_uri" => video_uri}) do
-    case fetch_video_title(video_uri) do
-      {:ok, title} -> json(conn, %{title: title})
-      {:error, message} ->
-        conn
-        |> put_status(404)
-        |> json(%{error: message})
+  def search(conn, %{"url" => url}) do
+    video_url = Video.format_url(url)
+    case Repo.get_by(Video.with_speakers(Video), url: video_url) do
+      nil -> send_resp(conn, 200, "{}")
+      video -> render(conn, "show.json", video: video)
     end
   end
+
+#  defp video_title(conn, %{"video_uri" => video_uri}) do
+#    case fetch_video_title(video_uri) do
+#      {:ok, title} -> json(conn, %{title: title})
+#      {:error, message} ->
+#        conn
+#        |> put_status(404)
+#        |> json(%{error: message})
+#    end
+#  end
 
   defp fetch_video_title(url) do
     if Regex.match?(~r/(?:youtube\.com\/\S*(?:(?:\/e(?:mbed))?\/|watch\/?\?(?:\S*?&?v\=))|youtu\.be\/)([a-zA-Z0-9_-]{6,11})/, url) do

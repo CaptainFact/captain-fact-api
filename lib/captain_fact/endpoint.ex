@@ -11,16 +11,7 @@ defmodule CaptainFact.Endpoint do
     at: "/", from: :captain_fact, gzip: false,
     only: ~w(css fonts images js favicon.ico robots.txt)
 
-  plug Plug.Static,
-    at: "/resources", from: "./resources", gzip: false
-
-  # Code reloading can be explicitly enabled under the
-  # :code_reloader configuration of your endpoint.
-  if code_reloading? do
-    socket "/phoenix/live_reload/socket", Phoenix.LiveReloader.Socket
-    plug Phoenix.LiveReloader
-    plug Phoenix.CodeReloader
-  end
+  plug Plug.Static, at: "/resources", from: "./resources", gzip: false
 
   plug Plug.RequestId
   plug Plug.Logger
@@ -41,6 +32,6 @@ defmodule CaptainFact.Endpoint do
     key: "_captain_fact_key",
     signing_salt: "M8OYuALs"
 
-  plug Corsica, allow_headers: ~w(Accept Content-Type Authorization)
+  plug CaptainFact.CORS
   plug CaptainFact.Router
 end

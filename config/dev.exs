@@ -7,11 +7,17 @@ use Mix.Config
 # watchers to your application. For example, we use it
 # with brunch.io to recompile .js and .css sources.
 config :captain_fact, CaptainFact.Endpoint,
-  http: [port: 4000],
   debug_errors: false,
   code_reloader: true,
   check_origin: false,
-  watchers: []
+  watchers: [],
+  http: [port: 4000],
+  https: [
+    port: 4001,
+    otp_app: :captain_fact,
+    keyfile: "priv/keys/localhost.key",
+    certfile: "priv/keys/localhost.cert"
+  ]
 
 
 # Watch static and templates for browser reloading.
