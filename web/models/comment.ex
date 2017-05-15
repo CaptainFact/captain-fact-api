@@ -1,14 +1,49 @@
 defmodule CaptainFact.Comment do
   use CaptainFact.Web, :model
 
+  alias CaptainFact.{Source, User, Statement, Comment}
+
   schema "comments" do
     field :text, :string
     field :approve, :boolean
 
-    belongs_to :source, CaptainFact.Source
-    belongs_to :user, CaptainFact.User
-    belongs_to :statement, CaptainFact.Statement
+    field :score, :integer, virtual: true, default: 0
+
+    belongs_to :source, Source
+    belongs_to :user, User
+    belongs_to :statement, Statement
     timestamps()
+  end
+
+  def full(query, source_required \\ false) do
+    query
+    |> join(:inner, [c], s in assoc(c, :statement))
+    |> join(:inner, [c, _], u in assoc(c, :user))
+    |> with_source(source_required)
+    |> join(:left, [c, _, _, _], v in fragment("
+        SELECT sum(value) AS score, comment_id
+        FROM   votes
+        GROUP BY comment_id
+       "), v.comment_id == c.id)
+    |> select([c, s, u, source, v], %{
+        id: c.id,
+        approve: c.approve,
+        source: source,
+        statement_id: c.statement_id,
+        text: c.text,
+        inserted_at: c.inserted_at,
+        updated_at: c.updated_at,
+        score: v.score,
+        user: %{id: u.id, name: u.name, username: u.username}
+      })
+  end
+
+  def with_source(query, required = true) do
+    from c in query, join: source in Source, on: [id: c.source_id]
+  end
+
+  def with_source(query, required = false) do
+    from c in query, left_join: source in Source, on: [id: c.source_id]
   end
 
   @required_fields ~w(statement_id)a

@@ -9,30 +9,10 @@ defmodule CaptainFact.CommentsChannel do
     user = Guardian.Phoenix.Socket.current_resource(socket)
     video_id = VideoHashId.decode!(video_id_hash)
     socket = assign(socket, :video_id, video_id)
-    # TODO Move this query in Comment model multiple subqueries
     # Get comments
     query =
-      from c in Comment,
-      join: s in Statement, on: c.statement_id == s.id,
-      join: u in User, on: u.id == c.user_id,
-      left_join: source in Source, on: c.source_id == source.id,
-      left_join: v in fragment("
-        SELECT sum(value) AS score, comment_id
-        FROM   votes
-        GROUP BY comment_id
-      "), on: v.comment_id == c.id,
-      where: s.video_id == ^video_id,
-      select: %{
-        id: c.id,
-        approve: c.approve,
-        source: source,
-        statement_id: c.statement_id,
-        text: c.text,
-        inserted_at: c.inserted_at,
-        updated_at: c.updated_at,
-        score: v.score,
-        user: %{id: u.id, name: u.name, username: u.username}
-      }
+      Comment.full(Comment)
+      |> where([c, s], s.video_id == ^video_id)
     rendered_comments = CommentView.render("index.json", comments: Repo.all(query))
 
     # Get user votes
@@ -45,8 +25,8 @@ defmodule CaptainFact.CommentsChannel do
     else
       []
     end
-    rendered_votes = VoteView.render("my_votes.json", votes: user_votes)
 
+    rendered_votes = VoteView.render("my_votes.json", votes: user_votes)
     {:ok, %{comments: rendered_comments, my_votes: rendered_votes}, socket}
   end
 

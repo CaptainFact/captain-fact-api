@@ -78,7 +78,7 @@ defmodule CaptainFact.Router do
     pipe_through [:api, :api_auth]
 
     # Statements
-    get "/videos/:video_id/statements", StatementsController, :get
+    get "/videos/:video_id/statements", StatementController, :get
     post "/search/video", VideoController, :search
   end
 end

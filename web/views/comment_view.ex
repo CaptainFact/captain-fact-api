@@ -12,6 +12,11 @@ defmodule CaptainFact.CommentView do
   end
 
   def render("comment.json", %{comment: comment}) do
+    user = if Ecto.assoc_loaded?(comment.user) do
+      UserView.render("show_public.json", %{user: comment.user})
+    else
+      nil
+    end
     %{
       id: comment.id,
       user: UserView.render("show_public.json", %{user: comment.user}),
@@ -19,7 +24,7 @@ defmodule CaptainFact.CommentView do
       text: comment.text,
       approve: comment.approve,
       inserted_at: comment.inserted_at,
-      score: comment.score || 0,
+      score: comment.score,
       source: render_source(comment.source)
     }
   end

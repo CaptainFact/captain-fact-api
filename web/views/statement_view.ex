@@ -5,6 +5,10 @@ defmodule CaptainFact.StatementView do
     render_many(statements, CaptainFact.StatementView, "statement.json")
   end
 
+  def render("index_full.json", %{statements: statements}) do
+    render_many(statements, CaptainFact.StatementView, "statement_full.json")
+  end
+
   def render("show.json", %{statement: statement}) do
     render_one(statement, CaptainFact.StatementView, "statement.json")
   end
@@ -15,6 +19,16 @@ defmodule CaptainFact.StatementView do
       text: statement.text,
       time: statement.time,
       speaker_id: statement.speaker_id
+    }
+  end
+
+  def render("statement_full.json", %{statement: statement}) do
+    %{
+      id: statement.id,
+      text: statement.text,
+      time: statement.time,
+      speaker: render_one(statement.speaker, CaptainFact.SpeakerView, "speaker.json"),
+      comments: render_many(statement.comments, CaptainFact.CommentView, "comment.json")
     }
   end
 end
