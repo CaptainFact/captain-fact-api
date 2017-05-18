@@ -7,6 +7,8 @@ defmodule CaptainFact.Repo.Migrations.CreateSpeaker do
       add :title, :string
       add :is_user_defined, :boolean, null: false
       add :picture, :string
+      add :wiki_url, :string
+      add :country, :string
       add :is_removed, :boolean, null: false, default: false
 
       timestamps()

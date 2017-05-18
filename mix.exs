@@ -52,13 +52,14 @@ defmodule CaptainFact.Mixfile do
       {:guardian, "~> 0.10"},
       {:ecto_enum, "~> 1.0"},
       {:ex_admin, github: "smpallen99/ex_admin"},
-      {:arc, "~> 0.7.0"},
-      {:arc_ecto, "~> 0.6.0"},
+      {:arc, "~> 0.8.0"},
+      {:arc_ecto, "~> 0.7.0"},
       {:floki, "~> 0.17.0"},
       {:hashids, "~> 2.0"},
       {:html_entities, "~> 0.3"},
-      {:httpoison, "~> 0.11.1"},
+      {:httpoison, "~> 0.11.2"},
       {:poison, "~> 2.2.0"},
+      {:csv, "~> 1.4.4"},
       {:faker, "~> 0.7", only: :test}
    ]
   end

@@ -5,6 +5,8 @@ defmodule CaptainFact.Speaker do
   schema "speakers" do
     field :full_name, :string
     field :title, :string
+    field :country, :string
+    field :wiki_url, :string
     field :is_user_defined, :boolean, default: true
     field :picture, CaptainFact.SpeakerPicture.Type
     field :is_removed, :boolean, default: false
@@ -15,7 +17,7 @@ defmodule CaptainFact.Speaker do
   end
 
   @required_fields ~w(full_name)
-  @optional_fields ~w(title)
+  @optional_fields ~w(title wiki_url country)
   @optional_file_fields ~w(picture)
 
   @doc """
