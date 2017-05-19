@@ -3,7 +3,7 @@ alias CaptainFact.User
 
 admin = User.changeset(%User{}, %{
   username: "Betree",
-  email: "admin@captainfact.com",
+  email: "admin@captainfact.io",
   password: "password"
 })
 

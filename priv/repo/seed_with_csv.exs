@@ -2,7 +2,6 @@ defmodule SeedWithCSV do
   def seed(filename, columns_mapping, insert_func) do
     File.stream!(filename)
     |> CSV.decode(headers: true)
-    |> Enum.take(10) #TODO For debug only
     |> Enum.map(&Task.async(fn -> build_and_insert(&1, columns_mapping, insert_func) end))
     |> Enum.map(&Task.await(&1, 30000))
   end
