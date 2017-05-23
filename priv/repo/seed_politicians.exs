@@ -8,7 +8,6 @@ alias CaptainFact.SpeakerPicture
 
 defmodule SeedPoliticians do
   @columns_mapping %{
-    "politicianDescription" => :title,
     "image" => :picture,
     "politicianLabel" => :full_name,
     "politician" => :wiki_url
@@ -36,7 +35,9 @@ defmodule SeedPoliticians do
       |> Map.delete(:picture)
       |> Map.put(:title, format_title(changes.title))
 
-    changeset = Speaker.changeset(%Speaker{is_user_defined: false, country: "FR"}, changes)
+    changeset =
+      %Speaker{is_user_defined: false, country: "FR", title: "French Politician"}
+      |> Speaker.changeset(changes)
     if !changeset.valid? do
       IO.puts(:stderr, "Cannot add speaker #{changes.full_name}: #{inspect(changeset.errors)}")
       nil
