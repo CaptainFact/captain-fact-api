@@ -29,6 +29,7 @@ defmodule CaptainFact.ErrorView do
   end
 
   def render("error.json", %{message: message}) do
+    if Mix.env == :dev, do: IO.inspect(message)
     %{
       errors: [message]
     }
