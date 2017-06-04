@@ -54,7 +54,7 @@ defmodule CaptainFact.StatementsChannel do
 
   def handle_in_authentified("update_statement", params = %{"id" => id}, socket) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
-    statement = Repo.get!(Statement, id)
+    statement = Repo.get_by!(Statement, id: id, is_removed: false)
     changeset = Statement.changeset(statement, params)
     case changeset.changes do
       changes when changes === %{} -> {:reply, :ok, socket}

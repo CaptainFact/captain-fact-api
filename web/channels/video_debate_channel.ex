@@ -83,7 +83,7 @@ defmodule CaptainFact.VideoDebateChannel do
   end
 
   def handle_in_authentified("update_speaker", params, socket) do
-    speaker = Repo.get!(Speaker, params["id"])
+    speaker = Repo.get_by!(Speaker, id: params["id"], is_removed: false)
     if !speaker.is_user_defined do
       {:reply, {:error, %{speaker: "Forbidden"}}, socket}
     else
@@ -109,7 +109,7 @@ defmodule CaptainFact.VideoDebateChannel do
   end
 
   def handle_in_authentified("remove_speaker", %{"id" => id}, socket) do
-    speaker = Repo.get(Speaker, id)
+    speaker = Repo.get_by!(Speaker, id: id, is_removed: false)
     do_remove_speaker(socket, speaker)
     broadcast!(socket, "speaker_removed", %{id: id})
     {:reply, :ok, socket}
