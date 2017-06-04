@@ -4,8 +4,8 @@ defmodule CaptainFact.UserTest do
   alias CaptainFact.User
 
   @valid_attrs %{
-    name: "#{Faker.Name.first_name}",
-    username: Faker.Internet.user_name,
+    name: "Jouje BigBrother",
+    username: "Hell0World 🌳",
     email: Faker.Internet.email,
     password: "@StrongP4ssword!"
   }
@@ -60,5 +60,13 @@ defmodule CaptainFact.UserTest do
     provider = Enum.random(ForbiddenEmailProviders.get_temporary_providers)
     attrs = %{email: "#{Faker.Internet.user_name}@#{provider}"}
     assert {:email, "this email provider is forbidden"} in errors_on(%User{}, attrs)
+  end
+
+  test "username should not contains forbidden passwords" do
+    changeset = User.registration_changeset(%User{}, %{@valid_attrs | username: "toto-Admin"})
+    refute changeset.valid?
+
+    changeset = User.registration_changeset(%User{}, %{@valid_attrs | username: "toCaptainFactto"})
+    refute changeset.valid?
   end
 end

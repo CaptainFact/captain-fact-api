@@ -44,11 +44,12 @@ defmodule CaptainFact.User do
     model
     |> cast(params, @required_fields ++ @optional_fields)
     |> validate_required(@required_fields)
-    |> validate_email()
     |> unique_constraint(:email)
+    |> unique_constraint(:username)
     |> validate_length(:username, min: 5, max: 15)
     |> validate_length(:name, min: 2, max: 20)
-    |> unique_constraint(:username)
+    |> validate_email()
+    |> validate_username()
   end
 
   defp put_encrypted_pw(changeset) do
@@ -71,4 +72,16 @@ defmodule CaptainFact.User do
     end
   end
   defp validate_email(changeset), do: changeset
+
+  @forbidden_username_keywords ~w(
+    captainfact admin
+  )
+  defp validate_username(%{changes: %{username: username}} = changeset) do
+    lower_username = String.downcase(username)
+    case Enum.find(@forbidden_username_keywords, &String.contains?(lower_username, &1)) do
+      nil -> changeset
+      keyword -> add_error(changeset, :username, "contains a foridden keyword #{keyword}")
+    end
+  end
+  defp validate_username(changeset), do: changeset
 end
