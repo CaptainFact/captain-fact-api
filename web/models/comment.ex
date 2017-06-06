@@ -34,7 +34,12 @@ defmodule CaptainFact.Comment do
         inserted_at: c.inserted_at,
         updated_at: c.updated_at,
         score: v.score,
-        user: %{id: u.id, name: u.name, username: u.username}
+        user: %{
+          id: u.id,
+          name: u.name,
+          username: u.username,
+          reputation: u.reputation
+        }
       })
   end
 

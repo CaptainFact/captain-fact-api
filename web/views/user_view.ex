@@ -23,7 +23,8 @@ defmodule CaptainFact.UserView do
     %{
       id: user.id,
       name: user.name,
-      username: user.username
+      username: user.username,
+      reputation: user.reputation
     }
   end
 
@@ -32,15 +33,18 @@ defmodule CaptainFact.UserView do
       id: user.id,
       email: user.email,
       name: user.name,
-      username: user.username
+      username: user.username,
+      reputation: user.reputation
     }
   end
 
   def render("user_token.json", %{user: user, token: token}) do
-    %{id: user.id,
+    %{
+      id: user.id,
       email: user.email,
       name: user.name,
       username: user.username,
+      reputation: user.reputation,
       token: token
     }
   end

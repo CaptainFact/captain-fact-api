@@ -27,6 +27,38 @@ defmodule CaptainFact.Vote do
     where: s.video_id == ^video_id
   end
 
+  @doc """
+  Get an atom describing the vote
+  ## Examples
+      iex> CaptainFact.Vote.get_vote_type(%{source: nil}, nil, 0)
+      nil
+      iex> CaptainFact.Vote.get_vote_type(%{source: "source"}, 0, 0)
+      nil
+      iex> CaptainFact.Vote.get_vote_type(%{source: nil}, 0, 1)
+      :comment_vote_up
+      iex> CaptainFact.Vote.get_vote_type(%{source: "source"}, 1, 0)
+      :fact_vote_down
+      iex> CaptainFact.Vote.get_vote_type(%{source: nil}, -1, 1)
+      :comment_vote_down_to_up
+      iex> CaptainFact.Vote.get_vote_type(%{source: "source"}, 1, -1)
+      :fact_vote_up_to_down
+  """
+  def get_vote_type(_, nil, 0), do: nil
+  def get_vote_type(_, base_value, base_value), do: nil
+  def get_vote_type(comment, base_value, value) do
+    (if comment.source, do: "fact_vote_", else: "comment_vote_")
+    |> (&(&1 <> get_vote_direction(base_value, value))).()
+    |> String.to_atom()
+  end
+
+  def get_vote_direction(base_value, value)
+  when is_nil(base_value) or base_value == 0 or value == 0 do
+    if value > (base_value || 0), do: "up", else: "down"
+  end
+  def get_vote_direction(base_value, value) when base_value < value, do: "down_to_up"
+  def get_vote_direction(base_value, value) when base_value > value, do: "up_to_down"
+
+
   @required_fields ~w(value comment_id)a
 
   @doc """

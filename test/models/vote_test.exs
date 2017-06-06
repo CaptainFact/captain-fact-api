@@ -1,5 +1,6 @@
 defmodule CaptainFact.VoteTest do
   use CaptainFact.ModelCase, async: true
+  doctest CaptainFact.Vote
 
   alias CaptainFact.Vote
 

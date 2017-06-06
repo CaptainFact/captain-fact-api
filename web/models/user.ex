@@ -6,6 +6,7 @@ defmodule CaptainFact.User do
     field :username, :string
     field :email, :string
     field :encrypted_password, :string
+    field :reputation, :integer, null: false, default: 0
 
     field :password, :string, virtual: true
 
@@ -30,6 +31,11 @@ defmodule CaptainFact.User do
     |> common_changeset(params)
     |> validate_length(:password, min: 6, max: 256)
     |> put_encrypted_pw
+  end
+
+  def reputation_changeset(model, params) do
+    model
+    |> cast(params, [:reputation])
   end
 
   def registration_changeset(model, params \\ :empty) do
@@ -73,9 +79,7 @@ defmodule CaptainFact.User do
   end
   defp validate_email(changeset), do: changeset
 
-  @forbidden_username_keywords ~w(
-    captainfact admin
-  )
+  @forbidden_username_keywords ~w(captainfact admin)
   defp validate_username(%{changes: %{username: username}} = changeset) do
     lower_username = String.downcase(username)
     case Enum.find(@forbidden_username_keywords, &String.contains?(lower_username, &1)) do

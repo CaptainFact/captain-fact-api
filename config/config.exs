@@ -6,8 +6,7 @@
 use Mix.Config
 
 # General application configuration
-config :captain_fact,
-  ecto_repos: [CaptainFact.Repo]
+config :captain_fact, ecto_repos: [CaptainFact.Repo]
 
 # Configures the endpoint
 config :captain_fact, CaptainFact.Endpoint,
@@ -24,6 +23,7 @@ config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
+# Configure ueberauth
 config :ueberauth, Ueberauth,
 base_path: "/api/auth",
 providers: [
@@ -56,6 +56,13 @@ config :ex_admin,
 # Configure file upload
 config :arc,
   storage: Arc.Storage.Local
+
+# Configure scheduler
+config :quantum, :captain_fact,
+  cron: [
+    # Reset score limit counter every midnight
+    "@daily": fn -> CaptainFact.ReputationUpdater.reset() end
+  ]
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

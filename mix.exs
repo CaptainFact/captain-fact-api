@@ -22,9 +22,9 @@ defmodule CaptainFact.Mixfile do
       applications: [
         :phoenix, :phoenix_pubsub, :phoenix_html, :cowboy, :logger, :gettext,
         :phoenix_ecto, :postgrex, :comeonin, :ueberauth, :ueberauth_identity,
-        :arc_ecto, :httpoison
+        :arc_ecto, :httpoison, :quantum
       ],
-      registered: [CaptainFact.VoteDebouncer]
+      registered: [CaptainFact.VoteDebouncer, CaptainFact.ReputationUpdater]
     ]
   end
 
@@ -60,6 +60,7 @@ defmodule CaptainFact.Mixfile do
       {:httpoison, "~> 0.11.2"},
       {:poison, "~> 2.2.0"},
       {:csv, "~> 1.4.4"},
+      {:quantum, ">= 1.9.2"},
       {:faker, "~> 0.7", only: :test}
    ]
   end

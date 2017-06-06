@@ -73,6 +73,7 @@ defmodule CaptainFact.CommentsChannel do
 
   def handle_in_authentified("vote", params = %{"comment_id" => comment_id}, socket) do
     current_user = %User{id: socket.assigns.user_id}
+    comment = Repo.get!(Comment, comment_id)
     base_vote = case Repo.get_by(Vote, user_id: current_user.id, comment_id: comment_id) do
       nil -> build_assoc(current_user, :votes)
       vote -> vote
@@ -81,11 +82,17 @@ defmodule CaptainFact.CommentsChannel do
     case Repo.insert_or_update(changeset) do
       {:ok, vote} ->
         CaptainFact.VoteDebouncer.add_vote(socket.topic, vote.comment_id)
+        vote_type = Vote.get_vote_type(comment, base_vote.value, vote.value)
+        if vote_type != nil && comment.user_id != current_user.id do
+          CaptainFact.ReputationUpdater.register_change(%User{id: comment.user_id}, vote_type)
+        end
         {:reply, :ok, socket}
       {:error, _} ->
         {:reply, :error, socket}
     end
   end
+
+  # Metadata fetching
 
   defp fetch_source_metadata_and_update_comment(comment = %Comment{source: source = %{title: nil, url: url}}, topic) do
     case fetch_source_metadata(url) do

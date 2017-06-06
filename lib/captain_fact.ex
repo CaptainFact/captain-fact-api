@@ -12,8 +12,9 @@ defmodule CaptainFact do
       supervisor(CaptainFact.Repo, []),
       # Start the endpoint when the application starts
       supervisor(CaptainFact.Endpoint, []),
-      # Start your own worker by calling: CaptainFact.Worker.start_link(arg1, arg2, arg3)
-      # worker(CaptainFact.Worker, [arg1, arg2, arg3]),
+      # Custom shceduler
+      worker(CaptainFact.ReputationUpdater, []),
+      # Other custom workers
       worker(CaptainFact.VoteDebouncer, []),
       worker(CaptainFact.VideoHashId, [])
     ]
