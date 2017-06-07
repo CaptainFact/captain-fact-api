@@ -61,7 +61,7 @@ defmodule CaptainFact.VideoHashId do
   def decode!(hash) do
     case do_decode(hash) do
       {:ok, [id]} -> id
-      error -> raise InvalidVideoHashError
+      _error -> raise InvalidVideoHashError
     end
   end
 

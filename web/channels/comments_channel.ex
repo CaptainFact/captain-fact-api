@@ -1,32 +1,36 @@
 defmodule CaptainFact.CommentsChannel do
   use CaptainFact.Web, :channel
 
-  alias CaptainFact.{ Comment, CommentView, User, Statement, Vote, VoteView }
-  alias CaptainFact.{ VideoHashId, Source }
+  alias CaptainFact.{ Comment, CommentView, User, Vote, VoteView }
+  alias CaptainFact.{ VideoHashId, Source, UserPermissions }
 
 
   def join("comments:video:" <> video_id_hash, _payload, socket) do
     user = Guardian.Phoenix.Socket.current_resource(socket)
     video_id = VideoHashId.decode!(video_id_hash)
-    socket = assign(socket, :video_id, video_id)
+
     # Get comments
-    query =
+    rendered_comments = CommentView.render("index.json", comments:
       Comment.full(Comment)
       |> where([c, s], s.video_id == ^video_id)
-    rendered_comments = CommentView.render("index.json", comments: Repo.all(query))
+      |> Repo.all()
+    )
 
     # Get user votes
-    user_votes = if user != nil do
-      Vote
-      |> Vote.user_votes(user)
-      |> Vote.video_votes(%{id: video_id})
-      |> select([:comment_id, :value])
-      |> Repo.all()
-    else
-      []
-    end
+    rendered_votes =
+      if user == nil do
+        []
+      else
+        VoteView.render("my_votes.json", votes:
+          Vote
+          |> Vote.user_votes(user)
+          |> Vote.video_votes(%{id: video_id})
+          |> select([:comment_id, :value])
+          |> Repo.all()
+        )
+      end
 
-    rendered_votes = VoteView.render("my_votes.json", votes: user_votes)
+    socket = assign(socket, :video_id, video_id)
     {:ok, %{comments: rendered_comments, my_votes: rendered_votes}, socket}
   end
 
@@ -72,24 +76,23 @@ defmodule CaptainFact.CommentsChannel do
   end
 
   def handle_in_authentified("vote", params = %{"comment_id" => comment_id}, socket) do
-    current_user = %User{id: socket.assigns.user_id}
-    comment = Repo.get!(Comment, comment_id)
-    base_vote = case Repo.get_by(Vote, user_id: current_user.id, comment_id: comment_id) do
-      nil -> build_assoc(current_user, :votes)
-      vote -> vote
+    action = if (params["value"] || Map.get(params, :value)) >= 0, do: :vote_up, else: :vote_down
+    comment =
+      Comment.with_source(Comment, false)
+      |> where(id: ^comment_id)
+      |> select([:user_id])
+      |> Repo.one!()
+    {base_vote, new_vote} = UserPermissions.lock!(socket.assigns.user_id, action, fn user ->
+      base_vote = Repo.get_by(Vote, user_id: user.id, comment_id: comment_id) || %Vote{user_id: user.id}
+      new_vote = Repo.insert_or_update!(Vote.changeset(base_vote, params))
+      {base_vote, new_vote}
+    end)
+    CaptainFact.VoteDebouncer.add_vote(socket.topic, new_vote.comment_id)
+    vote_type = Vote.get_vote_type(comment, base_vote.value, new_vote.value)
+    if vote_type != nil && comment.user_id != socket.assigns.user_id do
+     CaptainFact.ReputationUpdater.register_change(%User{id: comment.user_id}, vote_type)
     end
-    changeset = Vote.changeset(base_vote, params)
-    case Repo.insert_or_update(changeset) do
-      {:ok, vote} ->
-        CaptainFact.VoteDebouncer.add_vote(socket.topic, vote.comment_id)
-        vote_type = Vote.get_vote_type(comment, base_vote.value, vote.value)
-        if vote_type != nil && comment.user_id != current_user.id do
-          CaptainFact.ReputationUpdater.register_change(%User{id: comment.user_id}, vote_type)
-        end
-        {:reply, :ok, socket}
-      {:error, _} ->
-        {:reply, :error, socket}
-    end
+    {:reply, :ok, socket}
   end
 
   # Metadata fetching
@@ -117,7 +120,8 @@ defmodule CaptainFact.CommentsChannel do
     case HTTPoison.get(url, [], [follow_redirect: true, max_redirect: 5]) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         tree = Floki.parse(body)
-        source_params = %{
+        source_params =
+          %{
             title: Floki.attribute(tree, "meta[property='og:title']", "content"),
             language: Floki.attribute(tree, "html", "lang"),
             site_name: Floki.attribute(tree, "meta[property='og:site_name']", "content"),
@@ -129,11 +133,11 @@ defmodule CaptainFact.CommentsChannel do
             if key in [:title, :site_name],
               do: {key, HtmlEntities.decode(value)},
               else: entry
-          end)
+            end)
           |> Enum.into(%{})
         {:ok, source_params}
       {:ok, %HTTPoison.Response{status_code: 404}} ->
-        {:error, "Not found :("}
+        {:error, "Not found"}
       {:error, %HTTPoison.Error{reason: reason}} ->
         {:error, reason}
       end

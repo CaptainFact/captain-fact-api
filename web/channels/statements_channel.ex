@@ -58,7 +58,7 @@ defmodule CaptainFact.StatementsChannel do
     changeset = Statement.changeset(statement, params)
     case changeset.changes do
       changes when changes === %{} -> {:reply, :ok, socket}
-      changes ->
+      _ ->
         action_update = action_update(user_id, video_id, changeset)
         Multi.new
         |> Multi.update(:statement, changeset)

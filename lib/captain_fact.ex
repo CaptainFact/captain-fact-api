@@ -12,9 +12,9 @@ defmodule CaptainFact do
       supervisor(CaptainFact.Repo, []),
       # Start the endpoint when the application starts
       supervisor(CaptainFact.Endpoint, []),
-      # Custom shceduler
-      worker(CaptainFact.ReputationUpdater, []),
       # Other custom workers
+      worker(CaptainFact.ReputationUpdater, []),
+      worker(CaptainFact.UserPermissions, []),
       worker(CaptainFact.VoteDebouncer, []),
       worker(CaptainFact.VideoHashId, [])
     ]

@@ -24,7 +24,11 @@ defmodule CaptainFact.Mixfile do
         :phoenix_ecto, :postgrex, :comeonin, :ueberauth, :ueberauth_identity,
         :arc_ecto, :httpoison, :quantum
       ],
-      registered: [CaptainFact.VoteDebouncer, CaptainFact.ReputationUpdater]
+      registered: [
+        CaptainFact.VoteDebouncer,
+        CaptainFact.ReputationUpdater,
+        CaptainFact.UserPermissions
+      ]
     ]
   end
 

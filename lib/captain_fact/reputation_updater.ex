@@ -1,7 +1,8 @@
 defmodule CaptainFact.ReputationUpdater do
   @moduledoc """
   Updates a user reputation asynchronously, verifying at the same time that the maximum reputation
-  gain per day quota is respected
+  gain per day quota is respected.
+  State is a map like : `%{user_id: today_reputation_gain}`
   """
 
   require Logger
@@ -28,20 +29,20 @@ defmodule CaptainFact.ReputationUpdater do
 
   # --- API ---
 
-  @doc """
-  (!) ⚡ Should **never** be called directly
-  This method in only intended to be called by a scheduler to run 1 time a day
-  """
-  def reset() do
-    Agent.update(@name, &do_reset(&1))
-  end
-
   def register_change(user = %User{}, action) when is_atom(action) do
     Agent.update(@name, &do_add_action(&1, user.id, action))
   end
 
+  @doc """
+  (!) ⚡ Should **never** be called directly
+  This method in only intended to be called by a scheduler to run 1 time a day
+  """
+  def reset_limitations() do
+    Agent.update(@name, &do_reset_limitations(&1))
+  end
+
   # --- Methods ---
-  defp do_reset(_state) do
+  defp do_reset_limitations(_state) do
     Logger.info("[ReputationUpdater] Reset maximum reputation quota")
     %{}
   end
@@ -62,13 +63,13 @@ defmodule CaptainFact.ReputationUpdater do
             true -> @max_daily_reputation_gain - today_gain
           end
           Logger.debug("[ReputationUpdater] User #{user_id} gain #{action_gain} reputation")
-          {:ok, _} = do_update_reputation(user_id, action_gain)
+          {:ok, _} = update_reputation(user_id, action_gain)
           Map.update(state, user_id, 0, &(&1 + action_gain))
       end
     end
   end
 
-  defp do_update_reputation(user_id, reputation_change) do
+  defp update_reputation(user_id, reputation_change) do
     Repo.transaction(fn ->
       user =
         User

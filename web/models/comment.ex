@@ -1,7 +1,7 @@
 defmodule CaptainFact.Comment do
   use CaptainFact.Web, :model
 
-  alias CaptainFact.{Source, User, Statement, Comment}
+  alias CaptainFact.{Source, User, Statement}
 
   schema "comments" do
     field :text, :string
@@ -43,11 +43,11 @@ defmodule CaptainFact.Comment do
       })
   end
 
-  def with_source(query, required = true) do
+  def with_source(query, true) do
     from c in query, join: source in Source, on: [id: c.source_id]
   end
 
-  def with_source(query, required = false) do
+  def with_source(query, false) do
     from c in query, left_join: source in Source, on: [id: c.source_id]
   end
 

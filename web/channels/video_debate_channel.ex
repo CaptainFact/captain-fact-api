@@ -3,7 +3,7 @@ defmodule CaptainFact.VideoDebateChannel do
 
   alias Phoenix.View
   alias Ecto.Multi
-  alias CaptainFact.{ Statement, Video, VideoView, Speaker, SpeakerView}
+  alias CaptainFact.{ Video, VideoView, Speaker, SpeakerView}
   alias CaptainFact.{ VideoSpeaker, VideoHashId }
 
   import CaptainFact.VideoDebateActionCreator, only: [
@@ -91,7 +91,7 @@ defmodule CaptainFact.VideoDebateChannel do
       changeset = Speaker.changeset(speaker, params)
       case changeset.changes do
         changes when changes === %{} -> {:reply, :ok, socket}
-        changes ->
+        _ ->
           Multi.new
           |> Multi.update(:speaker, changeset)
           |> Multi.insert(:action_update, action_update(user_id, video_id, changeset))

@@ -19,7 +19,7 @@ defmodule CaptainFact.CommentView do
     end
     %{
       id: comment.id,
-      user: UserView.render("show_public.json", %{user: comment.user}),
+      user: user,
       statement_id: comment.statement_id,
       text: comment.text,
       approve: comment.approve,
