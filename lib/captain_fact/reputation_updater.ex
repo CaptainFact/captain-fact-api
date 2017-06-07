@@ -7,10 +7,10 @@ defmodule CaptainFact.ReputationUpdater do
 
   require Logger
   import Ecto.Query
-  alias CaptainFact.{ Repo, User }
+  alias CaptainFact.{ Repo, User, UserState }
 
-  @name __MODULE__
   @max_daily_reputation_gain 30
+  @user_state_key :today_reputation_gain
   @actions %{
     comment_vote_up: +2,
     comment_vote_down: -2,
@@ -22,54 +22,37 @@ defmodule CaptainFact.ReputationUpdater do
     fact_vote_up_to_down: -6
   }
 
-  def start_link() do
-    Logger.info("[ReputationUpdater] Reputation updater started")
-    Agent.start_link(fn -> %{} end, name: @name)
-  end
-
   # --- API ---
 
   def register_change(user = %User{}, action) when is_atom(action) do
-    Agent.update(@name, &do_add_action(&1, user.id, action))
-  end
-
-  @doc """
-  (!) ⚡ Should **never** be called directly
-  This method in only intended to be called by a scheduler to run 1 time a day
-  """
-  def reset_limitations() do
-    Agent.update(@name, &do_reset_limitations(&1))
-  end
-
-  # --- Methods ---
-  defp do_reset_limitations(_state) do
-    Logger.info("[ReputationUpdater] Reset maximum reputation quota")
-    %{}
-  end
-
-  defp do_add_action(state, user_id, action) do
-    today_gain = Map.get(state, user_id, 0)
-    if today_gain >= @max_daily_reputation_gain do
-      Logger.debug("[ReputationUpdater] User #{user_id} has already gained its max reputation for today")
-      state
+    action_reputation_change = Map.get(@actions, action)
+    if !action_reputation_change do
+      Logger.error("[ReputationUpdater] Unknow user #{user.id} action '#{action}'")
     else
-      case Map.get(@actions, action) do
-        nil ->
-          Logger.error("[ReputationUpdater] Unknow user_id action '#{action}'")
-          state
-        reputation_change ->
-          action_gain = cond do
-            today_gain + reputation_change < @max_daily_reputation_gain -> reputation_change
-            true -> @max_daily_reputation_gain - today_gain
-          end
-          Logger.debug("[ReputationUpdater] User #{user_id} gain #{action_gain} reputation")
-          {:ok, _} = update_reputation(user_id, action_gain)
-          Map.update(state, user_id, 0, &(&1 + action_gain))
-      end
+      real_change = UserState.get_and_update(user, @user_state_key, fn
+        today_gain when is_nil(today_gain) ->
+          {action_reputation_change, action_reputation_change}
+        today_gain when today_gain + action_reputation_change <= @max_daily_reputation_gain ->
+          {action_reputation_change, today_gain + action_reputation_change}
+        today_gain when today_gain >= @max_daily_reputation_gain ->
+          {0, @max_daily_reputation_gain}
+        today_gain ->
+          {@max_daily_reputation_gain - today_gain , @max_daily_reputation_gain}
+      end)
+      db_update_reputation(user.id, real_change)
     end
   end
 
-  defp update_reputation(user_id, reputation_change) do
+  def get_today_reputation_gain(user = %User{}) do
+    UserState.get(user, @user_state_key, 0)
+  end
+
+  def max_daily_reputation_gain(), do: @max_daily_reputation_gain
+  def actions(), do: @actions
+
+  # --- Methods ---
+  defp db_update_reputation(_user_id, 0), do: true
+  defp db_update_reputation(user_id, reputation_change) do
     Repo.transaction(fn ->
       user =
         User

@@ -1,11 +1,11 @@
 defmodule CaptainFact.UserPermissionsTest do
   use ExUnit.Case, async: true
-  alias CaptainFact.{UserPermissions, User}
+  alias CaptainFact.{UserPermissions, User, UserState}
   alias UserPermissions.PermissionsError
   doctest UserPermissions
 
   setup do
-    UserPermissions.reset_limitations()
+    UserState.reset()
     :ok
   end
 

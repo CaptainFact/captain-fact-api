@@ -90,7 +90,9 @@ defmodule CaptainFact.CommentsChannel do
     CaptainFact.VoteDebouncer.add_vote(socket.topic, new_vote.comment_id)
     vote_type = Vote.get_vote_type(comment, base_vote.value, new_vote.value)
     if vote_type != nil && comment.user_id != socket.assigns.user_id do
-     CaptainFact.ReputationUpdater.register_change(%User{id: comment.user_id}, vote_type)
+     Task.async(fn ->
+       CaptainFact.ReputationUpdater.register_change(%User{id: comment.user_id}, vote_type)
+     end)
     end
     {:reply, :ok, socket}
   end

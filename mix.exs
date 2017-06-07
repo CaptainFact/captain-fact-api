@@ -25,9 +25,8 @@ defmodule CaptainFact.Mixfile do
         :arc_ecto, :httpoison, :quantum
       ],
       registered: [
-        CaptainFact.VoteDebouncer,
-        CaptainFact.ReputationUpdater,
-        CaptainFact.UserPermissions
+        CaptainFact.UserState,
+        CaptainFact.VoteDebouncer
       ]
     ]
   end

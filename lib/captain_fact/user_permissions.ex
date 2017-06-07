@@ -12,13 +12,13 @@ defmodule CaptainFact.UserPermissions do
 
   require Logger
   import Ecto.Query
-  alias CaptainFact.{ Repo, User }
+  alias CaptainFact.{ Repo, User, UserState }
 
   defmodule PermissionsError do
     defexception message: "forbidden"
   end
 
-  @name __MODULE__
+  @user_state_key :actions_count
   @confirmed_user_threshold 50
   @min_reputations %{
     add_comment: -25,
@@ -63,20 +63,12 @@ defmodule CaptainFact.UserPermissions do
     restore_speaker:        {0, 2, @max_limit}
   }
 
-  def start_link() do
-    # TODO [Optimization] Start a link for each action to uses multiple processes
-    # Or for each user ?
-    Logger.info("[UserPermissions] User permissions / limitations watcher starting")
-    Agent.start_link(fn -> %{} end, name: @name)
-  end
-
   # --- API ---
 
   @doc """
   Get an atom describing the vote.
   ## Examples
       iex> alias CaptainFact.{ User, UserPermissions }
-      iex> UserPermissions.start_link
       iex> user = %User{id: 1, reputation: 42}
       iex> UserPermissions.check(user, :add_comment)
       :ok
@@ -89,9 +81,9 @@ defmodule CaptainFact.UserPermissions do
       {:error, "limit reached"}
   """
   def check(user = %User{}, action) when is_atom(action) do
-    Agent.get(@name, fn state ->
-      do_ensure_permissions(state, user, action)
-    end)
+    # TODO Get reputation in UserState and remove all calls to DB
+    UserState.get(user, @user_state_key, %{})
+    |> do_ensure_permissions(user, action)
   end
   def check!(user_id, action) when is_integer(user_id) and is_atom(action) do
      check(do_load_user!(user_id), action)
@@ -100,8 +92,11 @@ defmodule CaptainFact.UserPermissions do
   @doc """
   Doesn't verify user's limitation nor reputation, you need to check that by yourself
   """
-  def record_action(user = %User{}, action) when is_atom(action),
-  do: Agent.update(@name, &do_record_action(&1, user, action))
+  def record_action(user = %User{}, action) when is_atom(action) do
+    UserState.update(user, @user_state_key, %{action => 1}, fn user_state ->
+      Map.update(user_state, action, 1, &(&1 + 1))
+    end)
+  end
   def record_action(user_id, action) when is_integer(user_id),
   do: record_action(%User{id: user_id}, action)
 
@@ -113,12 +108,13 @@ defmodule CaptainFact.UserPermissions do
   If user is an integer, it will be loaded from DB
   """
   def lock!(user = %User{}, action, func) do
-    case Agent.get_and_update(@name, fn state ->
+    case UserState.get_and_update(user, @user_state_key, fn state ->
+      state = state || %{}
       case do_ensure_permissions(state, user, action) do
         :ok ->
           try do
             result = func.(user)
-            {{:ok, result}, do_record_action(state, user, action)}
+            {{:ok, result}, do_record_action(state, action)}
           rescue
             e -> {{:exception, e}, state}
           end
@@ -135,42 +131,29 @@ defmodule CaptainFact.UserPermissions do
   end
 
   def user_nb_action_occurences(user = %User{}, action) do
-    Agent.get(@name, &(get_in(&1, [user.id, action]) || 0))
+    UserState.get(user, @user_state_key, %{})
+    |> Map.get(action, 0)
   end
 
   def limitation(%User{reputation: reputation}, action),
   do: Map.get(@limitations, action) |> elem(do_get_limitation_index(reputation))
-
   def limitations(), do: @limitations
-
   def min_reputations(), do: @min_reputations
 
-  @doc """
-  (!) ⚡ Should **never** be called directly
-  This method in only intended to be called by a scheduler to run 1 time a day
-  """
-  def reset_limitations(), do: Agent.update(@name, &do_reset_limitations(&1))
-
-  # --- Methods ---
-  defp do_reset_limitations(_state) do
-    Logger.info("[UserPermissions] Reset today's quotas'")
-    %{}
-  end
+  # Methods
 
   defp do_ensure_permissions(state, user, action) do
     action_min_reputation = Map.get(@min_reputations, action)
     cond do
       action_min_reputation == nil -> {:error, "unknow action"}
       user.reputation < action_min_reputation -> {:error, "not enough reputation"}
-      (get_in(state, [user.id, action]) || 0) >= limitation(user, action) -> {:error, "limit reached"}
+      Map.get(state, action, 0) >= limitation(user, action) -> {:error, "limit reached"}
       true -> :ok
     end
   end
 
-  defp do_record_action(state, user, action) do
-    Map.update(state, user.id, %{action => 1}, fn user_actions ->
-      Map.update(user_actions, action, 0, &(&1 + 1))
-    end)
+  defp do_record_action(user_actions, action) do
+    Map.update(user_actions, action, 1, &(&1 + 1))
   end
 
   defp do_load_user!(user_id) do
