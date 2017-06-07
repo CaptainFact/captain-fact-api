@@ -5,7 +5,7 @@ defmodule CaptainFact.UserState do
   @name __MODULE__
 
   def start_link() do
-    Logger.info("[UserState] Starting")
+    Logger.info("[UserState] Start")
     Agent.start_link(fn -> %{} end, name: @name)
   end
 

@@ -19,48 +19,33 @@ defmodule CaptainFact.UserPermissions do
   end
 
   @user_state_key :actions_count
-  @confirmed_user_threshold 50
-  @min_reputations %{
-    add_comment: -25,
-    add_video: 15,
-    add_speaker: 15,
-    edit_speaker: 30,
-    add_statement: 15,
-    vote_up: 15,
-    approve_history_action: 30,
-    flag_comment: 40,
-    approve_history_action: 0,
-    flag_history_action: 40,
-    vote_down: 80,
-    edit_other_statement: 0,
-    remove_statement: 0,
-    restore_statement: 0,
-    remove_speaker: 0,
-    restore_speaker: 0
-  }
-  @max_limit 100 # A raisonnable limit that users should never exceed
+  @levels [-30, -5, 15, 30, 50, 100, 200, 500, 1000]
+  @reverse_levels Enum.reverse(@levels)
+  @nb_levels Enum.count(@levels)
   @limitations %{
-    # Should be formed as :
-    # limitation_key:       {negative_users_limit, new_users_limit, general_limit}
-    add_comment:            {3, 10, @max_limit},
-    add_video:              {0, 3, 10},
+    #                       Negative  |️ New user     | Confirmed user
+    # reputation            {-30 , -5 , 15 , 30 , 50 , 100 , 200 , 500 , 1000}
+    #-------------------------------------------------------------------------
+    edit_comment:           { 3  , 10 , 15 , 30 , 30 , 100 , 100 , 100 , 100 },
+    add_comment:            { 0  ,  3 , 10 , 20 , 30 , 200 , 200 , 200 , 200 },
+    add_video:              { 0  ,  1 ,  5 , 10 , 15 ,  30 ,  30 ,  30 ,  30 },
     # Vote
-    vote_up:                {0, 10, @max_limit},
-    vote_down:              {0, 10, @max_limit},
+    vote_up:                { 0  ,  0 , 20 , 30 , 45 , 300 , 500 , 500 , 500 },
+    vote_down:              { 0  ,  0 ,  0 ,  5 , 10 ,  20 ,  40 ,  80 , 150 },
     # Flag / Approve
-    approve_history_action: {0, 10, @max_limit},
-    flag_history_action:    {0, 5, @max_limit},
-    flag_comment:           {0, 1, @max_limit},
+    approve_history_action: { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 },
+    flag_history_action:    { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 },
+    flag_comment:           { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 },
     # Statements
-    add_statement:          {0, 10, @max_limit},
-    edit_other_statement:   {0, 3, @max_limit},
-    remove_statement:       {0, 1, @max_limit},
-    restore_statement:      {0, 2, @max_limit},
+    add_statement:          { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 },
+    edit_other_statement:   { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 },
+    remove_statement:       { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 },
+    restore_statement:      { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 },
     # Speakers
-    add_speaker:            {0, 10, 50},
-    remove_speaker:         {0, 0, @max_limit},
-    edit_speaker:           {0, 5, @max_limit},
-    restore_speaker:        {0, 2, @max_limit}
+    add_speaker:            { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 },
+    remove_speaker:         { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 },
+    edit_speaker:           { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 },
+    restore_speaker:        { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 }
   }
 
   # --- API ---
@@ -72,18 +57,22 @@ defmodule CaptainFact.UserPermissions do
       iex> user = %User{id: 1, reputation: 42}
       iex> UserPermissions.check(user, :add_comment)
       :ok
-      iex> UserPermissions.check(user, :eat_unicorn)
-      {:error, "unknow action"}
       iex> UserPermissions.check(%{user | reputation: -42}, :remove_statement)
       {:error, "not enough reputation"}
-      iex> for _ <- 0..5, do: UserPermissions.record_action(user, :flag_comment)
-      iex> UserPermissions.check(user, :flag_comment)
+      iex> for _ <- 0..50, do: UserPermissions.record_action(user, :add_comment)
+      iex> UserPermissions.check(user, :add_comment)
       {:error, "limit reached"}
   """
   def check(user = %User{}, action) when is_atom(action) do
-    # TODO Get reputation in UserState and remove all calls to DB
-    UserState.get(user, @user_state_key, %{})
-    |> do_ensure_permissions(user, action)
+    limit = limitation(user, action)
+    if (limit == 0) do
+      {:error, "not enough reputation"}
+    else
+      action_count = Map.get(UserState.get(user, @user_state_key, %{}), action, 0)
+      if action_count >= limitation(user, action),
+      do: {:error, "limit reached"},
+      else: :ok
+    end
   end
   def check!(user_id, action) when is_integer(user_id) and is_atom(action) do
      check(do_load_user!(user_id), action)
@@ -93,12 +82,10 @@ defmodule CaptainFact.UserPermissions do
   Doesn't verify user's limitation nor reputation, you need to check that by yourself
   """
   def record_action(user = %User{}, action) when is_atom(action) do
-    UserState.update(user, @user_state_key, %{action => 1}, fn user_state ->
-      Map.update(user_state, action, 1, &(&1 + 1))
-    end)
+    UserState.update(user, @user_state_key, %{action => 1}, &do_record_action(&1, action))
   end
   def record_action(user_id, action) when is_integer(user_id),
-  do: record_action(%User{id: user_id}, action)
+    do: record_action(%User{id: user_id}, action)
 
   @doc """
   The safe way to ensure limitations as state is locked during `func` execution.
@@ -107,18 +94,22 @@ defmodule CaptainFact.UserPermissions do
   Raises PermissionsError if user doesn't have the permission.
   If user is an integer, it will be loaded from DB
   """
-  def lock!(user = %User{}, action, func) do
+  def lock!(user = %User{}, action, func) when is_atom(action) do
+    limit = limitation(user, action)
+    if (limit == 0),
+      do: raise PermissionsError, message: "not enough reputation"
+
     case UserState.get_and_update(user, @user_state_key, fn state ->
       state = state || %{}
-      case do_ensure_permissions(state, user, action) do
-        :ok ->
-          try do
-            result = func.(user)
-            {{:ok, result}, do_record_action(state, action)}
-          rescue
-            e -> {{:exception, e}, state}
-          end
-        error -> {error, state}
+      if Map.get(state, action, 0) >= limitation(user, action) do
+        {{:error, "limit reached"}, state}
+      else
+        try do
+          result = func.(user)
+          {{:ok, result}, do_record_action(state, action)}
+        rescue
+          e -> {{:exception, e}, state}
+        end
       end
     end) do
       {:error, message} -> raise PermissionsError, message: message
@@ -126,35 +117,30 @@ defmodule CaptainFact.UserPermissions do
       {:ok, result} -> result
     end
   end
-  def lock!(user_id, action, func) when is_integer(user_id) and is_atom(action) do
-     lock!(do_load_user!(user_id), action, func)
-  end
+  def lock!(user_id, action, func) when is_integer(user_id) and is_atom(action),
+     do: lock!(do_load_user!(user_id), action, func)
 
   def user_nb_action_occurences(user = %User{}, action) do
     UserState.get(user, @user_state_key, %{})
     |> Map.get(action, 0)
   end
 
-  def limitation(%User{reputation: reputation}, action),
-  do: Map.get(@limitations, action) |> elem(do_get_limitation_index(reputation))
+  def limitation(user = %User{}, action) do
+    elem(Map.get(@limitations, action), level(user))
+  end
+
+  def level(%User{reputation: reputation}) do
+    (@nb_levels - 1) - (Enum.find_index(@reverse_levels, &(reputation >= &1)) || @nb_levels - 1)
+  end
+
+  # Static getters
   def limitations(), do: @limitations
-  def min_reputations(), do: @min_reputations
+  def nb_levels(), do: @nb_levels
 
   # Methods
 
-  defp do_ensure_permissions(state, user, action) do
-    action_min_reputation = Map.get(@min_reputations, action)
-    cond do
-      action_min_reputation == nil -> {:error, "unknow action"}
-      user.reputation < action_min_reputation -> {:error, "not enough reputation"}
-      Map.get(state, action, 0) >= limitation(user, action) -> {:error, "limit reached"}
-      true -> :ok
-    end
-  end
-
-  defp do_record_action(user_actions, action) do
-    Map.update(user_actions, action, 1, &(&1 + 1))
-  end
+  defp do_record_action(user_actions, action),
+    do: Map.update(user_actions, action, 1, &(&1 + 1))
 
   defp do_load_user!(user_id) do
     User
@@ -162,8 +148,4 @@ defmodule CaptainFact.UserPermissions do
     |> select([:id, :reputation])
     |> Repo.one!()
   end
-
-  defp do_get_limitation_index(reputation) when reputation > @confirmed_user_threshold, do: 2
-  defp do_get_limitation_index(reputation) when reputation >= 0, do: 1
-  defp do_get_limitation_index(_reputation), do: 0
 end

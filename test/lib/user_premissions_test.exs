@@ -16,14 +16,10 @@ defmodule CaptainFact.UserPermissionsTest do
     {:ok, [negative_user: negative_user, new_user: new_user, positive_user: positive_user]}
   end
 
-  test "@min_reputations and @limitations should have the same keys" do
-    limitations = Map.keys(UserPermissions.limitations)
-    min_reputations = Map.keys(UserPermissions.min_reputations)
-    limitations_uniq = limitations -- min_reputations
-    min_reputations_uniq = min_reputations -- limitations
-
-    assert limitations_uniq == [], "Unique in limitations: #{inspect(limitations_uniq)}"
-    assert min_reputations_uniq == [], "Unique in min_reputations: #{inspect(min_reputations_uniq)}"
+  test "for each limitation, we must define all levels" do
+    Enum.each(UserPermissions.limitations, fn {_, limitations_tuple} ->
+      assert limitations_tuple |> Tuple.to_list() |> Enum.count() == UserPermissions.nb_levels()
+    end)
   end
 
   test "lock! passes user to given func", context do
@@ -63,9 +59,6 @@ defmodule CaptainFact.UserPermissionsTest do
   end
 
   test "lock! ensures permissions are verified and raise exception otherwise", context do
-    assert_raise(PermissionsError, "unknow action", fn ->
-      UserPermissions.lock!(context[:negative_user], :ride_unicorn, fn _ -> 42 end)
-    end)
     assert_raise(PermissionsError, "not enough reputation", fn ->
       UserPermissions.lock!(context[:negative_user], :vote_down, fn _ -> 42 end)
     end)
