@@ -22,6 +22,7 @@ defmodule CaptainFact.UserPermissions do
   @levels [-30, -5, 15, 30, 50, 100, 200, 500, 1000]
   @reverse_levels Enum.reverse(@levels)
   @nb_levels Enum.count(@levels)
+  @lowest_acceptable_reputation List.first(@levels)
   @limitations %{
     #                       Negative  |️ New user     | Confirmed user
     # reputation            {-30 , -5 , 15 , 30 , 50 , 100 , 200 , 500 , 1000}
@@ -126,11 +127,16 @@ defmodule CaptainFact.UserPermissions do
   end
 
   def limitation(user = %User{}, action) do
-    elem(Map.get(@limitations, action), level(user))
+    case level(user) do
+      -1 -> 0 # Reputation under minimum user can't do anything
+      level -> elem(Map.get(@limitations, action), level)
+    end
   end
 
   def level(%User{reputation: reputation}) do
-    (@nb_levels - 1) - (Enum.find_index(@reverse_levels, &(reputation >= &1)) || @nb_levels - 1)
+    if reputation < @lowest_acceptable_reputation,
+      do: -1,
+      else: (@nb_levels - 1) - Enum.find_index(@reverse_levels, &(reputation >= &1))
   end
 
   # Static getters

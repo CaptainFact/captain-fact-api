@@ -9,30 +9,25 @@ defmodule CaptainFact.UserState do
     Agent.start_link(fn -> %{} end, name: @name)
   end
 
-  def get(user = %User{}, key, default \\ nil) when is_atom(key) do
-    Agent.get(user_agent(user), &Map.get(&1, key, default))
+  def get(user, key, default \\ nil) when is_atom(key) do
+    user
+    |> user_id()
+    |> user_agent()
+    |> Agent.get(&Map.get(&1, key, default))
   end
 
-  def update(user = %User{}, key, initial, func) when is_atom(key) and is_function(func) do
-    Agent.update(user_agent(user), &Map.update(&1, key, initial, func))
+  def update(user, key, initial, func) when is_atom(key) and is_function(func) do
+    user
+    |> user_id()
+    |> user_agent()
+    |> Agent.update(&Map.update(&1, key, initial, func))
   end
 
-  def get_and_update(user = %User{}, key, func) when is_atom(key) and is_function(func) do
-    Agent.get_and_update(user_agent(user), fn user_state ->
-      Map.get_and_update(user_state, key, func)
-    end)
-  end
-
-  def user_agent(user = %User{}) do
-    Agent.get_and_update(@name, fn state ->
-      case Map.get(state, user.id) do
-        nil ->
-          {:ok, pid} = Agent.start_link(fn -> %{} end) # Cannot fail (no timeout)
-          {pid, Map.put(state, user.id, pid)}
-        pid ->
-          {pid, state}
-      end
-    end)
+  def get_and_update(user, key, func) when is_atom(key) and is_function(func) do
+    user
+    |> user_id()
+    |> user_agent()
+    |> Agent.get_and_update(&Map.get_and_update(&1, key, func))
   end
 
   @doc """
@@ -42,9 +37,23 @@ defmodule CaptainFact.UserState do
   def reset() do
     Logger.info("[UserState] Reset all users states")
     Agent.update(@name, fn state ->
-      state
-      |> Enum.map(fn {_user_id, pid} -> Agent.stop(pid) end)
+      Enum.map(state, fn {_user_id, pid} -> Agent.stop(pid) end)
       %{}
     end)
   end
+
+  defp user_agent(user_id) do
+    Agent.get_and_update(@name, fn state ->
+      case Map.get(state, user_id) do
+        nil ->
+          {:ok, pid} = Agent.start_link(fn -> %{} end) # Cannot fail (no timeout)
+          {pid, Map.put(state, user_id, pid)}
+        pid ->
+          {pid, state}
+      end
+    end)
+  end
+
+  defp user_id(%User{id: id}), do: id
+  defp user_id(id) when is_integer(id), do: id
 end

@@ -10,10 +10,12 @@ defmodule CaptainFact.UserPermissionsTest do
   end
 
   setup_all do
+    banned_user = %User{id: 1, reputation: -4200}
     negative_user = %User{id: 1, reputation: -15}
     new_user = %User{id: 2, reputation: 42}
     positive_user = %User{id: 3, reputation: 80000}
-    {:ok, [negative_user: negative_user, new_user: new_user, positive_user: positive_user]}
+    {:ok, [negative_user: negative_user, new_user: new_user, positive_user: positive_user,
+           banned_user: banned_user]}
   end
 
   test "for each limitation, we must define all levels" do
@@ -88,5 +90,11 @@ defmodule CaptainFact.UserPermissionsTest do
     |> Enum.take(nb_threads)
     |> Enum.map(&Task.await/1)
     assert UserPermissions.user_nb_action_occurences(user, action) == max_occurences
+  end
+
+  test "users with too low reputation shouldn't be able to do anything", context do
+    Enum.each(UserPermissions.limitations, fn {action, _} ->
+      assert UserPermissions.check(context[:banned_user], action) == {:error, "not enough reputation"}
+    end)
   end
 end

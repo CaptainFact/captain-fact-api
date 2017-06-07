@@ -11,6 +11,8 @@ defmodule CaptainFact.UserTest do
   }
   @invalid_attrs %{}
 
+  def valid_attrs(), do: @valid_attrs
+
   test "registration changeset with valid attributes" do
     changeset = User.registration_changeset(%User{}, @valid_attrs)
     assert changeset.valid?
