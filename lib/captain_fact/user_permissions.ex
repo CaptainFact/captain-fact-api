@@ -15,7 +15,7 @@ defmodule CaptainFact.UserPermissions do
   alias CaptainFact.{ Repo, User, UserState }
 
   defmodule PermissionsError do
-    defexception message: "forbidden"
+    defexception message: "forbidden", plug_status: 403
   end
 
   @user_state_key :actions_count
@@ -24,35 +24,69 @@ defmodule CaptainFact.UserPermissions do
   @nb_levels Enum.count(@levels)
   @lowest_acceptable_reputation List.first(@levels)
   @limitations %{
-    #                       Negative  |️ New user     | Confirmed user
+    #                        /!\ |️ New user          | Confirmed user
     # reputation            {-30 , -5 , 15 , 30 , 50 , 100 , 200 , 500 , 1000}
     #-------------------------------------------------------------------------
-    edit_comment:           { 3  , 10 , 15 , 30 , 30 , 100 , 100 , 100 , 100 },
-    add_comment:            { 0  ,  3 , 10 , 20 , 30 , 200 , 200 , 200 , 200 },
     add_video:              { 0  ,  1 ,  5 , 10 , 15 ,  30 ,  30 ,  30 ,  30 },
+    edit_comment:           { 3  , 10 , 15 , 30 , 30 , 100 , 100 , 100 , 100 },
+    add_comment:            { 3  ,  5 , 10 , 20 , 30 , 200 , 200 , 200 , 200 },
     # Vote
-    vote_up:                { 0  ,  0 , 20 , 30 , 45 , 300 , 500 , 500 , 500 },
+    self_vote:              { 3  ,  5 , 15 , 30 , 50 , 250 , 250 , 250 , 250 },
+    vote_up:                { 0  ,  0 , 15 , 30 , 45 , 300 , 500 , 500 , 500 },
     vote_down:              { 0  ,  0 ,  0 ,  5 , 10 ,  20 ,  40 ,  80 , 150 },
     # Flag / Approve
     approve_history_action: { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 },
     flag_history_action:    { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 },
     flag_comment:           { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 },
     # Statements
-    add_statement:          { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 },
-    edit_other_statement:   { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 },
-    remove_statement:       { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 },
-    restore_statement:      { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 },
+    add_statement:          { 0  ,  2 ,  5 , 15 , 30 ,  50 , 100 , 100 , 100 },
+    edit_other_statement:   { 0  ,  0 ,  0 ,  3 ,  5 ,  50 , 100 , 100 , 100 },
+    remove_statement:       { 0  ,  0 ,  0 ,  3 ,  5 ,  10 ,  10 ,  10 ,  10 },
+    restore_statement:      { 0  ,  0 ,  0 ,  3 ,  5 ,  15 ,  15 ,  15 ,  15 },
     # Speakers
-    add_speaker:            { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 },
-    remove_speaker:         { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 },
-    edit_speaker:           { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 },
-    restore_speaker:        { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 }
+    add_speaker:            { 0  ,  0 ,  3 ,  5 , 10 ,  30 ,  50 , 100 , 100 },
+    remove_speaker:         { 0  ,  0 ,  3 ,  5 , 10 ,  30 ,  50 , 100 , 100 },
+    edit_speaker:           { 0  ,  0 ,  3 ,  5 , 10 ,  30 ,  50 , 100 , 100 },
+    restore_speaker:        { 0  ,  0 ,  0 ,  5 , 10 ,  30 ,  50 , 100 , 100 }
   }
 
   # --- API ---
 
   @doc """
-  Get an atom describing the vote.
+  The safe way to ensure limitations and record actions as state is locked during `func` execution.
+  Should be used to verify sensitive actions, but not for those where limitation is high / not
+  important because of perfomances impact.
+  Raises PermissionsError if user doesn't have the permission.
+  If user is an integer, it will be loaded from DB
+  """
+  def lock!(user = %User{}, action, func) when is_atom(action) do
+    limit = limitation(user, action)
+    if (limit == 0),
+      do: raise PermissionsError, message: "not enough reputation"
+
+    case UserState.get_and_update(user, @user_state_key, fn state ->
+      state = state || %{}
+      if Map.get(state, action, 0) >= limitation(user, action) do
+        {{:error, "limit reached"}, state}
+      else
+        try do
+          result = func.(user)
+          {{:ok, result}, do_record_action(state, action)}
+        rescue
+          e -> {{:exception, e}, state}
+        end
+      end
+    end) do
+      {:error, message} -> raise PermissionsError, message: message
+      {:exception, e} -> raise e
+      {:ok, result} -> result
+    end
+  end
+  def lock!(user_id, action, func) when is_integer(user_id) and is_atom(action),
+     do: lock!(do_load_user!(user_id), action, func)
+
+  @doc """
+  Check if user can execute action. Return :ok if yes, {:error, reason} otherwise
   ## Examples
       iex> alias CaptainFact.{ User, UserPermissions }
       iex> user = %User{id: 1, reputation: 42}
@@ -87,39 +121,6 @@ defmodule CaptainFact.UserPermissions do
   end
   def record_action(user_id, action) when is_integer(user_id),
     do: record_action(%User{id: user_id}, action)
-
-  @doc """
-  The safe way to ensure limitations as state is locked during `func` execution.
-  Should be used to verify sensitive actions, but not for those where limitation is high / not
-  important because of perfomances impact.
-  Raises PermissionsError if user doesn't have the permission.
-  If user is an integer, it will be loaded from DB
-  """
-  def lock!(user = %User{}, action, func) when is_atom(action) do
-    limit = limitation(user, action)
-    if (limit == 0),
-      do: raise PermissionsError, message: "not enough reputation"
-
-    case UserState.get_and_update(user, @user_state_key, fn state ->
-      state = state || %{}
-      if Map.get(state, action, 0) >= limitation(user, action) do
-        {{:error, "limit reached"}, state}
-      else
-        try do
-          result = func.(user)
-          {{:ok, result}, do_record_action(state, action)}
-        rescue
-          e -> {{:exception, e}, state}
-        end
-      end
-    end) do
-      {:error, message} -> raise PermissionsError, message: message
-      {:exception, e} -> raise e
-      {:ok, result} -> result
-    end
-  end
-  def lock!(user_id, action, func) when is_integer(user_id) and is_atom(action),
-     do: lock!(do_load_user!(user_id), action, func)
 
   def user_nb_action_occurences(user = %User{}, action) do
     UserState.get(user, @user_state_key, %{})

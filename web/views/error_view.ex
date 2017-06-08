@@ -13,6 +13,10 @@ defmodule CaptainFact.ErrorView do
     %{errors: [%{message: "You are not authorized to access this resource"}]}
   end
 
+  def render("403.json", _) do
+    %{errors: [%{message: "You are not authorized to access this resource"}]}
+  end
+
   def render("404.json", errors) do
     if Mix.env == :dev, do: IO.inspect(errors)
     %{errors: [%{message: "Not Found"}]}
