@@ -65,6 +65,7 @@ defmodule CaptainFact.Router do
     put "/users/:user_id", UserController, :update
     get "/users/:username", UserController, :show
     get "/users/:user_id/videos", VideoController, :index
+    get "/me/available_flags", UserController, :available_flags
 
     # Videos
     get "/videos", VideoController, :index
@@ -75,6 +76,7 @@ defmodule CaptainFact.Router do
   end
 
   scope "/extension_api", CaptainFact do
+    # TODO Move that to regular API
     pipe_through [:api, :api_auth]
 
     # Statements

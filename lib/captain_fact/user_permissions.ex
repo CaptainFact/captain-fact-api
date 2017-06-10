@@ -37,7 +37,7 @@ defmodule CaptainFact.UserPermissions do
     # Flag / Approve
     approve_history_action: { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 },
     flag_history_action:    { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 },
-    flag_comment:           { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 },
+    flag_comment:           { 0  ,  0 ,  0 ,  1 ,  3 ,   5 ,  10 ,  15 ,  30 },
     # Statements
     add_statement:          { 0  ,  2 ,  5 , 15 , 30 ,  50 , 100 , 100 , 100 },
     edit_other_statement:   { 0  ,  0 ,  0 ,  3 ,  5 ,  50 , 100 , 100 , 100 },
@@ -86,12 +86,12 @@ defmodule CaptainFact.UserPermissions do
      do: lock!(do_load_user!(user_id), action, func)
 
   @doc """
-  Check if user can execute action. Return :ok if yes, {:error, reason} otherwise
+  Check if user can execute action. Return {:ok, nb_available} if yes, {:error, reason} otherwise
   ## Examples
       iex> alias CaptainFact.{ User, UserPermissions }
       iex> user = %User{id: 1, reputation: 42}
       iex> UserPermissions.check(user, :add_comment)
-      :ok
+      {:ok, 20}
       iex> UserPermissions.check(%{user | reputation: -42}, :remove_statement)
       {:error, "not enough reputation"}
       iex> for _ <- 0..50, do: UserPermissions.record_action(user, :add_comment)
@@ -104,9 +104,10 @@ defmodule CaptainFact.UserPermissions do
       {:error, "not enough reputation"}
     else
       action_count = Map.get(UserState.get(user, @user_state_key, %{}), action, 0)
-      if action_count >= limitation(user, action),
+      limitation = limitation(user, action)
+      if action_count >= limitation,
       do: {:error, "limit reached"},
-      else: :ok
+      else: {:ok, limitation - action_count}
     end
   end
   def check!(user_id, action) when is_integer(user_id) and is_atom(action) do

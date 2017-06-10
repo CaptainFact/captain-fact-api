@@ -1,5 +1,7 @@
 defmodule CaptainFact.UserSocket do
   use Phoenix.Socket
+
+  require Logger
   import Guardian.Phoenix.Socket
 
   ## Channels
@@ -25,15 +27,24 @@ defmodule CaptainFact.UserSocket do
     end
   end
 
-  # Socket id's are topics that allow you to identify all sockets for a given user:
-  #
-  #     def id(socket), do: "users_socket:#{socket.assigns.user_id}"
-  #
-  # Would allow you to broadcast a "disconnect" event and terminate
-  # all active sockets and channels for a given user:
-  #
-  #     CaptainFact.Endpoint.broadcast("users_socket:#{user.id}", "disconnect", %{})
-  #
-  # Returning `nil` makes this socket anonymous.
+  def rescue_channel_errors(handler) when is_function(handler) do
+    fn command, params, socket ->
+      try do
+        handler.(command, params, socket)
+      rescue
+        # TODO unify errors with controllers
+        e in CaptainFact.UserPermissions.PermissionsError -> reply_error(socket, e.message)
+        _ in Ecto.NoResultsError -> reply_error(socket, "not found")
+        e ->
+          Logger.error("[RescueChannel] An unknown error just popped : #{inspect(e)}")
+          reply_error(socket, "unknown server error")
+      end
+    end
+  end
+
   def id(_socket), do: nil
+
+  defp reply_error(socket, message) do
+    {:reply, {:error, %{message: message}}, socket}
+  end
 end

@@ -1,6 +1,7 @@
 defmodule CaptainFact.CommentsChannel do
   use CaptainFact.Web, :channel
 
+  import CaptainFact.UserSocket, only: [rescue_channel_errors: 1]
   alias CaptainFact.{ Comment, CommentView, User, Vote, VoteView, VoteDebouncer }
   alias CaptainFact.{ VideoHashId, Source, UserPermissions, ReputationUpdater }
 
@@ -37,29 +38,25 @@ defmodule CaptainFact.CommentsChannel do
   def handle_in(command, params, socket) do
     case socket.assigns.user_id do
       nil -> {:reply, :error, socket}
-      _ -> handle_in_authentified(command, params, socket)
+      _ -> rescue_channel_errors(&handle_in_authentified/3).(command, params, socket)
     end
   end
 
   def handle_in_authentified("new_comment", params, socket) do
-    try do
-      user = Repo.get!(User, socket.assigns.user_id)
-      comment = UserPermissions.lock!(user, :add_comment, fn user ->
-        user
-        |> build_assoc(:comments)
-        |> Comment.changeset(params)
-        |> Repo.insert!()
-      end)
-      full_comment = comment |> Map.put(:user, user) |> Repo.preload(:source) |> Map.put(:score, 1)
-      broadcast!(socket, "comment_added", CommentView.render("comment.json", comment: full_comment))
-      handle_in_authentified("vote", %{"comment_id" => comment.id, "value" => "1"}, socket)
-      Task.async(fn() ->
-        fetch_source_metadata_and_update_comment(full_comment, socket.topic)
-      end)
-      {:reply, :ok, socket}
-    rescue
-      e in UserPermissions.PermissionsError -> {:reply, {:error, %{message: e.message}}, socket}
-    end
+    user = Repo.get!(User, socket.assigns.user_id)
+    comment = UserPermissions.lock!(user, :add_comment, fn user ->
+      user
+      |> build_assoc(:comments)
+      |> Comment.changeset(params)
+      |> Repo.insert!()
+    end)
+    full_comment = comment |> Map.put(:user, user) |> Repo.preload(:source) |> Map.put(:score, 1)
+    broadcast!(socket, "comment_added", CommentView.render("comment.json", comment: full_comment))
+    handle_in_authentified("vote", %{"comment_id" => comment.id, "value" => "1"}, socket)
+    Task.async(fn() ->
+      fetch_source_metadata_and_update_comment(full_comment, socket.topic)
+    end)
+    {:reply, :ok, socket}
   end
 
   def handle_in_authentified("delete_comment", %{"id" => id}, socket) do
@@ -84,25 +81,34 @@ defmodule CaptainFact.CommentsChannel do
       (params["value"] || Map.get(params, :value)) >= 0 -> :vote_up
       true -> :vote_down
     end
-    try do
-      {base_vote, new_vote} = UserPermissions.lock!(socket.assigns.user_id, action, fn user ->
-        base_vote = Repo.get_by(Vote, user_id: user.id, comment_id: comment_id) || %Vote{user_id: user.id}
-        new_vote = Repo.insert_or_update!(Vote.changeset(base_vote, params))
-        {base_vote, new_vote}
-      end)
-      VoteDebouncer.add_vote(socket.topic, new_vote.comment_id)
-      with action != :self_vote,
-           vote_type <- Vote.get_vote_type(comment, base_vote.value, new_vote.value) do
-        ReputationUpdater.register_action(socket.assigns.user_id, comment.user_id, vote_type)
-      end
-      {:reply, :ok, socket}
-    rescue
-      e in UserPermissions.PermissionsError -> {:reply, {:error, %{message: e.message}}, socket}
+    {base_vote, new_vote} = UserPermissions.lock!(socket.assigns.user_id, action, fn user ->
+      base_vote = Repo.get_by(Vote, user_id: user.id, comment_id: comment_id) || %Vote{user_id: user.id}
+      new_vote = Repo.insert_or_update!(Vote.changeset(base_vote, params))
+      {base_vote, new_vote}
+    end)
+    VoteDebouncer.add_vote(socket.topic, new_vote.comment_id)
+    with _ <- action != :self_vote,
+         vote_type <- Vote.get_vote_type(comment, base_vote.value, new_vote.value) do
+      ReputationUpdater.register_action(socket.assigns.user_id, comment.user_id, vote_type)
     end
+    {:reply, :ok, socket}
   end
 
-  defp do_vote() do
-
+  def handle_in_authentified("flag_comment", params = %{"comment_id" => comment_id}, socket) do
+    comment_owner_id =
+      Comment
+      |> where(id: ^comment_id)
+      |> select([:user_id])
+      |> Repo.one!()
+      |> Map.get(:user_id)
+    UserPermissions.lock!(socket.assigns.user_id, :flag_comment, fn user ->
+      # TODO Insert flag in DB
+      %Flag{type: :comment, entity_id: comment_id, user_source: user.id, user_target: comment_owner_id}
+      |> Flag.changeset()
+      |> Repo.insert()
+    end)
+    # TODO Check number of flags
+    {:reply, :ok, socket}
   end
 
   # Metadata fetching

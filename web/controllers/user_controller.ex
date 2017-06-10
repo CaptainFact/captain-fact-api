@@ -65,6 +65,16 @@ defmodule CaptainFact.UserController do
     end
   end
 
+  def available_flags(conn, _) do
+    current_user = Guardian.Plug.current_resource(conn)
+    case CaptainFact.UserPermissions.check(current_user, :flag_comment) do
+      {:ok, num_available} -> json(conn, %{flags_available: num_available})
+      {:error, _reason} ->
+        IO.inspect(_reason)
+        json(conn, %{flags_available: 0})
+    end
+  end
+
   def newsletter_subscribe(conn, %{"email" => email}) do
     case Regex.match?(~r/@/, email) do
       false -> render_invalid_email_error(conn)
