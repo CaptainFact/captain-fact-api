@@ -33,10 +33,10 @@ defmodule SeedPoliticians do
     changes =
       changes
       |> Map.delete(:picture)
-      |> Map.put(:title, format_title(changes.title))
+      |> Map.put(:title, "French Politician")
 
     changeset =
-      %Speaker{is_user_defined: false, country: "FR", title: "French Politician"}
+      %Speaker{is_user_defined: false, country: "FR"}
       |> Speaker.changeset(changes)
     if !changeset.valid? do
       IO.puts(:stderr, "Cannot add speaker #{changes.full_name}: #{inspect(changeset.errors)}")

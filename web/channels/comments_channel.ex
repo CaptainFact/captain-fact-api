@@ -3,7 +3,7 @@ defmodule CaptainFact.CommentsChannel do
 
   import CaptainFact.UserSocket, only: [rescue_channel_errors: 1]
   alias CaptainFact.{ Comment, CommentView, User, Vote, VoteView, VoteDebouncer }
-  alias CaptainFact.{ VideoHashId, Source, UserPermissions, ReputationUpdater }
+  alias CaptainFact.{ VideoHashId, Source, UserPermissions, ReputationUpdater, Flagger }
 
 
   def join("comments:video:" <> video_id_hash, _payload, socket) do
@@ -94,20 +94,13 @@ defmodule CaptainFact.CommentsChannel do
     {:reply, :ok, socket}
   end
 
-  def handle_in_authentified("flag_comment", params = %{"comment_id" => comment_id}, socket) do
-    comment_owner_id =
-      Comment
-      |> where(id: ^comment_id)
-      |> select([:user_id])
-      |> Repo.one!()
-      |> Map.get(:user_id)
-    UserPermissions.lock!(socket.assigns.user_id, :flag_comment, fn user ->
-      # TODO Insert flag in DB
-      %Flag{type: :comment, entity_id: comment_id, user_source: user.id, user_target: comment_owner_id}
-      |> Flag.changeset()
-      |> Repo.insert()
-    end)
-    # TODO Check number of flags
+  def handle_in_authentified("flag_comment", %{"id" => comment_id}, socket) do
+    Comment
+    |> select([:id, :user_id])
+    |> preload([:user])
+    |> where(id: ^comment_id)
+    |> Repo.one!()
+    |> Flagger.flag!(socket.assigns.user_id)
     {:reply, :ok, socket}
   end
 

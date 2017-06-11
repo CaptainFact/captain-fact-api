@@ -6,6 +6,7 @@ defmodule CaptainFact.Comment do
   schema "comments" do
     field :text, :string
     field :approve, :boolean
+    field :is_banned, :boolean, default: false
 
     field :score, :integer, virtual: true, default: 0
 

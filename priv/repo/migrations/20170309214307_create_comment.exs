@@ -9,11 +9,12 @@ defmodule CaptainFact.Repo.Migrations.CreateComment do
 
       add :text, :string
       add :approve, :boolean
+      add :is_banned, :boolean, null: false, default: false
 
       timestamps()
     end
     create index(:comments, [:user_id])
-    create index(:comments, [:statement_id])
+    create index(:comments, [:statement_id], where: "is_banned = false")
 
   end
 end
