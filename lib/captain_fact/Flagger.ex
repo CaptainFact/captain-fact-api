@@ -9,11 +9,10 @@ defmodule CaptainFact.Flagger do
   @doc """
   Record a new flag on `comment` requested by given user `user_id`
   """
-  def flag!(comment = %Comment{}, user_id) do
-    UserPermissions.lock!(user_id, :flag_comment, fn user ->
-      %Flag{}
-      |> Flag.changeset_comment(comment)
-      |> Ecto.Changeset.put_assoc(:source_user, user)
+  def flag!(comment = %Comment{}, reason, source_user_id) do
+    UserPermissions.lock!(source_user_id, :flag_comment, fn user ->
+      Ecto.build_assoc(user, :flags_posted)
+      |> Flag.changeset_comment(comment, %{reason: reason})
       |> Repo.insert!()
     end)
     Task.start(fn -> check_comment_flags(comment) end)

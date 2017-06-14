@@ -14,6 +14,9 @@ defmodule CaptainFact.User do
     has_many :votes, CaptainFact.Vote, on_delete: :delete_all
     has_many :video_debate_actions, CaptainFact.VideoDebateAction, on_delete: :nilify_all
 
+    has_many :flags_posted, CaptainFact.Flag, foreign_key: :source_user_id, on_delete: :nothing
+    has_many :flags_received, CaptainFact.Flag, foreign_key: :target_user_id, on_delete: :nothing
+
     timestamps()
   end
 

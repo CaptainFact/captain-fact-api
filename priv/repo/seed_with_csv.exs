@@ -1,9 +1,15 @@
 defmodule SeedWithCSV do
+  @nb_threads 2
+  @timeout 60000
+
   def seed(filename, columns_mapping, insert_func) do
     File.stream!(filename)
     |> CSV.decode(headers: true)
-    |> Enum.map(&Task.async(fn -> build_and_insert(&1, columns_mapping, insert_func) end))
-    |> Enum.map(&Task.await(&1, 30000))
+    |> Task.async_stream(
+        &build_and_insert(&1, columns_mapping, insert_func),
+        max_concurrency: @nb_threads, timeout: @timeout
+      )
+    |> Enum.to_list()
   end
 
   defp build_and_insert(entry, columns_mapping, insert_func) do

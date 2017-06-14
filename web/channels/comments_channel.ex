@@ -94,14 +94,23 @@ defmodule CaptainFact.CommentsChannel do
     {:reply, :ok, socket}
   end
 
-  def handle_in_authentified("flag_comment", %{"id" => comment_id}, socket) do
-    Comment
-    |> select([:id, :user_id])
-    |> preload([:user])
-    |> where(id: ^comment_id)
-    |> Repo.one!()
-    |> Flagger.flag!(socket.assigns.user_id)
-    {:reply, :ok, socket}
+  def handle_in_authentified("flag_comment", %{"id" => comment_id, "reason" => reason}, socket) do
+    try do
+      Comment
+      |> select([:id, :user_id])
+      |> preload([:user])
+      |> where(id: ^comment_id)
+      |> Repo.one!()
+      |> Flagger.flag!(reason, socket.assigns.user_id)
+      {:reply, :ok, socket}
+    rescue e in Ecto.ConstraintError ->
+      # TODO migrate to user_socket rescue_channel_errors with other constraints violations
+      if e.constraint == "flags_source_user_id_type_entity_id_index" do
+        {:reply, {:error, %{message: "action already done"}}, socket}
+      else
+        raise e
+      end
+    end
   end
 
   # Metadata fetching

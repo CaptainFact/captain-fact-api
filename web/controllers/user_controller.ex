@@ -70,7 +70,6 @@ defmodule CaptainFact.UserController do
     case CaptainFact.UserPermissions.check(current_user, :flag_comment) do
       {:ok, num_available} -> json(conn, %{flags_available: num_available})
       {:error, _reason} ->
-        IO.inspect(_reason)
         json(conn, %{flags_available: 0})
     end
   end

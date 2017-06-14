@@ -1,4 +1,5 @@
 Code.require_file("seed_with_csv.exs", __DIR__)
+require Logger
 require Arc.Ecto.Schema
 
 alias CaptainFact.Repo
@@ -7,6 +8,8 @@ alias CaptainFact.SpeakerPicture
 
 
 defmodule SeedPoliticians do
+  @activate_filter true
+  @filter ["sarkozy", "pen", "hamon", "mélenchon", "fillon", "poutou", "arthaud", "macron", "cheminade", "aignan", "lassalle", "asselineau"]
   @columns_mapping %{
     "image" => :picture,
     "politicianLabel" => :full_name,
@@ -30,24 +33,36 @@ defmodule SeedPoliticians do
   end
 
   defp seed_politician(changes) do
-    changes =
-      changes
-      |> Map.delete(:picture)
-      |> Map.put(:title, "French Politician")
+    if !@activate_filter || filter(changes) != false do
+      changes =
+        changes
+        |> Map.delete(:picture)
+        |> Map.put(:title, "French Politician")
 
-    changeset =
-      %Speaker{is_user_defined: false, country: "FR"}
-      |> Speaker.changeset(changes)
-    if !changeset.valid? do
-      IO.puts(:stderr, "Cannot add speaker #{changes.full_name}: #{inspect(changeset.errors)}")
-      nil
+      changeset =
+        %Speaker{is_user_defined: false, country: "FR"}
+        |> Speaker.changeset(changes)
+      if !changeset.valid? do
+        IO.puts(:stderr, "Cannot add speaker #{changes.full_name}: #{inspect(changeset.errors)}")
+        nil
+      else
+        Repo.insert!(changeset)
+      end
+    end
+  end
+
+  defp filter(changes) do
+    if !@activate_filter do
+      false
     else
-      Repo.insert!(changeset)
+      lower_name = String.downcase(changes.full_name)
+      Enum.any?(@filter, &String.contains?(lower_name, &1))
     end
   end
 
   defp fetch_picture(speaker, picture_url) do
     {:ok, picture} = SpeakerPicture.store({picture_url, speaker})
+    Logger.debug("Fetching picture for #{speaker.full_name} at #{picture_url}")
     speaker
     |> Ecto.Changeset.change(picture: %{file_name: picture, updated_at: Ecto.DateTime.utc})
     |> Repo.update!()
@@ -68,4 +83,4 @@ defmodule SeedPoliticians do
   end
 end
 
-SeedPoliticians.seed(false)
+SeedPoliticians.seed(true)
