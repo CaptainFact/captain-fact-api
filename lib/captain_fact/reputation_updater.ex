@@ -20,7 +20,9 @@ defmodule CaptainFact.ReputationUpdater do
     fact_vote_up:             {  0   , +3    },
     fact_vote_down:           { -1   , -3    },
     fact_vote_down_to_up:     { +1   , +6    },
-    fact_vote_up_to_down:     {  0   , -6    }
+    fact_vote_up_to_down:     {  0   , -6    },
+    # Actions without source
+    comment_banned:           {  0   , -20   }
   }
 
   # --- API ---
@@ -33,6 +35,12 @@ defmodule CaptainFact.ReputationUpdater do
       Task.async(fn -> register_change(user_id(target_user), target_change) end)
     ]
     unless async, do: Enum.map(tasks, &Task.await/1)
+  end
+
+  def register_action_without_source(target_user, action, async \\ true) do
+    change = elem(Map.get(@actions, action), 1)
+    change_func = fn -> register_change(user_id(target_user), change) end
+    if async, do: Task.async(change_func), else: change_func.()
   end
 
   def get_today_reputation_gain(user),

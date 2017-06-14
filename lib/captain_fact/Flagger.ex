@@ -2,7 +2,10 @@ defmodule CaptainFact.Flagger do
 
   require Logger
   import Ecto.Query
-  alias CaptainFact.{Flag, Comment, UserPermissions, Repo}
+
+  alias CaptainFact.{
+    Flag, Comment, Statement, UserPermissions, Repo, Endpoint, VideoHashId, ReputationUpdater
+  }
 
   @comments_nb_flags_to_ban 3
 
@@ -18,9 +21,9 @@ defmodule CaptainFact.Flagger do
     Task.start(fn -> check_comment_flags(comment) end)
   end
 
-  # TODO revert_flag
+  # TODO revert_ban
 
-  defp check_comment_flags(%Comment{id: comment_id}) do
+  defp check_comment_flags(comment = %Comment{id: comment_id}) do
     nb_flags = Repo.one(
       from f in Flag,
       select: count(f.id),
@@ -29,19 +32,31 @@ defmodule CaptainFact.Flagger do
     )
 
     if nb_flags >= @comments_nb_flags_to_ban do
-      {nb_updated, _comments} = Repo.update_all(
+      # Careful : update_all doesn't update `updated_at` field
+      {nb_updated, [comment]} = Repo.update_all(
         (
           from c in Comment,
           where: c.id == ^comment_id,
           where: c.is_banned == false
         ),
-        set: [is_banned: true]
+        [set: [is_banned: true]],
+        returning: true
       )
-
-      if nb_updated == 1 do
+      if nb_updated > 0 do
         Logger.info("Comment #{comment_id} banned")
         # TODO Update user reputation
-        # TODO Inform channel (delete comments[0])
+        comment_context = Repo.one!(
+          from c in Comment,
+            join: s in Statement, on: c.statement_id == s.id,
+            where: c.id == ^comment.id,
+            select: %{video_id: s.video_id, statement_id: s.id}
+        )
+        Endpoint.broadcast(
+          "comments:video:#{VideoHashId.encode(comment_context.video_id)}",
+          "comment_removed",
+          %{id: comment_id, statement_id: comment_context.statement_id}
+        )
+        ReputationUpdater.register_action_without_source(comment.user_id, :comment_banned)
       end
     end
   end

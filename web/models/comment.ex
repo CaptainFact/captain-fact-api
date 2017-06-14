@@ -68,6 +68,10 @@ defmodule CaptainFact.Comment do
     |> validate_length(:text, min: 1, max: 240)
   end
 
+  def ban_changeset(struct, params = %{}) do
+    cast(struct, params, [:is_banned])
+  end
+
   defp put_source(struct = %{changes: %{source: %{changes: %{url: url}}}}) do
     case CaptainFact.Repo.get_by(CaptainFact.Source, url: url) do
       nil -> struct

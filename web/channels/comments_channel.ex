@@ -2,7 +2,7 @@ defmodule CaptainFact.CommentsChannel do
   use CaptainFact.Web, :channel
 
   import CaptainFact.UserSocket, only: [rescue_channel_errors: 1]
-  alias CaptainFact.{ Comment, CommentView, User, Vote, VoteView, VoteDebouncer }
+  alias CaptainFact.{ Comment, CommentView, User, Vote, VoteView, VoteDebouncer, Flag, FlagView }
   alias CaptainFact.{ VideoHashId, Source, UserPermissions, ReputationUpdater, Flagger }
 
 
@@ -14,6 +14,7 @@ defmodule CaptainFact.CommentsChannel do
     rendered_comments = CommentView.render("index.json", comments:
       Comment.full(Comment)
       |> where([c, s], s.video_id == ^video_id)
+      |> where([c, _], c.is_banned == false)
       |> Repo.all()
     )
 
@@ -31,8 +32,19 @@ defmodule CaptainFact.CommentsChannel do
         )
       end
 
+    # Get user flags
+    comments_ids = Enum.map(rendered_comments, &(&1.id))
+    rendered_flags =
+      Flag
+      |> where([f], f.source_user_id == ^user.id)
+      |> where([f], f.type == 1) #TODO Use method
+      |> where([f], f.entity_id in ^comments_ids)
+      |> select([:entity_id])
+      |> Repo.all()
+      |> Enum.map(&(&1.entity_id))
+
     socket = assign(socket, :video_id, video_id)
-    {:ok, %{comments: rendered_comments, my_votes: rendered_votes}, socket}
+    {:ok, %{comments: rendered_comments, my_votes: rendered_votes, my_flags: rendered_flags}, socket}
   end
 
   def handle_in(command, params, socket) do
@@ -87,7 +99,7 @@ defmodule CaptainFact.CommentsChannel do
       {base_vote, new_vote}
     end)
     VoteDebouncer.add_vote(socket.topic, new_vote.comment_id)
-    with _ <- action != :self_vote,
+    with true <- action != :self_vote,
          vote_type <- Vote.get_vote_type(comment, base_vote.value, new_vote.value) do
       ReputationUpdater.register_action(socket.assigns.user_id, comment.user_id, vote_type)
     end
@@ -100,6 +112,7 @@ defmodule CaptainFact.CommentsChannel do
       |> select([:id, :user_id])
       |> preload([:user])
       |> where(id: ^comment_id)
+      |> where(is_banned: false)
       |> Repo.one!()
       |> Flagger.flag!(reason, socket.assigns.user_id)
       {:reply, :ok, socket}
