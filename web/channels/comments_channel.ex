@@ -9,42 +9,18 @@ defmodule CaptainFact.CommentsChannel do
   def join("comments:video:" <> video_id_hash, _payload, socket) do
     user = Guardian.Phoenix.Socket.current_resource(socket)
     video_id = VideoHashId.decode!(video_id_hash)
-
-    # Get comments
-    rendered_comments = CommentView.render("index.json", comments:
-      Comment.full(Comment)
-      |> where([c, s], s.video_id == ^video_id)
-      |> where([c, _], c.is_banned == false)
-      |> Repo.all()
-    )
-
-    # Get user votes
-    rendered_votes =
-      if user == nil do
-        []
-      else
-        VoteView.render("my_votes.json", votes:
-          Vote
-          |> Vote.user_votes(user)
-          |> Vote.video_votes(%{id: video_id})
-          |> select([:comment_id, :value])
+    response =
+      %{}
+      |> Map.put(:comments, CommentView.render("index.json", comments:
+          Comment.full(Comment)
+          |> where([c, s], s.video_id == ^video_id)
+          |> where([c, _], c.is_banned == false)
           |> Repo.all()
-        )
-      end
-
-    # Get user flags
-    comments_ids = Enum.map(rendered_comments, &(&1.id))
-    rendered_flags =
-      Flag
-      |> where([f], f.source_user_id == ^user.id)
-      |> where([f], f.type == 1) #TODO Use method
-      |> where([f], f.entity_id in ^comments_ids)
-      |> select([:entity_id])
-      |> Repo.all()
-      |> Enum.map(&(&1.entity_id))
+        ))
+      |> load_user_data(user, video_id)
 
     socket = assign(socket, :video_id, video_id)
-    {:ok, %{comments: rendered_comments, my_votes: rendered_votes, my_flags: rendered_flags}, socket}
+    {:ok, response, socket}
   end
 
   def handle_in(command, params, socket) do
@@ -124,6 +100,28 @@ defmodule CaptainFact.CommentsChannel do
         raise e
       end
     end
+  end
+
+  defp load_user_data(response, nil, _), do: response
+  defp load_user_data(response = %{comments: comments}, user = %User{}, video_id) do
+    comments_ids = Enum.map(comments, &(&1.id))
+    response
+    |> Map.put(:my_votes, VoteView.render("my_votes.json", votes:
+        Vote
+        |> Vote.user_votes(user)
+        |> Vote.video_votes(%{id: video_id})
+        |> select([:comment_id, :value])
+        |> Repo.all()
+      ))
+    |> Map.put(:my_flags,
+        Flag
+        |> where([f], f.source_user_id == ^user.id)
+        |> where([f], f.type == 1) #TODO Use method
+        |> where([f], f.entity_id in ^comments_ids)
+        |> select([:entity_id])
+        |> Repo.all()
+        |> Enum.map(&(&1.entity_id))
+      )
   end
 
   # Metadata fetching

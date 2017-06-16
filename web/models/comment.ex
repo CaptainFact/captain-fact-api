@@ -16,16 +16,17 @@ defmodule CaptainFact.Comment do
     timestamps()
   end
 
-  def full(query, source_required \\ false) do
+  def full(query, only_facts \\ false) do
     query
     |> join(:inner, [c], s in assoc(c, :statement))
     |> join(:inner, [c, _], u in assoc(c, :user))
-    |> with_source(source_required)
+    |> join(:left, [c, _, _], source in assoc(c, :source))
     |> join(:left, [c, _, _, _], v in fragment("
         SELECT sum(value) AS score, comment_id
         FROM   votes
         GROUP BY comment_id
        "), v.comment_id == c.id)
+    |> filter_facts(only_facts)
     |> select([c, s, u, source, v], %{
         id: c.id,
         approve: c.approve,
@@ -94,4 +95,8 @@ defmodule CaptainFact.Comment do
       _ -> changeset
     end
   end
+
+  defp filter_facts(query, false), do: query
+  defp filter_facts(query, true),
+    do: where(query, [c, _, _, _, _], not is_nil(c.source_id))
 end
