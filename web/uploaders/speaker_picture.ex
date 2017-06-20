@@ -17,12 +17,12 @@ defmodule CaptainFact.SpeakerPicture do
   end
 
   # Override the persisted filenames:
-  def filename(version, {file, speaker}) do
+  def filename(version, {_, _}) do
     version
   end
 
   # Override the storage directory:
-  def storage_dir(version, {file, speaker}) do
+  def storage_dir(_, {_, speaker}) do
     "resources/speakers/#{speaker.id}"
   end
 end

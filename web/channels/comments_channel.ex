@@ -2,7 +2,7 @@ defmodule CaptainFact.CommentsChannel do
   use CaptainFact.Web, :channel
 
   import CaptainFact.UserSocket, only: [rescue_channel_errors: 1]
-  alias CaptainFact.{ Comment, CommentView, User, Vote, VoteView, VoteDebouncer, Flag, FlagView }
+  alias CaptainFact.{ Comment, CommentView, User, Vote, VoteView, VoteDebouncer, Flag }
   alias CaptainFact.{ VideoHashId, Source, UserPermissions, ReputationUpdater, Flagger }
 
 

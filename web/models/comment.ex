@@ -63,6 +63,7 @@ defmodule CaptainFact.Comment do
     struct
     |> cast(params, @required_fields ++ @optional_fields)
     |> cast_assoc(:source)
+    |> format_text()
     |> put_source()
     |> validate_required(@required_fields)
     |> validate_source_or_text()
@@ -73,13 +74,17 @@ defmodule CaptainFact.Comment do
     cast(struct, params, [:is_banned])
   end
 
+  defp format_text(struct = %{changes: %{text: text}}) do
+    put_change(struct, :text, String.trim(text))
+  end
+  defp format_text(struct), do: struct
+
   defp put_source(struct = %{changes: %{source: %{changes: %{url: url}}}}) do
     case CaptainFact.Repo.get_by(CaptainFact.Source, url: url) do
       nil -> struct
       source -> put_assoc(struct, :source, source)
     end
   end
-
   defp put_source(struct), do: struct
 
   defp validate_source_or_text(changeset) do

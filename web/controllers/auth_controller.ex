@@ -8,21 +8,26 @@ defmodule CaptainFact.AuthController do
 
   def callback(%{assigns: %{ueberauth_auth: auth}} = conn, %{"type" => "session"}) do
     conn = Plug.Conn.fetch_session(conn)
-    conn = with {:ok, user} <- user_from_auth(auth),
+    result = with {:ok, user} <- user_from_auth(auth),
               :ok <- validate_pass(user.encrypted_password, auth.credentials.other.password),
               do: Guardian.Plug.sign_in(conn, user)
-    redirect(conn, to: "/admin")
+    case result do
+      {:error, _} ->
+        conn
+        |> put_status(:bad_request)
+        |> render(ErrorView, "error.json", message: "Invalid email / password combination")
+      _ ->
+        redirect(result, to: "/admin")
+    end
   end
 
   def callback(%{assigns: %{ueberauth_auth: auth}} = conn, _params) do
     result = with {:ok, user} <- user_from_auth(auth),
                   :ok <- validate_pass(user.encrypted_password, auth.credentials.other.password),
                   do: signin_user(conn, user)
-
     case result do
       {:ok, user, token} ->
-        conn
-        |> render(UserView, "show.json", user: user, token: token)
+        render(conn, UserView, "show.json", user: user, token: token)
       {:error, _} ->
         conn
         |> put_status(:bad_request)
@@ -51,7 +56,8 @@ defmodule CaptainFact.AuthController do
   end
 
   defp signin_user(conn, user) do
-    token = conn
+    token =
+      conn
       |> Guardian.Plug.api_sign_in(user)
       |> Guardian.Plug.current_token
     {:ok, user, token}

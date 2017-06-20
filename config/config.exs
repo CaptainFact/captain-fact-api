@@ -42,15 +42,19 @@ config :guardian, Guardian,
 
 # Configure ex_admin (Admin platform)
 config :ex_admin,
-  theme: ExAdmin.Theme.ActiveAdmin,
+#  theme: ExAdmin.Theme.ActiveAdmin,
   repo: CaptainFact.Repo,
   module: CaptainFact,
   modules: [
-    CaptainFact.ExAdmin.Dashboard,
-    CaptainFact.ExAdmin.Speaker,
     CaptainFact.ExAdmin.Comment,
+    CaptainFact.ExAdmin.Dashboard,
+    CaptainFact.ExAdmin.Flag,
+    CaptainFact.ExAdmin.Source,
+    CaptainFact.ExAdmin.Speaker,
+    CaptainFact.ExAdmin.Statement,
     CaptainFact.ExAdmin.User,
-    CaptainFact.ExAdmin.Video
+    CaptainFact.ExAdmin.Video,
+    CaptainFact.ExAdmin.VideoDebateAction
   ]
 
 # Configure file upload

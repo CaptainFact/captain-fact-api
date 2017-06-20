@@ -1,13 +1,13 @@
 defmodule CaptainFact.Flag do
   use CaptainFact.Web, :model
 
-  alias CaptainFact.{Comment, User}
+  alias CaptainFact.{Comment}
 
   @comment_type 1
 
-  @reason_spam 1
-  @reason_bad_language 2
-  @reason_harassment 3
+  @types [:comment]
+  @reasons [:spam, :bad_language, :harassment]
+  @nb_reasons Enum.count(@reasons)
 
   schema "flags" do
     field :type, :integer
@@ -32,7 +32,20 @@ defmodule CaptainFact.Flag do
     }, otherParams)
     cast(struct, params, [:entity_id, :type, :reason, :target_user_id])
     |> validate_required(@required_fields)
+    |> validate_reason()
   end
 
   def comment_type(), do: @comment_type
+
+  def reason_str(reason_id),
+    do: Atom.to_string(Enum.at(@reasons, reason_id - 1))
+
+  def type_str(type_id),
+    do: Atom.to_string(Enum.at(@types, type_id - 1))
+
+  defp validate_reason(changeset) do
+    validate_change changeset, :reason, fn :reason, reason ->
+      if reason < 1 || reason > @nb_reasons, do: [reason: "Bad reason given"], else: []
+    end
+  end
 end
