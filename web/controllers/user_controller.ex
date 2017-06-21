@@ -90,18 +90,13 @@ defmodule CaptainFact.UserController do
     end
   end
 
+  def delete(conn, _params) do
+    # TODO Soft delete, do the real delete after 1 week to avaoid user mistakes
+    Repo.delete!(Guardian.Plug.current_resource(conn))
+    send_resp(conn, :no_content, "")
+  end
+
   defp render_invalid_email_error(conn, msg \\ "Invalid Email") do
     conn |> put_status(400) |> json(%{error: msg})
   end
-
-  #
-  # def delete(conn, %{"id" => id}) do
-  #   user = Repo.get!(User, id)
-  #
-  #   # Here we use delete! (with a bang) because we expect
-  #   # it to always work (and if it does not, it will raise).
-  #   Repo.delete!(user)
-  #
-  #   send_resp(conn, :no_content, "")
-  # end
 end

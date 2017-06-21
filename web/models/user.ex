@@ -82,7 +82,7 @@ defmodule CaptainFact.User do
   end
   defp validate_email(changeset), do: changeset
 
-  @forbidden_username_keywords ~w(captainfact admin)
+  @forbidden_username_keywords ~w(captainfact admin newuser temporary)
   defp validate_username(%{changes: %{username: username}} = changeset) do
     lower_username = String.downcase(username)
     case Enum.find(@forbidden_username_keywords, &String.contains?(lower_username, &1)) do

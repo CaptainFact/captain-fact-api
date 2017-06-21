@@ -37,6 +37,8 @@
   "mime": {:hex, :mime, "1.1.0", "01c1d6f4083d8aa5c7b8c246ade95139620ef8effb009edde934e0ec3b28090a", [:mix], []},
   "mimerl": {:hex, :mimerl, "1.0.2", "993f9b0e084083405ed8252b99460c4f0563e41729ab42d9074fd5e52439be88", [:rebar3], []},
   "mochiweb": {:hex, :mochiweb, "2.15.0", "e1daac474df07651e5d17cc1e642c4069c7850dc4508d3db7263a0651330aacc", [:rebar3], []},
+  "not_qwerty123": {:hex, :not_qwerty123, "2.0.0", "cddc47ea024fd3ede14bb8549674644a62f99e1feb07d5a70bd73b68d0e7c82f", [:mix], [{:gettext, "~> 0.11", [hex: :gettext, optional: false]}]},
+  "oauth2": {:hex, :oauth2, "0.8.3", "080ea0bf2f7060ddb66204ed756b8363d8c34f20fc5684183a16f19fc5d3ad97", [:mix], [{:hackney, "~> 1.6", [hex: :hackney, optional: false]}]},
   "open_graph": {:hex, :open_graph, "0.0.2", "2404db2726d1920907635d2f472b1092500eee2688ea7f4d9f575eea5698de4d", [:mix], [{:httpoison, "~> 0.11", [hex: :httpoison, optional: false]}]},
   "parallel_stream": {:hex, :parallel_stream, "1.0.5", "4c78d3e675f9eff885cbe252c89a8fc1d2fb803c0d03a914281e587834e09431", [:mix], []},
   "phoenix": {:hex, :phoenix, "1.2.1", "6dc592249ab73c67575769765b66ad164ad25d83defa3492dc6ae269bd2a68ab", [:mix], [{:cowboy, "~> 1.0", [hex: :cowboy, optional: true]}, {:phoenix_pubsub, "~> 1.0", [hex: :phoenix_pubsub, optional: false]}, {:plug, "~> 1.1", [hex: :plug, optional: false]}, {:poison, "~> 1.5 or ~> 2.0", [hex: :poison, optional: false]}]},
@@ -55,7 +57,8 @@
   "ssl_verify_fun": {:hex, :ssl_verify_fun, "1.1.1", "28a4d65b7f59893bc2c7de786dec1e1555bd742d336043fe644ae956c3497fbe", [:make, :rebar], []},
   "timex": {:hex, :timex, "3.1.15", "94abaec8fef2436ced4d0e1b4ed50c8eaa5fb9138fc0699946ddee7abf5aaff2", [:mix], [{:combine, "~> 0.7", [hex: :combine, optional: false]}, {:gettext, "~> 0.10", [hex: :gettext, optional: false]}, {:tzdata, "~> 0.1.8 or ~> 0.5", [hex: :tzdata, optional: false]}]},
   "tzdata": {:hex, :tzdata, "0.5.12", "1c17b68692c6ba5b6ab15db3d64cc8baa0f182043d5ae9d4b6d35d70af76f67b", [:mix], [{:hackney, "~> 1.0", [hex: :hackney, optional: false]}]},
-  "ueberauth": {:hex, :ueberauth, "0.4.0", "bc72d5e5a7bdcbfcf28a756e34630816edabc926303bdce7e171f7ac7ffa4f91", [:mix], [{:plug, "~> 1.2", [hex: :plug, optional: false]}]},
+  "ueberauth": {:git, "https://github.com/CaptainFact/ueberauth.git", "447f66b6c8305cd54a7f0bb2e698a34a249c08d2", []},
+  "ueberauth_facebook": {:hex, :ueberauth_facebook, "0.6.0", "51006ed2b8adac923ff1820f7357647f39832408a9a327a939bcfc736c1630de", [:mix], [{:oauth2, "~> 0.8.0", [hex: :oauth2, optional: false]}, {:ueberauth, "~> 0.4", [hex: :ueberauth, optional: false]}]},
   "ueberauth_identity": {:hex, :ueberauth_identity, "0.2.3", "216f18ca24347f6b3dd0e5f4342b6fef7a4027fad0d133f1c454d51b7eaac55b", [:mix], [{:plug, "~> 1.0", [hex: :plug, optional: false]}, {:ueberauth, "~> 0.2", [hex: :ueberauth, optional: false]}]},
   "uuid": {:hex, :uuid, "1.1.6", "4927232f244e69c6e255643014c2d639dad5b8313dc2a6976ee1c3724e6ca60d", [:mix], []},
   "xain": {:hex, :xain, "0.6.0", "5b61cfe3ffc17904759ee30a699f9e0b1aefd943e996ee4cafea76e5b2f59e3a", [:mix], []}}

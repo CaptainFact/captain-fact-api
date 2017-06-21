@@ -25,12 +25,15 @@ config :logger, :console,
 
 # Configure ueberauth
 config :ueberauth, Ueberauth,
-base_path: "/api/auth",
-providers: [
-  identity: {
-    Ueberauth.Strategy.Identity, [callback_methods: ["POST"]]
-  }
-]
+  base_path: "/api/auth",
+  providers: [
+    identity: {Ueberauth.Strategy.Identity, [callback_methods: ["POST"]]},
+    facebook: {Ueberauth.Strategy.Facebook, [profile_fields: "name,email,picture"]}
+  ]
+
+config :ueberauth, Ueberauth.Strategy.Facebook.OAuth,
+  client_id: "506726596325615", # TODO System.get_env("FACEBOOK_CLIENT_ID")
+  client_secret: "4b320056746b8e57144c889f3baf0424" # TODO System.get_env("FACEBOOK_CLIENT_SECRET")
 
 # Configure Guardian (authentication)
 config :guardian, Guardian,

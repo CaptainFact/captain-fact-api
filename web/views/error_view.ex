@@ -5,7 +5,8 @@ defmodule CaptainFact.ErrorView do
     render_one(message, CaptainFact.ErrorView, "error.json")
   end
 
-  def render("400.json", _error) do
+  def render("400.json", errors) do
+    if Mix.env == :dev, do: IO.inspect(errors)
     %{errors: [%{message: "Bad Request"}]}
   end
 

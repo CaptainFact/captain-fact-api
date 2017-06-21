@@ -1,11 +1,27 @@
 defmodule CaptainFact.AuthController do
   use CaptainFact.Web, :controller
+  require Logger
 
-  alias CaptainFact.{ErrorView, UserView, User, AuthController}
+  alias Ecto.Multi
+  alias CaptainFact.{ErrorView, UserView, User, AuthController, UsernameGenerator}
 
   plug Ueberauth
   plug Guardian.Plug.EnsureAuthenticated, [handler: AuthController] when action in [:delete, :me]
 
+
+  @err_authentication_failed "authentication failed"
+  @err_invalid_email_password "Invalid email / password combination"
+
+
+  # If auth fails
+  def callback(%{assigns: %{ueberauth_failure: f}} = conn, _params) do
+    Logger.debug(inspect(f))
+    conn
+    |> put_status(:bad_request)
+    |> render(ErrorView, "error.json", message: @err_authentication_failed)
+  end
+
+  # Only used by admin
   def callback(%{assigns: %{ueberauth_auth: auth}} = conn, %{"type" => "session"}) do
     conn = Plug.Conn.fetch_session(conn)
     result = with {:ok, user} <- user_from_auth(auth),
@@ -15,13 +31,14 @@ defmodule CaptainFact.AuthController do
       {:error, _} ->
         conn
         |> put_status(:bad_request)
-        |> render(ErrorView, "error.json", message: "Invalid email / password combination")
+        |> render(ErrorView, "error.json", message: @err_invalid_email_password)
       _ ->
         redirect(result, to: "/admin")
     end
   end
 
-  def callback(%{assigns: %{ueberauth_auth: auth}} = conn, _params) do
+  # Special case for identity
+  def callback(%{assigns: %{ueberauth_auth: auth = %{provider: :identity}}} = conn, _params) do
     result = with {:ok, user} <- user_from_auth(auth),
                   :ok <- validate_pass(user.encrypted_password, auth.credentials.other.password),
                   do: signin_user(conn, user)
@@ -31,8 +48,54 @@ defmodule CaptainFact.AuthController do
       {:error, _} ->
         conn
         |> put_status(:bad_request)
-        |> render(ErrorView, "error.json", message: "Invalid email / password combination")
+        |> render(ErrorView, "error.json", message: @err_invalid_email_password)
     end
+  end
+
+  # For all others (OAuth) - create if doesn't exists, link otherwise
+  def callback(%{assigns: %{ueberauth_auth: auth}} = conn, _params) do
+    user = case user_from_auth(auth) do
+      {:ok, user} -> user # TODO Store FB / Twitter / G+ (...) id
+      {:error, _} -> create_user_from_oauth!(auth)
+    end
+
+    case signin_user(conn, user) do
+      {:ok, user, token} ->
+        render(conn, UserView, "show.json", user: user, token: token)
+      {:error, _} ->
+        conn
+        |> put_status(:bad_request)
+        |> render(ErrorView, "error.json", message: @err_authentication_failed)
+    end
+  end
+
+  defp create_user_from_oauth!(auth) do
+    Multi.new
+    |> Multi.insert(:base_user, User.registration_changeset(
+        %User{username: "temporary-#{temporary_username(auth.info.email)}"},
+        %{
+           name: auth.info.name,
+           email: auth.info.email,
+           password: NotQwerty123.RandomPassword.gen_password()
+           # TODO Image
+           # TODO Social networks ids
+         })
+       )
+    |> Multi.run(:final_user, fn %{base_user: user} ->
+        User.changeset(user, %{})
+        |> Ecto.Changeset.put_change(:username, UsernameGenerator.generate(user.id))
+        |> Repo.update()
+     end)
+    |> Repo.transaction()
+    |> case do
+        {:ok, %{final_user: user}} -> user
+    end
+  end
+
+  defp temporary_username(email) do
+    :crypto.hash(:sha256, email)
+    |> Base.encode64
+    |> String.slice(-8..-2)
   end
 
   defp user_from_auth(auth) do

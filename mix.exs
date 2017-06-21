@@ -21,8 +21,8 @@ defmodule CaptainFact.Mixfile do
       mod: {CaptainFact, []},
       applications: [
         :phoenix, :phoenix_pubsub, :phoenix_html, :cowboy, :logger, :gettext,
-        :phoenix_ecto, :postgrex, :comeonin, :ueberauth, :ueberauth_identity,
-        :arc_ecto, :httpoison, :quantum
+        :phoenix_ecto, :postgrex, :comeonin, :ueberauth, :ueberauth_identity, :ueberauth_facebook,
+        :arc_ecto, :httpoison, :quantum, :not_qwerty123
       ],
       registered: [
         CaptainFact.UserState,
@@ -50,8 +50,9 @@ defmodule CaptainFact.Mixfile do
       {:cowboy, "~> 1.0"},
       {:corsica, "~> 0.5"},
       {:comeonin, "~> 3.0"},
-      {:ueberauth, "~> 0.4"},
+      {:ueberauth, github: "CaptainFact/ueberauth", override: true},
       {:ueberauth_identity, "~> 0.2"},
+      {:ueberauth_facebook, "~> 0.6"},
       {:guardian, "~> 0.10"},
       {:ecto_enum, "~> 1.0"},
       {:ex_admin, github: "smpallen99/ex_admin"},
@@ -64,6 +65,7 @@ defmodule CaptainFact.Mixfile do
       {:poison, "~> 2.2.0"},
       {:csv, "~> 1.4.4"},
       {:quantum, ">= 1.9.2"},
+      {:not_qwerty123, "~> 2.0"},
       {:faker, "~> 0.7", only: :test}
    ]
   end

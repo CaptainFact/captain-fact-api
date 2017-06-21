@@ -15,7 +15,8 @@ defmodule CaptainFact do
       # Other custom workers
       worker(CaptainFact.UserState, []),
       worker(CaptainFact.VoteDebouncer, []),
-      worker(CaptainFact.VideoHashId, [])
+      worker(CaptainFact.VideoHashId, []),
+      worker(CaptainFact.UsernameGenerator, [])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html

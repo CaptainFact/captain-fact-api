@@ -55,13 +55,14 @@ defmodule CaptainFact.Router do
     # Authentication
     scope "/auth" do
       get "/me", AuthController, :me
-      get "/:provider", AuthController, :request
-      post "/:identity/callback", AuthController, :callback
+      get "/:provider/callback", AuthController, :callback
+      post "/:provider/callback", AuthController, :callback
       delete "/signout", AuthController, :delete
     end
 
     # Users
     post "/users", UserController, :create
+    delete "/users/me", UserController, :delete
     put "/users/:user_id", UserController, :update
     get "/users/:username", UserController, :show
     get "/users/:user_id/videos", VideoController, :index
