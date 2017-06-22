@@ -8,6 +8,7 @@ alias CaptainFact.SpeakerPicture
 
 
 defmodule SeedPoliticians do
+  @filename "/data/french_politicians.csv"
   @activate_filter true
   @filter ["sarkozy", "pen", "hamon", "mélenchon", "fillon", "poutou", "arthaud", "macron", "cheminade", "aignan", "lassalle", "asselineau"]
   @columns_mapping %{
@@ -18,7 +19,7 @@ defmodule SeedPoliticians do
   @title_separators [",", " and ", ".", "&"]
 
   def seed(fetch_pictures?) do
-    csv_path = __DIR__ <> "/data/french_politicians.csv"
+    csv_path = __DIR__ <> @filename
     if fetch_pictures? do
       SeedWithCSV.seed(csv_path, @columns_mapping, &seed_politician_with_picture/1)
     else
@@ -37,7 +38,7 @@ defmodule SeedPoliticians do
       changes =
         changes
         |> Map.delete(:picture)
-        |> Map.put(:title, "French Politician")
+        |> Map.put(:title, "Politician")
 
       changeset =
         %Speaker{is_user_defined: false, country: "FR"}
@@ -46,7 +47,12 @@ defmodule SeedPoliticians do
         IO.puts(:stderr, "Cannot add speaker #{changes.full_name}: #{inspect(changeset.errors)}")
         nil
       else
-        Repo.insert!(changeset)
+        case Repo.get_by(Speaker, wiki_url: changeset.changes.wiki_url) do
+          nil ->
+            Logger.info("Insert speaker #{changeset.changes.full_name}")
+            Repo.insert!(changeset)
+          _ -> nil # If speaker already exists, skik it
+        end
       end
     end
   end

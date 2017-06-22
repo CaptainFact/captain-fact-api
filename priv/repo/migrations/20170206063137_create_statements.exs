@@ -7,8 +7,8 @@ defmodule CaptainFact.Repo.Migrations.CreateStatement do
       add :time, :integer, null: false
       add :is_removed, :boolean, null: false, default: false
 
-      add :video_id, references(:videos), null: false
-      add :speaker_id, references(:speakers), null: true
+      add :video_id, references(:videos, on_delete: :delete_all), null: false
+      add :speaker_id, references(:speakers, on_delete: :nilify_all), null: true
 
       timestamps()
     end
