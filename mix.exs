@@ -19,15 +19,7 @@ defmodule CaptainFact.Mixfile do
   def application do
     [
       mod: {CaptainFact, []},
-      applications: [
-        :phoenix, :phoenix_pubsub, :phoenix_html, :cowboy, :logger, :gettext,
-        :phoenix_ecto, :postgrex, :comeonin, :ueberauth, :ueberauth_identity, :ueberauth_facebook,
-        :arc_ecto, :httpoison, :quantum, :not_qwerty123
-      ],
-      registered: [
-        CaptainFact.UserState,
-        CaptainFact.VoteDebouncer
-      ]
+      extra_applications: [:logger]
     ]
   end
 
