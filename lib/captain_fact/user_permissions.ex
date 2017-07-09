@@ -40,7 +40,7 @@ defmodule CaptainFact.UserPermissions do
     flag_comment:           { 0  ,  0 ,  0 ,  1 ,  3 ,   5 ,  10 ,  15 ,  30 },
     # Statements
     add_statement:          { 0  ,  2 ,  5 , 15 , 30 ,  50 , 100 , 100 , 100 },
-    edit_other_statement:   { 0  ,  0 ,  0 ,  3 ,  5 ,  50 , 100 , 100 , 100 },
+    edit_statement:         { 0  ,  0 ,  0 ,  3 ,  5 ,  50 , 100 , 100 , 100 },
     remove_statement:       { 0  ,  0 ,  0 ,  3 ,  5 ,  10 ,  10 ,  10 ,  10 },
     restore_statement:      { 0  ,  0 ,  0 ,  3 ,  5 ,  15 ,  15 ,  15 ,  15 },
     # Speakers

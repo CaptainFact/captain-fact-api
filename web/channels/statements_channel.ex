@@ -1,16 +1,12 @@
 defmodule CaptainFact.StatementsChannel do
   use CaptainFact.Web, :channel
 
+  import CaptainFact.UserSocket, only: [rescue_channel_errors: 1]
+  import CaptainFact.VideoDebateActionCreator,
+    only: [action_create: 3, action_update: 3, action_delete: 3]
+
   alias Ecto.Multi
-
-  alias CaptainFact.Statement
-  alias CaptainFact.StatementView
-  alias CaptainFact.ErrorView
-  alias CaptainFact.VideoHashId
-
-  import CaptainFact.VideoDebateActionCreator, only: [
-    action_create: 3, action_update: 3, action_delete: 3
-  ]
+  alias CaptainFact.{UserPermissions, Statement, StatementView, ErrorView, VideoHashId}
 
 
   def join("statements:video:" <> video_id_hash, _payload, socket) do
@@ -27,22 +23,22 @@ defmodule CaptainFact.StatementsChannel do
   def handle_in(command, params, socket) do
     case socket.assigns.user_id do
       nil -> {:reply, :error, socket}
-      _ -> handle_in_authentified(command, params, socket)
+      _ -> rescue_channel_errors(&handle_in_authenticated/3).(command, params, socket)
     end
   end
 
   @doc """
   Add a new statement
   """
-  def handle_in_authentified("new_statement", params, socket) do
+  def handle_in_authenticated("new_statement", params, socket) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
     changeset = Statement.changeset(%Statement{video_id: video_id}, params)
     Multi.new
     |> Multi.insert(:statement, changeset)
     |> Multi.run(:action_create, fn %{statement: statement} ->
-        Repo.insert(action_create(user_id, video_id, statement))
-    end)
-    |> Repo.transaction()
+         Repo.insert(action_create(user_id, video_id, statement))
+       end)
+    |> UserPermissions.lock_transaction!(user_id, :add_statement)
     |> case do
       {:ok, %{statement: statement}} ->
         broadcast!(socket, "statement_added", StatementView.render("show.json", statement: statement))
@@ -52,7 +48,7 @@ defmodule CaptainFact.StatementsChannel do
     end
   end
 
-  def handle_in_authentified("update_statement", params = %{"id" => id}, socket) do
+  def handle_in_authenticated("update_statement", params = %{"id" => id}, socket) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
     statement = Repo.get_by!(Statement, id: id, is_removed: false)
     changeset = Statement.changeset(statement, params)
@@ -63,7 +59,7 @@ defmodule CaptainFact.StatementsChannel do
         Multi.new
         |> Multi.update(:statement, changeset)
         |> Multi.insert(:action_update, action_update)
-        |> Repo.transaction()
+        |> UserPermissions.lock_transaction!(user_id, :edit_statement)
         |> case do
           {:ok, %{statement: updated_statement}} ->
             rendered_statement = StatementView.render("show.json", statement: updated_statement)
@@ -75,15 +71,15 @@ defmodule CaptainFact.StatementsChannel do
     end
   end
 
-  def handle_in_authentified("delete_statement", %{"id" => id}, socket) do
+  def handle_in_authenticated("remove_statement", %{"id" => id}, socket) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
     statement = Repo.get_by!(Statement, id: id, is_removed: false)
     Multi.new
     |> Multi.update(:statement, Statement.changeset_remove(statement))
     |> Multi.run(:action_delete, fn %{statement: statement} ->
-      Repo.insert(action_delete(user_id, video_id, statement))
-     end)
-    |> Repo.transaction()
+         Repo.insert(action_delete(user_id, video_id, statement))
+       end)
+    |> UserPermissions.lock_transaction!(user_id, :remove_statement)
     |> case do
         {:ok, _} ->
           broadcast!(socket, "statement_removed", %{id: id})

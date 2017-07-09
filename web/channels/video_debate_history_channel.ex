@@ -1,12 +1,13 @@
 defmodule CaptainFact.VideoDebateHistoryChannel do
   use CaptainFact.Web, :channel
 
+  import CaptainFact.VideoDebateActionCreator, only: [action_restore: 3]
+  import CaptainFact.UserSocket, only: [rescue_channel_errors: 1]
+
   alias Phoenix.View
   alias Ecto.Multi
   alias CaptainFact.{ VideoDebateAction, VideoHashId, Statement, Speaker, VideoSpeaker }
-  alias CaptainFact.{ VideoDebateActionView, StatementView, SpeakerView }
-
-  import CaptainFact.VideoDebateActionCreator, only: [action_restore: 3]
+  alias CaptainFact.{ VideoDebateActionView, StatementView, SpeakerView, UserPermissions }
 
 
   def join("video_debate_history:" <> video_id_hash, _payload, socket) do
@@ -34,7 +35,7 @@ defmodule CaptainFact.VideoDebateHistoryChannel do
   def handle_in(command, params, socket) do
     case socket.assigns.user_id do
       nil -> {:reply, :error, socket}
-      _ -> handle_in_authenticated(command, params, socket)
+      _ -> rescue_channel_errors(&handle_in_authenticated/3).(command, params, socket)
     end
   end
 
@@ -44,9 +45,9 @@ defmodule CaptainFact.VideoDebateHistoryChannel do
     Multi.new
     |> Multi.update(:statement, Statement.changeset_restore(statement))
     |> Multi.run(:action_restore, fn %{statement: statement} ->
-      Repo.insert(action_restore(user_id, video_id, statement))
-     end)
-    |> Repo.transaction()
+         Repo.insert(action_restore(user_id, video_id, statement))
+       end)
+    |> UserPermissions.lock_transaction!(user_id, :restore_statement)
     |> case do
         {:ok, %{action_restore: action, statement: statement}} ->
           # Broadcast action
@@ -78,7 +79,7 @@ defmodule CaptainFact.VideoDebateHistoryChannel do
     |> multi_undelete_speaker(speaker)
     |> Multi.insert(:video_speaker, video_speaker)
     |> Multi.insert(:action_restore, action_restore(user_id, video_id, speaker))
-    |> Repo.transaction()
+    |> UserPermissions.lock_transaction!(user_id, :restore_speaker)
     |> case do
       {:ok, %{action_restore: action}} ->
         # Broadcast the action
