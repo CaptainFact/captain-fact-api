@@ -97,4 +97,24 @@ defmodule CaptainFact.UserPermissionsTest do
       assert UserPermissions.check(context[:banned_user], action) == {:error, "not enough reputation"}
     end)
   end
+
+  test "unauthenticated users should never pass UserPermissions" do
+    Enum.each(UserPermissions.limitations, fn {action, _} ->
+      assert UserPermissions.check(nil, action) == {:error, "not authenticated"}
+    end)
+  end
+
+  test "nil user will raise UserPermissions error" do
+    message = "not authenticated"
+
+    # Lock
+    assert_raise(PermissionsError, message, fn ->
+      UserPermissions.lock!(nil, :add_video, fn _ -> 42 end)
+    end)
+
+    # Check
+    assert_raise(PermissionsError, message, fn ->
+      UserPermissions.check!(nil, :add_video)
+    end)
+  end
 end

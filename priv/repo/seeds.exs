@@ -1,7 +1,7 @@
 alias CaptainFact.Repo
 alias CaptainFact.User
 
-admin = User.changeset(%User{}, %{
+admin = User.changeset(%User{reputation: 4200}, %{
   username: "Betree",
   email: "admin@captainfact.io",
   password: "password"

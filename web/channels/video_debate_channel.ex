@@ -3,8 +3,9 @@ defmodule CaptainFact.VideoDebateChannel do
 
   alias Phoenix.View
   alias Ecto.Multi
+  import CaptainFact.UserSocket, only: [rescue_channel_errors: 1]
   alias CaptainFact.{ Video, VideoView, Speaker, SpeakerView}
-  alias CaptainFact.{ VideoSpeaker, VideoHashId }
+  alias CaptainFact.{ VideoSpeaker, VideoHashId, UserPermissions }
 
   import CaptainFact.VideoDebateActionCreator, only: [
     action_add: 3, action_create: 3, action_update: 3, action_delete: 3,
@@ -25,7 +26,7 @@ defmodule CaptainFact.VideoDebateChannel do
   def handle_in(command, params, socket) do
     case socket.assigns.user_id do
       nil -> {:reply, :error, socket}
-      _ -> handle_in_authentified(command, params, socket)
+      _ -> rescue_channel_errors(&handle_in_authentified/3).(command, params, socket)
     end
   end
 
@@ -35,14 +36,11 @@ defmodule CaptainFact.VideoDebateChannel do
   def handle_in_authentified("new_speaker", %{"id" => id}, socket) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
     speaker = Repo.get!(Speaker, id)
-    changeset =
-      %VideoSpeaker{speaker_id: speaker.id, video_id: video_id}
-      |> VideoSpeaker.changeset()
-
+    changeset = VideoSpeaker.changeset(%VideoSpeaker{speaker_id: speaker.id, video_id: video_id})
     Multi.new
     |> Multi.insert(:video_speaker, changeset)
     |> Multi.insert(:action_add, action_add(user_id, video_id, speaker))
-    |> Repo.transaction()
+    |> UserPermissions.lock_transaction!(user_id, :add_speaker)
     |> case do
       {:ok, %{}} ->
         rendered_speaker = SpeakerView.render("show.json", speaker: speaker)
@@ -62,15 +60,15 @@ defmodule CaptainFact.VideoDebateChannel do
     Multi.new
     |> Multi.insert(:speaker, speaker_changeset)
     |> Multi.run(:video_speaker, fn %{speaker: speaker} ->
-      # Insert association between video and speaker
-      %VideoSpeaker{speaker_id: speaker.id, video_id: video_id}
-      |> VideoSpeaker.changeset()
-      |> Repo.insert()
-    end)
+         # Insert association between video and speaker
+         %VideoSpeaker{speaker_id: speaker.id, video_id: video_id}
+         |> VideoSpeaker.changeset()
+         |> Repo.insert()
+       end)
     |> Multi.run(:action_create, fn %{speaker: speaker} ->
-      Repo.insert(action_create(user_id, video_id, speaker))
-    end)
-    |> Repo.transaction()
+         Repo.insert(action_create(user_id, video_id, speaker))
+       end)
+    |> UserPermissions.lock_transaction!(user_id, :add_speaker)
     |> case do
       {:ok, %{speaker: speaker}} ->
         # Broadcast the speaker

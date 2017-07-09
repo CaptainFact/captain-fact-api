@@ -83,7 +83,14 @@ defmodule CaptainFact.UserPermissions do
     end
   end
   def lock!(user_id, action, func) when is_integer(user_id) and is_atom(action),
-     do: lock!(do_load_user!(user_id), action, func)
+    do: lock!(do_load_user!(user_id), action, func)
+  def lock!(nil, _, _), do: raise PermissionsError, message: "not authenticated"
+
+  @doc """
+  Run Repo.transaction while locking permissions. Usefull when piping
+  """
+  def lock_transaction!(transaction = %Ecto.Multi{}, user, action) when is_atom(action),
+    do: lock!(user, action, fn _ -> Repo.transaction(transaction) end)
 
   @doc """
   Check if user can execute action. Return {:ok, nb_available} if yes, {:error, reason} otherwise
@@ -110,9 +117,17 @@ defmodule CaptainFact.UserPermissions do
       else: {:ok, limitation - action_count}
     end
   end
-  def check!(user_id, action) when is_integer(user_id) and is_atom(action) do
-     check(do_load_user!(user_id), action)
+  def check(nil, _), do: {:error, "not authenticated"}
+  def check!(user = %User{}, action) when is_atom(action) do
+    case check(user, action) do
+      {:ok, _} -> :ok
+      {:error, message} -> raise PermissionsError, message: message
+    end
   end
+  def check!(user_id, action) when is_integer(user_id) and is_atom(action) do
+     check!(do_load_user!(user_id), action)
+  end
+  def check!(nil, _), do: raise PermissionsError, message: "not authenticated"
 
   @doc """
   Doesn't verify user's limitation nor reputation, you need to check that by yourself
@@ -150,6 +165,7 @@ defmodule CaptainFact.UserPermissions do
   defp do_record_action(user_actions, action),
     do: Map.update(user_actions, action, 1, &(&1 + 1))
 
+  defp do_load_user!(nil), do: raise PermissionsError, message: "not authenticated"
   defp do_load_user!(user_id) do
     User
     |> where([u], u.id == ^user_id)

@@ -1,10 +1,8 @@
 defmodule CaptainFact.VideoController do
   use CaptainFact.Web, :controller
 
-  alias CaptainFact.{Video}
+  alias CaptainFact.{Video, UserPermissions}
 
-  plug Guardian.Plug.EnsureAuthenticated, [handler: CaptainFact.AuthController]
-  when action in [:get_or_create, :video_title]
 
   def index(conn, _params) do
     videos = Video
@@ -23,13 +21,19 @@ defmodule CaptainFact.VideoController do
   end
 
   defp create(conn, video_url) do
+    # Unsafe check just to ensure user is not using this method to DDOS youtube
+    user = Guardian.Plug.current_resource(conn)
+    UserPermissions.check!(user, :add_video)
     case fetch_video_title(video_url) do
       {:error, message} ->
         put_status(conn, :unprocessable_entity)
         |> json(%{error: %{url: message}})
       {:ok, title} ->
         changeset = Video.changeset(%Video{title: title}, %{url: video_url})
-        case Repo.insert(changeset) do
+        result = UserPermissions.lock!(user, :add_video, fn _ ->
+          Repo.insert(changeset)
+        end)
+        case result do
           {:ok, video} ->
             video = Map.put(video, :speakers, [])
             render(conn, "show.json", video: video)
@@ -48,16 +52,6 @@ defmodule CaptainFact.VideoController do
       video -> render(conn, "show.json", video: video)
     end
   end
-
-#  defp video_title(conn, %{"video_uri" => video_uri}) do
-#    case fetch_video_title(video_uri) do
-#      {:ok, title} -> json(conn, %{title: title})
-#      {:error, message} ->
-#        conn
-#        |> put_status(404)
-#        |> json(%{error: message})
-#    end
-#  end
 
   defp fetch_video_title(url) do
     if Regex.match?(~r/(?:youtube\.com\/\S*(?:(?:\/e(?:mbed))?\/|watch\/?\?(?:\S*?&?v\=))|youtu\.be\/)([a-zA-Z0-9_-]{6,11})/, url) do

@@ -1,6 +1,8 @@
 defmodule CaptainFact.ErrorView do
   use CaptainFact.Web, :view
 
+  alias CaptainFact.UserPermissions.PermissionsError
+
   def render("show.json", %{message: message}) do
     render_one(message, CaptainFact.ErrorView, "error.json")
   end
@@ -14,8 +16,13 @@ defmodule CaptainFact.ErrorView do
     %{errors: [%{message: "You are not authorized to access this resource"}]}
   end
 
-  def render("403.json", _) do
-    %{errors: [%{message: "You are not authorized to access this resource"}]}
+  def render("403.json", %{reason: %PermissionsError{message: message}}) do
+    %{errors: %{message: message}}
+  end
+
+  def render("403.json", errors) do
+    if Mix.env == :dev, do: IO.inspect(errors)
+    %{errors: %{message: "You are not authorized to access this resource"}}
   end
 
   def render("404.json", errors) do

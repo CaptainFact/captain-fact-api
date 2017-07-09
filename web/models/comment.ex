@@ -40,7 +40,8 @@ defmodule CaptainFact.Comment do
           id: u.id,
           name: u.name,
           username: u.username,
-          reputation: u.reputation
+          reputation: u.reputation,
+          inserted_at: u.inserted_at
         }
       })
   end
