@@ -33,7 +33,7 @@ defmodule CaptainFact.AuthController do
         |> put_status(:bad_request)
         |> render(ErrorView, "error.json", message: @err_invalid_email_password)
       _ ->
-        redirect(result, to: "/admin")
+        redirect(result, to: "/jouge42")
     end
   end
 

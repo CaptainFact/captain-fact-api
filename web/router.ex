@@ -36,13 +36,13 @@ defmodule CaptainFact.Router do
 
   # Browser (backadmin)
 
-  scope "/admin", CaptainFact do
+  scope "/jouge42", CaptainFact do
     pipe_through :browser
     get "/login", UserController, :admin_login
     delete "/logout", UserController, :admin_logout
   end
 
-  scope "/admin", ExAdmin do
+  scope "/jouge42", ExAdmin do
     pipe_through [:browser, :browser_auth]
     admin_routes()
   end

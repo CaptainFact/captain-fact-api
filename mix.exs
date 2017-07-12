@@ -32,7 +32,7 @@ defmodule CaptainFact.Mixfile do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.2.1"},
+      {:phoenix, "~> 1.3.0-rc.2"},
       {:phoenix_pubsub, "~> 1.0"},
       {:phoenix_ecto, "~> 3.2"},
       {:postgrex, ">= 0.0.0"},
@@ -47,7 +47,7 @@ defmodule CaptainFact.Mixfile do
       {:ueberauth_facebook, "~> 0.6"},
       {:guardian, "~> 0.10"},
       {:ecto_enum, "~> 1.0"},
-      {:ex_admin, github: "smpallen99/ex_admin"},
+      {:ex_admin, github: "smpallen99/ex_admin", branch: "phx-1.3"},
       {:arc, "~> 0.8.0"},
       {:arc_ecto, "~> 0.7.0"},
       {:floki, "~> 0.17.0"},
