@@ -63,10 +63,11 @@ defmodule CaptainFact.VoteDebouncer do
       select: %{
         id: v.comment_id,
         statement_id: c.statement_id,
+        reply_to_id: c.reply_to_id,
         score: sum(v.value)
       },
       where: v.comment_id in ^updated_comments,
-      group_by: [v.comment_id, c.statement_id]
+      group_by: [v.comment_id, c.statement_id, c.reply_to_id]
     ) |> Repo.all()
 
     CaptainFact.Endpoint.broadcast(

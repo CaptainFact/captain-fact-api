@@ -31,6 +31,7 @@ defmodule CaptainFact.CommentsChannel do
   end
 
   def handle_in_authentified("new_comment", params, socket) do
+    # TODO [Security] What if reply_to_id refer to a comment that is on a different statement ?
     user = Repo.get!(User, socket.assigns.user_id)
     comment = UserPermissions.lock!(user, :add_comment, fn user ->
       user
@@ -40,7 +41,7 @@ defmodule CaptainFact.CommentsChannel do
     end)
     full_comment = comment |> Map.put(:user, user) |> Repo.preload(:source) |> Map.put(:score, 1)
     broadcast!(socket, "comment_added", CommentView.render("comment.json", comment: full_comment))
-    handle_in_authentified("vote", %{"comment_id" => comment.id, "value" => "1"}, socket)
+    handle_in_authentified("vote", %{"comment_id" => full_comment.id, "value" => "1"}, socket)
     Task.async(fn() ->
       fetch_source_metadata_and_update_comment(full_comment, socket.topic)
     end)
@@ -51,7 +52,11 @@ defmodule CaptainFact.CommentsChannel do
     comment = Repo.get!(Comment, id)
     if socket.assigns.user_id === comment.user_id do
       Repo.delete!(comment)
-      broadcast!(socket, "comment_removed", %{id: id, statement_id: comment.statement_id})
+      broadcast!(socket, "comment_removed", %{
+        id: id,
+        statement_id: comment.statement_id,
+        reply_to_id: comment.reply_to_id
+      })
       {:reply, :ok, socket}
     else
       {:reply, :error, socket} # Not authorized

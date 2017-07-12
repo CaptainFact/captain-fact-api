@@ -19,6 +19,7 @@ defmodule CaptainFact.CommentView do
     end
     %{
       id: comment.id,
+      reply_to_id: comment.reply_to_id,
       user: user,
       statement_id: comment.statement_id,
       text: comment.text,

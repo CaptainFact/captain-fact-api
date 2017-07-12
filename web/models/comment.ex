@@ -13,6 +13,7 @@ defmodule CaptainFact.Comment do
     belongs_to :source, Source
     belongs_to :user, User
     belongs_to :statement, Statement
+    belongs_to :reply_to, Comment
     timestamps()
   end
 
@@ -29,6 +30,7 @@ defmodule CaptainFact.Comment do
     |> filter_facts(only_facts)
     |> select([c, s, u, source, v], %{
         id: c.id,
+        reply_to_id: c.reply_to_id,
         approve: c.approve,
         source: source,
         statement_id: c.statement_id,
@@ -55,7 +57,7 @@ defmodule CaptainFact.Comment do
   end
 
   @required_fields ~w(statement_id)a
-  @optional_fields ~w(approve text)a
+  @optional_fields ~w(approve text reply_to_id)a
 
   @doc """
   Builds a changeset based on the `struct` and `params`.
