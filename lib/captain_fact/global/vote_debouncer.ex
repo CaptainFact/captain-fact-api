@@ -4,6 +4,8 @@ defmodule CaptainFact.VoteDebouncer do
   @update_delay ms
   """
 
+  # TODO Make This Generic !
+
   import Ecto.Query
 
   alias CaptainFact.Repo

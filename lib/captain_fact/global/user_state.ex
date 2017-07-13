@@ -7,7 +7,6 @@ defmodule CaptainFact.UserState do
   """
 
   require Logger
-  alias CaptainFact.Web.User
 
   @name __MODULE__
 
