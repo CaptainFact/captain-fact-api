@@ -1,7 +1,7 @@
 defmodule CaptainFact.SpeakerTest do
   use CaptainFact.ModelCase, async: true
 
-  alias CaptainFact.Speaker
+  alias CaptainFact.Web.Speaker
 
   @valid_attrs %{
     full_name: "#{Faker.Name.first_name} #{Faker.Name.last_name}"

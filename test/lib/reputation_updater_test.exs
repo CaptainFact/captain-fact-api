@@ -1,6 +1,8 @@
 defmodule CaptainFact.ReputationUpdaterTest do
   use ExUnit.Case, async: false
-  alias CaptainFact.{ReputationUpdater, User, UserState, Repo}
+
+  alias CaptainFact.ReputationUpdater
+  alias CaptainFact.Web.{User, UserState, Repo}
 
   setup do
     UserState.reset()

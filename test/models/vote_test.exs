@@ -1,8 +1,8 @@
 defmodule CaptainFact.VoteTest do
   use CaptainFact.ModelCase, async: true
-  doctest CaptainFact.Vote
+  doctest CaptainFact.Web.Vote
 
-  alias CaptainFact.Vote
+  alias CaptainFact.Web.Vote
 
   @valid_attrs %{user_id: 1, comment_id: 1, value: 1}
   @invalid_attrs %{}

@@ -7,8 +7,8 @@ defimpl ExAdmin.Authentication, for: Plug.Conn do
   def session_path(_conn, _), do: ""
 end
 
-defmodule CaptainFact.Plugs.SuperAdmin do
-  alias CaptainFact.User
+defmodule CaptainFact.Web.Plugs.SuperAdmin do
+  alias CaptainFact.Web.User
 
   def init(default), do: default
 

@@ -1,6 +1,13 @@
 defmodule CaptainFact.UserState do
+  @moduledoc """
+  Store a state that is re-initialized every 24h. This is mainly intended to store info such as
+  limitations for daily reputations gains or maximum number of votes for each day.
+
+  ** (!) Should not be used directly outside of this folder **
+  """
+
   require Logger
-  alias CaptainFact.User
+  alias CaptainFact.Web.User
 
   @name __MODULE__
 
@@ -35,7 +42,7 @@ defmodule CaptainFact.UserState do
   This method in only intended to be called by a scheduler to run 1 time a day
   """
   def reset() do
-    Logger.info("[UserState] Reset all users states")
+    Logger.info("[UserState] Reset all users state")
     Agent.update(@name, fn state ->
       Enum.map(state, fn {_user_id, pid} -> Agent.stop(pid) end)
       %{}
@@ -54,6 +61,6 @@ defmodule CaptainFact.UserState do
     end)
   end
 
-  defp user_id(%User{id: id}), do: id
+  defp user_id(%{id: id}), do: id
   defp user_id(id) when is_integer(id), do: id
 end

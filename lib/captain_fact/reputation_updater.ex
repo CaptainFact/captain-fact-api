@@ -7,7 +7,10 @@ defmodule CaptainFact.ReputationUpdater do
 
   require Logger
   import Ecto.Query
-  alias CaptainFact.{ Repo, User, UserState }
+
+  alias CaptainFact.Repo
+  alias CaptainFact.UserState
+  alias CaptainFact.Web.User
 
   @max_daily_reputation_gain 30
   @user_state_key :today_reputation_gain

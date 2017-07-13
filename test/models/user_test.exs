@@ -1,7 +1,7 @@
 defmodule CaptainFact.UserTest do
   use CaptainFact.ModelCase, async: true
 
-  alias CaptainFact.User
+  alias CaptainFact.Web.User
 
   @valid_attrs %{
     name: "Jouje BigBrother",

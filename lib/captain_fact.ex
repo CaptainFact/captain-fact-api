@@ -11,7 +11,7 @@ defmodule CaptainFact do
       # Start the Ecto repository
       supervisor(CaptainFact.Repo, []),
       # Start the endpoint when the application starts
-      supervisor(CaptainFact.Endpoint, []),
+      supervisor(CaptainFact.Web.Endpoint, []),
       # Other custom workers
       worker(CaptainFact.UserState, []),
       worker(CaptainFact.VoteDebouncer, []),
@@ -23,12 +23,5 @@ defmodule CaptainFact do
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: CaptainFact.Supervisor]
     Supervisor.start_link(children, opts)
-  end
-
-  # Tell Phoenix to update the endpoint configuration
-  # whenever the application is updated.
-  def config_change(changed, _new, removed) do
-    CaptainFact.Endpoint.config_change(changed, removed)
-    :ok
   end
 end

@@ -1,5 +1,5 @@
 defmodule CaptainFact.VideoDebateActionCreator do
-  alias CaptainFact. { VideoDebateAction, Speaker, Statement }
+  alias CaptainFact.Web.{ VideoDebateAction, Speaker, Statement }
 
 
   # Generic action generator
