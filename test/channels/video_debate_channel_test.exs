@@ -1,7 +1,7 @@
 defmodule CaptainFact.VideoDebateChannelTest do
-  use CaptainFact.ChannelCase
+  use CaptainFact.Web.ChannelCase
 
-  alias CaptainFact.VideoDebateChannel
+  alias CaptainFact.Web.VideoDebateChannel
 
   setup do
     {:ok, _, socket} =

@@ -1,7 +1,7 @@
 defmodule CaptainFact.StatementTest do
   use CaptainFact.ModelCase, async: true
 
-  alias CaptainFact.Statement
+  alias CaptainFact.Web.Statement
 
   @valid_attrs %{
     text: Faker.Lorem.sentence(%Range{first: 1, last: 10}),

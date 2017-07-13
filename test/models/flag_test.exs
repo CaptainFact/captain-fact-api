@@ -1,7 +1,7 @@
 defmodule CaptainFact.FlagTest do
   use CaptainFact.ModelCase
 
-  alias CaptainFact.{Flag, Comment}
+  alias CaptainFact.Web.{Flag, Comment}
 
 
   @valid_comment %Comment{id: 1, user_id: 42}

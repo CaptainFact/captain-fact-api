@@ -1,3 +1,3 @@
 defmodule CaptainFact.PageViewTest do
-  use CaptainFact.ConnCase, async: true
+  use CaptainFact.Web.ConnCase, async: true
 end

@@ -1,7 +1,7 @@
 defmodule CaptainFact.CommentTest do
   use CaptainFact.ModelCase, async: true
 
-  alias CaptainFact.Comment
+  alias CaptainFact.Web.Comment
 
   @valid_attrs %{
     statement_id: 1,

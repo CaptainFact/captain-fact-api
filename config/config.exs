@@ -9,10 +9,10 @@ use Mix.Config
 config :captain_fact, ecto_repos: [CaptainFact.Repo]
 
 # Configures the endpoint
-config :captain_fact, CaptainFact.Endpoint,
+config :captain_fact, CaptainFact.Web.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "avLUvr7bCD8k3H+fX+PQi7DvB7qocJBMmX4H05kdSYX3sHEmnsgalWU1RbpwP1Bh",
-  render_errors: [view: CaptainFact.ErrorView, accepts: ~w(json), default_format: "json"],
+  render_errors: [view: CaptainFact.Web.ErrorView, accepts: ~w(json), default_format: "json"],
   pubsub: [name: CaptainFact.PubSub, adapter: Phoenix.PubSub.PG2],
   force_ssl: [rewrite_on: [:x_forwarded_proto]]
 
@@ -40,24 +40,24 @@ config :guardian, Guardian,
   issuer: "CaptainFact",
   ttl: {30, :days},
   secret_key: "Qf+lilDob+feItWrI+b/Ls3gBglt8IFlnC+DoJIn1Bqvy3yy/oVRDGdlte4wTu/x",
-  serializer: CaptainFact.GuardianSerializer,
+  serializer: CaptainFact.Web.GuardianSerializer,
   permissions: %{default: [:read, :write]}
 
 # Configure ex_admin (Admin platform)
 config :ex_admin,
 #  theme: ExAdmin.Theme.ActiveAdmin,
   repo: CaptainFact.Repo,
-  module: CaptainFact,
+  module: CaptainFact.Web,
   modules: [
-    CaptainFact.ExAdmin.Comment,
-    CaptainFact.ExAdmin.Dashboard,
-    CaptainFact.ExAdmin.Flag,
-    CaptainFact.ExAdmin.Source,
-    CaptainFact.ExAdmin.Speaker,
-    CaptainFact.ExAdmin.Statement,
-    CaptainFact.ExAdmin.User,
-    CaptainFact.ExAdmin.Video,
-    CaptainFact.ExAdmin.VideoDebateAction
+    CaptainFact.Web.ExAdmin.Comment,
+    CaptainFact.Web.ExAdmin.Dashboard,
+    CaptainFact.Web.ExAdmin.Flag,
+    CaptainFact.Web.ExAdmin.Source,
+    CaptainFact.Web.ExAdmin.Speaker,
+    CaptainFact.Web.ExAdmin.Statement,
+    CaptainFact.Web.ExAdmin.User,
+    CaptainFact.Web.ExAdmin.Video,
+    CaptainFact.Web.ExAdmin.VideoDebateAction
   ]
 
 # Configure file upload
