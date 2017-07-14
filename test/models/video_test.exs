@@ -16,6 +16,12 @@ defmodule CaptainFact.VideoTest do
       assert changeset.valid?
     end
 
+    test "url can be a short youtube url" do
+      attrs = Map.put(@valid_attrs, :url, "https://youtu.be/i92WEKROND8")
+      changeset = Video.changeset(%Video{}, attrs)
+      assert changeset.valid?
+    end
+
     test "video is not valid with missing attributes" do
       changeset = Video.changeset(%Video{}, %{})
       refute changeset.valid?

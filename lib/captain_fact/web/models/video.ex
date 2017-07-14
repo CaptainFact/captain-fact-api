@@ -5,7 +5,9 @@ defmodule CaptainFact.Web.Video do
 
   schema "videos" do
     field :title, :string
-    field :url, :string
+    field :url, :string, virtual: true
+    field :provider, :string, null: false
+    field :provider_id, :string, null: false
 
     many_to_many :speakers, Speaker, join_through: VideoSpeaker, on_delete: :delete_all
     has_many :statements, Statement, on_delete: :delete_all
@@ -22,10 +24,17 @@ defmodule CaptainFact.Web.Video do
     from v in query, preload: [:statements]
   end
 
-  def format_url(url) do
-    url
-    |> String.replace_prefix("http://", "https://")
-    |> String.replace(~r/&.*/, "")
+  @providers_urls %{
+    # Map a provider name to its regex, using named_captures to get the id -------------------↘️
+    "youtube" => ~r/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)(?<id>[^"&?\/ ]{11})/i
+  }
+
+  def is_valid_url(url) do
+    Enum.find_value(@providers_urls, false, fn {_, regex} -> Regex.match?(regex, url) end)
+  end
+
+  def build_url(%{provider: "youtube", provider_id: id}) do
+    "https://www.youtube.com/watch?v=#{id}"
   end
 
   @doc """
@@ -34,9 +43,34 @@ defmodule CaptainFact.Web.Video do
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(params, [:url, :title])
-    |> validate_required([:url, :title])
+    |> validate_required([:url])
+    |> parse_url()
+    |> validate_required([:provider, :provider_id])
     |> validate_length(:title, min: 5, max: 120)
-    |> validate_format(:url, ~r/(?:youtube\.com\/\S*(?:(?:\/e(?:mbed))?\/|watch\/?\?(?:\S*?&?v\=))|youtu\.be\/)([a-zA-Z0-9_-]{6,11})/)
-    |> unique_constraint(:url)
+    |> unique_constraint(:videos_provider_provider_id_index) # TODO Verify name
+  end
+
+  def parse_url(changeset = %Ecto.Changeset{}) do
+    case changeset do
+      %Ecto.Changeset{valid?: true, changes: %{url: url}} ->
+        case parse_url(url) do
+          {provider, id} ->
+            changeset
+            |> put_change(:provider, provider)
+            |> put_change(:provider_id, id)
+          _ ->
+            add_error(changeset, :url, "invalid url")
+        end
+      _ ->
+        changeset
+    end
+  end
+  def parse_url(url) when is_binary(url) do
+    Enum.find_value(@providers_urls, fn {provider, regex} ->
+      case Regex.named_captures(regex, url) do
+        %{"id" => id} -> {provider, id}
+        nil -> nil
+      end
+    end)
   end
 end

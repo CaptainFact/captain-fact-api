@@ -4,7 +4,7 @@ defmodule CaptainFact.StatementTest do
   alias CaptainFact.Web.Statement
 
   @valid_attrs %{
-    text: Faker.Lorem.sentence(%Range{first: 1, last: 10}),
+    text: "Be proud of you Because you can be do what we want to do !",
     time: 42,
     speaker_id: 3,
     video_id: 2
