@@ -37,7 +37,7 @@ defmodule CaptainFact.Web.UserSocket do
         _ in Ecto.NoResultsError -> reply_error(socket, "not found")
         e ->
           Logger.error("[RescueChannel] An unknown error just popped : #{inspect(e)}")
-          reply_error(socket, "unknown server error")
+          reply_error(socket, "unexpected")
       end
     end
   end
@@ -45,6 +45,6 @@ defmodule CaptainFact.Web.UserSocket do
   def id(_socket), do: nil
 
   defp reply_error(socket, message) do
-    {:reply, {:error, %{message: message}}, socket}
+    {:reply, {:error, %{error: message}}, socket}
   end
 end

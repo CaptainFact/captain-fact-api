@@ -64,7 +64,7 @@ defmodule CaptainFact.UserPermissionsTest do
   end
 
   test "lock! ensures permissions are verified and raise exception otherwise", context do
-    assert_raise(PermissionsError, "not enough reputation", fn ->
+    assert_raise(PermissionsError, "not_enough_reputation", fn ->
       UserPermissions.lock!(context[:negative_user], :vote_down, fn _ -> 42 end)
     end)
 
@@ -73,7 +73,7 @@ defmodule CaptainFact.UserPermissionsTest do
     action = :add_comment
     max_occurences = UserPermissions.limitation(user, action)
     for _ <- 0..max_occurences, do: UserPermissions.record_action(user, action)
-    assert_raise(PermissionsError, "limit reached", fn ->
+    assert_raise(PermissionsError, "limit_reached", fn ->
       UserPermissions.lock!(user, action, fn _ -> 42 end)
     end)
   end
@@ -97,18 +97,18 @@ defmodule CaptainFact.UserPermissionsTest do
 
   test "users with too low reputation shouldn't be able to do anything", context do
     Enum.each(UserPermissions.limitations, fn {action, _} ->
-      assert UserPermissions.check(context[:banned_user], action) == {:error, "not enough reputation"}
+      assert UserPermissions.check(context[:banned_user], action) == {:error, "not_enough_reputation"}
     end)
   end
 
   test "unauthenticated users should never pass UserPermissions" do
     Enum.each(UserPermissions.limitations, fn {action, _} ->
-      assert UserPermissions.check(nil, action) == {:error, "not authenticated"}
+      assert UserPermissions.check(nil, action) == {:error, "unauthenticated"}
     end)
   end
 
   test "nil user will raise UserPermissions error" do
-    message = "not authenticated"
+    message = "unauthenticated"
 
     # Lock
     assert_raise(PermissionsError, message, fn ->

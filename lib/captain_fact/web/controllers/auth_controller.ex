@@ -10,8 +10,8 @@ defmodule CaptainFact.Web.AuthController do
   plug Guardian.Plug.EnsureAuthenticated, [handler: AuthController] when action in [:delete, :me]
 
 
-  @err_authentication_failed "authentication failed"
-  @err_invalid_email_password "Invalid email / password combination"
+  @err_authentication_failed "authentication_failed"
+  @err_invalid_email_password "invalid_email_password"
 
 
   # If auth fails
@@ -143,12 +143,12 @@ defmodule CaptainFact.Web.AuthController do
   def unauthenticated(conn, _params) do
     conn
     |> put_status(:unauthorized)
-    |> render(ErrorView, "error.json", errors: %{"account" => ["insufficient privilege"]})
+    |> render(ErrorView, "error.json")
   end
 
   def unauthorized(conn, _params) do
     conn
     |> put_status(:forbidden)
-    |> render(ErrorView, "error.json", error: %{"account" => ["unauthorized"]})
+    |> render(ErrorView, "error.json")
   end
 end

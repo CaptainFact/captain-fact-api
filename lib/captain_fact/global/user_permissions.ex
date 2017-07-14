@@ -64,12 +64,12 @@ defmodule CaptainFact.UserPermissions do
   def lock!(user = %User{}, action, func) when is_atom(action) do
     limit = limitation(user, action)
     if (limit == 0),
-      do: raise PermissionsError, message: "not enough reputation"
+      do: raise PermissionsError, message: "not_enough_reputation"
 
     case UserState.get_and_update(user, @user_state_key, fn state ->
       state = state || %{}
       if Map.get(state, action, 0) >= limitation(user, action) do
-        {{:error, "limit reached"}, state}
+        {{:error, "limit_reached"}, state}
       else
         try do
           result = func.(user)
@@ -86,7 +86,7 @@ defmodule CaptainFact.UserPermissions do
   end
   def lock!(user_id, action, func) when is_integer(user_id) and is_atom(action),
     do: lock!(do_load_user!(user_id), action, func)
-  def lock!(nil, _, _), do: raise PermissionsError, message: "not authenticated"
+  def lock!(nil, _, _), do: raise PermissionsError, message: "unauthenticated"
 
   @doc """
   Run Repo.transaction while locking permissions. Usefull when piping
@@ -103,24 +103,24 @@ defmodule CaptainFact.UserPermissions do
       iex> UserPermissions.check(user, :add_comment)
       {:ok, 20}
       iex> UserPermissions.check(%{user | reputation: -42}, :remove_statement)
-      {:error, "not enough reputation"}
+      {:error, "not_enough_reputation"}
       iex> for _ <- 0..50, do: UserPermissions.record_action(user, :add_comment)
       iex> UserPermissions.check(user, :add_comment)
-      {:error, "limit reached"}
+      {:error, "limit_reached"}
   """
   def check(user = %User{}, action) when is_atom(action) do
     limit = limitation(user, action)
     if (limit == 0) do
-      {:error, "not enough reputation"}
+      {:error, "not_enough_reputation"}
     else
       action_count = Map.get(UserState.get(user, @user_state_key, %{}), action, 0)
       limitation = limitation(user, action)
       if action_count >= limitation,
-      do: {:error, "limit reached"},
+      do: {:error, "limit_reached"},
       else: {:ok, limitation - action_count}
     end
   end
-  def check(nil, _), do: {:error, "not authenticated"}
+  def check(nil, _), do: {:error, "unauthenticated"}
   def check!(user = %User{}, action) when is_atom(action) do
     case check(user, action) do
       {:ok, _} -> :ok
@@ -130,7 +130,7 @@ defmodule CaptainFact.UserPermissions do
   def check!(user_id, action) when is_integer(user_id) and is_atom(action) do
      check!(do_load_user!(user_id), action)
   end
-  def check!(nil, _), do: raise PermissionsError, message: "not authenticated"
+  def check!(nil, _), do: raise PermissionsError, message: "unauthenticated"
 
   @doc """
   Doesn't verify user's limitation nor reputation, you need to check that by yourself
@@ -168,7 +168,7 @@ defmodule CaptainFact.UserPermissions do
   defp do_record_action(user_actions, action),
     do: Map.update(user_actions, action, 1, &(&1 + 1))
 
-  defp do_load_user!(nil), do: raise PermissionsError, message: "not authenticated"
+  defp do_load_user!(nil), do: raise PermissionsError, message: "unauthenticated"
   defp do_load_user!(user_id) do
     User
     |> where([u], u.id == ^user_id)

@@ -10,7 +10,7 @@ defmodule CaptainFact.Web.VideoDebateChannel do
   alias Phoenix.View
   alias Ecto.Multi
   alias CaptainFact.{ VideoHashId, UserPermissions }
-  alias CaptainFact.Web.{ Video, VideoView, Speaker, SpeakerView, VideoSpeaker}
+  alias CaptainFact.Web.{ Video, VideoView, Speaker, SpeakerView, VideoSpeaker, ChangesetView}
 
 
   def join("video_debate:" <> video_id_hash, _payload, socket) do
@@ -75,15 +75,15 @@ defmodule CaptainFact.Web.VideoDebateChannel do
         rendered_speaker = SpeakerView.render("show.json", speaker: speaker)
         broadcast!(socket, "speaker_added", rendered_speaker)
         {:reply, :ok, socket}
-      {:error, _reason} ->
-        {:reply, :error, socket}
+      {:error, :speaker, changeset, %{}} ->
+        {:reply, {:error, ChangesetView.render("error.json", %{changeset: changeset})}, socket}
     end
   end
 
   def handle_in_authenticated("update_speaker", params, socket) do
     speaker = Repo.get_by!(Speaker, id: params["id"], is_removed: false)
     if !speaker.is_user_defined do
-      {:reply, {:error, %{speaker: "Forbidden"}}, socket}
+      {:reply, {:error, %{speaker: "forbidden"}}, socket}
     else
       %{user_id: user_id, video_id: video_id} = socket.assigns
       changeset = Speaker.changeset(speaker, params)
