@@ -84,7 +84,7 @@ defmodule CaptainFact.Web.UserController do
           |> SendInBlueApi.User.create_or_update()
           |> case do
             {:ok, _} -> send_resp(conn, 200, "")
-            {:error, _} -> render_invalid_email_error(conn, "Email rejected")
+            {:error, _} -> render_invalid_email_error(conn)
           end
       end
     end
@@ -96,7 +96,7 @@ defmodule CaptainFact.Web.UserController do
     send_resp(conn, :no_content, "")
   end
 
-  defp render_invalid_email_error(conn, msg \\ "Invalid Email") do
-    conn |> put_status(400) |> json(%{error: msg})
+  defp render_invalid_email_error(conn) do
+    conn |> put_status(400) |> json(%{error: "invalid_email"})
   end
 end
