@@ -83,10 +83,10 @@ defmodule CaptainFact.Web.AuthController do
          })
        )
     |> Multi.run(:final_user, fn %{base_user: user} ->
-        User.changeset(user, %{})
-        |> Ecto.Changeset.put_change(:username, UsernameGenerator.generate(user.id))
-        |> Repo.update()
-     end)
+         User.changeset(user, %{})
+         |> Ecto.Changeset.put_change(:username, UsernameGenerator.generate(user.id))
+         |> Repo.update()
+       end)
     |> Repo.transaction()
     |> case do
         {:ok, %{final_user: user}} -> user
@@ -100,22 +100,21 @@ defmodule CaptainFact.Web.AuthController do
   end
 
   defp user_from_auth(auth) do
-    result = Repo.get_by(User, email: auth.info.email)
-    case result do
+    case Repo.get_by(User, email: auth.info.email) do
       nil -> {:error, %{"email" => ["Invalid email"]}}
       user -> {:ok, user}
     end
   end
 
   defp validate_pass(_encrypted, password) when password in [nil, ""] do
-    {:error, "password required"}
+    {:error, "password_required"}
   end
 
   defp validate_pass(encrypted, password) do
     if Comeonin.Bcrypt.checkpw(password, encrypted) do
       :ok
     else
-      {:error, "invalid password"}
+      {:error, "invalid_password"}
     end
   end
 
@@ -134,21 +133,20 @@ defmodule CaptainFact.Web.AuthController do
 
   def delete(conn, _params) do
     conn
-      |> Guardian.Plug.current_token
-      |> Guardian.revoke!
-
+    |> Guardian.Plug.current_token
+    |> Guardian.revoke!
     send_resp(conn, 204, "")
   end
 
   def unauthenticated(conn, _params) do
     conn
     |> put_status(:unauthorized)
-    |> render(ErrorView, "error.json")
+    |> render(ErrorView, "401.json")
   end
 
   def unauthorized(conn, _params) do
     conn
     |> put_status(:forbidden)
-    |> render(ErrorView, "error.json")
+    |> render(ErrorView, "403.json")
   end
 end

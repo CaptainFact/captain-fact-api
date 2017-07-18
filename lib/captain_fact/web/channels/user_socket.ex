@@ -3,6 +3,7 @@ defmodule CaptainFact.Web.UserSocket do
 
   require Logger
   import Guardian.Phoenix.Socket
+  alias CaptainFact.Web.ErrorView
 
   ## Channels
   channel "video_debate:*", CaptainFact.Web.VideoDebateChannel
@@ -32,19 +33,20 @@ defmodule CaptainFact.Web.UserSocket do
       try do
         handler.(command, params, socket)
       rescue
-        # TODO unify errors with controllers
-        e in CaptainFact.UserPermissions.PermissionsError -> reply_error(socket, e.message)
-        _ in Ecto.NoResultsError -> reply_error(socket, "not found")
+        e in CaptainFact.UserPermissions.PermissionsError ->
+          reply_error(socket, Phoenix.View.render(ErrorView, "403.json", %{reason: e}))
+        _ in Ecto.NoResultsError ->
+          reply_error(socket, Phoenix.View.render(ErrorView, "404.json", []))
         e ->
           Logger.error("[RescueChannel] An unknown error just popped : #{inspect(e)}")
-          reply_error(socket, "unexpected")
+          reply_error(socket, Phoenix.View.render(ErrorView, "error.json", []))
       end
     end
   end
 
   def id(_socket), do: nil
 
-  defp reply_error(socket, message) do
-    {:reply, {:error, %{error: message}}, socket}
+  defp reply_error(socket, error) do
+    {:reply, {:error, error}, socket}
   end
 end

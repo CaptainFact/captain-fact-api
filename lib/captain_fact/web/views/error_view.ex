@@ -1,26 +1,40 @@
 defmodule CaptainFact.Web.ErrorView do
   use CaptainFact.Web, :view
 
+  alias CaptainFact.UserPermissions.PermissionsError
 
   def render("show.json", %{message: message}) do
     render_one(message, CaptainFact.Web.ErrorView, "error.json")
   end
 
-  def render("error.json", %{conn: %{status: 401}}) do
+  def render("401.json", _) do
     %{error: "unauthorized"}
+  end
+
+  def render("403.json", %{reason: %PermissionsError{message: message}}) do
+    %{error: message}
+  end
+
+  def render("403.json", assigns) do
+    if Mix.env == :dev, do: IO.inspect(assigns)
+    %{error: "forbidden"}
+  end
+
+  def render("404.json", _) do
+    %{error: "not_found"}
   end
 
   def render("error.json", %{message: message}) do
     %{error: message}
   end
 
-  def render("error.json", conn) do
-    if Mix.env == :dev, do: IO.inspect(conn)
+  def render("error.json", assigns) do
+    if Mix.env == :dev, do: IO.inspect(assigns)
     %{error: "unexpected"}
   end
 
-  def render(_, conn) do
-    if Mix.env == :dev, do: IO.inspect(conn)
+  def render(_, assigns) do
+    if Mix.env == :dev, do: IO.inspect(assigns)
     %{error: "unexpected"}
   end
 end

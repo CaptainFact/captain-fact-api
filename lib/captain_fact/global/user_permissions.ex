@@ -86,7 +86,7 @@ defmodule CaptainFact.UserPermissions do
   end
   def lock!(user_id, action, func) when is_integer(user_id) and is_atom(action),
     do: lock!(do_load_user!(user_id), action, func)
-  def lock!(nil, _, _), do: raise PermissionsError, message: "unauthenticated"
+  def lock!(nil, _, _), do: raise PermissionsError, message: "unauthorized"
 
   @doc """
   Run Repo.transaction while locking permissions. Usefull when piping
@@ -120,7 +120,7 @@ defmodule CaptainFact.UserPermissions do
       else: {:ok, limitation - action_count}
     end
   end
-  def check(nil, _), do: {:error, "unauthenticated"}
+  def check(nil, _), do: {:error, "unauthorized"}
   def check!(user = %User{}, action) when is_atom(action) do
     case check(user, action) do
       {:ok, _} -> :ok
@@ -130,7 +130,7 @@ defmodule CaptainFact.UserPermissions do
   def check!(user_id, action) when is_integer(user_id) and is_atom(action) do
      check!(do_load_user!(user_id), action)
   end
-  def check!(nil, _), do: raise PermissionsError, message: "unauthenticated"
+  def check!(nil, _), do: raise PermissionsError, message: "unauthorized"
 
   @doc """
   Doesn't verify user's limitation nor reputation, you need to check that by yourself
@@ -168,7 +168,7 @@ defmodule CaptainFact.UserPermissions do
   defp do_record_action(user_actions, action),
     do: Map.update(user_actions, action, 1, &(&1 + 1))
 
-  defp do_load_user!(nil), do: raise PermissionsError, message: "unauthenticated"
+  defp do_load_user!(nil), do: raise PermissionsError, message: "unauthorized"
   defp do_load_user!(user_id) do
     User
     |> where([u], u.id == ^user_id)

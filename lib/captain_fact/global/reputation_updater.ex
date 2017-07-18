@@ -34,16 +34,18 @@ defmodule CaptainFact.ReputationUpdater do
   when is_atom(action) do
     {source_change, target_change} = Map.get(@actions, action)
     tasks = [
-      Task.async(fn -> register_change(user_id(source_user), source_change) end),
-      Task.async(fn -> register_change(user_id(target_user), target_change) end)
+      fn -> register_change(user_id(source_user), source_change) end,
+      fn -> register_change(user_id(target_user), target_change) end
     ]
-    unless async, do: Enum.map(tasks, &Task.await/1)
+    if async,
+      do: Enum.map(tasks, &Task.start_link/1),
+      else: Enum.map(tasks, &Task.async/1) |> Enum.map(&Task.await/1)
   end
 
   def register_action_without_source(target_user, action, async \\ true) do
     change = elem(Map.get(@actions, action), 1)
     change_func = fn -> register_change(user_id(target_user), change) end
-    if async, do: Task.async(change_func), else: change_func.()
+    if async, do: Task.start_link(change_func), else: change_func.()
   end
 
   def get_today_reputation_gain(user),

@@ -46,7 +46,7 @@ defmodule CaptainFact.Web.Vote do
   def get_vote_type(_, nil, 0), do: nil
   def get_vote_type(_, base_value, base_value), do: nil
   def get_vote_type(comment, base_value, value) do
-    (if comment.source, do: "fact_vote_", else: "comment_vote_")
+    (if comment.source_id, do: "fact_vote_", else: "comment_vote_")
     |> (&(&1 <> get_vote_direction(base_value, value))).()
     |> String.to_atom()
   end

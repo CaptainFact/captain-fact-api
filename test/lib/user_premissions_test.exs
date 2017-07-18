@@ -101,14 +101,14 @@ defmodule CaptainFact.UserPermissionsTest do
     end)
   end
 
-  test "unauthenticated users should never pass UserPermissions" do
+  test "unauthorized users should never pass UserPermissions" do
     Enum.each(UserPermissions.limitations, fn {action, _} ->
-      assert UserPermissions.check(nil, action) == {:error, "unauthenticated"}
+      assert UserPermissions.check(nil, action) == {:error, "unauthorized"}
     end)
   end
 
   test "nil user will raise UserPermissions error" do
-    message = "unauthenticated"
+    message = "unauthorized"
 
     # Lock
     assert_raise(PermissionsError, message, fn ->

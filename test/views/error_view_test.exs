@@ -3,18 +3,27 @@ defmodule CaptainFact.ErrorViewTest do
 
   # Bring render/3 and render_to_string/3 for testing custom views
   import Phoenix.View
+  alias CaptainFact.Web.ErrorView
+  alias CaptainFact.UserPermissions.PermissionsError
 
-  test "renders 404.json" do
-    assert render_to_string(CaptainFact.ErrorView, "404.json", []) =~ "Not Found"
+  test "renders 401.json" do
+    assert render_to_string(ErrorView, "401.json", []) =~ "unauthorized"
   end
 
-  test "render 500.json" do
-    assert render_to_string(CaptainFact.ErrorView, "500.json", []) =~
-           "Server encountered an unexpected error. We're working on it !"
+  test "renders 403.json" do
+    assert render_to_string(ErrorView, "403.json", []) =~ "forbidden"
+  end
+
+  test "renders 403.json with PermissionsError" do
+    assert render_to_string(ErrorView, "403.json", %{reason: %PermissionsError{message: "xxx"}}) =~
+      "xxx"
+  end
+
+ test "renders 404.json" do
+    assert render_to_string(ErrorView, "404.json", []) =~ "not_found"
   end
 
   test "render any other" do
-    assert render_to_string(CaptainFact.ErrorView, "505.json", []) =~
-           "Server encountered an unexpected error. We're working on it !"
+    assert render_to_string(ErrorView, "999.json", []) =~ "unexpected"
   end
 end

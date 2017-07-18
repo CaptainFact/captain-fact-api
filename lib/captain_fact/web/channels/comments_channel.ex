@@ -81,7 +81,7 @@ defmodule CaptainFact.Web.CommentsChannel do
     end)
     VoteDebouncer.add_vote(socket.topic, new_vote.comment_id)
     with true <- action != :self_vote,
-         vote_type <- Vote.get_vote_type(comment, base_vote.value, new_vote.value) do
+         vote_type when not is_nil(vote_type) <- Vote.get_vote_type(comment, base_vote.value, new_vote.value) do
       ReputationUpdater.register_action(socket.assigns.user_id, comment.user_id, vote_type)
     end
     {:reply, :ok, socket}

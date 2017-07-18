@@ -82,12 +82,12 @@ defmodule CaptainFact.Web.User do
   end
   defp validate_email(changeset), do: changeset
 
-  @forbidden_username_keywords ~w(captainfact admin newuser temporary)
+  @forbidden_username_keywords ~w(captainfact admin newuser temporary anonymous)
   defp validate_username(%{changes: %{username: username}} = changeset) do
     lower_username = String.downcase(username)
     case Enum.find(@forbidden_username_keywords, &String.contains?(lower_username, &1)) do
       nil -> changeset
-      keyword -> add_error(changeset, :username, "contains a foridden keyword #{keyword}")
+      keyword -> add_error(changeset, :username, "contains a foridden keyword: #{keyword}")
     end
   end
   defp validate_username(changeset), do: changeset
