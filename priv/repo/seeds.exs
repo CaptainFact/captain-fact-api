@@ -1,21 +1,25 @@
-# Script for populating the database. You can run it as:
-#
-#     mix run priv/repo/seeds.exs
-#
-# Inside the script, you can read and write to any of your
-# repositories directly:
-#
-#     CaptainFact.Repo.insert!(%CaptainFact.SomeModel{})
-#
-# We recommend using the bang functions (`insert!`, `update!`
-# and so on) as they will fail if something goes wrong.
+alias CaptainFact.Repo
+alias CaptainFact.Web.User
 
-alias CaptainFact.User
-
-admin = User.registration_changeset(%User{}, %{
+admin = User.changeset(%User{reputation: 4200}, %{
   username: "Betree",
-  email: "admin@captainfact.com",
+  email: "admin@captainfact.io",
   password: "password"
 })
 
-CaptainFact.Repo.insert!(admin)
+Repo.insert!(admin)
+
+# Some speakers
+#speakers = [
+#  %Speaker{full_name: "Nicolas Sarkozy", title: "Former French President"},
+#  %Speaker{full_name: "Donald Trump", title: "President of the USA"},
+#  %Speaker{full_name: "Marine Lepen", title: "French Politician"},
+#  %Speaker{full_name: "Francois Fillon", title: "French Politician"},
+#  %Speaker{full_name: "Cécile Duflot", title: "French Politician"},
+#  %Speaker{full_name: "Jean-Luc Mélenchon", title: "French Politician"}
+#]
+#
+#Enum.each speakers, fn(speaker) ->
+#  speaker = Map.put(speaker, :is_user_defined, false)
+#  Repo.insert!(speaker)
+#end

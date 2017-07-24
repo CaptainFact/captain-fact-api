@@ -11,22 +11,17 @@ defmodule CaptainFact do
       # Start the Ecto repository
       supervisor(CaptainFact.Repo, []),
       # Start the endpoint when the application starts
-      supervisor(CaptainFact.Endpoint, []),
-      # Start your own worker by calling: CaptainFact.Worker.start_link(arg1, arg2, arg3)
-      # worker(CaptainFact.Worker, [arg1, arg2, arg3]),
-      worker(CaptainFact.VoteDebouncer, [])
+      supervisor(CaptainFact.Web.Endpoint, []),
+      # Other custom workers
+      worker(CaptainFact.UserState, []),
+      worker(CaptainFact.VoteDebouncer, []),
+      worker(CaptainFact.VideoHashId, []),
+      worker(CaptainFact.UsernameGenerator, [])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: CaptainFact.Supervisor]
     Supervisor.start_link(children, opts)
-  end
-
-  # Tell Phoenix to update the endpoint configuration
-  # whenever the application is updated.
-  def config_change(changed, _new, removed) do
-    CaptainFact.Endpoint.config_change(changed, removed)
-    :ok
   end
 end

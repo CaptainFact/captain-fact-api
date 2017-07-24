@@ -6,22 +6,28 @@ use Mix.Config
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we use it
 # with brunch.io to recompile .js and .css sources.
-config :captain_fact, CaptainFact.Endpoint,
-  http: [port: 4000],
+config :captain_fact, CaptainFact.Web.Endpoint,
   debug_errors: false,
   code_reloader: true,
   check_origin: false,
-  watchers: []
-
+  watchers: [],
+  http: [port: 4000],
+  force_ssl: false,
+  https: [
+    port: 4001,
+    otp_app: :captain_fact,
+    keyfile: "priv/keys/localhost.key",
+    certfile: "priv/keys/localhost.cert"
+  ]
 
 # Watch static and templates for browser reloading.
-config :captain_fact, CaptainFact.Endpoint,
+config :captain_fact, CaptainFact.Web.Endpoint,
   live_reload: [
     patterns: [
       ~r{priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$},
       ~r{priv/gettext/.*(po)$},
-      ~r{web/views/.*(ex)$},
-      ~r{web/templates/.*(eex)$}
+      ~r{lib/captain_fact/web/views/.*(ex)$},
+      ~r{lib/captain_fact/web/templates/.*(eex)$}
     ]
   ]
 

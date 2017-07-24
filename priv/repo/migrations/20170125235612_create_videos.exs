@@ -3,14 +3,12 @@ defmodule CaptainFact.Repo.Migrations.CreateVideo do
 
   def change do
     create table(:videos) do
-      add :is_private, :boolean, default: false, null: false
+      add :provider, :string, null: false
+      add :provider_id, :string, null: false
       add :title, :string, null: false
-      add :url, :string, null: false
-      add :owner_id, references(:users, on_delete: :delete_all), null: false
 
       timestamps()
     end
-    create index(:videos, [:owner_id])
-
+    create unique_index(:videos, [:provider, :provider_id])
   end
 end
