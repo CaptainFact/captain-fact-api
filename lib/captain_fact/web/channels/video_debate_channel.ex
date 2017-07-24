@@ -14,13 +14,13 @@ defmodule CaptainFact.Web.VideoDebateChannel do
 
 
   def join("video_debate:" <> video_id_hash, _payload, socket) do
-    video_id = VideoHashId.decode!(video_id_hash)
-    rendered_video =
-      Video
-      |> Video.with_speakers
-      |> Repo.get!(video_id)
-      |> View.render_one(VideoView, "video.json")
-    {:ok, rendered_video, assign(socket, :video_id, video_id)}
+    with {:ok, video_id} <- VideoHashId.decode(video_id_hash),
+         video when not is_nil(video) <- Repo.get(Video.with_speakers(Video), video_id)
+    do
+      {:ok, View.render_one(video, VideoView, "video.json"), assign(socket, :video_id, video_id)}
+    else
+      _ -> {:error, "not_found"}
+    end
   end
 
   def handle_in(command, params, socket) do

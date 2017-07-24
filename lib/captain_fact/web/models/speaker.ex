@@ -6,7 +6,7 @@ defmodule CaptainFact.Web.Speaker do
     field :full_name, :string
     field :title, :string
     field :country, :string
-    field :wiki_url, :string
+    field :wikidata_item_id, :integer
     field :is_user_defined, :boolean, default: true
     field :picture, CaptainFact.Web.SpeakerPicture.Type
     field :is_removed, :boolean, default: false
@@ -17,7 +17,7 @@ defmodule CaptainFact.Web.Speaker do
   end
 
   @required_fields ~w(full_name)
-  @optional_fields ~w(title wiki_url country)
+  @optional_fields ~w(title wikidata_item_id country)
   @optional_file_fields ~w(picture)
 
   @doc """
@@ -30,6 +30,7 @@ defmodule CaptainFact.Web.Speaker do
     |> validate_length(:full_name, min: 3, max: 60)
     |> validate_length(:title, min: 3, max: 60)
     |> validate_required(:full_name)
+    |> unique_constraint(:wikidata_item_id)
   end
 
   @doc """
