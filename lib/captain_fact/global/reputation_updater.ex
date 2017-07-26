@@ -25,7 +25,8 @@ defmodule CaptainFact.ReputationUpdater do
     fact_vote_down_to_up:     { +1   , +6    },
     fact_vote_up_to_down:     {  0   , -6    },
     # Actions without source
-    comment_banned:           {  0   , -20   }
+    comment_banned:           {  0   , -20   },
+    comment_flagged:          {  0   , -5    }
   }
 
   # --- API ---
@@ -59,6 +60,7 @@ defmodule CaptainFact.ReputationUpdater do
   defp user_id(%User{id: id}), do: id
   defp user_id(id) when is_integer(id), do: id
 
+  defp register_change(_, 0), do: :ok
   defp register_change(user_id, reputation_change) when is_integer(reputation_change) do
     real_change = UserState.get_and_update(user_id, @user_state_key, fn
       today_gain when is_nil(today_gain) ->

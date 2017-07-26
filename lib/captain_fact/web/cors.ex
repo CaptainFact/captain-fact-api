@@ -1,6 +1,6 @@
-defmodule CaptainFact.CORS do
-  @frontend "http://localhost:3333"
-  @chrome_extension "chrome-extension://ncoomilaknkmjmkeclinkmkjflkkeobh"
+defmodule CaptainFact.Web.CORS do
+  @frontend "http://localhost:3333" # TODO Put in config
+  @chrome_extension "chrome-extension://ncoomilaknkmjmkeclinkmkjflkkeobh" # TODO put in config
 
   use Corsica.Router,
     allow_headers: ~w(Accept Content-Type Authorization),

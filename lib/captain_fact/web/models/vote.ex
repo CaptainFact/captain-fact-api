@@ -30,17 +30,17 @@ defmodule CaptainFact.Web.Vote do
   @doc """
   Get an atom describing the vote
   ## Examples
-      iex> CaptainFact.Web.Vote.get_vote_type(%{source: nil}, nil, 0)
+      iex> CaptainFact.Web.Vote.get_vote_type(%{source_id: nil}, nil, 0)
       nil
-      iex> CaptainFact.Web.Vote.get_vote_type(%{source: "source"}, 0, 0)
+      iex> CaptainFact.Web.Vote.get_vote_type(%{source_id: 1}, 0, 0)
       nil
-      iex> CaptainFact.Web.Vote.get_vote_type(%{source: nil}, 0, 1)
+      iex> CaptainFact.Web.Vote.get_vote_type(%{source_id: nil}, 0, 1)
       :comment_vote_up
-      iex> CaptainFact.Web.Vote.get_vote_type(%{source: "source"}, 1, 0)
+      iex> CaptainFact.Web.Vote.get_vote_type(%{source_id: 1}, 1, 0)
       :fact_vote_down
-      iex> CaptainFact.Web.Vote.get_vote_type(%{source: nil}, -1, 1)
+      iex> CaptainFact.Web.Vote.get_vote_type(%{source_id: nil}, -1, 1)
       :comment_vote_down_to_up
-      iex> CaptainFact.Web.Vote.get_vote_type(%{source: "source"}, 1, -1)
+      iex> CaptainFact.Web.Vote.get_vote_type(%{source_id: 1}, 1, -1)
       :fact_vote_up_to_down
   """
   def get_vote_type(_, nil, 0), do: nil

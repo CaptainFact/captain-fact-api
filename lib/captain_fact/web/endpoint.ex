@@ -32,6 +32,6 @@ defmodule CaptainFact.Web.Endpoint do
     key: "_captain_fact_key",
     signing_salt: "M8OYuALs"
 
-  plug CaptainFact.CORS
+  plug CaptainFact.Web.CORS
   plug CaptainFact.Web.Router
 end

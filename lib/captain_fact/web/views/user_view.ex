@@ -8,6 +8,7 @@ defmodule CaptainFact.Web.UserView do
   end
 
   def render("show.json", %{user: user, token: token}) do
+    # TODO There should be a special method for token !
     render_one(user, UserView, "user_token.json", token: token)
   end
 
@@ -25,6 +26,7 @@ defmodule CaptainFact.Web.UserView do
       name: user.name,
       username: user.username,
       reputation: user.reputation,
+      picture_url: user.picture_url,
       registered_at: registered_at(user)
     }
   end
@@ -36,7 +38,8 @@ defmodule CaptainFact.Web.UserView do
       name: user.name,
       username: user.username,
       reputation: user.reputation,
-      registered_at: registered_at(user)
+      picture_url: user.picture_url,
+      registered_at: registered_at(user),
     }
   end
 
@@ -47,6 +50,7 @@ defmodule CaptainFact.Web.UserView do
       name: user.name,
       username: user.username,
       reputation: user.reputation,
+      picture_url: user.picture_url,
       token: token
     }
   end

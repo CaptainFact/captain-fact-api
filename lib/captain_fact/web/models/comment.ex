@@ -43,7 +43,8 @@ defmodule CaptainFact.Web.Comment do
           name: u.name,
           username: u.username,
           reputation: u.reputation,
-          inserted_at: u.inserted_at
+          inserted_at: u.inserted_at,
+          picture_url: u.picture_url
         }
       })
   end

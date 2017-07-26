@@ -4,7 +4,8 @@ use Mix.Config
 # you can enable the server option below.
 config :captain_fact, CaptainFact.Web.Endpoint,
   http: [port: 4001],
-  server: false
+  server: false,
+  force_ssl: false
 
 # Print only warnings and errors during test
 config :logger, level: :warn

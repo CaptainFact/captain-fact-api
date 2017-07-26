@@ -6,8 +6,9 @@ defmodule CaptainFact.Repo.Migrations.CreateFlag do
       add :type, :integer, null: false
       add :reason, :integer, null: false
       add :entity_id, :integer, null: false
-      add :source_user_id, references(:users, on_delete: :nothing), null: false
-      add :target_user_id, references(:users, on_delete: :nothing), null: false
+
+      add :source_user_id, references(:users, on_delete: :delete_all), null: false
+      add :target_user_id, references(:users, on_delete: :delete_all), null: false
 
       timestamps()
     end

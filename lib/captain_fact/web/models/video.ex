@@ -43,7 +43,7 @@ defmodule CaptainFact.Web.Video do
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(params, [:url, :title])
-    |> validate_required([:url])
+    |> validate_required([:url, :title])
     |> parse_url()
     |> validate_required([:provider, :provider_id])
     |> validate_length(:title, min: 5, max: 120)
@@ -59,7 +59,7 @@ defmodule CaptainFact.Web.Video do
             |> put_change(:provider, provider)
             |> put_change(:provider_id, id)
           _ ->
-            add_error(changeset, :url, "invalid url")
+            add_error(changeset, :url, "invalid_url")
         end
       _ ->
         changeset

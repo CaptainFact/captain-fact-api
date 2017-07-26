@@ -22,19 +22,20 @@ defmodule CaptainFact.Web.AuthController do
     |> render(ErrorView, "error.json", message: @err_authentication_failed)
   end
 
-  # Only used by admin
+  # Only used for admin auth
   def callback(%{assigns: %{ueberauth_auth: auth}} = conn, %{"type" => "session"}) do
     conn = Plug.Conn.fetch_session(conn)
-    result = with {:ok, user} <- user_from_auth(auth),
+    result = with {:ok, user = %User{id: 1}} <- user_from_auth(auth),
               :ok <- validate_pass(user.encrypted_password, auth.credentials.other.password),
               do: Guardian.Plug.sign_in(conn, user)
+
     case result do
-      {:error, _} ->
-        conn
-        |> put_status(:bad_request)
-        |> render(ErrorView, "error.json", message: @err_invalid_email_password)
-      _ ->
+      %Plug.Conn{} ->
         redirect(result, to: "/jouge42")
+      _ ->
+        conn
+        |> put_status(:unauthorized)
+        |> render(ErrorView, "error.json", message: @err_invalid_email_password)
     end
   end
 
@@ -48,7 +49,7 @@ defmodule CaptainFact.Web.AuthController do
         render(conn, UserView, "show.json", user: user, token: token)
       {:error, _} ->
         conn
-        |> put_status(:bad_request)
+        |> put_status(:unauthorized)
         |> render(ErrorView, "error.json", message: @err_invalid_email_password)
     end
   end
@@ -56,13 +57,21 @@ defmodule CaptainFact.Web.AuthController do
   # For all others (OAuth) - create if doesn't exists, link otherwise
   def callback(%{assigns: %{ueberauth_auth: auth}} = conn, _params) do
     user = case user_from_auth(auth) do
-      {:ok, user} -> user # TODO Store FB / Twitter / G+ (...) id
+      {:ok, user} ->
+        # Try to update user with social network id if needed
+        with %{fb_user_id: nil} <- user,
+             changeset <- User.oauth_changeset(user, provider_specific_infos(auth)),
+             {:ok, newUser} <- Repo.update(changeset) do
+          newUser
+        else
+          _ -> user # Not a big deal if this fails, just return the user
+        end
       {:error, _} -> create_user_from_oauth!(auth)
     end
 
     case signin_user(conn, user) do
       {:ok, user, token} ->
-        render(conn, UserView, "show.json", user: user, token: token)
+        render(conn, UserView, :show, %{user: user, token: token})
       {:error, _} ->
         conn
         |> put_status(:bad_request)
@@ -72,15 +81,10 @@ defmodule CaptainFact.Web.AuthController do
 
   defp create_user_from_oauth!(auth) do
     Multi.new
-    |> Multi.insert(:base_user, User.registration_changeset(
-        %User{username: "temporary-#{temporary_username(auth.info.email)}"},
-        %{
-           name: auth.info.name,
-           email: auth.info.email,
-           password: NotQwerty123.RandomPassword.gen_password()
-           # TODO Image
-           # TODO Social networks ids
-         })
+    |> Multi.insert(:base_user,
+         %User{username: temporary_username(auth.info.email)}
+         |> User.registration_changeset(auth_info_to_user_info(auth))
+         |> User.oauth_changeset(provider_specific_infos(auth))
        )
     |> Multi.run(:final_user, fn %{base_user: user} ->
          User.changeset(user, %{})
@@ -93,12 +97,47 @@ defmodule CaptainFact.Web.AuthController do
     end
   end
 
+  defp auth_info_to_user_info(auth) do
+    %{
+       name: auth.info.name,
+       email: auth.info.email,
+       password: NotQwerty123.RandomPassword.gen_password()
+    }
+  end
+
+  defp provider_specific_infos(auth = %{provider: :facebook}) do
+    infos = %{fb_user_id: auth.uid}
+    case auth.extra.raw_info.user["picture"]["data"] do
+      %{"is_silhouette" => true} -> infos
+      _ -> Map.merge(infos, %{picture_url: auth.info.image})
+    end
+  end
+  defp provider_specific_infos(_), do: %{}
+
   defp temporary_username(email) do
     :crypto.hash(:sha256, email)
     |> Base.encode64
     |> String.slice(-8..-2)
+    |> (fn res -> "temporary-#{res}" end).()
   end
 
+  defp user_from_auth(auth = %{provider: :facebook}) do
+    User
+    |> where([u], u.fb_user_id == ^auth.uid)
+    |> or_where([u], u.email == ^auth.info.email)
+    |> Repo.all()
+    |> Enum.reduce(nil, fn (user, best_fit) ->
+         # User may link a facebook account, change its facebook email and re-connect with facebook
+         # so we link by default using the facebook account and if none we try to link with email
+         if user.fb_user_id == auth.uid or is_nil(best_fit),
+          do: user,
+          else: best_fit
+       end)
+    |> case do
+      nil -> {:error, %{"email" => ["Invalid email"]}}
+      user -> {:ok, user}
+    end
+  end
   defp user_from_auth(auth) do
     case Repo.get_by(User, email: auth.info.email) do
       nil -> {:error, %{"email" => ["Invalid email"]}}
@@ -128,7 +167,7 @@ defmodule CaptainFact.Web.AuthController do
 
   def me(conn, _params) do
     user = Guardian.Plug.current_resource(conn)
-    render(conn, UserView, "show.json", user: user)
+    render(conn, UserView, :show, user: user)
   end
 
   def delete(conn, _params) do
