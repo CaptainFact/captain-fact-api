@@ -17,10 +17,6 @@ defmodule CaptainFact.Repo.Migrations.CreateUsers do
       add :email_confirmed, :boolean, null: false, default: false
       add :email_confirmation_token, :string, null: true
 
-      # Reset password
-      add :reset_password_confirmation_token, :string, null: true
-      add :reset_password_request_time, :utc_datetime, null: true
-
       timestamps()
     end
 

@@ -16,10 +16,6 @@ defmodule CaptainFact.Web.User do
     field :email_confirmed, :boolean, default: false
     field :email_confirmation_token, :string
 
-    # Reset password
-    field :reset_password_confirmation_token, :string
-    field :reset_password_request_time, :utc_datetime
-
     # Virtual
     field :password, :string, virtual: true
 
@@ -57,6 +53,12 @@ defmodule CaptainFact.Web.User do
   def registration_changeset(model, params \\ :empty) do
     model
     |> common_changeset(params)
+    |> password_changeset(params)
+  end
+
+  def password_changeset(model, params) do
+    model
+    |> cast(params, [:password])
     |> validate_required([:password])
     |> validate_length(:password, min: 6, max: 256)
     |> put_encrypted_pw

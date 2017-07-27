@@ -1,5 +1,5 @@
 defmodule CaptainFact.FlagTest do
-  use CaptainFact.ModelCase
+  use CaptainFact.DataCase
 
   alias CaptainFact.Web.{Flag, Comment}
 

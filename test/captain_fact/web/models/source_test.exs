@@ -1,5 +1,5 @@
 defmodule CaptainFact.SourceTest do
-  use CaptainFact.ModelCase
+  use CaptainFact.DataCase
 
   alias CaptainFact.Web.Source
 

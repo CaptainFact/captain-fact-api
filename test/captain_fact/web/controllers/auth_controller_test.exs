@@ -147,6 +147,33 @@ defmodule CaptainFact.Web.AuthControllerTest do
     end
   end
 
+  test "reset password" do
+    user = insert(:user)
+    new_password = "Passw0rDChanged...=)"
+
+    # Ask for password reset
+    build_conn()
+    |> post("/api/auth/reset_password/request", %{email: user.email})
+    |> response(204)
+
+    # Verify token
+    req = Repo.get_by!(CaptainFact.Accounts.ResetPasswordRequest, user_id: user.id)
+    resp =
+      get(build_conn(), "/api/auth/reset_password/verify/#{req.token}")
+      |> json_response(200)
+    assert Map.has_key?(resp, "username")
+
+    # Confirm (change password)
+    resp =
+      build_conn()
+      |> post("/api/auth/reset_password/confirm", %{
+           token: req.token,
+           password: new_password
+         })
+      |> json_response(200)
+    assert Map.has_key?(resp, "email")
+  end
+
   defp reset_users_table() do
     Repo.delete_all(User)
     query = "ALTER SEQUENCE users_id_seq RESTART WITH 1"

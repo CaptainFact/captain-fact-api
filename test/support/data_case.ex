@@ -1,4 +1,4 @@
-defmodule CaptainFact.ModelCase do
+defmodule CaptainFact.DataCase do
   @moduledoc """
   This module defines the test case to be used by
   model tests.
@@ -21,7 +21,8 @@ defmodule CaptainFact.ModelCase do
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
-      import CaptainFact.ModelCase
+      import CaptainFact.DataCase
+      import CaptainFact.Factory
     end
   end
 

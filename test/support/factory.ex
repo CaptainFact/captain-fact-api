@@ -9,7 +9,8 @@ defmodule CaptainFact.Factory do
       username: "User-#{random_string(10)}",
       email: Faker.Internet.email,
       encrypted_password: "$2b$12$fe55IfCdqNzKp1wMIJDwVeG3f7guOduEE5HS2C9IJyfkuk3avbjQG",
-      fb_user_id: Integer.to_string(Enum.random(10000..9999999999999))
+      fb_user_id: Integer.to_string(Enum.random(10000..9999999999999)),
+      reputation: 0
     }
   end
 

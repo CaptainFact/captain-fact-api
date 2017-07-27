@@ -1,5 +1,5 @@
 defmodule CaptainFact.StatementTest do
-  use CaptainFact.ModelCase, async: true
+  use CaptainFact.DataCase, async: true
 
   alias CaptainFact.Web.Statement
 

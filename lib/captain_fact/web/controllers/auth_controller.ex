@@ -4,6 +4,7 @@ defmodule CaptainFact.Web.AuthController do
 
   alias Ecto.Multi
   alias CaptainFact.UsernameGenerator
+  alias CaptainFact.Accounts
   alias CaptainFact.Web.{ErrorView, UserView, User, AuthController }
 
   plug Ueberauth
@@ -78,6 +79,24 @@ defmodule CaptainFact.Web.AuthController do
         |> render(ErrorView, "error.json", message: @err_authentication_failed)
     end
   end
+
+  # ---- Reset password ----
+  def reset_password_request(conn, %{"email" => email}) do
+    Accounts.reset_password!(email, Enum.join(Tuple.to_list(conn.remote_ip), ","))
+    send_resp(conn, :no_content, "")
+  end
+
+  def reset_password_verify(conn, %{"token" => token}) do
+    user = Accounts.check_reset_password_token!(token)
+    render(conn, UserView, :show, %{user: user})
+  end
+
+  def reset_password_confirm(conn, %{"token" => token, "password" => password}) do
+    user = Accounts.confirm_password_reset!(token, password)
+    render(conn, UserView, :show, %{user: user})
+  end
+
+  # ---- Private ----
 
   defp create_user_from_oauth!(auth) do
     Multi.new
