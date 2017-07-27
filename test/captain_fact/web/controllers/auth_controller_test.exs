@@ -174,6 +174,12 @@ defmodule CaptainFact.Web.AuthControllerTest do
     assert Map.has_key?(resp, "email")
   end
 
+  test "reset_password should not inform user if email doesn't exists" do
+    build_conn()
+    |> post("/api/auth/reset_password/request", %{email: "total_bullshit!"})
+    |> response(204)
+  end
+
   defp reset_users_table() do
     Repo.delete_all(User)
     query = "ALTER SEQUENCE users_id_seq RESTART WITH 1"

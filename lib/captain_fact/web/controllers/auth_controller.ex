@@ -82,7 +82,11 @@ defmodule CaptainFact.Web.AuthController do
 
   # ---- Reset password ----
   def reset_password_request(conn, %{"email" => email}) do
-    Accounts.reset_password!(email, Enum.join(Tuple.to_list(conn.remote_ip), ","))
+    try do
+      Accounts.reset_password!(email, Enum.join(Tuple.to_list(conn.remote_ip), ","))
+    rescue
+      _ in Ecto.NoResultsError -> "I won't tell the user ;)'"
+    end
     send_resp(conn, :no_content, "")
   end
 

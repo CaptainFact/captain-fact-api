@@ -10,7 +10,7 @@ defmodule CaptainFact.Accounts.ResetPasswordRequest do
     field :source_ip, :string
     field :user_id, :id
 
-    timestamps()
+    timestamps(updated_at: false)
   end
 
   def changeset(model, attrs) do
