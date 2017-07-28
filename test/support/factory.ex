@@ -1,11 +1,11 @@
 defmodule CaptainFact.Factory do
   use ExMachina.Ecto, repo: CaptainFact.Repo
 
-  alias CaptainFactWeb.{User, Video}
+  alias CaptainFactWeb.{User, Video, Statement, Speaker, Comment}
 
   def user_factory do
     %User{
-      name: "Jouje BigBrother",
+      name: Faker.Name.first_name,
       username: "User-#{random_string(10)}",
       email: Faker.Internet.email,
       encrypted_password: "$2b$12$fe55IfCdqNzKp1wMIJDwVeG3f7guOduEE5HS2C9IJyfkuk3avbjQG",
@@ -21,6 +21,32 @@ defmodule CaptainFact.Factory do
       title: random_string(10),
       provider: "youtube",
       provider_id: youtube_id
+    }
+  end
+
+  def speaker_factory do
+    %Speaker{
+      full_name: Faker.Name.name,
+      title: Faker.Name.title,
+      country: Faker.Address.country_code,
+      is_user_defined: Enum.random([true, false]),
+    }
+  end
+
+  def statement_factory do
+    %Statement{
+      text: Faker.Lorem.sentence(6..10),
+      time: Enum.random(1..1000),
+      video: build(:video),
+      speaker: Enum.random([nil, build(:speaker)])
+    }
+  end
+
+  def comment_factory do
+    %Comment{
+      text: Faker.Lorem.sentence(0..10),
+      approve: Enum.random([false, true, nil]),
+      statement: build(:statement)
     }
   end
 

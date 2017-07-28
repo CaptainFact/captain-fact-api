@@ -38,7 +38,7 @@ defmodule CaptainFactWeb.AuthControllerTest do
         |> post("/api/auth/facebook/callback")
         |> json_response(:ok)
 
-      assert response["id"] == user.id, "should use existing account if exists"
+      assert response["user"]["id"] == user.id, "should use existing account if exists"
     end
 
     test "link profile if same email" do
@@ -54,7 +54,7 @@ defmodule CaptainFactWeb.AuthControllerTest do
         |> post("/api/auth/facebook/callback")
         |> json_response(:ok)
 
-      assert response["id"] == user.id, "should use existing account if email exists"
+      assert response["user"]["id"] == user.id, "should use existing account if email exists"
     end
 
     test "create account if it doesn't exist" do
@@ -73,13 +73,11 @@ defmodule CaptainFactWeb.AuthControllerTest do
       nb_accounts_before = Repo.aggregate(User, :count, :id)
       nb_to_create = 10
       # User creates 5 accounts via email
-      user_emails = for _ <- 1..div(nb_to_create, 2),
-        do: insert(Map.delete(build(:user), :fb_user_id))
+      user_emails = insert_list(div(nb_to_create, 2), :user, %{fb_user_id: nil})
       # User create an account using facebook with a new, unused email
       user_facebook = insert(:user)
       # And create again 4 accounts via email
-      user_emails = user_emails ++ for _ <- 1..(div(nb_to_create, 2) - 1),
-        do: insert(Map.delete(build(:user), :fb_user_id))
+      user_emails = user_emails ++ insert_list(div(nb_to_create, 2) - 1, :user, %{fb_user_id: nil})
 
       # User changes its email on FB using existing emails and try to login...
       for user <- user_emails do
@@ -91,7 +89,7 @@ defmodule CaptainFactWeb.AuthControllerTest do
           |> json_response(:ok)
 
         Guardian.decode_and_verify!(response["token"])
-        assert response["id"] == user_facebook.id, "should always preferer facebook uid over email"
+        assert response["user"]["id"] == user_facebook.id, "should always preferer facebook uid over email"
         assert Repo.aggregate(User, :count, :id) == nb_accounts_before + nb_to_create
       end
     end
@@ -187,9 +185,7 @@ defmodule CaptainFactWeb.AuthControllerTest do
   end
 
   defp insert_user_with_custom_password(password) do
-    build(:user)
-    |> Map.put(:encrypted_password, Comeonin.Bcrypt.hashpwsalt(password))
-    |> insert()
+    insert(:user, %{encrypted_password: Comeonin.Bcrypt.hashpwsalt(password)})
   end
 
   defp build_auth(provider, uid, email, name \\ "Any name") do

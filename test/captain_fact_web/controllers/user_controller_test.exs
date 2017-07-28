@@ -2,15 +2,13 @@ defmodule CaptainFactWeb.UserControllerTest do
   use CaptainFactWeb.ConnCase, async: true
   import CaptainFact.Factory
 
-  alias CaptainFactWeb.User
-
 
   describe "GET /api/users/:username" do
-    test "displays sensitive info (email...) if user is self" do
+    test "displays sensitive info (email...) when requesting /me" do
       user = insert(:user)
       returned_user =
         build_authenticated_conn(user)
-        |> get("/api/users/#{user.username}")
+        |> get("/api/users/me")
         |> json_response(:ok)
 
       assert Map.has_key?(returned_user, "email")
@@ -40,6 +38,7 @@ defmodule CaptainFactWeb.UserControllerTest do
   end
 
   test "must be authenticated to update, delete, admin_logout and available_flags" do
+    response(get(build_conn(), "/api/users/me"), 401) =~ "unauthorized"
     response(put(build_conn(), "/api/users/me"), 401) =~ "unauthorized"
     response(get(build_conn(), "/api/users/me/available_flags"), 401) =~ "unauthorized"
     response(delete(build_conn(), "/api/users/me"), 401) =~ "unauthorized"

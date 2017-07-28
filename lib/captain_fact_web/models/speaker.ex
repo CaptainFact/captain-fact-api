@@ -13,6 +13,7 @@ defmodule CaptainFactWeb.Speaker do
 
     has_many :statements, CaptainFactWeb.Statement, on_delete: :nilify_all
     many_to_many :videos, CaptainFactWeb.Video, join_through: "videos_speakers", on_delete: :delete_all
+
     timestamps()
   end
 
