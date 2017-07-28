@@ -1,5 +1,5 @@
 alias CaptainFact.Repo
-alias CaptainFact.Web.User
+alias CaptainFactWeb.User
 
 admin = User.changeset(%User{reputation: 4200}, %{
   username: "Betree",

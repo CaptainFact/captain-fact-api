@@ -7,7 +7,7 @@ defmodule CaptainFact.Accounts do
   alias CaptainFact.Repo
 
   alias CaptainFact.Accounts.ResetPasswordRequest
-  alias CaptainFact.Web.User # Todo move this to accounts
+  alias CaptainFactWeb.User # Todo move this to accounts
 
 
   @max_ip_reset_requests 3

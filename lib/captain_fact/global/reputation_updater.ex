@@ -10,7 +10,7 @@ defmodule CaptainFact.ReputationUpdater do
 
   alias CaptainFact.Repo
   alias CaptainFact.UserState
-  alias CaptainFact.Web.User
+  alias CaptainFactWeb.User
 
   @max_daily_reputation_gain 30
   @user_state_key :today_reputation_gain

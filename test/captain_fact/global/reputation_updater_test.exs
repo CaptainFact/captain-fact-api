@@ -3,14 +3,14 @@ defmodule CaptainFact.ReputationUpdaterTest do
 
   alias CaptainFact.ReputationUpdater
   alias CaptainFact.{UserState, Repo}
-  alias CaptainFact.Web.{User}
+  alias CaptainFactWeb.{User}
 
   setup do
     UserState.reset()
   end
 
   setup_all do
-    Repo.delete_all(CaptainFact.Web.Flag)
+    Repo.delete_all(CaptainFactWeb.Flag)
     Repo.delete_all(User)
     source_user = Repo.insert! Map.merge(gen_user(1), %{reputation: 4200})
     target_user = Repo.insert! Map.merge(gen_user(2), %{reputation: 0})

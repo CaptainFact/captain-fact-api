@@ -1,7 +1,7 @@
 defmodule CaptainFact.VideoDebateActionTest do
   use CaptainFact.DataCase
 
-  alias CaptainFact.Web.VideoDebateAction
+  alias CaptainFactWeb.VideoDebateAction
 
   @valid_attrs %{
     user_id: 1,

@@ -1,9 +1,9 @@
 defmodule CaptainFact.ErrorViewTest do
-  use CaptainFact.Web.ConnCase, async: true
+  use CaptainFactWeb.ConnCase, async: true
 
   # Bring render/3 and render_to_string/3 for testing custom views
   import Phoenix.View
-  alias CaptainFact.Web.ErrorView
+  alias CaptainFactWeb.ErrorView
   alias CaptainFact.UserPermissions.PermissionsError
 
   test "renders 401.json" do

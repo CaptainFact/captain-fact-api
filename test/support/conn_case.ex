@@ -1,4 +1,4 @@
-defmodule CaptainFact.Web.ConnCase do
+defmodule CaptainFactWeb.ConnCase do
   @moduledoc """
   This module defines the test case to be used by
   tests that require setting up a connection.
@@ -19,10 +19,10 @@ defmodule CaptainFact.Web.ConnCase do
     quote do
       # Import conveniences for testing with connections
       use Phoenix.ConnTest
-      import CaptainFact.Web.Router.Helpers
+      import CaptainFactWeb.Router.Helpers
 
       # The default endpoint for testing
-      @endpoint CaptainFact.Web.Endpoint
+      @endpoint CaptainFactWeb.Endpoint
 
       alias CaptainFact.Repo
 

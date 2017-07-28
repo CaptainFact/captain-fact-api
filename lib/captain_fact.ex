@@ -11,7 +11,7 @@ defmodule CaptainFact do
       # Start the Ecto repository
       supervisor(CaptainFact.Repo, []),
       # Start the endpoint when the application starts
-      supervisor(CaptainFact.Web.Endpoint, []),
+      supervisor(CaptainFactWeb.Endpoint, []),
       # Other custom workers
       worker(CaptainFact.UserState, []),
       worker(CaptainFact.VoteDebouncer, []),

@@ -1,8 +1,8 @@
-defmodule CaptainFact.Web.AuthControllerTest do
-  use CaptainFact.Web.ConnCase, async: true
+defmodule CaptainFactWeb.AuthControllerTest do
+  use CaptainFactWeb.ConnCase, async: true
   import CaptainFact.Factory
 
-  alias CaptainFact.Web.User
+  alias CaptainFactWeb.User
   alias CaptainFact.Repo
 
   @facebook_default_picture "http://graph.facebook.com/10154431272431347/picture?width=96&height=96"

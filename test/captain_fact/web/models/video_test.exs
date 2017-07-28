@@ -1,7 +1,7 @@
 defmodule CaptainFact.VideoTest do
   use CaptainFact.DataCase, async: true
 
-  alias CaptainFact.Web.Video
+  alias CaptainFactWeb.Video
 
   @valid_attrs %{
     title: Faker.Lorem.sentence,

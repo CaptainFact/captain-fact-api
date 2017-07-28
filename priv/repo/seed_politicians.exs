@@ -3,8 +3,8 @@ require Logger
 require Arc.Ecto.Schema
 
 alias CaptainFact.Repo
-alias CaptainFact.Web.Speaker
-alias CaptainFact.Web.SpeakerPicture
+alias CaptainFactWeb.Speaker
+alias CaptainFactWeb.SpeakerPicture
 
 
 defmodule SeedPoliticians do

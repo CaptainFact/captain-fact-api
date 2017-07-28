@@ -1,7 +1,6 @@
 defmodule CaptainFact.Accounts.ResetPasswordRequest do
   use Ecto.Schema
   import Ecto.Changeset
-  alias CaptainFact.Accounts.ResetPasswordRequest
 
 
   @primary_key {:token, :string, []}

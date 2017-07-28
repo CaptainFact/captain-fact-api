@@ -4,7 +4,7 @@ defmodule CaptainFact.Flagger do
   import Ecto.Query
 
   alias CaptainFact.{UserPermissions, Repo, VideoHashId, ReputationUpdater}
-  alias CaptainFact.Web.{Flag, Comment, Statement, Endpoint}
+  alias CaptainFactWeb.{Flag, Comment, Statement, Endpoint}
 
   @comments_nb_flags_to_ban 3
 

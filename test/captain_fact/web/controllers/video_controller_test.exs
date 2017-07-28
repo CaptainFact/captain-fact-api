@@ -1,8 +1,8 @@
-defmodule CaptainFact.Web.VideoControllerTest do
-  use CaptainFact.Web.ConnCase
+defmodule CaptainFactWeb.VideoControllerTest do
+  use CaptainFactWeb.ConnCase
   import CaptainFact.Factory
 
-  alias CaptainFact.Web.Video
+  alias CaptainFactWeb.Video
 
   setup do
     CaptainFact.Repo.delete_all(Video)

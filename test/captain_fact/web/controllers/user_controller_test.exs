@@ -1,8 +1,8 @@
-defmodule CaptainFact.Web.UserControllerTest do
-  use CaptainFact.Web.ConnCase, async: true
+defmodule CaptainFactWeb.UserControllerTest do
+  use CaptainFactWeb.ConnCase, async: true
   import CaptainFact.Factory
 
-  alias CaptainFact.Web.User
+  alias CaptainFactWeb.User
 
 
   describe "GET /api/users/:username" do

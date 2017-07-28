@@ -9,7 +9,7 @@ defmodule CaptainFact.VoteDebouncer do
   import Ecto.Query
 
   alias CaptainFact.Repo
-  alias CaptainFact.Web.{ Vote, Comment }
+  alias CaptainFactWeb.{ Vote, Comment }
 
   @name __MODULE__
   @update_delay 5000 # 5 seconds
@@ -74,7 +74,7 @@ defmodule CaptainFact.VoteDebouncer do
       group_by: [v.comment_id, c.statement_id, c.reply_to_id]
     ) |> Repo.all()
 
-    CaptainFact.Web.Endpoint.broadcast(
+    CaptainFactWeb.Endpoint.broadcast(
       channel_topic,
       "comments_scores_updated",
       %{comments: scores}

@@ -1,7 +1,7 @@
 defmodule CaptainFact.SourceTest do
   use CaptainFact.DataCase
 
-  alias CaptainFact.Web.Source
+  alias CaptainFactWeb.Source
 
   @valid_attrs %{title: "some content", url: "http://www.lemonde.fr/idees/article/2017/04/24/les-risques-d-une-explosion_5116380_3232.html"}
   @invalid_attrs %{}
