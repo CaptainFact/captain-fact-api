@@ -54,8 +54,8 @@ defmodule CaptainFact.VideoHashId do
   ## Examples
       iex> CaptainFact.VideoHashId.decode!("JbOz")
       1337
-      iex> CaptainFact.VideoHashId.decode!("€€€")
-      ** (CaptainFact.VideoHashId.InvalidVideoHashError) Not found
+      iex> catch_throw(CaptainFact.VideoHashId.decode!("€€€"))
+      CaptainFact.VideoHashId.InvalidVideoHashError
   """
   @spec decode!(String.t) :: Integer.t
   def decode!(hash) do

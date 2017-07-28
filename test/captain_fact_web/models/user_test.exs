@@ -1,7 +1,7 @@
 defmodule CaptainFact.UserTest do
   use CaptainFact.DataCase, async: true
 
-  alias CaptainFactWeb.User
+  alias CaptainFact.Accounts.User
 
   @valid_attrs %{
     name: "Jouje BigBrother",

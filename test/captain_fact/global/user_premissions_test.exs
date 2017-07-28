@@ -2,7 +2,7 @@ defmodule CaptainFact.UserPermissionsTest do
   use ExUnit.Case, async: true
 
   alias CaptainFact.{UserPermissions, UserState}
-  alias CaptainFactWeb.User
+  alias CaptainFact.Accounts.User
   alias UserPermissions.PermissionsError
 
   doctest UserPermissions

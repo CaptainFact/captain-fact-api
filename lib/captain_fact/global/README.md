@@ -4,18 +4,19 @@ We could for example imagine something like :
 
 ```
 /lib/captain_fact
-  | - user_state
+  | - accounts
+  |   |- accounts.ex
+  |   |- user.ex
   |   |- permissions.ex
   |   |- state.ex
   |   |- reputation.ex
   |   |- username.ex
-  | - user_state.ex
+  |   |- reset_password_request.ex
   | - video_debate
   |   |- video_hash_id.ex
   |   |- action_creator.ex
-  | - video_debate.ex
   | ...
-  | - web
+/lib/captain_fact_web
 ```
 
 See https://www.youtube.com/watch?v=tMO28ar0lW8 for more info

@@ -100,7 +100,8 @@ defmodule CaptainFact.UserPermissions do
   Check if user can execute action. Return {:ok, nb_available} if yes, {:error, reason} otherwise
   ## Examples
       iex> alias CaptainFact.UserPermissions
-      iex> alias CaptainFact.Accounts.User      iex> user = %User{id: 1, reputation: 42}
+      iex> alias CaptainFact.Accounts.User
+      iex> user = %User{id: 1, reputation: 42}
       iex> UserPermissions.check(user, :add_comment)
       {:ok, 20}
       iex> UserPermissions.check(%{user | reputation: -42}, :remove_statement)

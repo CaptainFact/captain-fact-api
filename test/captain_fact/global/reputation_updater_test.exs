@@ -4,7 +4,7 @@ defmodule CaptainFact.ReputationUpdaterTest do
   import CaptainFact.Factory
 
   alias CaptainFact.{UserState, Repo, ReputationUpdater}
-  alias CaptainFactWeb.{User}
+  alias CaptainFact.Accounts.User
 
   setup do
     UserState.reset()
