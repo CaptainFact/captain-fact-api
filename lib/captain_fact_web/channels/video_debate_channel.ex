@@ -5,7 +5,7 @@ defmodule CaptainFactWeb.VideoDebateChannel do
     action_add: 3, action_create: 3, action_update: 3, action_delete: 3,
     action_remove: 3
   ]
-  import CaptainFactWeb.UserSocket, only: [rescue_channel_errors: 1]
+  import CaptainFactWeb.UserSocket, only: [handle_in_authenticated: 4]
 
   alias Phoenix.View
   alias Ecto.Multi
@@ -24,16 +24,13 @@ defmodule CaptainFactWeb.VideoDebateChannel do
   end
 
   def handle_in(command, params, socket) do
-    case socket.assigns.user_id do
-      nil -> {:reply, :error, socket}
-      _ -> rescue_channel_errors(&handle_in_authenticated/3).(command, params, socket)
-    end
+    handle_in_authenticated(command, params, socket, &handle_in_authenticated!/3)
   end
 
   @doc """
   Add an existing speaker to the video
   """
-  def handle_in_authenticated("new_speaker", %{"id" => id}, socket) do
+  def handle_in_authenticated!("new_speaker", %{"id" => id}, socket) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
     speaker = Repo.get!(Speaker, id)
     changeset = VideoSpeaker.changeset(%VideoSpeaker{speaker_id: speaker.id, video_id: video_id})
@@ -53,7 +50,7 @@ defmodule CaptainFactWeb.VideoDebateChannel do
   @doc """
   Add a new speaker to the video
   """
-  def handle_in_authenticated("new_speaker", params, socket) do
+  def handle_in_authenticated!("new_speaker", params, socket) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
     speaker_changeset = Speaker.changeset(%Speaker{is_user_defined: true}, params)
 
@@ -80,7 +77,7 @@ defmodule CaptainFactWeb.VideoDebateChannel do
     end
   end
 
-  def handle_in_authenticated("update_speaker", params, socket) do
+  def handle_in_authenticated!("update_speaker", params, socket) do
     speaker = Repo.get_by!(Speaker, id: params["id"], is_removed: false)
     if !speaker.is_user_defined do
       {:reply, {:error, %{speaker: "forbidden"}}, socket}
@@ -106,7 +103,7 @@ defmodule CaptainFactWeb.VideoDebateChannel do
     end
   end
 
-  def handle_in_authenticated("remove_speaker", %{"id" => id}, socket) do
+  def handle_in_authenticated!("remove_speaker", %{"id" => id}, socket) do
     speaker = Repo.get_by!(Speaker, id: id, is_removed: false)
     do_remove_speaker(socket, speaker)
     broadcast!(socket, "speaker_removed", %{id: id})
@@ -114,7 +111,7 @@ defmodule CaptainFactWeb.VideoDebateChannel do
   end
 
   @max_speakers_search_results 5
-  def handle_in_authenticated("search_speaker", params, socket) do
+  def handle_in_authenticated!("search_speaker", params, socket) do
     query = "%#{params["query"]}%"
     speakers_query =
       from s in Speaker,

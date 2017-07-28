@@ -1,7 +1,7 @@
 defmodule CaptainFactWeb.StatementsChannel do
   use CaptainFactWeb, :channel
 
-  import CaptainFactWeb.UserSocket, only: [rescue_channel_errors: 1]
+  import CaptainFactWeb.UserSocket, only: [handle_in_authenticated: 4]
   import CaptainFact.VideoDebateActionCreator,
     only: [action_create: 3, action_update: 3, action_delete: 3]
 
@@ -22,16 +22,13 @@ defmodule CaptainFactWeb.StatementsChannel do
   end
 
   def handle_in(command, params, socket) do
-    case socket.assigns.user_id do
-      nil -> {:reply, :error, socket}
-      _ -> rescue_channel_errors(&handle_in_authenticated/3).(command, params, socket)
-    end
+    handle_in_authenticated(command, params, socket, &handle_in_authenticated!/3)
   end
 
   @doc """
   Add a new statement
   """
-  def handle_in_authenticated("new_statement", params, socket) do
+  def handle_in_authenticated!("new_statement", params, socket) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
     changeset = Statement.changeset(%Statement{video_id: video_id}, params)
     Multi.new
@@ -49,7 +46,7 @@ defmodule CaptainFactWeb.StatementsChannel do
     end
   end
 
-  def handle_in_authenticated("update_statement", params = %{"id" => id}, socket) do
+  def handle_in_authenticated!("update_statement", params = %{"id" => id}, socket) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
     statement = Repo.get_by!(Statement, id: id, is_removed: false)
     changeset = Statement.changeset(statement, params)
@@ -72,7 +69,7 @@ defmodule CaptainFactWeb.StatementsChannel do
     end
   end
 
-  def handle_in_authenticated("remove_statement", %{"id" => id}, socket) do
+  def handle_in_authenticated!("remove_statement", %{"id" => id}, socket) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
     statement = Repo.get_by!(Statement, id: id, is_removed: false)
     Multi.new

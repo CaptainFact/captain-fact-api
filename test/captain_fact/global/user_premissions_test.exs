@@ -7,6 +7,10 @@ defmodule CaptainFact.UserPermissionsTest do
 
   doctest UserPermissions
 
+  @error_unauthorized %PermissionsError{message: "unauthorized"}
+  @error_reputation %PermissionsError{message: "not_enough_reputation"}
+  @error_limit %PermissionsError{message: "limit_reached"}
+
   setup do
     UserState.reset()
     :ok
@@ -42,7 +46,7 @@ defmodule CaptainFact.UserPermissionsTest do
     assert UserPermissions.user_nb_action_occurences(user, action) == 1
   end
 
-  test "if an exception is raised in func state will not be updated", context do
+  test "if an exception is throwed in func state will not be updated", context do
     user = context[:new_user]
     action = :add_comment
     assert UserPermissions.user_nb_action_occurences(user, action) == 0
@@ -54,7 +58,7 @@ defmodule CaptainFact.UserPermissionsTest do
     assert UserPermissions.user_nb_action_occurences(user, action) == 0
   end
 
-  test "if an exception is raised in func lock! will re-raise it", context do
+  test "if an exception is throwed in func lock! will re-throw it", context do
     exception_message = "Oh no 😱😱😱 !"
     assert_raise(RuntimeError, exception_message, fn ->
       UserPermissions.lock!(context[:new_user], :add_comment, fn _ ->
@@ -63,19 +67,16 @@ defmodule CaptainFact.UserPermissionsTest do
     end)
   end
 
-  test "lock! ensures permissions are verified and raise exception otherwise", context do
-    assert_raise(PermissionsError, "not_enough_reputation", fn ->
-      UserPermissions.lock!(context[:negative_user], :vote_down, fn _ -> 42 end)
-    end)
+  test "lock! ensures permissions are verified and throws exception otherwise", context do
+    assert catch_throw(UserPermissions.lock!(context[:negative_user], :vote_down, fn _ -> 42 end))
+      == @error_reputation
 
     # Check limitation
     user = context[:new_user]
     action = :add_comment
     max_occurences = UserPermissions.limitation(user, action)
     for _ <- 0..max_occurences, do: UserPermissions.record_action(user, action)
-    assert_raise(PermissionsError, "limit_reached", fn ->
-      UserPermissions.lock!(user, action, fn _ -> 42 end)
-    end)
+    assert catch_throw(UserPermissions.lock!(user, action, fn _ -> 42 end)) == @error_limit
   end
 
   test "running lock! concurrently isn't messing up with state", context do
@@ -87,7 +88,7 @@ defmodule CaptainFact.UserPermissionsTest do
       Task.async(fn ->
         try do
           UserPermissions.lock!(user, action, fn _ -> 42 end)
-        rescue e in PermissionsError -> e end
+        catch e = %PermissionsError{} -> e end
       end)
     end)
     |> Enum.take(nb_threads)
@@ -107,17 +108,11 @@ defmodule CaptainFact.UserPermissionsTest do
     end)
   end
 
-  test "nil user will raise UserPermissions error" do
-    message = "unauthorized"
-
+  test "nil user will throw UserPermissions error" do
     # Lock
-    assert_raise(PermissionsError, message, fn ->
-      UserPermissions.lock!(nil, :add_video, fn _ -> 42 end)
-    end)
+    assert catch_throw(UserPermissions.lock!(nil, :add_video, fn _ -> 42 end)) == @error_unauthorized
 
     # Check
-    assert_raise(PermissionsError, message, fn ->
-      UserPermissions.check!(nil, :add_video)
-    end)
+    assert catch_throw(UserPermissions.check!(nil, :add_video)) == @error_unauthorized
   end
 end

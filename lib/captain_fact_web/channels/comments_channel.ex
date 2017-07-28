@@ -1,7 +1,7 @@
 defmodule CaptainFactWeb.CommentsChannel do
   use CaptainFactWeb, :channel
 
-  import CaptainFactWeb.UserSocket, only: [rescue_channel_errors: 1]
+  import CaptainFactWeb.UserSocket, only: [handle_in_authenticated: 4]
   alias CaptainFactWeb.{ Comment, CommentView, User, Vote, VoteView, Flag, Source }
   alias CaptainFact.{ VideoHashId, VoteDebouncer, UserPermissions, ReputationUpdater, Flagger }
 
@@ -24,13 +24,10 @@ defmodule CaptainFactWeb.CommentsChannel do
   end
 
   def handle_in(command, params, socket) do
-    case socket.assigns.user_id do
-      nil -> {:reply, :error, socket}
-      _ -> rescue_channel_errors(&handle_in_authentified/3).(command, params, socket)
-    end
+    handle_in_authenticated(command, params, socket, &handle_in_authenticated!/3)
   end
 
-  def handle_in_authentified("new_comment", params, socket) do
+  def handle_in_authenticated!("new_comment", params, socket) do
     # TODO [Security] What if reply_to_id refer to a comment that is on a different statement ?
     user = Repo.get!(User, socket.assigns.user_id)
     comment = UserPermissions.lock!(user, :add_comment, fn user ->
@@ -41,14 +38,14 @@ defmodule CaptainFactWeb.CommentsChannel do
     end)
     full_comment = comment |> Map.put(:user, user) |> Repo.preload(:source) |> Map.put(:score, 1)
     broadcast!(socket, "comment_added", CommentView.render("comment.json", comment: full_comment))
-    handle_in_authentified("vote", %{"comment_id" => full_comment.id, "value" => "1"}, socket)
+    handle_in_authenticated!("vote", %{"comment_id" => full_comment.id, "value" => "1"}, socket)
     Task.async(fn() ->
       fetch_source_metadata_and_update_comment(full_comment, socket.topic)
     end)
     {:reply, :ok, socket}
   end
 
-  def handle_in_authentified("delete_comment", %{"id" => id}, socket) do
+  def handle_in_authenticated!("delete_comment", %{"id" => id}, socket) do
     comment = Repo.get!(Comment, id)
     if socket.assigns.user_id === comment.user_id do
       Repo.delete!(comment)
@@ -63,7 +60,7 @@ defmodule CaptainFactWeb.CommentsChannel do
     end
   end
 
-  def handle_in_authentified("vote", params = %{"comment_id" => comment_id}, socket) do
+  def handle_in_authenticated!("vote", params = %{"comment_id" => comment_id}, socket) do
     comment =
       Comment.with_source(Comment, false)
       |> where(id: ^comment_id)
@@ -87,7 +84,7 @@ defmodule CaptainFactWeb.CommentsChannel do
     {:reply, :ok, socket}
   end
 
-  def handle_in_authentified("flag_comment", %{"id" => comment_id, "reason" => reason}, socket) do
+  def handle_in_authenticated!("flag_comment", %{"id" => comment_id, "reason" => reason}, socket) do
     try do
       Comment
       |> select([:id, :user_id])
@@ -100,9 +97,9 @@ defmodule CaptainFactWeb.CommentsChannel do
     rescue e in Ecto.ConstraintError ->
       # TODO migrate to user_socket rescue_channel_errors with other constraints violations
       if e.constraint == "flags_source_user_id_type_entity_id_index" do
-        {:reply, {:error, %{message: "action already done"}}, socket}
+        {:reply, {:error, %{message: "action_already_done"}}, socket}
       else
-        raise e
+        throw e
       end
     end
   end

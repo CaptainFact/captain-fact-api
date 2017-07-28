@@ -28,19 +28,28 @@ defmodule CaptainFactWeb.UserSocket do
     end
   end
 
-  def rescue_channel_errors(handler) when is_function(handler) do
-    fn command, params, socket ->
-      try do
-        handler.(command, params, socket)
-      rescue
-        e in CaptainFact.UserPermissions.PermissionsError ->
-          reply_error(socket, Phoenix.View.render(ErrorView, "403.json", %{reason: e}))
-        _ in Ecto.NoResultsError ->
-          reply_error(socket, Phoenix.View.render(ErrorView, "404.json", []))
-        e ->
-          Logger.error("[RescueChannel] An unknown error just popped : #{inspect(e)}")
-          reply_error(socket, Phoenix.View.render(ErrorView, "error.json", []))
-      end
+  def handle_in_authenticated(command, params, socket, handler) do
+    case socket.assigns.user_id do
+      nil -> {:reply, :error, socket}
+      _ -> rescue_handler(handler, command, params, socket)
+    end
+  end
+
+  def rescue_handler(handler, command, params, socket) do
+    try do
+      handler.(command, params, socket)
+    catch
+      %CaptainFact.UserPermissions.PermissionsError{} = e ->
+        reply_error(socket, Phoenix.View.render(ErrorView, "403.json", %{reason: e}))
+      e ->
+        Logger.error("[RescueChannel] Uncatched exception : #{inspect(e)}")
+        reply_error(socket, Phoenix.View.render(ErrorView, "error.json", []))
+    rescue
+      _ in Ecto.NoResultsError ->
+        reply_error(socket, Phoenix.View.render(ErrorView, "404.json", []))
+      e ->
+        Logger.error("[RescueChannel] An unknown error just popped : #{inspect(e)}")
+        reply_error(socket, Phoenix.View.render(ErrorView, "error.json", []))
     end
   end
 

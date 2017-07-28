@@ -2,7 +2,7 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
   use CaptainFactWeb, :channel
 
   import CaptainFact.VideoDebateActionCreator, only: [action_restore: 3]
-  import CaptainFactWeb.UserSocket, only: [rescue_channel_errors: 1]
+  import CaptainFactWeb.UserSocket, only: [handle_in_authenticated: 4]
 
   alias Phoenix.View
   alias Ecto.Multi
@@ -33,13 +33,10 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
   end
 
   def handle_in(command, params, socket) do
-    case socket.assigns.user_id do
-      nil -> {:reply, :error, socket}
-      _ -> rescue_channel_errors(&handle_in_authenticated/3).(command, params, socket)
-    end
+    handle_in_authenticated(command, params, socket, &handle_in_authenticated!/3)
   end
 
-  def handle_in_authenticated("restore_statement", %{"id" => id}, socket) do
+  def handle_in_authenticated!("restore_statement", %{"id" => id}, socket) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
     statement = Repo.get_by!(Statement, id: id, is_removed: true)
     Multi.new
@@ -70,7 +67,7 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
     end
   end
 
-  def handle_in_authenticated("restore_speaker", %{"id" => id}, socket) do
+  def handle_in_authenticated!("restore_speaker", %{"id" => id}, socket) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
     speaker = Repo.get(Speaker, id)
     video_speaker = VideoSpeaker.changeset(%VideoSpeaker{speaker_id: speaker.id, video_id: video_id})

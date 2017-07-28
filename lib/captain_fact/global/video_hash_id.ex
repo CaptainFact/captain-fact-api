@@ -1,7 +1,7 @@
 defmodule CaptainFact.VideoHashId do
   defmodule InvalidVideoHashError do
     @moduledoc """
-    Exception raised when hash is not valid
+    Exception throwed when hash is not valid
     """
     defexception plug_status: 404, message: "Not found", conn: nil, router: nil
   end
@@ -61,7 +61,7 @@ defmodule CaptainFact.VideoHashId do
   def decode!(hash) do
     case do_decode(hash) do
       {:ok, [id]} -> id
-      _error -> raise InvalidVideoHashError
+      _error -> throw InvalidVideoHashError
     end
   end
 
