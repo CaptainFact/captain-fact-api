@@ -1,7 +1,7 @@
 defmodule CaptainFactWeb.Flag do
   use CaptainFactWeb, :model
 
-  alias CaptainFactWeb.{Comment}
+  alias CaptainFactWeb.Comment
 
   @comment_type 1
 
@@ -13,9 +13,8 @@ defmodule CaptainFactWeb.Flag do
     field :type, :integer
     field :reason, :integer
     field :entity_id, :integer
-    belongs_to :source_user, CaptainFactWeb.User
-    belongs_to :target_user, CaptainFactWeb.User
-
+    belongs_to :source_user, CaptainFact.Accounts.User
+    belongs_to :target_user, CaptainFact.Accounts.User
     timestamps()
   end
 

@@ -2,7 +2,7 @@ defmodule CaptainFactWeb.VideoDebateAction do
   use CaptainFactWeb, :model
 
   schema "video_debate_actions" do
-    belongs_to :user, CaptainFactWeb.User
+    belongs_to :user, CaptainFact.Accounts.User
     belongs_to :video, CaptainFactWeb.Video
 
     field :entity, :string

@@ -1,4 +1,4 @@
-defmodule CaptainFactWeb.User do
+defmodule CaptainFact.Accounts.User do
   use CaptainFactWeb, :model
 
   schema "users" do

@@ -7,7 +7,7 @@ defmodule CaptainFactWeb.Vote do
 
   @primary_key false
   schema "votes" do
-    belongs_to :user, CaptainFactWeb.User, primary_key: true
+    belongs_to :user, CaptainFact.Accounts.User, primary_key: true
     belongs_to :comment, CaptainFactWeb.Comment, primary_key: true
 
     field :value, :integer, null: false

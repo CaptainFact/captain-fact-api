@@ -8,8 +8,7 @@ defimpl ExAdmin.Authentication, for: Plug.Conn do
 end
 
 defmodule CaptainFactWeb.Plugs.SuperAdmin do
-  alias CaptainFactWeb.User
-
+  alias CaptainFact.Accounts.User
   def init(default), do: default
 
   def call(conn, _default) do

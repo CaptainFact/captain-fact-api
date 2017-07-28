@@ -5,7 +5,8 @@ defmodule CaptainFactWeb.AuthController do
   alias Ecto.Multi
   alias CaptainFact.UsernameGenerator
   alias CaptainFact.Accounts
-  alias CaptainFactWeb.{ErrorView, UserView, User, AuthController }
+  alias CaptainFact.Accounts.User
+  alias CaptainFactWeb.{ErrorView, UserView, AuthController }
 
   plug Ueberauth
   plug Guardian.Plug.EnsureAuthenticated, [handler: AuthController] when action in [:delete, :me]

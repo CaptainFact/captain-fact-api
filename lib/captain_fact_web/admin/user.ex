@@ -1,7 +1,7 @@
 defmodule CaptainFactWeb.ExAdmin.User do
   use ExAdmin.Register
 
-  register_resource CaptainFactWeb.User do
+  register_resource CaptainFact.Accounts.User do
     index do
       selectable_column()
 

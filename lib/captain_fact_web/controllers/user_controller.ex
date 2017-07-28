@@ -2,8 +2,7 @@ defmodule CaptainFactWeb.UserController do
   use CaptainFactWeb, :controller
 
   alias CaptainFact.SendInBlueApi
-  alias CaptainFactWeb.User
-
+  alias CaptainFact.Accounts.User
   plug Guardian.Plug.EnsureAuthenticated, [handler: CaptainFactWeb.AuthController]
   when action in [:update, :delete, :admin_logout, :available_flags, :show_me]
 

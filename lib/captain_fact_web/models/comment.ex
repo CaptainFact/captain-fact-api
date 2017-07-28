@@ -1,7 +1,8 @@
 defmodule CaptainFactWeb.Comment do
   use CaptainFactWeb, :model
 
-  alias CaptainFactWeb.{Source, User, Statement, Comment}
+  alias CaptainFact.Accounts.User
+  alias CaptainFactWeb.{Source, Statement, Comment}
 
   schema "comments" do
     field :text, :string

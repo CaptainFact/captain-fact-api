@@ -14,8 +14,7 @@ defmodule CaptainFact.UserPermissions do
   import Ecto.Query
 
   alias CaptainFact.{ Repo, UserState }
-  alias CaptainFactWeb.User
-
+  alias CaptainFact.Accounts.User
   defmodule PermissionsError do
     defexception message: "forbidden", plug_status: 403
   end
@@ -101,8 +100,7 @@ defmodule CaptainFact.UserPermissions do
   Check if user can execute action. Return {:ok, nb_available} if yes, {:error, reason} otherwise
   ## Examples
       iex> alias CaptainFact.UserPermissions
-      iex> alias CaptainFactWeb.User
-      iex> user = %User{id: 1, reputation: 42}
+      iex> alias CaptainFact.Accounts.User      iex> user = %User{id: 1, reputation: 42}
       iex> UserPermissions.check(user, :add_comment)
       {:ok, 20}
       iex> UserPermissions.check(%{user | reputation: -42}, :remove_statement)
