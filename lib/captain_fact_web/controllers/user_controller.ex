@@ -16,7 +16,7 @@ defmodule CaptainFactWeb.UserController do
         {:ok, token, _claims} = Guardian.encode_and_sign(user, :token)
         conn
         |> put_status(:created)
-        |> render("show.json", user: user, token: token)
+        |> render("user_with_token.json", %{user: user, token: token})
       {:error, changeset} ->
         conn
         |> put_status(:bad_request)

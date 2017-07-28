@@ -47,7 +47,7 @@ defmodule CaptainFactWeb.AuthController do
                   do: signin_user(conn, user)
     case result do
       {:ok, user, token} ->
-        render(conn, UserView, "show.json", user: user, token: token)
+        render(conn, UserView, "user_with_token.json", %{user: user, token: token})
       {:error, _} ->
         conn
         |> put_status(:unauthorized)
@@ -72,7 +72,7 @@ defmodule CaptainFactWeb.AuthController do
 
     case signin_user(conn, user) do
       {:ok, user, token} ->
-        render(conn, UserView, :show, %{user: user, token: token})
+        render(conn, UserView, "user_with_token.json", %{user: user, token: token})
       {:error, _} ->
         conn
         |> put_status(:bad_request)
@@ -80,7 +80,32 @@ defmodule CaptainFactWeb.AuthController do
     end
   end
 
+  def me(conn, _params) do
+    user = Guardian.Plug.current_resource(conn)
+    render(conn, UserView, :show, user: user)
+  end
+
+  def delete(conn, _params) do
+    conn
+    |> Guardian.Plug.current_token
+    |> Guardian.revoke!
+    send_resp(conn, 204, "")
+  end
+
+  def unauthenticated(conn, _params) do
+    conn
+    |> put_status(:unauthorized)
+    |> render(ErrorView, "401.json")
+  end
+
+  def unauthorized(conn, _params) do
+    conn
+    |> put_status(:forbidden)
+    |> render(ErrorView, "403.json")
+  end
+
   # ---- Reset password ----
+
   def reset_password_request(conn, %{"email" => email}) do
     try do
       Accounts.reset_password!(email, Enum.join(Tuple.to_list(conn.remote_ip), ","))
@@ -186,29 +211,5 @@ defmodule CaptainFactWeb.AuthController do
       |> Guardian.Plug.api_sign_in(user)
       |> Guardian.Plug.current_token
     {:ok, user, token}
-  end
-
-  def me(conn, _params) do
-    user = Guardian.Plug.current_resource(conn)
-    render(conn, UserView, :show, user: user)
-  end
-
-  def delete(conn, _params) do
-    conn
-    |> Guardian.Plug.current_token
-    |> Guardian.revoke!
-    send_resp(conn, 204, "")
-  end
-
-  def unauthenticated(conn, _params) do
-    conn
-    |> put_status(:unauthorized)
-    |> render(ErrorView, "401.json")
-  end
-
-  def unauthorized(conn, _params) do
-    conn
-    |> put_status(:forbidden)
-    |> render(ErrorView, "403.json")
   end
 end

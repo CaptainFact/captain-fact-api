@@ -1,15 +1,10 @@
 defmodule CaptainFactWeb.UserView do
   use CaptainFactWeb, :view
 
-  alias CaptainFactWeb.{UserView}
+  alias CaptainFactWeb.UserView
 
   def render("index_public.json", %{users: users}) do
     render_many(users, UserView, "public_user.json")
-  end
-
-  def render("show.json", %{user: user, token: token}) do
-    # TODO There should be a special method for token !
-    render_one(user, UserView, "user_token.json", token: token)
   end
 
   def render("show.json", %{user: user}) do
@@ -43,14 +38,9 @@ defmodule CaptainFactWeb.UserView do
     }
   end
 
-  def render("user_token.json", %{user: user, token: token}) do
+  def render("user_with_token.json", %{user: user, token: token}) do
     %{
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      username: user.username,
-      reputation: user.reputation,
-      picture_url: user.picture_url,
+      user: UserView.render("show.json", %{user: user}),
       token: token
     }
   end
