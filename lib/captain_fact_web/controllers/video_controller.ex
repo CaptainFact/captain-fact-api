@@ -2,7 +2,7 @@ defmodule CaptainFactWeb.VideoController do
   use CaptainFactWeb, :controller
 
   alias CaptainFactWeb.Video
-  alias CaptainFact.UserPermissions
+  alias CaptainFact.Accounts.UserPermissions
 
 
   def index(conn, _params) do

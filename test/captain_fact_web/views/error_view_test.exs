@@ -4,7 +4,7 @@ defmodule CaptainFact.ErrorViewTest do
   # Bring render/3 and render_to_string/3 for testing custom views
   import Phoenix.View
   alias CaptainFactWeb.ErrorView
-  alias CaptainFact.UserPermissions.PermissionsError
+  alias CaptainFact.Accounts.UserPermissions.PermissionsError
 
   test "renders 401.json" do
     assert render_to_string(ErrorView, "401.json", []) =~ "unauthorized"

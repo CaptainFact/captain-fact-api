@@ -1,19 +1,11 @@
 defmodule CaptainFact.FlaggerTest do
-  use ExUnit.Case, async: false
-
-  import CaptainFact.Factory
+  use CaptainFact.DataCase
 
   alias CaptainFact.Flagger
-  alias CaptainFact.Repo
   alias CaptainFact.Accounts.User
   alias CaptainFactWeb.{Flag, Comment}
 
   setup do
-    Repo.delete_all(Flag)
-    :ok
-  end
-
-  setup_all do
     Repo.delete_all(Flag)
     Repo.delete_all(User)
     target_user = insert(:user, %{reputation: 10000})

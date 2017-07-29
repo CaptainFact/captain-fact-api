@@ -6,8 +6,9 @@ defmodule CaptainFactWeb.StatementsChannel do
     only: [action_create: 3, action_update: 3, action_delete: 3]
 
   alias Ecto.Multi
-  alias CaptainFact.{UserPermissions, VideoHashId}
+  alias CaptainFact.VideoHashId
   alias CaptainFactWeb.{Statement, StatementView, ErrorView}
+  alias CaptainFact.Accounts.UserPermissions
 
 
   def join("statements:video:" <> video_id_hash, _payload, socket) do

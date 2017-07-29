@@ -68,7 +68,7 @@ config :arc,
 config :quantum, :captain_fact,
   cron: [
     # Reset score limit counter every midnight
-    "@daily": fn -> CaptainFact.UserState.reset() end
+    "@daily": fn -> CaptainFact.Accounts.UserState.reset() end
   ]
 
 # Import environment specific config. This must remain at the bottom

@@ -1,4 +1,4 @@
-defmodule CaptainFact.UsernameGenerator do
+defmodule CaptainFact.Accounts.UsernameGenerator do
   @moduledoc """
   Generates a unique username based on user id
   """
@@ -21,7 +21,7 @@ defmodule CaptainFact.UsernameGenerator do
   @doc """
   Encode a given id
   ## Examples
-      iex> CaptainFact.UsernameGenerator.encode(42)
+      iex> CaptainFact.Accounts.UsernameGenerator.encode(42)
       "py7"
   """
   @spec encode(Integer.t) :: String.t

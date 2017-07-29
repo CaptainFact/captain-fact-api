@@ -4,6 +4,7 @@ defmodule CaptainFactWeb.UserSocket do
   require Logger
   import Guardian.Phoenix.Socket
   alias CaptainFactWeb.ErrorView
+  alias CaptainFact.Accounts.UserPermissions
 
   ## Channels
   channel "video_debate:*", CaptainFactWeb.VideoDebateChannel
@@ -39,7 +40,7 @@ defmodule CaptainFactWeb.UserSocket do
     try do
       handler.(command, params, socket)
     catch
-      %CaptainFact.UserPermissions.PermissionsError{} = e ->
+      %UserPermissions.PermissionsError{} = e ->
         reply_error(socket, Phoenix.View.render(ErrorView, "403.json", %{reason: e}))
       e ->
         Logger.error("[RescueChannel] Uncatched exception : #{inspect(e)}")

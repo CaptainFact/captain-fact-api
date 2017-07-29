@@ -1,5 +1,5 @@
 defmodule CaptainFact.VideoDebateActionTest do
-  use CaptainFact.DataCase
+  use CaptainFact.DataCase, async: true
 
   alias CaptainFactWeb.VideoDebateAction
 

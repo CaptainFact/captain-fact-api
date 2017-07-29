@@ -1,18 +1,10 @@
-defmodule CaptainFact.ReputationUpdaterTest do
-  use ExUnit.Case, async: false
+defmodule CaptainFact.Accounts.ReputationUpdaterTest do
+  use CaptainFact.DataCase
 
-  import CaptainFact.Factory
-
-  alias CaptainFact.{UserState, Repo, ReputationUpdater}
-  alias CaptainFact.Accounts.User
+  alias CaptainFact.Accounts.{User, UserState, ReputationUpdater}
 
   setup do
     UserState.reset()
-  end
-
-  setup_all do
-    Repo.delete_all(CaptainFactWeb.Flag)
-    Repo.delete_all(User)
     source_user = insert(:user, %{reputation: 42000})
     target_user = insert(:user, %{reputation: 0})
     {:ok, [source_user: source_user, target_user: target_user]}

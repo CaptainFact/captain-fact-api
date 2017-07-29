@@ -13,10 +13,10 @@ defmodule CaptainFact do
       # Start the endpoint when the application starts
       supervisor(CaptainFactWeb.Endpoint, []),
       # Other custom workers
-      worker(CaptainFact.UserState, []),
+      worker(CaptainFact.Accounts.UserState, []),
       worker(CaptainFact.VoteDebouncer, []),
       worker(CaptainFact.VideoHashId, []),
-      worker(CaptainFact.UsernameGenerator, [])
+      worker(CaptainFact.Accounts.UsernameGenerator, [])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html

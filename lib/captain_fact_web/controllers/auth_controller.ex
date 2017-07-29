@@ -3,9 +3,8 @@ defmodule CaptainFactWeb.AuthController do
   require Logger
 
   alias Ecto.Multi
-  alias CaptainFact.UsernameGenerator
   alias CaptainFact.Accounts
-  alias CaptainFact.Accounts.User
+  alias CaptainFact.Accounts.{User, UsernameGenerator}
   alias CaptainFactWeb.{ErrorView, UserView, AuthController }
 
   plug Ueberauth

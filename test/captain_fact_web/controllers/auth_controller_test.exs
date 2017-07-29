@@ -1,5 +1,5 @@
 defmodule CaptainFactWeb.AuthControllerTest do
-  use CaptainFactWeb.ConnCase, async: true
+  use CaptainFactWeb.ConnCase
   import CaptainFact.Factory
 
   alias CaptainFact.Accounts.User

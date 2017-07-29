@@ -1,4 +1,4 @@
-defmodule CaptainFact.UserPermissions do
+defmodule CaptainFact.Accounts.UserPermissions do
   @moduledoc """
   Check and log user permissions. State is a map looking like this :
   ```
@@ -13,8 +13,8 @@ defmodule CaptainFact.UserPermissions do
   require Logger
   import Ecto.Query
 
-  alias CaptainFact.{ Repo, UserState }
-  alias CaptainFact.Accounts.User
+  alias CaptainFact.Repo
+  alias CaptainFact.Accounts.{User, UserState}
   defmodule PermissionsError do
     defexception message: "forbidden", plug_status: 403
   end
@@ -99,8 +99,7 @@ defmodule CaptainFact.UserPermissions do
   @doc """
   Check if user can execute action. Return {:ok, nb_available} if yes, {:error, reason} otherwise
   ## Examples
-      iex> alias CaptainFact.UserPermissions
-      iex> alias CaptainFact.Accounts.User
+      iex> alias CaptainFact.Accounts.{User, UserPermissions}
       iex> user = %User{id: 1, reputation: 42}
       iex> UserPermissions.check(user, :add_comment)
       {:ok, 20}

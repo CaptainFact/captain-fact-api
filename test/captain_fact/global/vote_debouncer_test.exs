@@ -1,4 +1,4 @@
 defmodule CaptainFact.VoteDebouncerTest do
-  use ExUnit.Case
+  use CaptainFact.DataCase
   doctest CaptainFact.VoteDebouncer
 end

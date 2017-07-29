@@ -1,5 +1,5 @@
 defmodule CaptainFact.FlagTest do
-  use CaptainFact.DataCase
+  use CaptainFact.DataCase, async: true
 
   alias CaptainFactWeb.{Flag, Comment}
 

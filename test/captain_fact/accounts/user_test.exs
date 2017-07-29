@@ -1,4 +1,4 @@
-defmodule CaptainFact.UserTest do
+defmodule CaptainFact.Accounts.UserTest do
   use CaptainFact.DataCase, async: true
 
   alias CaptainFact.Accounts.User

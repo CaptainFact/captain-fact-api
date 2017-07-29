@@ -5,7 +5,7 @@ defmodule CaptainFact.AccountsTest do
 
   describe "reset_password_requests" do
     alias CaptainFact.Accounts.ResetPasswordRequest
-    alias CaptainFact.UserPermissions.PermissionsError
+    alias CaptainFact.Accounts.UserPermissions.PermissionsError
 
     # Request
 

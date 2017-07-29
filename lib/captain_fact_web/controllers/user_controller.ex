@@ -3,6 +3,8 @@ defmodule CaptainFactWeb.UserController do
 
   alias CaptainFact.SendInBlueApi
   alias CaptainFact.Accounts.User
+  alias CaptainFact.Accounts.UserPermissions
+
   plug Guardian.Plug.EnsureAuthenticated, [handler: CaptainFactWeb.AuthController]
   when action in [:update, :delete, :admin_logout, :available_flags, :show_me]
 
@@ -60,7 +62,7 @@ defmodule CaptainFactWeb.UserController do
 
   def available_flags(conn, _) do
     current_user = Guardian.Plug.current_resource(conn)
-    case CaptainFact.UserPermissions.check(current_user, :flag_comment) do
+    case UserPermissions.check(current_user, :flag_comment) do
       {:ok, num_available} -> json(conn, %{flags_available: num_available})
       {:error, _reason} ->
         json(conn, %{flags_available: 0})

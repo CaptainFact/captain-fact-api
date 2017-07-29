@@ -6,8 +6,7 @@ defmodule CaptainFact.Accounts do
   import Ecto.Query, warn: false
   alias CaptainFact.Repo
 
-  alias CaptainFact.Accounts.ResetPasswordRequest
-  alias CaptainFact.Accounts.User
+  alias CaptainFact.Accounts.{User, ResetPasswordRequest, UserPermissions}
 
   @max_ip_reset_requests 3
   @request_validity 48 * 60 * 60 # 48 hours
@@ -24,7 +23,7 @@ defmodule CaptainFact.Accounts do
       |> Repo.aggregate(:count, :token)
 
     if nb_ip_requests > @max_ip_reset_requests do
-      throw CaptainFact.UserPermissions.PermissionsError
+      throw UserPermissions.PermissionsError
     end
 
     %ResetPasswordRequest{}

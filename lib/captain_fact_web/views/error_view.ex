@@ -1,7 +1,7 @@
 defmodule CaptainFactWeb.ErrorView do
   use CaptainFactWeb, :view
 
-  alias CaptainFact.UserPermissions.PermissionsError
+  alias CaptainFact.Accounts.UserPermissions.PermissionsError
 
   def render("show.json", %{message: message}) do
     render_one(message, CaptainFactWeb.ErrorView, "error.json")

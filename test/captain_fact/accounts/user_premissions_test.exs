@@ -1,8 +1,7 @@
-defmodule CaptainFact.UserPermissionsTest do
-  use ExUnit.Case, async: true
+defmodule CaptainFact.Accounts.UserPermissionsTest do
+  use CaptainFact.DataCase
 
-  alias CaptainFact.{UserPermissions, UserState}
-  alias CaptainFact.Accounts.User
+  alias CaptainFact.Accounts.{User, UserPermissions, UserState}
   alias UserPermissions.PermissionsError
 
   doctest UserPermissions

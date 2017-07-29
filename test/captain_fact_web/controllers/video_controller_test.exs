@@ -4,13 +4,9 @@ defmodule CaptainFactWeb.VideoControllerTest do
 
   alias CaptainFactWeb.Video
 
-  setup do
-    CaptainFact.Repo.delete_all(Video)
-    :ok
-  end
-
   test "GET /api/videos", %{conn: conn} do
-    videos = for _ <- 0..5, do: insert(:video)
+    CaptainFact.Repo.delete_all(Video)
+    videos = insert_list(5, :video)
     response =
       conn
       |> get("/api/videos")

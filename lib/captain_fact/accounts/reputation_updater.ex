@@ -1,4 +1,4 @@
-defmodule CaptainFact.ReputationUpdater do
+defmodule CaptainFact.Accounts.ReputationUpdater do
   @moduledoc """
   Updates a user reputation asynchronously, verifying at the same time that the maximum reputation
   gain per day quota is respected.
@@ -9,8 +9,9 @@ defmodule CaptainFact.ReputationUpdater do
   import Ecto.Query
 
   alias CaptainFact.Repo
-  alias CaptainFact.UserState
-  alias CaptainFact.Accounts.User
+  alias CaptainFact.Accounts.{User, UserState}
+
+
   @max_daily_reputation_gain 30
   @user_state_key :today_reputation_gain
   @actions %{
@@ -30,8 +31,7 @@ defmodule CaptainFact.ReputationUpdater do
 
   # --- API ---
 
-  def register_action(source_user, target_user, action, async \\ true)
-  when is_atom(action) do
+  def register_action(source_user, target_user, action, async \\ true) when is_atom(action) do
     {source_change, target_change} = Map.get(@actions, action)
     tasks = [
       fn -> register_change(user_id(source_user), source_change) end,

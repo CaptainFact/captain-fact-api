@@ -3,7 +3,8 @@ defmodule CaptainFact.Flagger do
   require Logger
   import Ecto.Query
 
-  alias CaptainFact.{UserPermissions, Repo, VideoHashId, ReputationUpdater}
+  alias CaptainFact.Accounts.{UserPermissions, ReputationUpdater}
+  alias CaptainFact.{Repo, VideoHashId}
   alias CaptainFactWeb.{Flag, Comment, Statement, Endpoint}
 
   @comments_nb_flags_to_ban 3

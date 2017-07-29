@@ -1,4 +1,4 @@
-defmodule CaptainFact.UserState do
+defmodule CaptainFact.Accounts.UserState do
   @moduledoc """
   Store a state that is re-initialized every 24h. This is mainly intended to store info such as
   limitations for daily reputations gains or maximum number of votes for each day.
