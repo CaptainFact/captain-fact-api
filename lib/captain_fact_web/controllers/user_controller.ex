@@ -1,7 +1,6 @@
 defmodule CaptainFactWeb.UserController do
   use CaptainFactWeb, :controller
 
-  alias CaptainFact.SendInBlueApi
   alias CaptainFact.Accounts.User
   alias CaptainFact.Accounts.UserPermissions
 
@@ -69,29 +68,9 @@ defmodule CaptainFactWeb.UserController do
     end
   end
 
-  def newsletter_subscribe(conn, %{"email" => email}) do
-    case Regex.match?(~r/@/, email) do
-      false -> render_invalid_email_error(conn)
-      true -> case ForbiddenEmailProviders.is_forbidden(email) do
-        true -> render_invalid_email_error(conn)
-        false ->
-          %SendInBlueApi.User{email: email}
-          |> SendInBlueApi.User.create_or_update()
-          |> case do
-            {:ok, _} -> send_resp(conn, 200, "")
-            {:error, _} -> render_invalid_email_error(conn)
-          end
-      end
-    end
-  end
-
   def delete(conn, _params) do
     # TODO Soft delete, do the real delete after 1 week to avaoid user mistakes
     Repo.delete!(Guardian.Plug.current_resource(conn))
     send_resp(conn, :no_content, "")
-  end
-
-  defp render_invalid_email_error(conn) do
-    conn |> put_status(400) |> json(%{error: "invalid_email"})
   end
 end

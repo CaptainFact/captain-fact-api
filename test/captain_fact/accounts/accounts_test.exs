@@ -89,4 +89,40 @@ defmodule CaptainFact.AccountsTest do
       assert nb_requests == 0
     end
   end
+
+  describe "invitation_requests" do
+    test "invitation request get created with given user" do
+      email = "test@email.com"
+      user = insert(:user)
+      {:ok, req} = Accounts.request_invitation(email, user)
+      assert is_nil(req.token), "don't generate token before necessary"
+      assert user.id == req.invited_by_id
+      assert email == req.email
+    end
+
+    test "multiple requests only insert one time but doesn't crash" do
+      email = "test@email.com"
+      user = insert(:user)
+      {:ok, req} = Accounts.request_invitation(email)
+      {:ok, req2} = Accounts.request_invitation(email)
+      {:ok, req3} = Accounts.request_invitation(email, user)
+
+      assert req.id == req2.id
+      assert req2.id == req3.id
+    end
+
+    test "cannot insert with bad email" do
+      {:error, "invalid_email"} = Accounts.request_invitation("toto@yopmail.fr")
+      {:error, "invalid_email"} = Accounts.request_invitation("toto@")
+      {:error, "invalid_email"} = Accounts.request_invitation("xxxxxxxxx")
+    end
+
+    test "re-asking for an invitation reset invitation_sent boolean to false" do
+      req = insert(:invitation_request, %{invitation_sent: true})
+      req_updated = Accounts.request_invitation(req.email)
+      assert req_updated.invitation_sent == false
+    end
+
+    # TODO What if user already have an account and request an invitation ?
+  end
 end

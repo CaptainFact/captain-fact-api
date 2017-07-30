@@ -145,37 +145,58 @@ defmodule CaptainFactWeb.AuthControllerTest do
     end
   end
 
-  test "reset password" do
-    user = insert(:user)
-    new_password = "Passw0rDChanged...=)"
+  describe "reset password" do
+    test "full flow" do
+      user = insert(:user)
+      new_password = "Passw0rDChanged...=)"
 
-    # Ask for password reset
-    build_conn()
-    |> post("/api/auth/reset_password/request", %{email: user.email})
-    |> response(204)
-
-    # Verify token
-    req = Repo.get_by!(CaptainFact.Accounts.ResetPasswordRequest, user_id: user.id)
-    resp =
-      get(build_conn(), "/api/auth/reset_password/verify/#{req.token}")
-      |> json_response(200)
-    assert Map.has_key?(resp, "username")
-
-    # Confirm (change password)
-    resp =
+      # Ask for password reset
       build_conn()
-      |> post("/api/auth/reset_password/confirm", %{
-           token: req.token,
-           password: new_password
-         })
-      |> json_response(200)
-    assert Map.has_key?(resp, "email")
+      |> post("/api/auth/reset_password/request", %{email: user.email})
+      |> response(204)
+
+      # Verify token
+      req = Repo.get_by!(CaptainFact.Accounts.ResetPasswordRequest, user_id: user.id)
+      resp =
+        get(build_conn(), "/api/auth/reset_password/verify/#{req.token}")
+        |> json_response(200)
+      assert Map.has_key?(resp, "username")
+
+      # Confirm (change password)
+      resp =
+        build_conn()
+        |> post("/api/auth/reset_password/confirm", %{
+             token: req.token,
+             password: new_password
+           })
+        |> json_response(200)
+      assert Map.has_key?(resp, "email")
+    end
+
+    test "should not inform user if email doesn't exists" do
+        build_conn()
+        |> post("/api/auth/reset_password/request", %{email: "total_bullshit!"})
+        |> response(204)
+      end
   end
 
-  test "reset_password should not inform user if email doesn't exists" do
-    build_conn()
-    |> post("/api/auth/reset_password/request", %{email: "total_bullshit!"})
-    |> response(204)
+  describe "invitations" do
+    test "should say ok everytime the user request with valid info" do
+      email = "test@email.fr"
+      request_invite(email) |> response(204)
+      request_invite(email) |> response(204)
+    end
+
+    test "should inform the user if email is not valid" do
+      assert json_response(request_invite("xxx"), 400) == %{"email" => "invalid_email"}
+      assert json_response(request_invite("toto@yopmail.fr"), 400) == %{"email" => "invalid_email"}
+      assert json_response(request_invite("x@xx"), 400) == %{"email" => "invalid_email"}
+    end
+
+    defp request_invite(email) do
+      build_conn()
+      |> post("/api/auth/request_invitation", %{email: email})
+    end
   end
 
   defp reset_users_table() do

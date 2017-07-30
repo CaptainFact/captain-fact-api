@@ -54,7 +54,7 @@ defmodule CaptainFact.Accounts.UserTest do
   end
 
   test "email must be a valid address" do
-    changeset = User.registration_changeset(%User{}, Map.put(@valid_attrs, :email, "INVALID EMAIL"))
+    changeset = User.registration_changeset(%User{}, Map.put(@valid_attrs, :email, "xx@xx"))
     refute changeset.valid?
   end
 

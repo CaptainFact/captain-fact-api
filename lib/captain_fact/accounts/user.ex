@@ -31,6 +31,7 @@ defmodule CaptainFact.Accounts.User do
   end
 
 
+  @email_regex ~r/\A([\w+\-].?)+@[a-z\d\-]+(\.[a-z]+)*\.[a-z]+\z/i
   @required_fields ~w(email username)a
   @optional_fields ~w(name password)a
 
@@ -39,7 +40,7 @@ defmodule CaptainFact.Accounts.User do
   If no params are provided, an invalid changeset is returned
   with no validation performed.
   """
-  def changeset(model, params \\ :empty) do
+  def changeset(model, params \\ %{}) do
     model
     |> common_changeset(params)
     |> validate_length(:password, min: 6, max: 256)
@@ -50,7 +51,7 @@ defmodule CaptainFact.Accounts.User do
     cast(model, params, [:reputation])
   end
 
-  def registration_changeset(model, params \\ :empty) do
+  def registration_changeset(model, params \\ %{}) do
     model
     |> common_changeset(params)
     |> password_changeset(params)
@@ -68,6 +69,8 @@ defmodule CaptainFact.Accounts.User do
     model
     |> cast(params, [:fb_user_id, :picture_url])
   end
+
+  def email_regex(), do: @email_regex
 
   defp common_changeset(model, params) do
     model
@@ -92,17 +95,17 @@ defmodule CaptainFact.Accounts.User do
     end
   end
 
-  defp validate_email(%{changes: %{email: email}} = changeset) do
-    case Regex.match?(~r/@/, email) do
+  def validate_email(%{changes: %{email: email}} = changeset) do
+    case Regex.match?(@email_regex, email) do
       true ->
-        case ForbiddenEmailProviders.is_forbidden(email) do
+        case ForbiddenEmailProviders.is_forbidden?(email) do
           true -> add_error(changeset, :email, "forbidden_provider")
           false -> changeset
         end
       false -> add_error(changeset, :email, "invalid_format")
     end
   end
-  defp validate_email(changeset), do: changeset
+  def validate_email(changeset), do: changeset
 
   @forbidden_username_keywords ~w(captainfact admin newuser temporary anonymous)
   defp validate_username(%{changes: %{username: username}} = changeset) do

@@ -486,7 +486,7 @@ defmodule ForbiddenEmailProviders do
     zoemail.org
   )
 
-  def is_forbidden(email) do
+  def is_forbidden?(email) do
     Enum.any?(@temporary_email_providers, &String.ends_with?(email, &1))
   end
 

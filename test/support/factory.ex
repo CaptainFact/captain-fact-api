@@ -1,7 +1,7 @@
 defmodule CaptainFact.Factory do
   use ExMachina.Ecto, repo: CaptainFact.Repo
 
-  alias CaptainFact.Accounts.User
+  alias CaptainFact.Accounts.{User, InvitationRequest}
   alias CaptainFactWeb.{Video, Statement, Speaker, Comment}
 
   def user_factory do
@@ -48,6 +48,13 @@ defmodule CaptainFact.Factory do
       text: Faker.Lorem.sentence(0..10),
       approve: Enum.random([false, true, nil]),
       statement: build(:statement)
+    }
+  end
+
+  def invitation_request_factory do
+    %InvitationRequest{
+      email: Faker.Internet.email,
+      invited_by: build(:user)
     }
   end
 

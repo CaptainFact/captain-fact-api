@@ -51,6 +51,8 @@ defmodule CaptainFactWeb.Router do
         get  "/verify/:token", AuthController, :reset_password_verify
         post "/confirm", AuthController, :reset_password_confirm
       end
+
+      post   "/request_invitation", AuthController, :request_invitation
     end
 
     # Users
@@ -65,9 +67,6 @@ defmodule CaptainFactWeb.Router do
     # Videos
     get   "/videos", VideoController, :index
     post  "/videos", VideoController, :get_or_create
-
-    # Subscribe to the newsletter
-    post "/newsletter/subscribe", UserController, :newsletter_subscribe
   end
 
   scope "/extension_api", CaptainFactWeb do

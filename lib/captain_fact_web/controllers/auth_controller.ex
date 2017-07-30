@@ -125,6 +125,20 @@ defmodule CaptainFactWeb.AuthController do
     render(conn, UserView, :show, %{user: user})
   end
 
+  # ---- Invitations ----
+
+  def request_invitation(conn, %{"email" => email}) do
+    case Accounts.request_invitation(email, Guardian.Plug.current_resource(conn)) do
+      {:ok, _} ->
+        send_resp(conn, :no_content, "")
+      {:error, "invalid_email"} ->
+        put_status(conn, :bad_request)
+        |> json(%{error: "invalid_email"})
+      {:error, _} ->
+        send_resp(conn, :bad_request, "")
+    end
+  end
+
   # ---- Private ----
 
   defp create_user_from_oauth!(auth) do
