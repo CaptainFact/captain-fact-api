@@ -34,6 +34,7 @@ defmodule CaptainFactWeb.UserView do
       username: user.username,
       reputation: user.reputation,
       picture_url: user.picture_url,
+      locale: user.locale,
       registered_at: registered_at(user),
     }
   end

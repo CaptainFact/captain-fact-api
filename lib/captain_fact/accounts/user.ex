@@ -8,6 +8,7 @@ defmodule CaptainFact.Accounts.User do
     field :name, :string
     field :picture_url, :string
     field :reputation, :integer, default: 0
+    field :locale, :string
 
     # Social networks profiles
     field :fb_user_id, :string
@@ -32,8 +33,9 @@ defmodule CaptainFact.Accounts.User do
 
 
   @email_regex ~r/\A([\w+\-].?)+@[a-z\d\-]+(\.[a-z]+)*\.[a-z]+\z/i
+  @valid_locales ~w(en fr de it es ru)
   @required_fields ~w(email username)a
-  @optional_fields ~w(name password)a
+  @optional_fields ~w(name password locale)a
 
   @doc """
   Creates a changeset based on the `model` and `params`.
@@ -80,6 +82,7 @@ defmodule CaptainFact.Accounts.User do
     |> unique_constraint(:username)
     |> validate_length(:username, min: 5, max: 15)
     |> validate_length(:name, min: 2, max: 20)
+    |> validate_inclusion(:locale, @valid_locales)
     |> validate_email()
     |> validate_username()
   end

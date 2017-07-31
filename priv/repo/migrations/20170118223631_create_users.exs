@@ -9,6 +9,7 @@ defmodule CaptainFact.Repo.Migrations.CreateUsers do
       add :name, :citext, null: true
       add :picture_url, :string, null: true
       add :reputation, :integer, null: false, default: 0
+      add :locale, :string, null: true
 
       # Social networks profiles
       add :fb_user_id, :string, null: true
