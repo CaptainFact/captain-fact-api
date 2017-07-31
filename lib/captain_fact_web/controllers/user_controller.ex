@@ -1,26 +1,28 @@
 defmodule CaptainFactWeb.UserController do
   use CaptainFactWeb, :controller
 
-  alias CaptainFact.Accounts.User
-  alias CaptainFact.Accounts.UserPermissions
+  alias CaptainFact.Accounts
+  alias CaptainFact.Accounts.{User, UserPermissions}
 
   plug Guardian.Plug.EnsureAuthenticated, [handler: CaptainFactWeb.AuthController]
   when action in [:update, :delete, :admin_logout, :available_flags, :show_me]
 
 
-  def create(conn, user_params) do
-    changeset = User.changeset(%User{}, user_params)
-
-    case Repo.insert(changeset) do
+  def create(conn, params = %{"user" => user_params}) do
+    case Accounts.create_account(user_params, Map.get(params, "invitation_token")) do
       {:ok, user} ->
         {:ok, token, _claims} = Guardian.encode_and_sign(user, :token)
         conn
         |> put_status(:created)
         |> render("user_with_token.json", %{user: user, token: token})
-      {:error, changeset} ->
+      {:error, changeset = %Ecto.Changeset{}} ->
         conn
         |> put_status(:bad_request)
         |> render(CaptainFactWeb.ChangesetView, "error.json", changeset: changeset)
+      {:error, message} ->
+        conn
+        |> put_status(:bad_request)
+        |> render(CaptainFactWeb.ErrorView, "error.json", %{message: message})
     end
   end
 

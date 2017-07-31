@@ -54,7 +54,8 @@ defmodule CaptainFact.Factory do
   def invitation_request_factory do
     %InvitationRequest{
       email: Faker.Internet.email,
-      invited_by: build(:user)
+      invited_by: build(:user),
+      token: "TestInvitationToken"
     }
   end
 

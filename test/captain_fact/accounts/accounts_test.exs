@@ -119,10 +119,70 @@ defmodule CaptainFact.AccountsTest do
 
     test "re-asking for an invitation reset invitation_sent boolean to false" do
       req = insert(:invitation_request, %{invitation_sent: true})
-      req_updated = Accounts.request_invitation(req.email)
+      {:ok, req_updated} = Accounts.request_invitation(req.email)
       assert req_updated.invitation_sent == false
     end
 
     # TODO What if user already have an account and request an invitation ?
   end
+
+  describe "create_account" do
+    test "requires a valid invitation token" do
+      assert Accounts.create_account(%{}, nil) == {:error, "invalid_invitation_token"}
+      assert Accounts.create_account(%{}, "") == {:error, "invalid_invitation_token"}
+      assert Accounts.create_account(%{}, "zzzzz") == {:error, "invalid_invitation_token"}
+    end
+
+    test "create an account if a valid user is given" do
+      invit = insert(:invitation_request)
+      user_params =
+        build(:user)
+        |> Map.take([:username, :email])
+        |> Map.put(:password, "xs45;%%5s")
+      {:ok, created} = Accounts.create_account(user_params, invit.token)
+      assert user_params.username == created.username
+      assert user_params.email == created.email
+    end
+
+    test "can create an account with auto-generated username only if explicitly requested" do
+      invit = insert(:invitation_request)
+      user_params =
+        build(:user)
+        |> Map.take([:email])
+        |> Map.put(:password, "xs45;%%5s")
+
+      {:error, %Ecto.Changeset{}} = # Without username, no allow_empty_username
+        Accounts.create_account(user_params, invit.token)
+      {:error, %Ecto.Changeset{}} = # With empty username, no allow_empty_username
+        Accounts.create_account(Map.put(user_params, :username, ""), invit.token)
+      {:ok, created} = # Without username, allow_empty_username
+        Accounts.create_account(user_params, invit.token, allow_empty_username: true)
+
+      assert user_params.email == created.email
+      assert String.starts_with?(created.username, Accounts.UsernameGenerator.username_prefix())
+    end
+
+    test "store provider infos" do
+      invit = insert(:invitation_request)
+      user_params =
+        build(:user)
+        |> Map.take([:email])
+        |> Map.put(:password, "xs45;%%5s")
+      provider_params = %{fb_user_id: "4242424242"}
+
+      Accounts.create_account(user_params, invit.token, provider_params: provider_params)
+    end
+
+    test "delete invitation request after creating the user" do
+      Repo.delete_all(Accounts.InvitationRequest)
+      invit = insert(:invitation_request)
+      user_params =
+        build(:user)
+        |> Map.take([:email, :username])
+        |> Map.put(:password, "xs45;%%5s")
+      Accounts.create_account(user_params, invit.token)
+      assert Repo.get(Accounts.InvitationRequest, invit.id) == nil
+    end
+  end
+
 end

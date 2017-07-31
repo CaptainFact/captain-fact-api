@@ -65,7 +65,7 @@ defmodule CaptainFact.Accounts.User do
     |> put_encrypted_pw
   end
 
-  def oauth_changeset(model, params \\ :empty) do
+  def provider_changeset(model, params \\ %{}) do
     model
     |> cast(params, [:fb_user_id, :picture_url])
   end

@@ -57,13 +57,26 @@ defmodule CaptainFactWeb.AuthControllerTest do
       assert response["user"]["id"] == user.id, "should use existing account if email exists"
     end
 
-    test "create account if it doesn't exist" do
+    test "show an error if not invited" do
       user = build(:user)
       auth = %{ueberauth_auth: build_auth(:facebook, user.fb_user_id, user.email, user.name)}
       response =
         build_conn()
         |> Map.put(:assigns, auth)
         |> post("/api/auth/facebook/callback")
+        |> json_response(:bad_request)
+
+      assert response == %{"error" => "invalid_invitation_token"}
+    end
+
+    test "create account if it doesn't exist" do
+      invit = insert(:invitation_request)
+      user = build(:user)
+      auth = %{ueberauth_auth: build_auth(:facebook, user.fb_user_id, user.email, user.name)}
+      response =
+        build_conn()
+        |> Map.put(:assigns, auth)
+        |> post("/api/auth/facebook/callback", %{invitation_token: invit.token})
         |> json_response(:ok)
 
       Guardian.decode_and_verify!(response["token"])
@@ -188,9 +201,9 @@ defmodule CaptainFactWeb.AuthControllerTest do
     end
 
     test "should inform the user if email is not valid" do
-      assert json_response(request_invite("xxx"), 400) == %{"email" => "invalid_email"}
-      assert json_response(request_invite("toto@yopmail.fr"), 400) == %{"email" => "invalid_email"}
-      assert json_response(request_invite("x@xx"), 400) == %{"email" => "invalid_email"}
+      assert json_response(request_invite("xxx"), 400) == %{"error" => "invalid_email"}
+      assert json_response(request_invite("toto@yopmail.fr"), 400) == %{"error" => "invalid_email"}
+      assert json_response(request_invite("x@xx"), 400) == %{"error" => "invalid_email"}
     end
 
     defp request_invite(email) do

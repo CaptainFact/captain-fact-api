@@ -4,6 +4,7 @@ defmodule CaptainFact.Accounts.UsernameGenerator do
   """
 
   @name __MODULE__
+  @username_prefix "NewUser-"
 
   def start_link do
     Agent.start_link(
@@ -15,8 +16,10 @@ defmodule CaptainFact.Accounts.UsernameGenerator do
   end
 
   def generate(id) do
-    "NewUser-#{encode(id)}"
+    @username_prefix <> encode(id)
   end
+
+  def username_prefix(), do: @username_prefix
 
   @doc """
   Encode a given id

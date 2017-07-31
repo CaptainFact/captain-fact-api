@@ -26,6 +26,37 @@ defmodule CaptainFactWeb.UserControllerTest do
     end
   end
 
+  describe "create account" do
+    test "must work if joined a valid invitation" do
+      invit = insert(:invitation_request)
+      user =
+        build(:user)
+        |> Map.take([:email, :username])
+        |> Map.put(:password, "dsad888-!")
+
+      response =
+        build_conn()
+        |> post("/api/users", %{user: user, invitation_token: invit.token})
+        |> json_response(:created)
+
+      Guardian.decode_and_verify!(response["token"])
+    end
+
+    test "must not work without an invitation" do
+      user =
+        build(:user)
+        |> Map.take([:email, :username])
+        |> Map.put(:password, "dsad888-!")
+
+      response =
+        build_conn()
+        |> post("/api/users", %{user: user})
+        |> json_response(:bad_request)
+
+      assert response == %{"error" => "invalid_invitation_token"}
+    end
+  end
+
   test "GET /api/users/me/available_flags" do
     user = build(:user) |> Map.put(:reputation, 4200) |> insert()
     available =

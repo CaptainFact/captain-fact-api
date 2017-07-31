@@ -2,9 +2,8 @@ defmodule CaptainFactWeb.AuthController do
   use CaptainFactWeb, :controller
   require Logger
 
-  alias Ecto.Multi
   alias CaptainFact.Accounts
-  alias CaptainFact.Accounts.{User, UsernameGenerator}
+  alias CaptainFact.Accounts.User
   alias CaptainFactWeb.{ErrorView, UserView, AuthController }
 
   plug Ueberauth
@@ -56,27 +55,20 @@ defmodule CaptainFactWeb.AuthController do
   end
 
   # For all others (OAuth) - create if doesn't exists, link otherwise
-  def callback(%{assigns: %{ueberauth_auth: auth}} = conn, _params) do
-    user = case user_from_auth(auth) do
-      {:ok, user} ->
-        # Try to update user with social network id if needed
-        with %{fb_user_id: nil} <- user,
-             changeset <- User.oauth_changeset(user, provider_specific_infos(auth)),
-             {:ok, newUser} <- Repo.update(changeset) do
-          newUser
-        else
-          _ -> user # Not a big deal if this fails, just return the user
-        end
-      {:error, _} -> create_user_from_oauth!(auth)
-    end
-
-    case signin_user(conn, user) do
-      {:ok, user, token} ->
-        render(conn, UserView, "user_with_token.json", %{user: user, token: token})
-      {:error, _} ->
+  def callback(%{assigns: %{ueberauth_auth: auth}} = conn, params) do
+    case third_paty_auth(auth, Map.get(params, "invitation_token")) do
+      {:ok, user} -> case signin_user(conn, user) do
+        {:ok, user, token} ->
+          render(conn, UserView, "user_with_token.json", %{user: user, token: token})
+        {:error, _} ->
+          conn
+          |> put_status(:bad_request)
+          |> render(ErrorView, "error.json", message: @err_authentication_failed)
+      end
+      {:error, error} ->
         conn
         |> put_status(:bad_request)
-        |> render(ErrorView, "error.json", message: @err_authentication_failed)
+        |> render(ErrorView, "error.json", message: error)
     end
   end
 
@@ -141,21 +133,24 @@ defmodule CaptainFactWeb.AuthController do
 
   # ---- Private ----
 
-  defp create_user_from_oauth!(auth) do
-    Multi.new
-    |> Multi.insert(:base_user,
-         %User{username: temporary_username(auth.info.email)}
-         |> User.registration_changeset(auth_info_to_user_info(auth))
-         |> User.oauth_changeset(provider_specific_infos(auth))
-       )
-    |> Multi.run(:final_user, fn %{base_user: user} ->
-         User.changeset(user, %{})
-         |> Ecto.Changeset.put_change(:username, UsernameGenerator.generate(user.id))
-         |> Repo.update()
-       end)
-    |> Repo.transaction()
-    |> case do
-        {:ok, %{final_user: user}} -> user
+  defp third_paty_auth(auth, invitation_token) do
+    case user_from_auth(auth) do
+      # User already exists
+      {:ok, user} ->
+        # Let's update user infos from third party
+        user
+        |> User.provider_changeset(provider_specific_infos(auth))
+        |> Repo.update()
+        |> case do
+             {:error, _} -> {:ok, user} # Not a big deal if this fails, just return the user
+             {:ok, updated_user} -> {:ok, updated_user}
+           end
+      # User doesn't exist, create account
+      {:error, _} ->
+        Accounts.create_account(auth_info_to_user_info(auth), invitation_token, [
+          provider_params: provider_specific_infos(auth),
+          allow_empty_username: true
+        ])
     end
   end
 
@@ -175,13 +170,6 @@ defmodule CaptainFactWeb.AuthController do
     end
   end
   defp provider_specific_infos(_), do: %{}
-
-  defp temporary_username(email) do
-    :crypto.hash(:sha256, email)
-    |> Base.encode64
-    |> String.slice(-8..-2)
-    |> (fn res -> "temporary-#{res}" end).()
-  end
 
   defp user_from_auth(auth = %{provider: :facebook}) do
     User

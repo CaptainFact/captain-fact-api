@@ -14,7 +14,7 @@ defmodule CaptainFact.Accounts.InvitationRequest do
     timestamps()
   end
 
-  @token_length 128
+  @token_length 12
 
   @doc false
   def changeset(%InvitationRequest{} = invitation_request, attrs) do

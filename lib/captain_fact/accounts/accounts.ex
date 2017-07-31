@@ -4,12 +4,85 @@ defmodule CaptainFact.Accounts do
   """
 
   import Ecto.Query, warn: false
+
+  alias Ecto.Multi
   alias CaptainFact.Repo
 
   alias CaptainFact.Accounts.{User, ResetPasswordRequest, UserPermissions, InvitationRequest}
+  alias CaptainFact.Accounts.UsernameGenerator
 
   @max_ip_reset_requests 3
   @request_validity 48 * 60 * 60 # 48 hours
+
+  # ---- User creation ----
+
+  @doc """
+  Create an account with given user `params`
+
+  Raise if `invitation_token` is not valid
+
+  Returns {:ok, %User{}} if success
+  In case of error, return can be :
+    * {:error, %Ecto.Changeset{}}
+    * {:error, message}
+    * {:error, nil} (unknown error)
+  """
+  def create_account(_, _, _ \\ [])
+  def create_account(_, nil, _),
+    do: {:error, "invalid_invitation_token"}
+  def create_account(user_params, invitation_token, opts) when is_binary(invitation_token),
+    do: create_account(user_params, Repo.get_by(InvitationRequest, token: invitation_token), opts)
+  def create_account(user_params, %InvitationRequest{token: invitation_token}, opts) do
+    allow_empty_username = Keyword.get(opts, :allow_empty_username, false)
+    provider_params = Keyword.get(opts, :provider_params, %{})
+
+    case Map.get(user_params, "username") || Map.get(user_params, :username) do
+      username when allow_empty_username and (is_nil(username) or username == "") ->
+        Map.get(user_params, "email") || Map.get(user_params, :email)
+        |> create_account_without_username(user_params, provider_params)
+      _ ->
+        do_create_account(user_params, provider_params)
+    end
+    |> case do
+      {:ok, user} when not is_nil(invitation_token) ->
+        # We willingly delete token using `invitation_token` string because we accept having
+        # multiple invitations with the same token
+        delete_invitation(invitation_token)
+        {:ok, user}
+      any -> any
+    end
+  end
+
+  defp do_create_account(user_params, provider_params) do
+    User.registration_changeset(%User{}, user_params)
+    |> User.provider_changeset(provider_params)
+    |> Repo.insert()
+  end
+
+  defp create_account_without_username(email, params, provider_params) do
+    Multi.new
+    |> Multi.insert(:base_user,
+         %User{username: temporary_username(email)}
+         |> User.registration_changeset(Map.drop(params, [:username, "username"]))
+         |> User.provider_changeset(provider_params)
+       )
+    |> Multi.run(:final_user, fn %{base_user: user} ->
+         User.changeset(user, %{})
+         |> Ecto.Changeset.put_change(:username, UsernameGenerator.generate(user.id))
+         |> Repo.update()
+       end)
+    |> Repo.transaction()
+    |> case do
+        {:ok, %{final_user: user}} -> {:ok, user}
+    end
+  end
+
+  defp temporary_username(email) do
+    :crypto.hash(:sha256, email)
+    |> Base.encode64
+    |> String.slice(-8..-2)
+    |> (fn res -> "temporary-#{res}" end).()
+  end
 
   # ---- Reset Password ----
 
@@ -75,6 +148,8 @@ defmodule CaptainFact.Accounts do
           %InvitationRequest{}
           |> InvitationRequest.changeset(%{email: email, invited_by_id: invited_by_id})
           |> Repo.insert()
+        %{invitation_sent: true} = invit ->
+          Repo.update(InvitationRequest.changeset_sent(invit, false))
         request ->
           {:ok, request}
       end
@@ -82,7 +157,18 @@ defmodule CaptainFact.Accounts do
       _ -> {:error, "invalid_email"}
     end
   end
-  def request_invitation(email, %User{id: id}), do: request_invitation(email, id)
+  def request_invitation(email, %User{id: id}),
+    do: request_invitation(email, id)
+
+  @doc """
+  Delete an invitation
+  """
+  def delete_invitation(invitation_token) do
+    case Repo.get_by(InvitationRequest, token: invitation_token) do
+      nil -> {:error, nil}
+      invit -> Repo.delete(invit)
+    end
+  end
 
   @doc """
   Send `nb_invites` invitations to most recently updated users
