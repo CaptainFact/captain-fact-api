@@ -93,8 +93,8 @@ defmodule CaptainFact.Accounts do
 
   # ---- Confirm email ----
 
-  def confirm_email!(user = %User{email_confirmation_token: token}, token, async \\ true) do
-    user
+  def confirm_email!(token, async \\ true) do
+    Repo.get_by(User, email_confirmation_token: token)
     |> User.changeset_confirm_email(true)
     |> Repo.update!()
     |> ReputationUpdater.register_action_without_source(:email_confirmed, async)

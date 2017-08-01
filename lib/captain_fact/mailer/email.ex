@@ -21,7 +21,7 @@ defmodule CaptainFact.Email do
     |> html_body("""
        We're glag you joined us on CaptainFact ! To confirm your email and gain a bonus of
        +#{@confirm_email_reputation} reputation right now, click on the link below :
-       <a href="#{@frontend_url}/users/me/confirm/#{user.email_confirmation_token}">
+       <a href="#{@frontend_url}/confirm_email/#{user.email_confirmation_token}">
          Confirm email
        </a>
 
@@ -58,7 +58,7 @@ defmodule CaptainFact.Email do
     |> subject(invitation_subject(invited_by))
     |> html_body("""
        Please follow this link to create your account :
-       <a href="#{@frontend_url}/register?invitation_token=#{token}">Create account</a>
+       <a href="#{@frontend_url}/signup?invitation_token=#{token}">Create account</a>
        """)
   end
 
