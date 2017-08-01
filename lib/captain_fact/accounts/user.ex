@@ -1,6 +1,8 @@
 defmodule CaptainFact.Accounts.User do
   use CaptainFactWeb, :model
 
+  alias CaptainFact.TokenGenerator
+
   schema "users" do
     field :username, :string
     field :email, :string
@@ -31,11 +33,15 @@ defmodule CaptainFact.Accounts.User do
     timestamps()
   end
 
+  def user_appelation(%{username: username, name: nil}), do: "@#{username}"
+  def user_appelation(%{username: username, name: name}), do: "#{name} (@#{username})"
 
   @email_regex ~r/\A([\w+\-].?)+@[a-z\d\-]+(\.[a-z]+)*\.[a-z]+\z/i
   @valid_locales ~w(en fr de it es ru)
   @required_fields ~w(email username)a
   @optional_fields ~w(name password locale)a
+
+  def email_regex(), do: @email_regex
 
   @doc """
   Creates a changeset based on the `model` and `params`.
@@ -57,6 +63,13 @@ defmodule CaptainFact.Accounts.User do
     model
     |> common_changeset(params)
     |> password_changeset(params)
+    |> generate_email_verification_token(false)
+  end
+
+  def changeset_confirm_email(model, is_confirmed) do
+    model
+    |> change(email_confirmed: is_confirmed)
+    |> generate_email_verification_token(is_confirmed)
   end
 
   def password_changeset(model, params) do
@@ -67,12 +80,14 @@ defmodule CaptainFact.Accounts.User do
     |> put_encrypted_pw
   end
 
-  def provider_changeset(model, params \\ %{}) do
-    model
-    |> cast(params, [:fb_user_id, :picture_url])
-  end
+  def provider_changeset(model, params \\ %{}),
+    do: cast(model, params, [:fb_user_id, :picture_url])
 
-  def email_regex(), do: @email_regex
+  @token_length 32
+  defp generate_email_verification_token(changeset, false),
+    do: put_change(changeset, :email_confirmation_token, TokenGenerator.generate(@token_length))
+  defp generate_email_verification_token(changeset, true),
+    do: put_change(changeset, :email_confirmation_token, nil)
 
   defp common_changeset(model, params) do
     model

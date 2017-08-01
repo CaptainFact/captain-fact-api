@@ -31,7 +31,7 @@ defmodule CaptainFactWeb.AuthController do
 
     case result do
       %Plug.Conn{} ->
-        redirect(result, to: "/jouge42")
+        redirect(result, to: "/jouge42/admin")
       _ ->
         conn
         |> put_status(:unauthorized)
@@ -100,7 +100,7 @@ defmodule CaptainFactWeb.AuthController do
 
   def reset_password_request(conn, %{"email" => email}) do
     try do
-      Accounts.reset_password!(email, Enum.join(Tuple.to_list(conn.remote_ip), ","))
+      Accounts.reset_password!(email, Enum.join(Tuple.to_list(conn.remote_ip), "."))
     rescue
       _ in Ecto.NoResultsError -> "I won't tell the user ;)'"
     end

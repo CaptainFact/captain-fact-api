@@ -7,9 +7,10 @@ defmodule CaptainFact.Accounts do
 
   alias Ecto.Multi
   alias CaptainFact.Repo
+  alias CaptainFact.Email
 
   alias CaptainFact.Accounts.{User, ResetPasswordRequest, UserPermissions, InvitationRequest}
-  alias CaptainFact.Accounts.UsernameGenerator
+  alias CaptainFact.Accounts.{UsernameGenerator, ReputationUpdater}
 
   @max_ip_reset_requests 3
   @request_validity 48 * 60 * 60 # 48 hours
@@ -36,6 +37,7 @@ defmodule CaptainFact.Accounts do
     allow_empty_username = Keyword.get(opts, :allow_empty_username, false)
     provider_params = Keyword.get(opts, :provider_params, %{})
 
+    # Do create user
     case Map.get(user_params, "username") || Map.get(user_params, :username) do
       username when allow_empty_username and (is_nil(username) or username == "") ->
         Map.get(user_params, "email") || Map.get(user_params, :email)
@@ -43,15 +45,20 @@ defmodule CaptainFact.Accounts do
       _ ->
         do_create_account(user_params, provider_params)
     end
-    |> case do
-      {:ok, user} when not is_nil(invitation_token) ->
-        # We willingly delete token using `invitation_token` string because we accept having
-        # multiple invitations with the same token
-        delete_invitation(invitation_token)
-        {:ok, user}
-      any -> any
-    end
+    |> after_create(invitation_token)
   end
+
+  defp after_create(error = {:error, _}, _), do: error
+  defp after_create(result = {:ok, user}, invitation_token) do
+    # We willingly delete token using `invitation_token` string because we accept having
+    # multiple invitations with the same token
+    if invitation_token, do: delete_invitation(invitation_token)
+    # Send welcome mail
+    CaptainFact.Email.welcome_email(user) |> CaptainFact.Mailer.deliver_later()
+
+    result
+  end
+
 
   defp do_create_account(user_params, provider_params) do
     User.registration_changeset(%User{}, user_params)
@@ -84,6 +91,15 @@ defmodule CaptainFact.Accounts do
     |> (fn res -> "temporary-#{res}" end).()
   end
 
+  # ---- Confirm email ----
+
+  def confirm_email!(user = %User{email_confirmation_token: token}, token, async \\ true) do
+    user
+    |> User.changeset_confirm_email(true)
+    |> Repo.update!()
+    |> ReputationUpdater.register_action_without_source(:email_confirmed, async)
+  end
+
   # ---- Reset Password ----
 
   @doc """
@@ -91,18 +107,27 @@ defmodule CaptainFact.Accounts do
   """
   def reset_password!(email, source_ip_address) when is_binary(source_ip_address) do
     user = Repo.get_by!(User, email: email)
+
+    # Ensure not flooding
     nb_ip_requests =
       ResetPasswordRequest
       |> where([r], r.source_ip == ^source_ip_address)
       |> Repo.aggregate(:count, :token)
-
     if nb_ip_requests > @max_ip_reset_requests do
       throw UserPermissions.PermissionsError
     end
 
-    %ResetPasswordRequest{}
-    |> ResetPasswordRequest.changeset(%{user_id: user.id, source_ip: source_ip_address})
-    |> Repo.insert!()
+    # Generate request
+    request =
+      %ResetPasswordRequest{}
+      |> ResetPasswordRequest.changeset(%{user_id: user.id, source_ip: source_ip_address})
+      |> Repo.insert!()
+
+    # Email request
+    request
+    |> Map.put(:user, user)
+    |> Email.reset_password_request_mail()
+    |> CaptainFact.Mailer.deliver_later()
   end
 
   @doc """
@@ -177,6 +202,7 @@ defmodule CaptainFact.Accounts do
     InvitationRequest
     |> where([i], i.invitation_sent == false)
     |> order_by([i], i.updated_at)
+    |> preload(:invited_by)
     |> limit(^nb_invites)
     |> Repo.all()
     |> Enum.each(&send_invite/1)
@@ -188,7 +214,10 @@ defmodule CaptainFact.Accounts do
   def send_invite(request = %InvitationRequest{token: nil}),
     do: send_invite(Repo.update!(InvitationRequest.changeset_token(request)))
   def send_invite(request = %InvitationRequest{}) do
-    # TODO Send mail
+    request
+    |> CaptainFact.Email.invite_user_email()
+    |> CaptainFact.Mailer.deliver_later()
+
     # Email sent successfuly
     Repo.update!(InvitationRequest.changeset_sent(request, true))
   end

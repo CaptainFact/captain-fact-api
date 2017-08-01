@@ -1,5 +1,6 @@
 defmodule CaptainFact.AccountsTest do
   use CaptainFact.DataCase
+  use Bamboo.Test
 
   alias CaptainFact.Accounts
 
@@ -9,13 +10,16 @@ defmodule CaptainFact.AccountsTest do
 
     # Request
 
-    test "token gets generated" do
+    test "token gets generated and sent by mail" do
       Repo.delete_all(ResetPasswordRequest)
       user = insert(:user)
+
       Accounts.reset_password!(user.email, "127.0.0.1")
+
       assert Repo.aggregate(ResetPasswordRequest, :count, :token) == 1
       req = Repo.get_by!(ResetPasswordRequest, user_id: user.id)
-      refute is_nil(req.token) or String.length(req.token) != 254
+      refute is_nil(req.token) or String.length(req.token) < 128
+      assert_delivered_email CaptainFact.Email.reset_password_request_mail(req)
     end
 
     test "a single ip cannot make too much requests" do
@@ -35,8 +39,6 @@ defmodule CaptainFact.AccountsTest do
         end
       ) == PermissionsError
     end
-
-    #    test "sends an email with the token"
 
     # Verify
     test "verify token" do
@@ -91,13 +93,28 @@ defmodule CaptainFact.AccountsTest do
   end
 
   describe "invitation_requests" do
-    test "invitation request get created with given user" do
+    test "invitation request get created with given invited_by user" do
       email = "test@email.com"
       user = insert(:user)
       {:ok, req} = Accounts.request_invitation(email, user)
       assert is_nil(req.token), "don't generate token before necessary"
       assert user.id == req.invited_by_id
       assert email == req.email
+    end
+
+    test "send a mail when calling send_invite/1" do
+      req = insert(:invitation_request)
+      Accounts.send_invite(req)
+      assert_delivered_email CaptainFact.Email.invite_user_email(req)
+    end
+
+    test "send mails when calling send_invites/1" do
+      nb_invites = 10
+      requests = insert_list(nb_invites, :invitation_request)
+      Accounts.send_invites(nb_invites)
+      Enum.each(requests, fn req ->
+        assert_delivered_email CaptainFact.Email.invite_user_email(req)
+      end)
     end
 
     test "multiple requests only insert one time but doesn't crash" do
@@ -135,10 +152,7 @@ defmodule CaptainFact.AccountsTest do
 
     test "create an account if a valid user is given" do
       invit = insert(:invitation_request)
-      user_params =
-        build(:user)
-        |> Map.take([:username, :email])
-        |> Map.put(:password, "xs45;%%5s")
+      user_params = build_user_params()
       {:ok, created} = Accounts.create_account(user_params, invit.token)
       assert user_params.username == created.username
       assert user_params.email == created.email
@@ -146,10 +160,7 @@ defmodule CaptainFact.AccountsTest do
 
     test "can create an account with auto-generated username only if explicitly requested" do
       invit = insert(:invitation_request)
-      user_params =
-        build(:user)
-        |> Map.take([:email])
-        |> Map.put(:password, "xs45;%%5s")
+      user_params = Map.delete(build_user_params(), :username)
 
       {:error, %Ecto.Changeset{}} = # Without username, no allow_empty_username
         Accounts.create_account(user_params, invit.token)
@@ -164,10 +175,7 @@ defmodule CaptainFact.AccountsTest do
 
     test "store provider infos" do
       invit = insert(:invitation_request)
-      user_params =
-        build(:user)
-        |> Map.take([:email])
-        |> Map.put(:password, "xs45;%%5s")
+      user_params = build_user_params()
       provider_params = %{fb_user_id: "4242424242"}
 
       Accounts.create_account(user_params, invit.token, provider_params: provider_params)
@@ -176,12 +184,34 @@ defmodule CaptainFact.AccountsTest do
     test "delete invitation request after creating the user" do
       Repo.delete_all(Accounts.InvitationRequest)
       invit = insert(:invitation_request)
-      user_params =
-        build(:user)
-        |> Map.take([:email, :username])
-        |> Map.put(:password, "xs45;%%5s")
+      user_params = build_user_params()
       Accounts.create_account(user_params, invit.token)
       assert Repo.get(Accounts.InvitationRequest, invit.id) == nil
+    end
+
+    test "sends an email to welcome the user" do
+      invit = insert(:invitation_request)
+      user_params = build_user_params()
+      {:ok, user} = Accounts.create_account(user_params, invit.token)
+      assert_delivered_email CaptainFact.Email.welcome_email(user)
+    end
+
+    defp build_user_params() do
+      build(:user)
+      |> Map.take([:email, :username])
+      |> Map.put(:password, "xs45;%%5s")
+    end
+  end
+
+  describe "confirm email" do
+    test "set email_confirmed to true, reset the token and update reputation" do
+      user = insert(:user)
+      Accounts.confirm_email!(user, user.email_confirmation_token, false)
+      updated_user = Repo.get(Accounts.User, user.id)
+
+      assert updated_user.email_confirmed
+      assert updated_user.email_confirmation_token == nil
+      assert user.reputation < updated_user.reputation
     end
   end
 

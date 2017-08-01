@@ -34,7 +34,7 @@ defmodule CaptainFactWeb.Router do
 
   # ---- Routes ----
 
-  # API
+  # APIs
 
   scope "/api", CaptainFactWeb do
     pipe_through [:api, :api_auth]
@@ -60,6 +60,7 @@ defmodule CaptainFactWeb.Router do
     delete "/users/me", UserController, :delete
     put    "/users/me", UserController, :update
     get    "/users/me/available_flags", UserController, :available_flags
+    put    "/users/me/confirm_email/:token", UserController, :confirm_email
     get    "/users/me", UserController, :show_me
     get    "/users/:username", UserController, :show
     get    "/users/:user_id/videos", VideoController, :index
@@ -85,8 +86,16 @@ defmodule CaptainFactWeb.Router do
     delete "/logout", UserController, :admin_logout
   end
 
-  scope "/jouge42", ExAdmin do
+  scope "/jouge42/admin", ExAdmin do
     pipe_through [:browser, :browser_auth]
     admin_routes()
+  end
+
+  # Dev only : mailer
+  if Mix.env == :dev do
+    scope "/jouge42/mail" do
+      pipe_through [:browser, :browser_auth]
+      forward "/sent_emails", Bamboo.SentEmailViewerPlug
+    end
   end
 end

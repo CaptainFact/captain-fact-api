@@ -5,7 +5,7 @@ defmodule CaptainFactWeb.UserController do
   alias CaptainFact.Accounts.{User, UserPermissions}
 
   plug Guardian.Plug.EnsureAuthenticated, [handler: CaptainFactWeb.AuthController]
-  when action in [:update, :delete, :admin_logout, :available_flags, :show_me]
+  when action in [:update, :delete, :admin_logout, :available_flags, :show_me, :confirm_email]
 
 
   def create(conn, params = %{"user" => user_params}) do
@@ -68,6 +68,11 @@ defmodule CaptainFactWeb.UserController do
       {:error, _reason} ->
         json(conn, %{flags_available: 0})
     end
+  end
+
+  def confirm_email(conn, %{"token" => token}) do
+    Accounts.confirm_email!(Guardian.Plug.current_resource(conn), token)
+    send_resp(conn, :no_content, "")
   end
 
   def delete(conn, _params) do

@@ -1,5 +1,8 @@
 use Mix.Config
 
+# General config
+config :captain_fact, frontend_url: "https://captainfact.io"
+
 # For production, we configure the host to read the PORT
 # from the system environment. Therefore, you will need
 # to set PORT=80 before running your server.

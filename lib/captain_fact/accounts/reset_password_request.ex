@@ -7,12 +7,12 @@ defmodule CaptainFact.Accounts.ResetPasswordRequest do
   @derive {Phoenix.Param, key: :token}
   schema "accounts_reset_password_requests" do
     field :source_ip, :string
-    field :user_id, :id
+    belongs_to :user, CaptainFact.Accounts.User
 
     timestamps(updated_at: false)
   end
 
-  @token_length 254
+  @token_length 128
 
   def changeset(model, attrs) do
     model

@@ -41,7 +41,7 @@ defmodule CaptainFactWeb do
 
   def view do
     quote do
-      use Phoenix.View, root: "lib/captain_fact/web/templates",
+      use Phoenix.View, root: "lib/captain_fact_web/templates",
                         namespace: CaptainFactWeb
 
       # Import convenience functions from controllers

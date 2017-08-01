@@ -1,5 +1,8 @@
 use Mix.Config
 
+# General config
+config :captain_fact, frontend_url: "https://TEST_FRONTEND"
+
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
 config :captain_fact, CaptainFactWeb.Endpoint,
@@ -18,3 +21,6 @@ config :captain_fact, CaptainFact.Repo,
   database: "captain_fact_test",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
+
+# Mails
+config :captain_fact, CaptainFact.Mailer, adapter: Bamboo.TestAdapter

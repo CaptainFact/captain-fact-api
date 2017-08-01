@@ -26,7 +26,8 @@ defmodule CaptainFact.Accounts.ReputationUpdater do
     fact_vote_up_to_down:     {  0   , -6    },
     # Actions without source
     comment_banned:           {  0   , -20   },
-    comment_flagged:          {  0   , -5    }
+    comment_flagged:          {  0   , -5    },
+    email_confirmed:          {  0   , +15   }
   }
 
   # --- API ---
@@ -43,7 +44,7 @@ defmodule CaptainFact.Accounts.ReputationUpdater do
   end
 
   def register_action_without_source(target_user, action, async \\ true) do
-    change = elem(Map.get(@actions, action), 1)
+    change = action_target_reputation_change(action)
     change_func = fn -> register_change(user_id(target_user), change) end
     if async, do: Task.start_link(change_func), else: change_func.()
   end
@@ -53,6 +54,7 @@ defmodule CaptainFact.Accounts.ReputationUpdater do
 
   def max_daily_reputation_gain(), do: @max_daily_reputation_gain
   def actions(), do: @actions
+  def action_target_reputation_change(action), do: elem(Map.get(@actions, action), 1)
 
   # --- Methods ---
 

@@ -1,5 +1,8 @@
 use Mix.Config
 
+# General config
+config :captain_fact, frontend_url: "http://localhost:3333"
+
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #
@@ -46,3 +49,6 @@ config :captain_fact, CaptainFact.Repo,
   database: "captain_fact_dev",
   hostname: "localhost",
   pool_size: 10
+
+# Mails
+config :captain_fact, CaptainFact.Mailer, adapter: Bamboo.LocalAdapter

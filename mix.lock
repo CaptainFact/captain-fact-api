@@ -1,5 +1,6 @@
 %{"arc": {:hex, :arc, "0.8.0", "bb7cf8ea50f30f9c2bb357270c074def42a7ec6a3b4605be731cc5faf8fde6fd", [:mix], [{:ex_aws, "~> 1.1", [hex: :ex_aws, optional: true]}, {:httpoison, "~> 0.11", [hex: :httpoison, optional: false]}, {:poison, "~> 2.2 or ~> 3.1", [hex: :poison, optional: true]}, {:sweet_xml, "~> 0.6", [hex: :sweet_xml, optional: true]}]},
   "arc_ecto": {:hex, :arc_ecto, "0.7.0", "428ed7ea4ed0be8996d8fc6e9f651d3e26fe9c9063f26cbf6731c865369845d3", [:mix], [{:arc, "~> 0.8.0", [hex: :arc, optional: false]}, {:ecto, "~> 2.0", [hex: :ecto, optional: false]}]},
+  "bamboo": {:hex, :bamboo, "1.0.0-rc.1", "5e056f4092fea964c83b22827a9e6b5859af2d5793df1cc1f960346183be147c", [], [{:hackney, "~> 1.7", [hex: :hackney, repo: "hexpm", optional: false]}, {:plug, "~> 1.0", [hex: :plug, repo: "hexpm", optional: false]}, {:poison, ">= 1.5.0", [hex: :poison, repo: "hexpm", optional: false]}], "hexpm"},
   "base64url": {:hex, :base64url, "0.0.1", "36a90125f5948e3afd7be97662a1504b934dd5dac78451ca6e9abf85a10286be", [:rebar], []},
   "calendar": {:hex, :calendar, "0.17.2", "d6b7bccc29c72203b076d4e488d967780bf2d123a96fafdbf45746fdc2fa342c", [:mix], [{:tzdata, "~> 0.5.8 or ~> 0.1.201603", [hex: :tzdata, optional: false]}]},
   "certifi": {:hex, :certifi, "1.1.0", "c9b71a547016c2528a590ccfc28de786c7edb74aafa17446b84f54e04efc00ee", [:rebar3], []},
