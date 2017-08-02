@@ -5,13 +5,15 @@ defmodule CaptainFact.Accounts.ReputationUpdater do
   State is a map like : `%{user_id: today_reputation_gain}`
   """
 
+  use GenServer
+
   require Logger
   import Ecto.Query
 
   alias CaptainFact.Repo
   alias CaptainFact.Accounts.{User, UserState}
 
-
+  @name __MODULE__
   @max_daily_reputation_gain 30
   @user_state_key :today_reputation_gain
   @actions %{
@@ -30,63 +32,74 @@ defmodule CaptainFact.Accounts.ReputationUpdater do
     email_confirmed:          {  0   , +15   }
   }
 
-  # --- API ---
+  # --- Client API ---
 
-  def register_action(source_user, target_user, action, async \\ true) when is_atom(action) do
-    {source_change, target_change} = Map.get(@actions, action)
-    tasks = [
-      fn -> register_change(user_id(source_user), source_change) end,
-      fn -> register_change(user_id(target_user), target_change) end
-    ]
-    if async,
-      do: Enum.map(tasks, &Task.start_link/1),
-      else: Enum.map(tasks, &Task.async/1) |> Enum.map(&Task.await/1)
+  def start_link() do
+    GenServer.start_link(@name, :ok, name: @name)
   end
 
-  def register_action_without_source(target_user, action, async \\ true) do
-    change = action_target_reputation_change(action)
-    change_func = fn -> register_change(user_id(target_user), change) end
-    if async, do: Task.start_link(change_func), else: change_func.()
-  end
+  # Static API
 
-  def get_today_reputation_gain(user),
-    do: UserState.get(user_id(user), @user_state_key, 0)
-
-  def max_daily_reputation_gain(), do: @max_daily_reputation_gain
-  def actions(), do: @actions
+  def max_daily_reputation_gain, do: @max_daily_reputation_gain
+  def actions, do: @actions
   def action_target_reputation_change(action), do: elem(Map.get(@actions, action), 1)
+  def get_today_reputation_gain(user), do: UserState.get(user_id(user), @user_state_key, 0)
+  def wait_queue(), do: GenServer.call(@name, {:ping})
 
-  # --- Methods ---
+  # Async methods
 
-  defp user_id(%User{id: id}), do: id
-  defp user_id(id) when is_integer(id), do: id
+  def register_action(source_user, target_user, action) when is_atom(action) do
+    {source_change, target_change} = Map.get(@actions, action)
+    GenServer.cast(@name, {:register_change, user_id(source_user), source_change})
+    GenServer.cast(@name, {:register_change, user_id(target_user), target_change})
+  end
 
-  defp register_change(_, 0), do: :ok
-  defp register_change(user_id, reputation_change) when is_integer(reputation_change) do
+  def register_action(target_user, action) when is_atom(action) do
+    change = action_target_reputation_change(action)
+    GenServer.cast(@name, {:register_change, user_id(target_user), change})
+  end
+
+  # --- Server callbacks ---
+
+  def handle_cast({:register_change, _, 0}, _state), do: {:noreply, :ok}
+  def handle_cast({:register_change, user_id, change}, _state) do
+    # Get max reputation gain from user state and updates it ({action_gain, new_daily_gain})
     real_change = UserState.get_and_update(user_id, @user_state_key, fn
       today_gain when is_nil(today_gain) ->
-        {reputation_change, reputation_change}
-      today_gain when today_gain + reputation_change <= @max_daily_reputation_gain ->
-        {reputation_change, today_gain + reputation_change}
+        {change, change}
+      today_gain when today_gain + change <= @max_daily_reputation_gain ->
+        {change, today_gain + change}
       today_gain when today_gain >= @max_daily_reputation_gain ->
         {0, @max_daily_reputation_gain}
       today_gain ->
         {@max_daily_reputation_gain - today_gain , @max_daily_reputation_gain}
     end)
     db_update_reputation(user_id, real_change)
+    {:noreply, :ok}
   end
+
+  def handle_call({:ping}, _caller, _state), do: {:reply, :ok, :ok}
+
+  # --- Methods ---
 
   defp db_update_reputation(_user_id, 0), do: true
   defp db_update_reputation(user_id, reputation_change) do
-    Repo.transaction(fn ->
-      user =
-        User
-        |> where(id: ^user_id)
-        |> lock("FOR UPDATE")
-        |> Repo.one!()
+    try do
+      Repo.transaction(fn ->
+        user =
+          User
+          |> where(id: ^user_id)
+          |> lock("FOR UPDATE")
+          |> Repo.one!()
 
-      new_reputation = user.reputation + reputation_change
-      Repo.update!(User.reputation_changeset(user, %{reputation: new_reputation}))
-    end)
+        new_reputation = user.reputation + reputation_change
+        Repo.update(User.reputation_changeset(user, %{reputation: new_reputation}))
+      end)
+    rescue
+      _ -> Logger.warn("DB reputation update (#{reputation_change}) for user #{user_id} failed")
+    end
   end
+
+  defp user_id(%User{id: id}), do: id
+  defp user_id(id) when is_integer(id), do: id
 end

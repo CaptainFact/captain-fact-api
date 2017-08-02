@@ -19,8 +19,8 @@ defmodule CaptainFact.Flagger do
       |> Repo.insert!()
     end)
     if async,
-      do: Task.start_link(fn -> check_comment_flags(comment) end),
-      else: check_comment_flags(comment)
+      do: Task.start_link(fn -> check_comment_flags(comment, get_nb_flags(comment)) end),
+      else: check_comment_flags(comment, get_nb_flags(comment))
   end
 
   def comments_nb_flags_to_ban(), do: @comments_nb_flags_to_ban
@@ -34,33 +34,32 @@ defmodule CaptainFact.Flagger do
     |> Repo.aggregate(:count, :id)
   end
 
-  defp check_comment_flags(comment = %Comment{id: comment_id}) do
-    if get_nb_flags(comment) < @comments_nb_flags_to_ban do
-      ReputationUpdater.register_action_without_source(comment.user_id, :comment_flagged, false)
-    else
-      # Careful : update_all doesn't update `updated_at` field
-      {nb_updated, [comment]} = Repo.update_all((
-          from c in Comment,
-          where: c.id == ^comment_id,
-          where: c.is_banned == false
-        ), [set: [is_banned: true]], returning: true
+  defp check_comment_flags(_comment, nb_flags) when nb_flags > @comments_nb_flags_to_ban,
+    do: nil # Ignore additional flags
+  defp check_comment_flags(comment, nb_flags) when nb_flags < @comments_nb_flags_to_ban,
+    do: ReputationUpdater.register_action(comment.user_id, :comment_flagged)
+  defp check_comment_flags(%Comment{id: comment_id}, @comments_nb_flags_to_ban) do
+    # Careful : update_all doesn't update `updated_at` field
+    {nb_updated, [comment]} = Repo.update_all((
+        from c in Comment,
+        where: c.id == ^comment_id,
+        where: c.is_banned == false
+      ), [set: [is_banned: true]], returning: true
+    )
+    if nb_updated == 1 do
+      Logger.debug("Comment #{comment_id} banned")
+      comment_context = Repo.one!(
+        from c in Comment,
+          join: s in Statement, on: c.statement_id == s.id,
+          where: c.id == ^comment.id,
+          select: %{video_id: s.video_id, statement_id: s.id}
       )
-      if nb_updated == 1 do
-        Logger.debug("Comment #{comment_id} banned")
-        comment_context = Repo.one!(
-          from c in Comment,
-            join: s in Statement, on: c.statement_id == s.id,
-            where: c.id == ^comment.id,
-            select: %{video_id: s.video_id, statement_id: s.id}
-        )
-        Endpoint.broadcast(
-          "comments:video:#{VideoHashId.encode(comment_context.video_id)}",
-          "comment_removed",
-          %{id: comment_id, statement_id: comment_context.statement_id}
-        )
-        # Update reputation synchronously
-        ReputationUpdater.register_action_without_source(comment.user_id, :comment_banned, false)
-      end
+      Endpoint.broadcast(
+        "comments:video:#{VideoHashId.encode(comment_context.video_id)}",
+        "comment_removed",
+        %{id: comment_id, statement_id: comment_context.statement_id}
+      )
+      ReputationUpdater.register_action(comment.user_id, :comment_banned)
     end
   end
 end

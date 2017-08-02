@@ -40,8 +40,10 @@ defmodule CaptainFactWeb.CommentsChannel do
     end)
     full_comment = comment |> Map.put(:user, user) |> Repo.preload(:source) |> Map.put(:score, 1)
     broadcast!(socket, "comment_added", CommentView.render("comment.json", comment: full_comment))
-    handle_in_authenticated!("vote", %{"comment_id" => full_comment.id, "value" => "1"}, socket)
-    Task.async(fn() ->
+    Task.start_link(fn() ->
+      handle_in_authenticated!("vote", %{"comment_id" => full_comment.id, "value" => "1"}, socket)
+    end)
+    Task.start_link(fn() ->
       fetch_source_metadata_and_update_comment(full_comment, socket.topic)
     end)
     {:reply, :ok, socket}

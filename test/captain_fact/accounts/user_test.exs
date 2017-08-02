@@ -60,8 +60,8 @@ defmodule CaptainFact.Accounts.UserTest do
 
   test "email must not be a temporary email (yopmail, jetable.org...etc)" do
     provider = Enum.random(ForbiddenEmailProviders.get_temporary_providers)
-    attrs = %{email: "#{Faker.Internet.user_name}@#{provider}"}
-    assert {:email, "forbidden_provider"} in errors_on(%User{}, attrs)
+    attrs = %{email: "xxxxx@#{provider}"}
+    assert {:email, "forbidden_provider"} in errors_on(%User{}, attrs), "didn't reject #{provider}'"
   end
 
   test "username should not contains forbidden passwords" do

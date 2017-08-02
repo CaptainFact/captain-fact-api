@@ -93,11 +93,11 @@ defmodule CaptainFact.Accounts do
 
   # ---- Confirm email ----
 
-  def confirm_email!(token, async \\ true) do
+  def confirm_email!(token) do
     Repo.get_by(User, email_confirmation_token: token)
     |> User.changeset_confirm_email(true)
     |> Repo.update!()
-    |> ReputationUpdater.register_action_without_source(:email_confirmed, async)
+    |> ReputationUpdater.register_action(:email_confirmed)
   end
 
   # ---- Reset Password ----

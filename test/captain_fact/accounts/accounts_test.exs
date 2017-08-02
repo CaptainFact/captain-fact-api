@@ -129,9 +129,9 @@ defmodule CaptainFact.AccountsTest do
     end
 
     test "cannot insert with bad email" do
-      {:error, "invalid_email"} = Accounts.request_invitation("toto@yopmail.fr")
-      {:error, "invalid_email"} = Accounts.request_invitation("toto@")
-      {:error, "invalid_email"} = Accounts.request_invitation("xxxxxxxxx")
+      assert {:error, "invalid_email"} == Accounts.request_invitation("toto@yopmail.fr")
+      assert {:error, "invalid_email"} == Accounts.request_invitation("toto@")
+      assert {:error, "invalid_email"} == Accounts.request_invitation("xxxxxxxxx")
     end
 
     test "re-asking for an invitation reset invitation_sent boolean to false" do
@@ -206,7 +206,8 @@ defmodule CaptainFact.AccountsTest do
   describe "confirm email" do
     test "set email_confirmed to true, reset the token and update reputation" do
       user = insert(:user)
-      Accounts.confirm_email!(user.email_confirmation_token, false)
+      Accounts.confirm_email!(user.email_confirmation_token)
+      CaptainFact.Accounts.ReputationUpdater.wait_queue()
       updated_user = Repo.get(Accounts.User, user.id)
 
       assert updated_user.email_confirmed
