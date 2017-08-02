@@ -6,6 +6,7 @@ defmodule CaptainFactWeb.CommentsChannel do
   alias CaptainFactWeb.{ Comment, CommentView, Vote, VoteView, Flag, Source }
   alias CaptainFact.{ VideoHashId, VoteDebouncer, Flagger }
   alias CaptainFact.Accounts.{ReputationUpdater, UserPermissions}
+  alias CaptainFact.Sources.Fetcher
 
 
   def join("comments:video:" <> video_id_hash, _payload, socket) do
@@ -133,7 +134,7 @@ defmodule CaptainFactWeb.CommentsChannel do
   # Metadata fetching
 
   defp fetch_source_metadata_and_update_comment(comment = %Comment{source: source = %{title: nil, url: url}}, topic) do
-    case fetch_source_metadata(url) do
+    case Fetcher.fetch_source_metadata(url) do
       {:error, _} -> nil
       {:ok, source_params} when source_params == %{} -> nil
       {:ok, source_params} ->
@@ -150,31 +151,4 @@ defmodule CaptainFactWeb.CommentsChannel do
   end
 
   defp fetch_source_metadata_and_update_comment(_, _), do: nil
-
-  defp fetch_source_metadata(url) do
-    case HTTPoison.get(url, [], [follow_redirect: true, max_redirect: 5]) do
-      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        tree = Floki.parse(body)
-        source_params =
-          %{
-            title: Floki.attribute(tree, "meta[property='og:title']", "content"),
-            language: Floki.attribute(tree, "html", "lang"),
-            site_name: Floki.attribute(tree, "meta[property='og:site_name']", "content"),
-            url: Floki.attribute(tree, "meta[property='og:url']", "content")
-          }
-          |> Enum.map(fn({key, value}) -> {key, List.first(value)} end)
-          |> Enum.filter(fn({_key, value}) -> value != nil end)
-          |> Enum.map(fn(entry = {key, value}) ->
-            if key in [:title, :site_name],
-              do: {key, HtmlEntities.decode(value)},
-              else: entry
-            end)
-          |> Enum.into(%{})
-        {:ok, source_params}
-      {:ok, %HTTPoison.Response{status_code: 404}} ->
-        {:error, "Not found"}
-      {:error, %HTTPoison.Error{reason: reason}} ->
-        {:error, reason}
-      end
-  end
 end

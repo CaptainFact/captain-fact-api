@@ -59,6 +59,7 @@ defmodule CaptainFact.Mixfile do
       {:quantum, ">= 1.9.2"},
       {:not_qwerty123, "~> 2.0"},
       {:bamboo, "~> 1.0.0-rc.1"},
+      {:bypass, "~> 0.8", only: :test},
       {:ex_machina, "~> 2.0", only: :test},
       {:faker, "~> 0.7", only: :test}
    ]
