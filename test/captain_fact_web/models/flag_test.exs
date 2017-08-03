@@ -1,7 +1,8 @@
 defmodule CaptainFact.FlagTest do
   use CaptainFact.DataCase, async: true
 
-  alias CaptainFactWeb.{Flag, Comment}
+  alias CaptainFactWeb.Flag
+  alias CaptainFact.Comments.Comment
 
 
   @valid_comment %Comment{id: 1, user_id: 42}

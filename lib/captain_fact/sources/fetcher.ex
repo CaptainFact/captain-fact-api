@@ -1,11 +1,39 @@
 defmodule CaptainFact.Sources.Fetcher do
 
-  alias CaptainFactWeb.{Comment}
+  alias CaptainFact.Comments.Comment
+  alias CaptainFact.Sources.Fetcher
 
-  # TODO Comment updater
-  # TODO Pool
+  # TODO Pool https://elixirschool.com/en/lessons/libraries/poolboy/
 
-  def fetch_source_metadata(url) do
+  @name __MODULE__
+  @pool_name :source_fetcher_pool
+
+  # Public API
+
+  def start_link(), do: Agent.start_link(fn -> MapSet.new end, name: @name)
+
+  @doc """
+  Fetch given url infos
+  """
+  def fetch_source_metadata(url, callback) do
+    Agent.get_and_update(@name, fn state ->
+      if MapSet.member?(state, url) do
+        {:error, state} # Already queued for fetch
+      else
+        Agent.cast(@name, fn state ->
+          callback.(do_fetch_source_metadata(url)) # TODO Send to pool
+          MapSet.delete(state, url)
+        end)
+        {:ok, MapSet.put(state, url)}
+      end
+    end)
+  end
+
+  def get_queue, do: Agent.get(@name, &(&1))
+
+  # Private methods
+
+  defp do_fetch_source_metadata(url) do
     case HTTPoison.get(url, [], [follow_redirect: true, max_redirect: 5]) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         {:ok, source_params_from_tree(Floki.parse(body))}
@@ -15,7 +43,7 @@ defmodule CaptainFact.Sources.Fetcher do
         {:error, :unknown}
       {:error, %HTTPoison.Error{reason: reason}} ->
         {:error, reason}
-      end
+    end
   end
 
   defp source_params_from_tree(tree) do

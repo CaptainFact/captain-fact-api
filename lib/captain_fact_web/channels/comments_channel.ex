@@ -1,12 +1,12 @@
-defmodule CaptainFactWeb.CommentsChannel do
+defmodule CaptainFact.Comments.CommentsChannel do
   use CaptainFactWeb, :channel
 
   import CaptainFactWeb.UserSocket, only: [handle_in_authenticated: 4]
   alias CaptainFact.Accounts.User
-  alias CaptainFactWeb.{ Comment, CommentView, Vote, VoteView, Flag, Source }
-  alias CaptainFact.{ VideoHashId, VoteDebouncer, Flagger }
-  alias CaptainFact.Accounts.{ReputationUpdater, UserPermissions}
-  alias CaptainFact.Sources.Fetcher
+  alias CaptainFactWeb.{ CommentView, VoteView, Flag }
+  alias CaptainFact.{ VideoHashId, Flagger }
+  alias CaptainFact.Comments
+  alias CaptainFact.Comments.{Comment, Vote, VoteDebouncer}
 
 
   def join("comments:video:" <> video_id_hash, _payload, socket) do
@@ -31,22 +31,11 @@ defmodule CaptainFactWeb.CommentsChannel do
   end
 
   def handle_in_authenticated!("new_comment", params, socket) do
-    # TODO [Security] What if reply_to_id refer to a comment that is on a different statement ?
-    user = Repo.get!(User, socket.assigns.user_id)
-    comment = UserPermissions.lock!(user, :add_comment, fn user ->
-      user
-      |> build_assoc(:comments)
-      |> Comment.changeset(params)
-      |> Repo.insert!()
+    comment = Comments.add_comment(Repo.get!(User, socket.assigns.user_id), params, fn comment ->
+      rendered_comment = CommentView.render("comment.json", comment: comment)
+      broadcast!(socket, "comment_updated", rendered_comment)
     end)
-    full_comment = comment |> Map.put(:user, user) |> Repo.preload(:source) |> Map.put(:score, 1)
-    broadcast!(socket, "comment_added", CommentView.render("comment.json", comment: full_comment))
-    Task.start_link(fn() ->
-      handle_in_authenticated!("vote", %{"comment_id" => full_comment.id, "value" => "1"}, socket)
-    end)
-    Task.start_link(fn() ->
-      fetch_source_metadata_and_update_comment(full_comment, socket.topic)
-    end)
+    broadcast!(socket, "comment_added", CommentView.render("comment.json", comment: comment))
     {:reply, :ok, socket}
   end
 
@@ -65,27 +54,9 @@ defmodule CaptainFactWeb.CommentsChannel do
     end
   end
 
-  def handle_in_authenticated!("vote", params = %{"comment_id" => comment_id}, socket) do
-    comment =
-      Comment.with_source(Comment, false)
-      |> where(id: ^comment_id)
-      |> select([:user_id])
-      |> Repo.one!()
-    action = cond do
-      socket.assigns.user_id == comment.user_id -> :self_vote
-      (params["value"] || Map.get(params, :value)) >= 0 -> :vote_up
-      true -> :vote_down
-    end
-    {base_vote, new_vote} = UserPermissions.lock!(socket.assigns.user_id, action, fn user ->
-      base_vote = Repo.get_by(Vote, user_id: user.id, comment_id: comment_id) || %Vote{user_id: user.id}
-      new_vote = Repo.insert_or_update!(Vote.changeset(base_vote, params))
-      {base_vote, new_vote}
-    end)
-    VoteDebouncer.add_vote(socket.topic, new_vote.comment_id)
-    with true <- action != :self_vote,
-         vote_type when not is_nil(vote_type) <- Vote.get_vote_type(comment, base_vote.value, new_vote.value) do
-      ReputationUpdater.register_action(socket.assigns.user_id, comment.user_id, vote_type)
-    end
+  def handle_in_authenticated!("vote", %{"comment_id" => comment_id, "value" => value}, socket) do
+    vote = Comments.vote(Repo.get(User, socket.assigns.user_id), comment_id, value)
+    VoteDebouncer.add_vote(socket.topic, vote.comment_id)
     {:reply, :ok, socket}
   end
 
@@ -130,25 +101,4 @@ defmodule CaptainFactWeb.CommentsChannel do
         |> Enum.map(&(&1.entity_id))
       )
   end
-
-  # Metadata fetching
-
-  defp fetch_source_metadata_and_update_comment(comment = %Comment{source: source = %{title: nil, url: url}}, topic) do
-    case Fetcher.fetch_source_metadata(url) do
-      {:error, _} -> nil
-      {:ok, source_params} when source_params == %{} -> nil
-      {:ok, source_params} ->
-        source_params = if source_params.url == url,
-          do: Map.delete(source_params, :url),
-          else: source_params
-        # TODO Check if this url already exists. If it does, merge it and remove this source
-        updated_source = Repo.update!(Source.changeset(source, source_params))
-        # TODO Comment may have been edited. Reload from DB
-        updated_comment = Map.put(comment, :source, updated_source)
-        rendered_comment = CommentView.render("comment.json", comment: updated_comment)
-        CaptainFactWeb.Endpoint.broadcast(topic, "comment_updated", rendered_comment)
-    end
-  end
-
-  defp fetch_source_metadata_and_update_comment(_, _), do: nil
 end

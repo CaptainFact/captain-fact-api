@@ -1,4 +1,4 @@
-defmodule CaptainFact.VoteDebouncerTest do
+defmodule CaptainFact.Comments.VoteDebouncerTest do
   use CaptainFact.DataCase
-  doctest CaptainFact.VoteDebouncer
+  doctest CaptainFact.Comments.VoteDebouncer
 end

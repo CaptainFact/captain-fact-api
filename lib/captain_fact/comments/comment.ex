@@ -1,8 +1,10 @@
-defmodule CaptainFactWeb.Comment do
+defmodule CaptainFact.Comments.Comment do
   use CaptainFactWeb, :model
 
   alias CaptainFact.Accounts.User
-  alias CaptainFactWeb.{Source, Statement, Comment}
+  alias CaptainFactWeb.Statement
+  alias CaptainFact.Sources.Source
+  alias CaptainFact.Comments.Comment
 
   schema "comments" do
     field :text, :string
@@ -85,7 +87,7 @@ defmodule CaptainFactWeb.Comment do
   defp format_text(struct), do: struct
 
   defp put_source(struct = %{changes: %{source: %{changes: %{url: url}}}}) do
-    case CaptainFact.Repo.get_by(CaptainFactWeb.Source, url: url) do
+    case CaptainFact.Repo.get_by(CaptainFact.Sources.Source, url: url) do
       nil -> struct
       source -> put_assoc(struct, :source, source)
     end

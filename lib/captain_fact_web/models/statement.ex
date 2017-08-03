@@ -9,7 +9,7 @@ defmodule CaptainFactWeb.Statement do
     belongs_to :video, CaptainFactWeb.Video
     belongs_to :speaker, CaptainFactWeb.Speaker
 
-    has_many :comments, CaptainFactWeb.Comment, on_delete: :delete_all
+    has_many :comments, CaptainFact.Comments.Comment, on_delete: :delete_all
 
     timestamps()
   end

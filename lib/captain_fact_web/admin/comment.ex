@@ -1,7 +1,7 @@
 defmodule CaptainFactWeb.ExAdmin.Comment do
   use ExAdmin.Register
 
-  register_resource CaptainFactWeb.Comment do
+  register_resource CaptainFact.Comments.Comment do
     index do
       selectable_column()
 

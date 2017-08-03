@@ -15,7 +15,8 @@ defmodule CaptainFact do
       # Other custom workers
       worker(CaptainFact.Accounts.ReputationUpdater, []),
       worker(CaptainFact.Accounts.UserState, []),
-      worker(CaptainFact.VoteDebouncer, []),
+      worker(CaptainFact.Comments.VoteDebouncer, []),
+      worker(CaptainFact.Sources.Fetcher, []),
       worker(CaptainFact.VideoHashId, []),
       worker(CaptainFact.Accounts.UsernameGenerator, [])
     ]

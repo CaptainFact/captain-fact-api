@@ -2,7 +2,9 @@ defmodule CaptainFact.Factory do
   use ExMachina.Ecto, repo: CaptainFact.Repo
 
   alias CaptainFact.Accounts.{User, InvitationRequest}
-  alias CaptainFactWeb.{Video, Statement, Speaker, Comment}
+  alias CaptainFactWeb.{Video, Statement, Speaker}
+  alias CaptainFact.Comments.Comment
+
 
   def user_factory do
     %User{

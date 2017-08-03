@@ -28,7 +28,7 @@ defmodule CaptainFactWeb.StatementView do
       text: statement.text,
       time: statement.time,
       speaker: render_one(statement.speaker, CaptainFactWeb.SpeakerView, "speaker.json"),
-      comments: render_many(statement.comments, CaptainFactWeb.CommentView, "comment.json")
+      comments: render_many(statement.comments, CaptainFact.Comments.CommentView, "comment.json")
     }
   end
 end

@@ -5,7 +5,9 @@ defmodule CaptainFact.Flagger do
 
   alias CaptainFact.Accounts.{UserPermissions, ReputationUpdater}
   alias CaptainFact.{Repo, VideoHashId}
-  alias CaptainFactWeb.{Flag, Comment, Statement, Endpoint}
+  alias CaptainFactWeb.{Flag, Statement, Endpoint}
+  alias CaptainFact.Comments.Comment
+
 
   @comments_nb_flags_to_ban 3
 

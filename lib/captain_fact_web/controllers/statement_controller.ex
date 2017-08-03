@@ -1,7 +1,8 @@
 defmodule CaptainFactWeb.StatementController do
   use CaptainFactWeb, :controller
 
-  alias CaptainFactWeb.{Statement, Comment}
+  alias CaptainFactWeb.{Statement}
+  alias CaptainFact.Comments.Comment
 
   def get(conn, %{"video_id" => video_id}) do
     video_id = CaptainFact.VideoHashId.decode!(video_id)

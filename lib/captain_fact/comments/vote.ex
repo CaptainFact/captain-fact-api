@@ -1,14 +1,14 @@
-defmodule CaptainFactWeb.Vote do
+defmodule CaptainFact.Comments.Vote do
   use CaptainFactWeb, :model
 
   alias CaptainFactWeb.Statement
-  alias CaptainFactWeb.Comment
+  alias CaptainFact.Comments.Comment
 
 
   @primary_key false
   schema "votes" do
     belongs_to :user, CaptainFact.Accounts.User, primary_key: true
-    belongs_to :comment, CaptainFactWeb.Comment, primary_key: true
+    belongs_to :comment, CaptainFact.Comments.Comment, primary_key: true
 
     field :value, :integer, null: false
 
@@ -30,17 +30,17 @@ defmodule CaptainFactWeb.Vote do
   @doc """
   Get an atom describing the vote
   ## Examples
-      iex> CaptainFactWeb.Vote.get_vote_type(%{source_id: nil}, nil, 0)
+      iex> CaptainFact.Comments.Vote.get_vote_type(%{source_id: nil}, nil, 0)
       nil
-      iex> CaptainFactWeb.Vote.get_vote_type(%{source_id: 1}, 0, 0)
+      iex> CaptainFact.Comments.Vote.get_vote_type(%{source_id: 1}, 0, 0)
       nil
-      iex> CaptainFactWeb.Vote.get_vote_type(%{source_id: nil}, 0, 1)
+      iex> CaptainFact.Comments.Vote.get_vote_type(%{source_id: nil}, 0, 1)
       :comment_vote_up
-      iex> CaptainFactWeb.Vote.get_vote_type(%{source_id: 1}, 1, 0)
+      iex> CaptainFact.Comments.Vote.get_vote_type(%{source_id: 1}, 1, 0)
       :fact_vote_down
-      iex> CaptainFactWeb.Vote.get_vote_type(%{source_id: nil}, -1, 1)
+      iex> CaptainFact.Comments.Vote.get_vote_type(%{source_id: nil}, -1, 1)
       :comment_vote_down_to_up
-      iex> CaptainFactWeb.Vote.get_vote_type(%{source_id: 1}, 1, -1)
+      iex> CaptainFact.Comments.Vote.get_vote_type(%{source_id: 1}, 1, -1)
       :fact_vote_up_to_down
   """
   def get_vote_type(_, nil, 0), do: nil

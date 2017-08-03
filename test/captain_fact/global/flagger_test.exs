@@ -3,7 +3,9 @@ defmodule CaptainFact.FlaggerTest do
 
   alias CaptainFact.Flagger
   alias CaptainFact.Accounts.User
-  alias CaptainFactWeb.{Flag, Comment}
+  alias CaptainFactWeb.Flag
+  alias CaptainFact.Comments.Comment
+
 
   setup do
     Repo.delete_all(Flag)

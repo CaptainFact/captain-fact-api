@@ -1,7 +1,7 @@
 defmodule CaptainFactWeb.Flag do
   use CaptainFactWeb, :model
 
-  alias CaptainFactWeb.Comment
+  alias CaptainFact.Comments.Comment
 
   @comment_type 1
 

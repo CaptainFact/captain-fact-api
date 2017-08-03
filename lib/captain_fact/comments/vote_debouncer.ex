@@ -1,4 +1,4 @@
-defmodule CaptainFact.VoteDebouncer do
+defmodule CaptainFact.Comments.VoteDebouncer do
   @moduledoc """
   Debounce a channel votes to avoid sending more than 1 channel update each
   @update_delay ms
@@ -9,7 +9,7 @@ defmodule CaptainFact.VoteDebouncer do
   import Ecto.Query
 
   alias CaptainFact.Repo
-  alias CaptainFactWeb.{ Vote, Comment }
+  alias CaptainFact.Comments.{Comment, Vote}
 
   @name __MODULE__
   @update_delay 5000 # 5 seconds
@@ -22,7 +22,7 @@ defmodule CaptainFact.VoteDebouncer do
   @doc """
   Add a vote to the debouncer
   ## Examples
-      iex> CaptainFact.VoteDebouncer.add_vote("test_topic", 42)
+      iex> CaptainFact.Comments.VoteDebouncer.add_vote("test_topic", 42)
       :ok
   """
   def add_vote(channel_topic, comment_id) do
@@ -56,7 +56,7 @@ defmodule CaptainFact.VoteDebouncer do
 
   defp delay_update(channel_topic) do
     :timer.sleep(@update_delay)
-    CaptainFact.VoteDebouncer.update(channel_topic)
+    CaptainFact.Comments.VoteDebouncer.update(channel_topic)
   end
 
   defp do_update(state, channel_topic) do
