@@ -1,8 +1,6 @@
 defmodule CaptainFact.Sources.Fetcher do
 
-  import Logger
-
-  alias CaptainFact.Comments.Comment
+  require Logger
   alias CaptainFact.Sources.Fetcher
 
 

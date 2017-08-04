@@ -33,7 +33,7 @@ defmodule CaptainFact.Comments do
     Fetcher.fetch_source_metadata(source.url, fn
       metadata when metadata == %{} -> nil
       metadata ->
-        # TODO Check if this url already exists. If it does, merge it and remove this source
+        # TODO Check if url changed and if did, check if new url already exists. If it does, merge it and remove this source if nowone uses it
         updated_source = Repo.update!(Source.changeset(source, metadata))
         # TODO Comment may have been edited. Reload from DB
         if callback, do: callback.(Map.put(comment, :source, updated_source))
