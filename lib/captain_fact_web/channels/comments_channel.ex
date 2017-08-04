@@ -31,7 +31,8 @@ defmodule CaptainFact.Comments.CommentsChannel do
   end
 
   def handle_in_authenticated!("new_comment", params, socket) do
-    comment = Comments.add_comment(Repo.get!(User, socket.assigns.user_id), params, fn comment ->
+    source_url = get_in(params, ["source", "url"])
+    comment = Comments.add_comment(Repo.get!(User, socket.assigns.user_id), params, source_url, fn comment ->
       rendered_comment = CommentView.render("comment.json", comment: comment)
       broadcast!(socket, "comment_updated", rendered_comment)
     end)

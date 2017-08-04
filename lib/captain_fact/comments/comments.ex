@@ -31,11 +31,10 @@ defmodule CaptainFact.Comments do
   defp fetch_source_metadata_and_update_comment(%Comment{source: nil}, _), do: nil
   defp fetch_source_metadata_and_update_comment(comment = %Comment{source: source}, callback) do
     Fetcher.fetch_source_metadata(source.url, fn
-      {:error, _} -> nil
-      {:ok, source_params} when source_params == %{} -> nil
-      {:ok, source_params} ->
+      metadata when metadata == %{} -> nil
+      metadata ->
         # TODO Check if this url already exists. If it does, merge it and remove this source
-        updated_source = Repo.update!(Source.changeset(source, source_params))
+        updated_source = Repo.update!(Source.changeset(source, metadata))
         # TODO Comment may have been edited. Reload from DB
         if callback, do: callback.(Map.put(comment, :source, updated_source))
     end)

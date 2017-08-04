@@ -1,40 +1,60 @@
 defmodule CaptainFact.Sources.Fetcher do
 
+  import Logger
+
   alias CaptainFact.Comments.Comment
   alias CaptainFact.Sources.Fetcher
 
-  # TODO Pool https://elixirschool.com/en/lessons/libraries/poolboy/
 
-  @name __MODULE__
-  @pool_name :source_fetcher_pool
+  @request_timeout 15_000
+  @max_connections 4
 
-  # Public API
+  def link_checker_name, do: :sources_fetcher_checker
+  def pool_name, do: :sources_fetcher_pool
 
-  def start_link(), do: Agent.start_link(fn -> MapSet.new end, name: @name)
+  # ---- Public API ----
 
-  @doc """
-  Fetch given url infos
-  """
-  def fetch_source_metadata(url, callback) do
-    Agent.get_and_update(@name, fn state ->
-      if MapSet.member?(state, url) do
-        {:error, state} # Already queued for fetch
-      else
-        Agent.cast(@name, fn state ->
-          callback.(do_fetch_source_metadata(url)) # TODO Send to pool
-          MapSet.delete(state, url)
-        end)
-        {:ok, MapSet.put(state, url)}
-      end
-    end)
+  def start_link() do
+    import Supervisor.Spec
+    Supervisor.start_link([
+      :hackney_pool.child_spec(pool_name(), [
+        timeout: @request_timeout,
+        max_connections: @max_connections
+      ]),
+      worker(CaptainFact.Sources.Fetcher.LinkChecker, [])
+    ], strategy: :one_for_all, name: __MODULE__)
   end
 
-  def get_queue, do: Agent.get(@name, &(&1))
+  @doc """
+  Fetch given url infos and call callback with {:ok || :error, result}
+  """
+  def fetch_source_metadata(url, callback) do
+    case Fetcher.LinkChecker.reserve_url(url) do
+      :error -> :error # Already started, it's ok
+      :ok ->
+        Task.start(fn ->
+          try do
+            fetch(url, callback)
+          rescue
+            e -> Logger.warn("Fetch metadata for #{url} crashed - #{inspect(e)}")
+          after
+            Fetcher.LinkChecker.free_url(url)
+          end
+        end)
+    end
+  end
 
-  # Private methods
+  def get_queue, do: Fetcher.LinkChecker.get_queue()
+
+  defp fetch(url, callback) do
+    case do_fetch_source_metadata(url) do
+      {:error, _} -> :error
+      {:ok, result} -> callback.(result)
+    end
+  end
 
   defp do_fetch_source_metadata(url) do
-    case HTTPoison.get(url, [], [follow_redirect: true, max_redirect: 5]) do
+    case HTTPoison.get(url, [], [follow_redirect: true, max_redirect: 5, hackney: [pool: pool_name()]]) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         {:ok, source_params_from_tree(Floki.parse(body))}
       {:ok, %HTTPoison.Response{status_code: 404}} ->
@@ -61,5 +81,32 @@ defmodule CaptainFact.Sources.Fetcher do
         else: entry
       end)
     |> Enum.into(%{})
+  end
+
+  # Link checker
+
+  defmodule LinkChecker do
+    @doc """
+    Agent that record which links are currently fetched
+    """
+    def start_link() do
+      Agent.start_link(fn -> MapSet.new end, name: Fetcher.link_checker_name())
+    end
+
+    def reserve_url(url) do
+      Agent.get_and_update(Fetcher.link_checker_name(), fn state ->
+        if MapSet.member?(state, url) do
+          {:error, state}
+        else
+          {:ok, MapSet.put(state, url)}
+        end
+      end)
+    end
+
+    def free_url(url),
+      do: Agent.cast(Fetcher.link_checker_name(), &MapSet.delete(&1, url))
+
+    def get_queue,
+      do: Agent.get(Fetcher.link_checker_name(), &(&1))
   end
 end

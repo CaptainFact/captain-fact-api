@@ -12,12 +12,15 @@ defmodule CaptainFact.Support.MetaPage do
       do: Map.put(meta_attributes, :url, endpoint_url(bypass, Map.get(meta_attributes, :url))),
       else: meta_attributes
 
-    func = fn conn -> Plug.Conn.resp(conn, response_status, generate_page(meta_attributes)) end
+    func = plug_response(response_status, meta_attributes)
     if only_once,
       do: Bypass.expect_once(bypass, "GET", url, func),
       else: Bypass.expect(bypass, "GET", url, func)
     bypass
   end
+
+  def plug_response(response_status, meta_attributes),
+    do: fn conn -> Plug.Conn.resp(conn, response_status, generate_page(meta_attributes)) end
 
   def endpoint_url(_, nil), do: nil
   def endpoint_url(bypass, url), do: "http://localhost:#{bypass.port}#{url}"

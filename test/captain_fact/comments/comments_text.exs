@@ -4,6 +4,7 @@ defmodule CaptainFact.CommentsTest do
   import CaptainFact.Support.MetaPage
   alias CaptainFact.Comments
   alias CaptainFact.TokenGenerator
+  alias CaptainFact.Sources.Fetcher
 
   @valid_source_attributes %{
     language: "fr", # TODO remplace by locale
@@ -30,6 +31,8 @@ defmodule CaptainFact.CommentsTest do
         assert updated_comment.source.language == attributes.language
       end)
 
+      wait_fetcher()
+
       assert comment.source.title == nil
       assert comment.statement_id == statement.id
       assert comment.source.url == url
@@ -48,6 +51,7 @@ defmodule CaptainFact.CommentsTest do
       Comments.add_comment(user, %{statement_id: statement.id}, url, fn _ ->
         raise "callback shouldn't be called if there's nothing to update"
       end)
+      wait_fetcher()
     end
 
     test "source only fetched one time" do
@@ -65,6 +69,7 @@ defmodule CaptainFact.CommentsTest do
         assert update_comment.source.title === attributes.title
       end)
       Comments.add_comment(user, comment_params, url, fn _ -> raise "source is re-fetched" end)
+      wait_fetcher()
     end
 #    test "if the same source is added multiple times at the same moment, only fetch 1"
 #    test "if og:url is different than given url, change comment's url'"
@@ -72,4 +77,13 @@ defmodule CaptainFact.CommentsTest do
   end
 
   defp url_without_validation(), do: "/__IGNORE_URL_VALIDATION__/#{TokenGenerator.generate(32)}"
+
+  defp wait_fetcher() do
+    case MapSet.size(Fetcher.get_queue()) do
+      0 -> :ok
+      _ ->
+        :timer.sleep(50)
+        wait_fetcher()
+    end
+  end
 end
