@@ -1,13 +1,6 @@
 defmodule CaptainFact.Accounts.UserPermissions do
   @moduledoc """
   Check and log user permissions. State is a map looking like this :
-  ```
-  %{
-    user_id => %{
-      :action_atom => 42 # Number of occurences in the last 24h
-    }
-  }
-  ```
   """
 
   require Logger
@@ -55,35 +48,40 @@ defmodule CaptainFact.Accounts.UserPermissions do
 
   @doc """
   The safe way to ensure limitations and record actions as state is locked during `func` execution.
-  Should be used to verify sensitive actions, but not for those where limitation is high / not
-  important because of perfomances impact.
   Raises PermissionsError if user doesn't have the permission.
-  If user is an integer, it will be loaded from DB
+
+  lock! will do an optimistic lock by incrementing the counter for this action then execute func.
+  Returnning a tupe like {:error, _} or throwing / raising in `func` will revert the action
   """
   def lock!(user = %User{}, action, func) when is_atom(action) do
     limit = limitation(user, action)
-    if (limit == 0),
-      do: throw %PermissionsError{message: "not_enough_reputation"}
+    if (limit == 0), do: throw %PermissionsError{message: "not_enough_reputation"}
 
-    case UserState.get_and_update(user, @user_state_key, fn state ->
+    # TODO Manage own state
+    # Optimistic lock
+    lock_status = UserState.get_and_update(user, @user_state_key, fn state ->
       state = state || %{}
-      if Map.get(state, action, 0) >= limitation(user, action) do
-        {{:error, "limit_reached"}, state}
-      else
-        try do
-          result = func.(user)
-          {{:ok, result}, do_record_action(state, action)}
-        catch
-          e -> {{:throw, e}, state}
-        rescue
-          e -> {{:raise, e}, state}
-        end
-      end
-    end) do
-      {:error, message} -> throw %PermissionsError{message: message}
-      {:throw, e} -> throw e
-      {:raise, e} -> raise e
-      {:ok, result} -> result
+      if Map.get(state, action, 0) >= limit,
+        do: {:error, state},
+        else: {:ok, do_record_action(state, action)}
+    end)
+    if lock_status == :error, do: throw %PermissionsError{message: "limit_reached"}
+
+    try do
+      func.(user)
+    catch
+      e ->
+        UserState.update(user, @user_state_key, 0, &do_revert_action(&1, action))
+        throw e
+    rescue
+      e ->
+        UserState.update(user, @user_state_key, 0, &do_revert_action(&1, action))
+        reraise e, System.stacktrace
+    else
+      response = {:error, _} ->
+        UserState.update(user, @user_state_key, 0, &do_revert_action(&1, action))
+        response
+      response -> response
     end
   end
   def lock!(user_id, action, func) when is_integer(user_id) and is_atom(action),
@@ -166,8 +164,8 @@ defmodule CaptainFact.Accounts.UserPermissions do
 
   # Methods
 
-  defp do_record_action(user_actions, action),
-    do: Map.update(user_actions, action, 1, &(&1 + 1))
+  defp do_record_action(user_actions, action), do: Map.update(user_actions, action, 1, &(&1 + 1))
+  defp do_revert_action(user_actions, action), do: Map.update(user_actions, action, 0, &(&1 - 1))
 
   defp do_load_user!(nil), do: throw %PermissionsError{message: "unauthorized"}
   defp do_load_user!(user_id) do
