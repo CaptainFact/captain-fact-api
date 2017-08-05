@@ -6,7 +6,8 @@ defmodule CaptainFact.Comments do
   alias CaptainFact.Accounts.{UserPermissions, ReputationUpdater}
   alias CaptainFact.Sources.{Fetcher, Source}
 
-  # ---- Add comment ----
+
+  # ---- Public API ----
 
   def add_comment(user, params, source_url, source_fetch_callback \\ nil) do
     # TODO [Security] What if reply_to_id refer to a comment that is on a different statement ?
@@ -25,22 +26,6 @@ defmodule CaptainFact.Comments do
       do: fetch_source_metadata_and_update_comment(comment, source_fetch_callback)
     full_comment
   end
-
-  # Metadata fetching
-
-  defp fetch_source_metadata_and_update_comment(%Comment{source: nil}, _), do: nil
-  defp fetch_source_metadata_and_update_comment(comment = %Comment{source: source}, callback) do
-    Fetcher.fetch_source_metadata(source.url, fn
-      metadata when metadata == %{} -> nil
-      metadata ->
-        # TODO Check if url changed and if did, check if new url already exists. If it does, merge it and remove this source if nowone uses it
-        updated_source = Repo.update!(Source.changeset(source, metadata))
-        # TODO Comment may have been edited. Reload from DB
-        if callback, do: callback.(Map.put(comment, :source, updated_source))
-    end)
-  end
-
-  # ---- Vote ----
 
   def vote(user, comment_id, value) do
     # Find initial comment
@@ -68,5 +53,19 @@ defmodule CaptainFact.Comments do
       ReputationUpdater.register_action(user.id, comment.user_id, vote_type)
     end
     new_vote
+  end
+
+  # ---- Private ----
+
+  defp fetch_source_metadata_and_update_comment(%Comment{source: nil}, _), do: nil
+  defp fetch_source_metadata_and_update_comment(comment = %Comment{source: source}, callback) do
+    Fetcher.fetch_source_metadata(source.url, fn
+      metadata when metadata == %{} -> nil
+      metadata ->
+        # TODO Check if url changed and if did, check if new url already exists. If it does, merge it and remove this source if nowone uses it
+        updated_source = Repo.update!(Source.changeset(source, metadata))
+        # TODO Comment may have been edited. Reload from DB
+        if callback, do: callback.(Map.put(comment, :source, updated_source))
+    end)
   end
 end

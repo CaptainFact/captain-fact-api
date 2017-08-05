@@ -21,7 +21,7 @@ defmodule CaptainFact.Flagger do
       |> Repo.insert!()
     end)
     if async,
-      do: Task.start_link(fn -> check_comment_flags(comment, get_nb_flags(comment)) end),
+      do: Task.start(fn -> check_comment_flags(comment, get_nb_flags(comment)) end),
       else: check_comment_flags(comment, get_nb_flags(comment))
   end
 
