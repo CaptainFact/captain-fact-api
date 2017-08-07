@@ -34,7 +34,7 @@ defmodule CaptainFact.Sources.Fetcher do
           try do
             fetch(url, callback)
           rescue
-            e -> Logger.warn("Fetch metadata for #{url} crashed - #{inspect(e)}")
+            e -> Logger.error("Fetch metadata for #{url} crashed - #{inspect(e)}")
           after
             Fetcher.LinkChecker.free_url(url)
           end

@@ -4,6 +4,7 @@ defmodule CaptainFact.Factory do
   alias CaptainFact.Accounts.{User, InvitationRequest}
   alias CaptainFactWeb.{Video, Statement, Speaker}
   alias CaptainFact.Comments.Comment
+  alias CaptainFact.Sources.Source
 
 
   def user_factory do
@@ -50,7 +51,8 @@ defmodule CaptainFact.Factory do
     %Comment{
       text: Faker.Lorem.sentence(0..10),
       approve: Enum.random([false, true, nil]),
-      statement: build(:statement)
+      statement: build(:statement),
+      user: build(:user)
     }
   end
 
@@ -59,6 +61,15 @@ defmodule CaptainFact.Factory do
       email: Faker.Internet.email,
       invited_by: build(:user),
       token: "TestInvitationToken"
+    }
+  end
+
+  def source_factory do
+    %Source{
+      url: Faker.Internet.url,
+      site_name: Faker.Internet.domain_word,
+      language: String.downcase(Faker.Address.country_code),
+      title: Faker.Lorem.sentence(1..10)
     }
   end
 

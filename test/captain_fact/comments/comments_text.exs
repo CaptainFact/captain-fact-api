@@ -4,7 +4,8 @@ defmodule CaptainFact.CommentsTest do
   import CaptainFact.Support.MetaPage
   alias CaptainFact.Comments
   alias CaptainFact.TokenGenerator
-  alias CaptainFact.Sources.Fetcher
+  alias CaptainFact.Sources.{Source, Fetcher}
+
 
   @valid_source_attributes %{
     language: "fr", # TODO remplace by locale
@@ -71,9 +72,53 @@ defmodule CaptainFact.CommentsTest do
       Comments.add_comment(user, comment_params, url, fn _ -> raise "source is re-fetched" end)
       wait_fetcher()
     end
-#    test "if the same source is added multiple times at the same moment, only fetch 1"
-#    test "if og:url is different than given url, change comment's url'"
-#    test "don't try to fetch anything if no source given"
+
+    test "if og:url is different than given url, change comment's source" do
+      base_url = url_without_validation()
+      meta_url = url_without_validation()
+      attributes = Map.put(@valid_source_attributes, :url, meta_url)
+      url =
+        serve(base_url, 200, attributes, only_once: true, ignore_meta_url_correction: true)
+        |> endpoint_url(base_url)
+
+      # Add comment
+      user = insert(:user)
+      statement = insert(:statement)
+      comment_params = %{statement_id: statement.id}
+      Comments.add_comment(user, comment_params, url, fn comment ->
+        assert comment.source.title === attributes.title
+        assert comment.source.url != base_url
+        assert comment.source.url == meta_url
+        # Ensure base source is deleted
+        refute Repo.get_by(Source, url: base_url)
+        refute Repo.get_by(Source, url: url)
+      end)
+      wait_fetcher()
+    end
+
+    test "if og:url is different from given url, change comment's url (re-use if existing)" do
+      old_url = url_without_validation()
+      real_source = insert(:source, %{url: url_without_validation()})
+      attributes = Map.put(@valid_source_attributes, :url, real_source.url)
+      url =
+        serve(old_url, 200, attributes, only_once: true, ignore_meta_url_correction: true)
+        |> endpoint_url(old_url)
+
+      # Add comment
+      user = insert(:user)
+      statement = insert(:statement)
+      comment_params = %{statement_id: statement.id}
+      Comments.add_comment(user, comment_params, url, fn comment ->
+        assert comment.source.title === attributes.title
+        assert comment.source.url == real_source.url
+        assert comment.source.id == real_source.id
+        # Ensure base source is deleted
+        assert Repo.get_by(Source, url: old_url) == nil
+      end)
+      wait_fetcher()
+    end
+
+#    test "if redirected, store redirect url"
   end
 
   defp url_without_validation(), do: "/__IGNORE_URL_VALIDATION__/#{TokenGenerator.generate(32)}"

@@ -5,10 +5,11 @@ defmodule CaptainFact.Support.MetaPage do
 
   def serve(url, response_status, meta_attributes, opts \\ []) do
     only_once = Keyword.get(opts, :only_once, false)
+    ignore_meta_url_correction = Keyword.get(opts, :ignore_meta_url_correction, false)
 
     bypass = Bypass.open
     meta_attributes =
-      if Map.has_key?(meta_attributes, :url),
+      if not ignore_meta_url_correction and Map.has_key?(meta_attributes, :url),
       do: Map.put(meta_attributes, :url, endpoint_url(bypass, Map.get(meta_attributes, :url))),
       else: meta_attributes
 

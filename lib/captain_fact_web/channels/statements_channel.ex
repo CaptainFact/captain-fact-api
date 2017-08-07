@@ -40,8 +40,9 @@ defmodule CaptainFactWeb.StatementsChannel do
     |> UserPermissions.lock_transaction!(user_id, :add_statement)
     |> case do
       {:ok, %{statement: statement}} ->
-        broadcast!(socket, "statement_added", StatementView.render("show.json", statement: statement))
-        {:reply, :ok, socket}
+        rendered_statement = StatementView.render("show.json", statement: statement)
+        broadcast!(socket, "statement_added", rendered_statement)
+        {:reply, {:ok, rendered_statement}, socket}
       {:error, _operation, reason, _changes} ->
         {:reply, {:error, ErrorView.render("error.json", reason: reason)}, socket}
     end
