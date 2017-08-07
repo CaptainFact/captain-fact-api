@@ -3,7 +3,7 @@ defmodule CaptainFactWeb.UserSocket do
 
   require Logger
   import Guardian.Phoenix.Socket
-  alias CaptainFactWeb.ErrorView
+  alias CaptainFactWeb.{ErrorView, ChangesetView}
   alias CaptainFact.Accounts.UserPermissions
 
   ## Channels
@@ -46,6 +46,8 @@ defmodule CaptainFactWeb.UserSocket do
         Logger.error("[RescueChannel] Uncatched exception : #{inspect(e)}")
         reply_error(socket, Phoenix.View.render(ErrorView, "error.json", []))
     rescue
+      e in Ecto.InvalidChangesetError ->
+        reply_error(socket, ChangesetView.render("error.json", %{changeset: e.changeset}))
       _ in Ecto.NoResultsError ->
         reply_error(socket, Phoenix.View.render(ErrorView, "404.json", []))
       e ->

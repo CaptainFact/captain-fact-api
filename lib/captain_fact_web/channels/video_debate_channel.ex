@@ -97,7 +97,9 @@ defmodule CaptainFactWeb.VideoDebateChannel do
               rendered_speaker = View.render_one(speaker, SpeakerView, "speaker.json")
               broadcast!(socket, "speaker_updated", rendered_speaker)
               {:reply, :ok, socket}
-            {:error, _, _, _} ->
+            {:error, :speaker, changeset = %Ecto.Changeset{}, _} ->
+              {:reply, {:error, ChangesetView.render("error.json", %{changeset: changeset})}, socket}
+            e ->
               {:reply, :error, socket}
           end
       end
