@@ -46,9 +46,9 @@ defmodule CaptainFact.Comments.Vote do
   def get_vote_type(_, nil, 0), do: nil
   def get_vote_type(_, base_value, base_value), do: nil
   def get_vote_type(comment, base_value, value) do
-    (if comment.source_id, do: "fact_vote_", else: "comment_vote_")
-    |> (&(&1 <> get_vote_direction(base_value, value))).()
-    |> String.to_atom()
+    base = if comment.source_id, do: "fact_vote_", else: "comment_vote_"
+    direction = get_vote_direction(base_value, value)
+    String.to_atom(base <> direction)
   end
 
   def get_vote_direction(base_value, value)
@@ -68,15 +68,6 @@ defmodule CaptainFact.Comments.Vote do
     struct
     |> cast(params, @required_fields)
     |> validate_required(@required_fields)
-    |> validate_vote_value()
-  end
-
-  defp validate_vote_value(changeset) do
-    validate_change changeset, :value, fn :value, value ->
-      case value in [-1, 0, 1] do
-        true -> []
-        false -> [value: "Can only be -1, 0 or +1"]
-      end  
-    end
+    |> validate_inclusion(:value, [-1, 0, 1])
   end
 end
