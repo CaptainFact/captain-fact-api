@@ -8,7 +8,12 @@ config :captain_fact, frontend_url: "https://TEST_FRONTEND"
 config :captain_fact, CaptainFactWeb.Endpoint,
   http: [port: 4001],
   server: false,
-  force_ssl: false
+  force_ssl: false,
+  secret_key_base: "psZ6n/fq0b444U533yKtve2R0rpjk/IxRGpuanNE92phSDy8/Z2I8lHaIugCMOY7" # Avoid setting env for testing
+
+# Configure Guardian (authentication)
+config :guardian, Guardian,
+  secret_key: "psZ6n/fq0b444U533yKtve2R0rpjk/IxRGpuanNE92phSDy8/Z2I8lHaIugCMOY7" # Avoid setting env for testing
 
 # Print only warnings and errors during test
 config :logger, level: :warn
