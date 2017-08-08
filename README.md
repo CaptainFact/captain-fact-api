@@ -1,4 +1,4 @@
-# CaptainFact
+# CaptainFact API
 
 ## Install
 
@@ -10,7 +10,7 @@
 Configuration should not be necessary in dev if you're using a Jetbrains IDE with main repo's
 configuration.
 
-Following environment variables are required :
+Following environment variables are required for `dev` and `prod` :
 
 * FACEBOOK_CLIENT_ID
 * FACEBOOK_CLIENT_SECRET
