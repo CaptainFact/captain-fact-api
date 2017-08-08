@@ -7,4 +7,4 @@ admin = User.changeset(%User{reputation: 4200}, %{
   password: "password"
 })
 
-Repo.insert!(admin)
+Repo.insert(admin) # No need to warn if already exists
