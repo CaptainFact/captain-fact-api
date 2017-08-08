@@ -1,1 +1,1 @@
-docker start postgres-dev && iex -S mix phoenix.server
+docker start postgres-dev && iex -S mix phx.server

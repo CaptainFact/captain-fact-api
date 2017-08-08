@@ -99,7 +99,7 @@ defmodule CaptainFactWeb.VideoDebateChannel do
               {:reply, :ok, socket}
             {:error, :speaker, changeset = %Ecto.Changeset{}, _} ->
               {:reply, {:error, ChangesetView.render("error.json", %{changeset: changeset})}, socket}
-            e ->
+            _ ->
               {:reply, :error, socket}
           end
       end

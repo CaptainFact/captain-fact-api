@@ -11,7 +11,7 @@ config :captain_fact, ecto_repos: [CaptainFact.Repo]
 # Configures the endpoint
 config :captain_fact, CaptainFactWeb.Endpoint,
   url: [host: "localhost"],
-  secret_key_base: "avLUvr7bCD8k3H+fX+PQi7DvB7qocJBMmX4H05kdSYX3sHEmnsgalWU1RbpwP1Bh",
+  secret_key_base: System.get_env("SECRET_KEY"),
   render_errors: [view: CaptainFactWeb.ErrorView, accepts: ~w(json), default_format: "json"],
   pubsub: [name: CaptainFact.PubSub, adapter: Phoenix.PubSub.PG2],
   force_ssl: [rewrite_on: [:x_forwarded_proto]]
@@ -30,14 +30,14 @@ config :ueberauth, Ueberauth,
   ]
 
 config :ueberauth, Ueberauth.Strategy.Facebook.OAuth,
-  client_id: "506726596325615", # TODO System.get_env("FACEBOOK_CLIENT_ID")
-  client_secret: "4b320056746b8e57144c889f3baf0424" # TODO System.get_env("FACEBOOK_CLIENT_SECRET")
+  client_id: System.get_env("FACEBOOK_CLIENT_ID"),
+  client_secret: System.get_env("FACEBOOK_CLIENT_SECRET")
 
 # Configure Guardian (authentication)
 config :guardian, Guardian,
   issuer: "CaptainFact",
   ttl: {30, :days},
-  secret_key: "Qf+lilDob+feItWrI+b/Ls3gBglt8IFlnC+DoJIn1Bqvy3yy/oVRDGdlte4wTu/x",
+  secret_key: System.get_env("SECRET_KEY"),
   serializer: CaptainFactWeb.GuardianSerializer,
   permissions: %{default: [:read, :write]}
 

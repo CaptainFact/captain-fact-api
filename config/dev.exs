@@ -5,15 +5,10 @@ config :captain_fact, frontend_url: "http://localhost:3333"
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
-#
-# The watchers configuration can be used to run external
-# watchers to your application. For example, we use it
-# with brunch.io to recompile .js and .css sources.
 config :captain_fact, CaptainFactWeb.Endpoint,
   debug_errors: false,
   code_reloader: true,
   check_origin: false,
-  watchers: [],
   http: [port: 4000],
   force_ssl: false,
   https: [
