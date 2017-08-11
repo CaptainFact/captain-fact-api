@@ -13,10 +13,10 @@ defmodule CaptainFact do
       # Start the endpoint when the application starts
       supervisor(CaptainFactWeb.Endpoint, []),
       # Other custom workers
+      supervisor(CaptainFact.Sources.Fetcher, []),
       worker(CaptainFact.Accounts.ReputationUpdater, []),
       worker(CaptainFact.Accounts.UserState, []),
       worker(CaptainFact.Comments.VoteDebouncer, []),
-      supervisor(CaptainFact.Sources.Fetcher, []),
       worker(CaptainFact.VideoHashId, []),
       worker(CaptainFact.Accounts.UsernameGenerator, [])
     ]

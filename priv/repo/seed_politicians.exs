@@ -8,12 +8,13 @@ alias CaptainFactWeb.SpeakerPicture
 
 
 defmodule SeedPoliticians do
-  @filename "/data/french_politicians.csv"
   @activate_filter true
-  @filter ["sarkozy", "pen", "hamon", "mélenchon", "fillon", "poutou", "arthaud", "macron", "cheminade", "aignan", "lassalle", "asselineau"]
+  @filter [
+    "sarkozy", "le pen", "hamon", "mélenchon", "fillon", "poutou", "arthaud", "macron", "cheminade",
+    "aignan", "lassalle", "asselineau", "trump", "obama"
+  ]
 
-  def seed(fetch_pictures?) do
-    csv_path = __DIR__ <> @filename
+  def seed(csv_path, fetch_pictures?) do
     seed_func = if fetch_pictures?, do: &seed_politician_with_picture/1, else: &seed_politician/1
     SeedWithCSV.seed(csv_path, seed_func, %{
       "image" => :picture,
@@ -62,12 +63,20 @@ defmodule SeedPoliticians do
   end
 
   defp fetch_picture(speaker, picture_url) do
-    {:ok, picture} = SpeakerPicture.store({picture_url, speaker})
-    Logger.debug("Fetching picture for #{speaker.full_name} at #{picture_url}")
-    speaker
-    |> Ecto.Changeset.change(picture: %{file_name: picture, updated_at: Ecto.DateTime.utc})
-    |> Repo.update!()
+    case SpeakerPicture.store({picture_url, speaker}) do
+      {:ok, picture} ->
+        Logger.debug("Fetching picture for #{speaker.full_name} at #{picture_url}")
+        speaker
+        |> Ecto.Changeset.change(picture: %{file_name: picture, updated_at: Ecto.DateTime.utc})
+        |> Repo.update!()
+      {:error, :invalid_file_path} ->
+        Logger.error("Given image path is invalid : #{picture_url}")
+    end
   end
 end
 
-SeedPoliticians.seed(true)
+{keywords, args, invalids} = OptionParser.parse(System.argv, switches: [fetch_pictures: :boolean])
+
+if Enum.count(invalids) == 0,
+  do: SeedPoliticians.seed(List.first(args), Keyword.get(keywords, :fetch_pictures)),
+  else: IO.puts "Usage: mix run seed_politicians.exs file.csv --fetch-pictures"

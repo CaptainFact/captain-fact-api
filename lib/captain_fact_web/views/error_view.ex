@@ -1,6 +1,7 @@
 defmodule CaptainFactWeb.ErrorView do
   use CaptainFactWeb, :view
 
+  require Logger
   alias CaptainFact.Accounts.UserPermissions.PermissionsError
 
   def render("show.json", %{message: message}) do
@@ -16,7 +17,7 @@ defmodule CaptainFactWeb.ErrorView do
   end
 
   def render("403.json", assigns) do
-    if Mix.env == :dev, do: IO.inspect(assigns)
+    Logger.debug(assigns)
     %{error: "forbidden"}
   end
 
@@ -29,12 +30,12 @@ defmodule CaptainFactWeb.ErrorView do
   end
 
   def render("error.json", assigns) do
-    if Mix.env == :dev, do: IO.inspect(assigns)
+    Logger.debug(assigns)
     %{error: "unexpected"}
   end
 
   def render(_, assigns) do
-    if Mix.env == :dev, do: IO.inspect(assigns)
+    Logger.debug(assigns)
     %{error: "unexpected"}
   end
 end

@@ -17,7 +17,7 @@ defmodule CaptainFact.CommentsTest do
   describe "add_comment" do
     test "returns comment and call callback once updated" do
       # Start a server to provide a valid page
-      attributes = Map.put(@valid_source_attributes, :url, url_without_validation())
+      attributes = Map.put(@valid_source_attributes, :url, unique_url())
       url =
         serve(attributes.url, 200, attributes)
         |> endpoint_url(attributes.url)
@@ -41,7 +41,7 @@ defmodule CaptainFact.CommentsTest do
 
     test "doesn't call callback if no updates required" do
       # Start a server to provide a valid page
-      sub_url = url_without_validation()
+      sub_url = unique_url()
       url =
         serve(sub_url, 200, %{})
         |> endpoint_url(sub_url)
@@ -57,7 +57,7 @@ defmodule CaptainFact.CommentsTest do
 
     test "source only fetched one time" do
       # Start a server to provide a valid page
-      attributes = Map.put(@valid_source_attributes, :url, url_without_validation())
+      attributes = Map.put(@valid_source_attributes, :url, unique_url())
       url =
         serve(attributes.url, 200, attributes, only_once: true)
         |> endpoint_url(attributes.url)
@@ -74,11 +74,11 @@ defmodule CaptainFact.CommentsTest do
     end
 
     test "if og:url is different than given url, change comment's source" do
-      base_url = url_without_validation()
-      meta_url = url_without_validation()
+      base_url = unique_url()
+      meta_url = unique_url()
       attributes = Map.put(@valid_source_attributes, :url, meta_url)
       url =
-        serve(base_url, 200, attributes, only_once: true, ignore_meta_url_correction: true)
+        serve(base_url, 200, attributes, only_once: true)
         |> endpoint_url(base_url)
 
       # Add comment
@@ -87,8 +87,8 @@ defmodule CaptainFact.CommentsTest do
       comment_params = %{statement_id: statement.id}
       Comments.add_comment(user, comment_params, url, fn comment ->
         assert comment.source.title === attributes.title
-        assert comment.source.url != base_url
-        assert comment.source.url == meta_url
+        refute String.ends_with?(comment.source.url, base_url)
+        assert String.ends_with?(comment.source.url, meta_url)
         # Ensure base source is deleted
         refute Repo.get_by(Source, url: base_url)
         refute Repo.get_by(Source, url: url)
@@ -97,11 +97,12 @@ defmodule CaptainFact.CommentsTest do
     end
 
     test "if og:url is different from given url, change comment's url (re-use if existing)" do
-      old_url = url_without_validation()
-      real_source = insert(:source, %{url: url_without_validation()})
+      bypass = Bypass.open
+      old_url = unique_url()
+      real_source = insert(:source, %{url: endpoint_url(bypass, unique_url())})
       attributes = Map.put(@valid_source_attributes, :url, real_source.url)
       url =
-        serve(old_url, 200, attributes, only_once: true, ignore_meta_url_correction: true)
+        serve(bypass, old_url, 200, attributes, only_once: true)
         |> endpoint_url(old_url)
 
       # Add comment
@@ -110,10 +111,10 @@ defmodule CaptainFact.CommentsTest do
       comment_params = %{statement_id: statement.id}
       Comments.add_comment(user, comment_params, url, fn comment ->
         assert comment.source.title === attributes.title
-        assert comment.source.url == real_source.url
+        assert comment.source.url, real_source.url
         assert comment.source.id == real_source.id
         # Ensure base source is deleted
-        assert Repo.get_by(Source, url: old_url) == nil
+        assert Repo.get_by(Source, url: url) == nil
       end)
       wait_fetcher()
     end
@@ -121,7 +122,7 @@ defmodule CaptainFact.CommentsTest do
 #    test "if redirected, store redirect url"
   end
 
-  defp url_without_validation(), do: "/__IGNORE_URL_VALIDATION__/#{TokenGenerator.generate(32)}"
+  defp unique_url(), do: "/#{TokenGenerator.generate(32)}"
 
   defp wait_fetcher() do
     case MapSet.size(Fetcher.get_queue()) do

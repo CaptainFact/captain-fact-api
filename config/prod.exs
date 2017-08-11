@@ -1,37 +1,40 @@
 use Mix.Config
 
 # General config
-config :captain_fact, frontend_url: "https://captainfact.io"
+config :captain_fact, frontend_url: "${HOST}"
 
 # For production, we configure the host to read the PORT
 # from the system environment. Therefore, you will need
 # to set PORT=80 before running your server.
 config :captain_fact, CaptainFactWeb.Endpoint,
-  url: [host: "captainfact.io", port: 443],
-  force_ssl: [hsts: true],
-  http: [
-    port: {:system, "PORT"}
-  ],
+  url: [host: "${HOST}", port: "${PORT}"],
+  secret_key_base: "${SECRET_KEY_BASE}",
+  server: true,
+  http: [port: "${PORT}"],
   https: [
-    port: 443,
+    port: "${PORT_SSL}",
     otp_app: :captain_fact,
-    keyfile: System.get_env("SSL_KEY_PATH"),
-    certfile: System.get_env("SSL_CERT_PATH")
-  ]
+    keyfile: "${SSL_KEY_PATH}",
+    certfile: "${SSL_CERT_PATH}"
+  ],
+  force_ssl: [hsts: true],
+  # Static resources (for admin)
+  root: "."
+
+config :guardian, Guardian,
+  secret_key: "${SECRET_KEY_BASE}"
+
+config :ueberauth, Ueberauth.Strategy.Facebook.OAuth,
+  client_id: "${FACEBOOK_APP_ID}",
+  client_secret: "${FACEBOOK_APP_SECRET}"
+
+config :captain_fact, CaptainFact.Repo,
+  adapter: Ecto.Adapters.Postgres,
+  hostname: "${DB_HOSTNAME}",
+  username: "${DB_USERNAME}",
+  password: "${DB_PASSWORD}",
+  database: "${DB_NAME}",
+  pool_size: 20
 
 # Do not print debug messages in production
 config :logger, level: :info
-
-# ## Using releases
-#
-# If you are doing OTP releases, you need to instruct Phoenix
-# to start the server for all endpoints:
-#
-#     config :phoenix, :serve_endpoints, true
-#
-# Alternatively, you can configure exactly which server to
-# start per endpoint:
-#
-#     config :captain_fact, CaptainFactWeb.Endpoint, server: true
-#
-

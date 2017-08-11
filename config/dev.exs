@@ -1,11 +1,15 @@
 use Mix.Config
 
+
+dev_secret = "8C6FsJwjV11d+1WPUIbkEH6gB/VavJrcXWoPLujgpclfxjkLkoNFSjVU9XfeNm6s"
+
 # General config
 config :captain_fact, frontend_url: "http://localhost:3333"
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
 config :captain_fact, CaptainFactWeb.Endpoint,
+  secret_key_base: dev_secret,
   debug_errors: false,
   code_reloader: true,
   check_origin: false,
@@ -14,8 +18,8 @@ config :captain_fact, CaptainFactWeb.Endpoint,
   https: [
     port: 4001,
     otp_app: :captain_fact,
-    keyfile: System.get_env("SSL_KEY_PATH"),
-    certfile: System.get_env("SSL_CERT_PATH")
+    keyfile: "priv/keys/localhost.key",
+    certfile: "priv/keys/localhost.cert"
   ]
 
 # Watch static and templates for browser reloading.
@@ -28,6 +32,15 @@ config :captain_fact, CaptainFactWeb.Endpoint,
       ~r{lib/captain_fact/web/templates/.*(eex)$}
     ]
   ]
+
+# Guardian + Ueberauth
+
+config :guardian, Guardian,
+  secret_key: dev_secret
+
+config :ueberauth, Ueberauth.Strategy.Facebook.OAuth,
+  client_id: "506726596325615",
+  client_secret: "4b320056746b8e57144c889f3baf0424"
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"

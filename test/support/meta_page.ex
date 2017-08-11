@@ -3,13 +3,11 @@ defmodule CaptainFact.Support.MetaPage do
   Tools to serve an html page containing given meta attributes using a bypass server
   """
 
-  def serve(url, response_status, meta_attributes, opts \\ []) do
+  def serve(bypass, url, response_status, meta_attributes, opts) do
     only_once = Keyword.get(opts, :only_once, false)
-    ignore_meta_url_correction = Keyword.get(opts, :ignore_meta_url_correction, false)
 
-    bypass = Bypass.open
     meta_attributes =
-      if not ignore_meta_url_correction and Map.has_key?(meta_attributes, :url),
+      if Map.has_key?(meta_attributes, :url) and not String.starts_with?(Map.get(meta_attributes, :url), "http"),
       do: Map.put(meta_attributes, :url, endpoint_url(bypass, Map.get(meta_attributes, :url))),
       else: meta_attributes
 
@@ -18,6 +16,10 @@ defmodule CaptainFact.Support.MetaPage do
       do: Bypass.expect_once(bypass, "GET", url, func),
       else: Bypass.expect(bypass, "GET", url, func)
     bypass
+  end
+
+  def serve(url, response_status, meta_attributes, opts \\ []) do
+    serve(Bypass.open, url, response_status, meta_attributes, opts)
   end
 
   def plug_response(response_status, meta_attributes),

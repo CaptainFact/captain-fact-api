@@ -91,7 +91,7 @@ defmodule CaptainFactWeb.Router do
     admin_routes()
   end
 
-  # Dev only : mailer
+  # Dev only : mailer. We can use Mix.env here cause file is interpreted at compile time
   if Mix.env == :dev do
     scope "/jouge42/mail" do
       pipe_through [:browser, :browser_auth]

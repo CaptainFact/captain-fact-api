@@ -6,15 +6,15 @@
 use Mix.Config
 
 # General application configuration
-config :captain_fact, ecto_repos: [CaptainFact.Repo]
+config :captain_fact,
+  ecto_repos: [CaptainFact.Repo],
+  source_url_regex: ~r/[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/
 
 # Configures the endpoint
 config :captain_fact, CaptainFactWeb.Endpoint,
   url: [host: "localhost"],
-  secret_key_base: System.get_env("SECRET_KEY"),
   render_errors: [view: CaptainFactWeb.ErrorView, accepts: ~w(json), default_format: "json"],
-  pubsub: [name: CaptainFact.PubSub, adapter: Phoenix.PubSub.PG2],
-  force_ssl: [rewrite_on: [:x_forwarded_proto]]
+  pubsub: [name: CaptainFact.PubSub, adapter: Phoenix.PubSub.PG2]
 
 # Configures Elixir's Logger
 config :logger, :console,
@@ -29,15 +29,10 @@ config :ueberauth, Ueberauth,
     facebook: {Ueberauth.Strategy.Facebook, [profile_fields: "name,email,picture"]}
   ]
 
-config :ueberauth, Ueberauth.Strategy.Facebook.OAuth,
-  client_id: System.get_env("FACEBOOK_CLIENT_ID"),
-  client_secret: System.get_env("FACEBOOK_CLIENT_SECRET")
-
 # Configure Guardian (authentication)
 config :guardian, Guardian,
   issuer: "CaptainFact",
   ttl: {30, :days},
-  secret_key: System.get_env("SECRET_KEY"),
   serializer: CaptainFactWeb.GuardianSerializer,
   permissions: %{default: [:read, :write]}
 
@@ -65,8 +60,8 @@ config :arc,
 # Configure scheduler
 config :quantum, :captain_fact,
   cron: [
-    # Reset score limit counter every midnight
-    "@daily": fn -> CaptainFact.Accounts.UserState.reset() end
+    # Reset score limit counter at midnight
+    "@daily": {CaptainFact.Accounts.UserState, :reset, []}
   ]
 
 # Import environment specific config. This must remain at the bottom
