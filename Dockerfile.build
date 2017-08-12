@@ -1,0 +1,20 @@
+FROM elixir:1.5.1
+ENV DEBIAN_FRONTEND=noninteractive
+
+ENV HOME=/opt/app/ TERM=xterm
+
+# Install Hex+Rebar
+RUN mix local.hex --force && \
+    mix local.rebar --force
+
+WORKDIR /opt/app
+ENV MIX_ENV=prod REPLACE_OS_VARS=true
+
+# Cache elixir deps
+COPY mix.exs mix.lock ./
+RUN mix deps.get
+COPY config ./config
+RUN mix deps.compile
+
+COPY . .
+RUN mix release --env=prod

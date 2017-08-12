@@ -20,7 +20,7 @@ Following environment variables are required for `dev` and `prod` :
   
 ## Run
 
-Start Phoenix endpoint with `mix phx.server`
+Start postgres first, then start Phoenix endpoint with `mix phx.server`
 
 API is started on [`localhost:4000`](http://localhost:4000) for http and
 [`localhost:4001`](http://localhost:4001) for https.

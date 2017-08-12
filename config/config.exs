@@ -10,6 +10,9 @@ config :captain_fact,
   ecto_repos: [CaptainFact.Repo],
   source_url_regex: ~r/[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/
 
+# Docker image generated (mainly used to realease)
+config :mix_docker, image: "captain_fact_api"
+
 # Configures the endpoint
 config :captain_fact, CaptainFactWeb.Endpoint,
   url: [host: "localhost"],

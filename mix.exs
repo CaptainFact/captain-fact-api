@@ -57,12 +57,13 @@ defmodule CaptainFact.Mixfile do
       {:poison, "~> 2.2.0"},
       {:csv, "~> 1.4.4"},
       {:quantum, ">= 1.9.2"},
-      {:not_qwerty123, "~> 2.0"},
+      {:not_qwerty123, github: "Betree/not_qwerty123", branch: "fix/app_dir_path"},
       {:bamboo, "~> 1.0.0-rc.1"},
       {:ex_machina, "~> 2.0", only: [:test, :dev]},
       {:faker, "~> 0.7", only: [:test, :dev]},
       {:bypass, "~> 0.8", only: :test},
       {:distillery, "~> 1.4", runtime: false},
+      {:mix_docker, "~> 0.5.0", runtime: false},
       # Force last version of timex to fix a bug between distillery and Elixir 1.5 both implementing inspect for
       # DateTime. https://github.com/bitwalker/timex/issues/343
       # TODO: Remove when next distillery version comes out

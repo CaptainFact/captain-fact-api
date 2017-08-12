@@ -17,3 +17,6 @@ erl_crash.dump
 
 # Uploads
 /resources
+
+# Release build
+/captain_fact.tar.gz

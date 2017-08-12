@@ -17,9 +17,9 @@ config :captain_fact, CaptainFactWeb.Endpoint,
     keyfile: "${SSL_KEY_PATH}",
     certfile: "${SSL_CERT_PATH}"
   ],
-  force_ssl: [hsts: true],
+  force_ssl: [hsts: true]
   # Static resources (for admin)
-  root: "."
+#  root: "."
 
 config :guardian, Guardian,
   secret_key: "${SECRET_KEY_BASE}"
