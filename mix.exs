@@ -57,7 +57,7 @@ defmodule CaptainFact.Mixfile do
       {:poison, "~> 2.2.0"},
       {:csv, "~> 1.4.4"},
       {:quantum, ">= 1.9.2"},
-      {:not_qwerty123, github: "Betree/not_qwerty123", branch: "fix/app_dir_path"},
+      {:not_qwerty123, "~> 2.1"},
       {:bamboo, "~> 1.0.0-rc.1"},
       {:ex_machina, "~> 2.0", only: [:test, :dev]},
       {:faker, "~> 0.7", only: [:test, :dev]},

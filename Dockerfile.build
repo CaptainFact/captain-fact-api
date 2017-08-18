@@ -1,11 +1,8 @@
-FROM elixir:1.5.1
-ENV DEBIAN_FRONTEND=noninteractive
+FROM bitwalker/alpine-elixir:1.5.1
+
+RUN apk add gcc make musl-dev
 
 ENV HOME=/opt/app/ TERM=xterm
-
-# Install Hex+Rebar
-RUN mix local.hex --force && \
-    mix local.rebar --force
 
 WORKDIR /opt/app
 ENV MIX_ENV=prod REPLACE_OS_VARS=true

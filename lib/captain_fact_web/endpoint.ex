@@ -32,6 +32,10 @@ defmodule CaptainFactWeb.Endpoint do
     key: "_captain_fact_key",
     signing_salt: "M8OYuALs"
 
-  plug CaptainFactWeb.CORS
+  plug Corsica,
+       max_age: 3600,
+       allow_headers: ~w(Accept Content-Type Authorization),
+       origins: {CaptainFactWeb.CORS, :check_origin}
+
   plug CaptainFactWeb.Router
 end
