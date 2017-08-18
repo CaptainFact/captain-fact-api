@@ -1,0 +1,30 @@
+<%= form_tag auth_path(@conn, :callback, "identity"), method: "post", novalidate: true do %>
+   <input type='email' name="email" placeholder="Your grandpa email" required/>
+   <input type='password' name="password" placeholder="A freakin' password" required/>
+   <input type="hidden" name="type" value="session"/>
+   <button type="submit">Let's go</button>
+<% end %>
+
+<style>
+form {
+  margin-top: 5vh;
+}
+input, button {
+    border-radius: 5px;
+    padding: 5px;
+    display: block;
+    margin: 5px;
+    width: 300px;
+    margin: 5px auto;
+    font-family: monospace;
+}
+button {
+  background-color: #fd7aff;
+  color: white;
+  font-weight: bold;
+}
+button:hover {
+  cursor: pointer;
+  background: #fea2ff;
+}
+</style>

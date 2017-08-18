@@ -1,4 +1,4 @@
-defmodule CaptainFact.ConnCase do
+defmodule CaptainFactWeb.ConnCase do
   @moduledoc """
   This module defines the test case to be used by
   tests that require setting up a connection.
@@ -19,26 +19,26 @@ defmodule CaptainFact.ConnCase do
     quote do
       # Import conveniences for testing with connections
       use Phoenix.ConnTest
-
-      alias CaptainFact.Repo
-      import Ecto
-      import Ecto.Changeset
-      import Ecto.Query
-
-      import CaptainFact.Router.Helpers
+      import CaptainFactWeb.Router.Helpers
 
       # The default endpoint for testing
-      @endpoint CaptainFact.Endpoint
+      @endpoint CaptainFactWeb.Endpoint
+
+      alias CaptainFact.Repo
+
+      def build_authenticated_conn(user) do
+        { :ok, token, _ } = Guardian.encode_and_sign(user)
+        Phoenix.ConnTest.build_conn()
+        |> Plug.Conn.put_req_header("authorization", "Bearer #{token}")
+      end
     end
   end
 
   setup tags do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(CaptainFact.Repo)
-
     unless tags[:async] do
       Ecto.Adapters.SQL.Sandbox.mode(CaptainFact.Repo, {:shared, self()})
     end
-
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 end
