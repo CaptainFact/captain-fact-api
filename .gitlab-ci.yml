@@ -10,7 +10,7 @@ prepare:
   script:
     - pwd && ls
     - docker run --name build_cache -v /opt/app  busybox /bin/true
-    - docker cp ./* build_cache:/opt/app
+    - docker cp $(pwd)/* build_cache:/opt/app
 
 test:
   stage: test
