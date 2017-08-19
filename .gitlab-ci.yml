@@ -2,22 +2,21 @@ stages:
   - test
 #  - release
 
-# Config to be passed to associated services - used for test
-variables:
-  CONTINUOUS_INTEGRATION: "true"
-  POSTGRES_PASSWORD: postgres
-  POSTGRES_DB: captain_fact_test
-  BUILD_IMAGE: build-$CI_PROJECT_ID:$CI_BUILD_REF
-  BUILD_VOLUME: build_data-$CI_PROJECT_ID-$CI_BUILD_REF
-
 test:
   stage: test
   tags: [docker]
-  services:
-    - postgres
+  before_script:
+    - docker run -d
+      --name postgres_testing
+      -e POSTGRES_DB=captain_fact_test
+      -e POSTGRES_PASSWORD=postgres
+      postgres:9.6
   script:
-    - ls
     - docker run --rm
-      --link postgres:postgres
+      --link postgres_testing:postgres
+      -e CONTINUOUS_INTEGRATION=true
       -v $(pwd):/opt/app
-      bitwalker/alpine-elixir:1.5.1 mix test
+      bitwalker/alpine-elixir:1.5.1 "mix ecto.setup && mix test"
+  after_script:
+    - docker stop postgres_testing
+    - docker rm postgres_testing
