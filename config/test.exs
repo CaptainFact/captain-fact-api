@@ -22,12 +22,13 @@ config :guardian, Guardian,
 config :logger, level: :warn
 
 # Configure your database
+# Dirty fix : if CONTINUOUS_INTEGRATION is present, it means we are on CI and postgres is linked to us
 config :captain_fact, CaptainFact.Repo,
   adapter: Ecto.Adapters.Postgres,
   username: "postgres",
   password: "postgres",
   database: "captain_fact_test",
-  hostname: "localhost",
+  hostname: (if is_nil(System.get_env("CONTINUOUS_INTEGRATION")), do: "localhost", else: "postgres"),
   pool: Ecto.Adapters.SQL.Sandbox
 
 # Mails

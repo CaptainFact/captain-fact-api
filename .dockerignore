@@ -2,8 +2,8 @@
 _build
 cover
 deps
+resources
 doc
-test
 tmp
 erl_crash.dump
 *.ez

@@ -1,0 +1,50 @@
+image: docker:latest
+
+stages:
+  - build
+  - test
+  - cleanup
+
+# Config to be passed to associated services - used for test
+variables:
+  CONTINUOUS_INTEGRATION: true
+  POSTGRES_PASSWORD: postgres
+  POSTGRES_DB: captain_fact_test
+  BUILD_IMAGE: build-$CI_PROJECT_ID:$CI_BUILD_REF
+  BUILD_VOLUME: build_data-$CI_PROJECT_ID-$CI_BUILD_REF
+
+build:
+  stage: build
+  before_script:
+    - docker build -f Dockerfile.build -t $BUILD_IMAGE .
+    - docker create
+      -v /build/deps
+      -v /build/_build
+      -v /build/rel
+      -v /root/.cache/rebar3/
+      --name $BUILD_VOLUME busybox /bin/true
+  script:
+    - docker run --rm
+      --volumes-from $BUILD_VOLUME
+      -t $BUILD_IMAGE
+
+test:
+  stage: test
+  services:
+    - postgres
+  script:
+    - docker run --rm
+      -- volumes-from $BUILD_VOLUME
+      --link postgres:postgres
+      -e MIX_ENV=test
+      -e CONTINUOUS_INTEGRATION=true
+      build-cfapi:xxx sh -c "mix ecto.setup && mix test"
+
+cleanup_job:
+  tags:
+    - docker
+  stage: cleanup
+  script:
+    - docker rm -v $BUILD_VOLUME
+    - docker rmi $BUILD_IMAGE
+  when: always
