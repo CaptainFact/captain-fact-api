@@ -20,7 +20,7 @@ build:
     - apk add gcc make libc-dev libgcc && rm -rf /var/cache/apk/*
   script:
     - mix deps.get
-    - mix.compile
+    - mix compile
 
 test:
   stage: test
