@@ -17,7 +17,7 @@ test:
       -e CONTINUOUS_INTEGRATION=true
       -v $(pwd):/opt/app
       bitwalker/alpine-elixir:1.5.1
-      /bin/sh -c "mix local.hex --force && mix local.rebar --force && mix ecto.setup && mix test"
+      /bin/sh -c "mix local.hex --force && mix local.rebar --force && mix deps.get && mix ecto.setup && mix test"
   after_script:
     - docker stop postgres_testing
     - docker rm postgres_testing
