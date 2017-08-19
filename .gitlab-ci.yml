@@ -15,6 +15,7 @@ variables:
 
 build:
   stage: build
+  tags: [docker]
   before_script:
     - apk add gcc make libc-dev libgcc && rm -rf /var/cache/apk/*
   script:
@@ -23,6 +24,7 @@ build:
 
 test:
   stage: test
+  tags: [docker]
   services:
     - postgres
   script:
