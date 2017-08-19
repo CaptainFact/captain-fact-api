@@ -7,7 +7,7 @@ stages:
 
 # Config to be passed to associated services - used for test
 variables:
-  CONTINUOUS_INTEGRATION: true
+  CONTINUOUS_INTEGRATION: "true"
   POSTGRES_PASSWORD: postgres
   POSTGRES_DB: captain_fact_test
   BUILD_IMAGE: build-$CI_PROJECT_ID:$CI_BUILD_REF
