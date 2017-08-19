@@ -19,5 +19,5 @@ test:
     - ls
     - docker run --rm
       --link postgres:postgres
-      -v .:/opt/app
+      -v $(pwd):/opt/app
       bitwalker/alpine-elixir:1.5.1 mix test
