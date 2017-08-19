@@ -1,6 +1,4 @@
-FROM bitwalker/alpine-elixir:1.5.1 as builder
-
-RUN apk add gcc make libc-dev libgcc
+FROM betree/alpine-elixir-gcc:1.5.1 as builder
 
 ENV HOME=/opt/app/ TERM=xterm
 

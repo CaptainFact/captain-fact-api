@@ -8,7 +8,6 @@ prepare:
   stage: prepare
   tags: [docker]
   script:
-    - pwd && ls
     - docker run --name build_cache -v /opt  busybox /bin/true
     - docker cp $(pwd) build_cache:/opt/app
 
@@ -26,7 +25,7 @@ test:
       --link postgres_testing:postgres
       --volumes-from build_cache
       -e CONTINUOUS_INTEGRATION=true
-      bitwalker/alpine-elixir:1.5.1
+      betree/alpine-elixir-gcc:1.5.1
       /bin/sh -c "mix local.hex --force && mix local.rebar --force && mix deps.get && mix ecto.setup && mix test"
   after_script:
     - docker stop postgres_testing
