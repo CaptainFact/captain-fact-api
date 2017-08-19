@@ -1,9 +1,9 @@
-image: docker:latest
+image: bitwalker/alpine-elixir:1.5.1
 
 stages:
   - build
   - test
-  - cleanup
+#  - cleanup
 
 # Config to be passed to associated services - used for test
 variables:
@@ -15,37 +15,37 @@ variables:
 
 build:
   stage: build
-  tags: [docker]
   before_script:
-    - docker build -f Dockerfile.build -t $BUILD_IMAGE .
-    - docker create
-      -v /build/deps
-      -v /build/_build
-      -v /build/rel
-      -v /root/.cache/rebar3/
-      --name $BUILD_VOLUME busybox /bin/true
+    - apk add gcc make libc-dev libgcc && rm -rf /var/cache/apk/*
   script:
-    - docker run --rm
-      --volumes-from $BUILD_VOLUME
-      -t $BUILD_IMAGE
+    - mix deps.get
+    - mix.compile
 
 test:
   stage: test
-  tags: [docker]
   services:
     - postgres
   script:
-    - docker run --rm
-      -- volumes-from $BUILD_VOLUME
-      --link postgres:postgres
-      -e MIX_ENV=test
-      -e CONTINUOUS_INTEGRATION=true
-      build-cfapi:xxx sh -c "mix ecto.setup && mix test"
+    - mix ecto.setup && mix test
 
-cleanup_job:
-  tags: [docker]
-  stage: cleanup
-  script:
-    - docker rm -v $BUILD_VOLUME
-    - docker rmi $BUILD_IMAGE
-  when: always
+#
+#test:
+#  stage: test
+#  tags: [docker]
+#  services:
+#    - postgres
+#  script:
+#    - docker run --rm
+#      -- volumes-from $BUILD_VOLUME
+#      --link postgres:postgres
+#      -e MIX_ENV=test
+#      -e CONTINUOUS_INTEGRATION=true
+#      build-cfapi:xxx sh -c "mix ecto.setup && mix test"
+
+#cleanup_job:
+#  tags: [docker]
+#  stage: cleanup
+#  script:
+#    - docker rm -v $BUILD_VOLUME
+#    - docker rmi $BUILD_IMAGE
+#  when: always
