@@ -15,14 +15,15 @@ test:
   stage: test
   tags: [docker]
   before_script:
+    - docker network create network_testing
     - docker run -d
-      --name postgres_testing
+      --network network_testing
       -e POSTGRES_DB=captain_fact_test
       -e POSTGRES_PASSWORD=postgres
       postgres:9.6
   script:
     - docker run --rm
-      --link postgres_testing:postgres
+      --network network_testing
       --volumes-from build_cache
       -e CONTINUOUS_INTEGRATION=true
       betree/alpine-elixir-gcc:1.5.1
@@ -30,6 +31,7 @@ test:
   after_script:
     - docker stop postgres_testing
     - docker rm postgres_testing
+    - docker network rm network_testing
 
 cleanup:
   stage: cleanup
