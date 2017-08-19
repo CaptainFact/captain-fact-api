@@ -1,5 +1,3 @@
-image: docker:latest
-
 stages:
   - test
 #  - release
@@ -14,9 +12,12 @@ variables:
 
 test:
   stage: test
-  image: bitwalker/alpine-elixir:1.5.1
   tags: [docker]
   services:
     - postgres
   script:
-    - mix test
+    - ls
+    - docker run --rm
+      --link postgres:postgres
+      -v .:/opt/app
+      bitwalker/alpine-elixir:1.5.1 mix test
