@@ -15,6 +15,7 @@ variables:
 
 build:
   stage: build
+  tags: [docker]
   before_script:
     - docker build -f Dockerfile.build -t $BUILD_IMAGE .
     - docker create
@@ -30,6 +31,7 @@ build:
 
 test:
   stage: test
+  tags: [docker]
   services:
     - postgres
   script:
@@ -41,8 +43,7 @@ test:
       build-cfapi:xxx sh -c "mix ecto.setup && mix test"
 
 cleanup_job:
-  tags:
-    - docker
+  tags: [docker]
   stage: cleanup
   script:
     - docker rm -v $BUILD_VOLUME
