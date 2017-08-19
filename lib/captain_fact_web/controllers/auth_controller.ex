@@ -22,23 +22,6 @@ defmodule CaptainFactWeb.AuthController do
     |> render(ErrorView, "error.json", message: @err_authentication_failed)
   end
 
-  # Only used for admin auth
-  def callback(%{assigns: %{ueberauth_auth: auth}} = conn, %{"type" => "session"}) do
-    conn = Plug.Conn.fetch_session(conn)
-    result = with {:ok, user = %User{id: 1}} <- user_from_auth(auth),
-              :ok <- validate_pass(user.encrypted_password, auth.credentials.other.password),
-              do: Guardian.Plug.sign_in(conn, user)
-
-    case result do
-      %Plug.Conn{} ->
-        redirect(result, to: "/jouge42/admin")
-      _ ->
-        conn
-        |> put_status(:unauthorized)
-        |> render(ErrorView, "error.json", message: @err_invalid_email_password)
-    end
-  end
-
   # Special case for identity
   def callback(%{assigns: %{ueberauth_auth: auth = %{provider: :identity}}} = conn, _params) do
     result = with {:ok, user} <- user_from_auth(auth),

@@ -40,23 +40,6 @@ config :guardian, Guardian,
   serializer: CaptainFactWeb.GuardianSerializer,
   permissions: %{default: [:read, :write]}
 
-# Configure ex_admin (Admin platform)
-config :ex_admin,
-#  theme: ExAdmin.Theme.ActiveAdmin,
-  repo: CaptainFact.Repo,
-  module: CaptainFactWeb,
-  modules: [
-    CaptainFactWeb.ExAdmin.Comment,
-    CaptainFactWeb.ExAdmin.Dashboard,
-    CaptainFactWeb.ExAdmin.Flag,
-    CaptainFactWeb.ExAdmin.Source,
-    CaptainFactWeb.ExAdmin.Speaker,
-    CaptainFactWeb.ExAdmin.Statement,
-    CaptainFactWeb.ExAdmin.User,
-    CaptainFactWeb.ExAdmin.Video,
-    CaptainFactWeb.ExAdmin.VideoDebateAction
-  ]
-
 # Configure file upload
 config :arc,
   storage: Arc.Storage.Local

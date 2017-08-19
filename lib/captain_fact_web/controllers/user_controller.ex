@@ -5,7 +5,7 @@ defmodule CaptainFactWeb.UserController do
   alias CaptainFact.Accounts.{User, UserPermissions}
 
   plug Guardian.Plug.EnsureAuthenticated, [handler: CaptainFactWeb.AuthController]
-  when action in [:update, :delete, :admin_logout, :available_flags, :show_me]
+  when action in [:update, :delete, :available_flags, :show_me]
 
 
   def create(conn, params = %{"user" => user_params}) do
@@ -32,19 +32,6 @@ defmodule CaptainFactWeb.UserController do
 
   def show_me(conn, _params) do
     render(conn, "show.json", user: Guardian.Plug.current_resource(conn))
-  end
-
-  def admin_login(conn, _) do
-    render(conn, "admin_login.html")
-  end
-
-  def admin_logout(conn, _) do
-    conn
-      |> Guardian.Plug.current_token
-      |> Guardian.revoke!
-    conn
-      |> Plug.Conn.configure_session(drop: true)
-      |> redirect(to: "/admin/login")
   end
 
   def update(conn, params) do

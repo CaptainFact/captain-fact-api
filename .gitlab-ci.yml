@@ -1,9 +1,6 @@
-image: bitwalker/alpine-elixir:1.5.1
-
 stages:
-  - build
   - test
-#  - cleanup
+#  - release
 
 # Config to be passed to associated services - used for test
 variables:
@@ -13,41 +10,11 @@ variables:
   BUILD_IMAGE: build-$CI_PROJECT_ID:$CI_BUILD_REF
   BUILD_VOLUME: build_data-$CI_PROJECT_ID-$CI_BUILD_REF
 
-build:
-  stage: build
-  tags: [docker]
-  before_script:
-    - apk add gcc make libc-dev libgcc && rm -rf /var/cache/apk/*
-  script:
-    - mix deps.get
-    - mix compile
-
 test:
   stage: test
+  image: elixir-alpine:1.5.1
   tags: [docker]
   services:
     - postgres
   script:
-    - mix ecto.setup && mix test
-
-#
-#test:
-#  stage: test
-#  tags: [docker]
-#  services:
-#    - postgres
-#  script:
-#    - docker run --rm
-#      -- volumes-from $BUILD_VOLUME
-#      --link postgres:postgres
-#      -e MIX_ENV=test
-#      -e CONTINUOUS_INTEGRATION=true
-#      build-cfapi:xxx sh -c "mix ecto.setup && mix test"
-
-#cleanup_job:
-#  tags: [docker]
-#  stage: cleanup
-#  script:
-#    - docker rm -v $BUILD_VOLUME
-#    - docker rmi $BUILD_IMAGE
-#  when: always
+    - mix test
