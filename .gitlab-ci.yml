@@ -16,7 +16,7 @@ test:
       --link postgres_testing:postgres
       -e CONTINUOUS_INTEGRATION=true
       -v $(pwd):/opt/app
-      bitwalker/alpine-elixir:1.5.1 "mix ecto.setup && mix test"
+      bitwalker/alpine-elixir:1.5.1 /bin/sh -c "mix ecto.setup && mix test"
   after_script:
     - docker stop postgres_testing
     - docker rm postgres_testing
