@@ -1,6 +1,15 @@
 stages:
+  - prepare
   - test
 #  - release
+  - cleanup
+
+prepare:
+  stage: prepare
+  tags: [docker]
+  script:
+    - docker run --name build_cache -v /opt/app  busybox /bin/true
+    - docker cp * build_cache:/opt/app
 
 test:
   stage: test
@@ -14,10 +23,17 @@ test:
   script:
     - docker run --rm
       --link postgres_testing:postgres
+      --volumes-from build_cache
       -e CONTINUOUS_INTEGRATION=true
-      -v $(pwd):/opt/app
       bitwalker/alpine-elixir:1.5.1
       /bin/sh -c "mix local.hex --force && mix local.rebar --force && mix deps.get && mix ecto.setup && mix test"
   after_script:
     - docker stop postgres_testing
     - docker rm postgres_testing
+
+cleanup:
+  stage: cleanup
+  tags: [docker]
+  when: always
+  script:
+    - docker rm build_cache
