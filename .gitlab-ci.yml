@@ -1,6 +1,7 @@
 stages:
   - test
 #  - release
+  - cleanup
 
 test:
   stage: test
@@ -23,7 +24,13 @@ test:
       /bin/sh -c
       "env && mix local.hex --force && mix local.rebar --force && mix deps.get && mix ecto.setup && mix test"
   after_script:
-    - chown -R gitlab-runner _build deps
     - docker stop postgres_testing || /bin/true
     - docker rm postgres_testing || /bin/true
     - docker network rm network_testing || /bin/true
+
+# Dirty fix : files created in docker are owned by root. We change permissions so gitlab-runner can delete them
+cleanup:
+  stage: cleanup
+  tags: [docker]
+  when: always
+  script: docker run -v $(pwd):/opt/app --rm alpine:latest chmod -R 777 /opt/app/{_build,deps}
