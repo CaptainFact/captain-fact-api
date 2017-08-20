@@ -11,9 +11,6 @@ config :captain_fact,
   source_url_regex: ~r/[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/,
   cors_origins: ["http://localhost:3333", "chrome-extension://lpdmcoikcclagelhlmibniibjilfifac"]
 
-# Docker image generated (mainly used to realease)
-config :mix_docker, image: "captain_fact_api"
-
 # Configures the endpoint
 config :captain_fact, CaptainFactWeb.Endpoint,
   url: [host: "localhost"],
@@ -54,5 +51,3 @@ config :quantum, :captain_fact,
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env}.exs"
-
-config :xain, :after_callback, {Phoenix.HTML, :raw}
