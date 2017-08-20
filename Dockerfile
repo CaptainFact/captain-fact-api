@@ -11,7 +11,6 @@ RUN mix local.rebar --force
 RUN mix deps.get
 RUN mix deps.compile
 RUN mix release --env=prod
-RUN ls -R _build/prod/rel
 
 
 FROM bitwalker/alpine-elixir:1.5.1

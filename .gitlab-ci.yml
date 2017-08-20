@@ -17,6 +17,7 @@ test:
   before_script:
     - docker network create network_testing
     - docker run -d
+      --name postgres_testing
       --network network_testing
       -e POSTGRES_DB=captain_fact_test
       -e POSTGRES_PASSWORD=postgres
@@ -25,9 +26,10 @@ test:
     - docker run --rm
       --network network_testing
       --volumes-from build_cache
-      -e CONTINUOUS_INTEGRATION=true
+      -e POSTGRES_HOST=postgres_testing
       betree/alpine-elixir-gcc:1.5.1
-      /bin/sh -c "mix local.hex --force && mix local.rebar --force && mix deps.get && mix ecto.setup && mix test"
+      /bin/sh -c
+      "env && mix local.hex --force && mix local.rebar --force && mix deps.get && mix ecto.setup && mix test"
   after_script:
     - docker stop postgres_testing
     - docker rm postgres_testing

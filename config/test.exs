@@ -28,7 +28,7 @@ config :captain_fact, CaptainFact.Repo,
   username: "postgres",
   password: "postgres",
   database: "captain_fact_test",
-  hostname: "localhost",
+  hostname: (if is_nil(System.get_env("POSTGRES_HOST")), do: "localhost", else: System.get_env("POSTGRES_HOST")),
   pool: Ecto.Adapters.SQL.Sandbox
 
 # Mails
