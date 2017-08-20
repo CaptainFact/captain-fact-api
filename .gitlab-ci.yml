@@ -1,15 +1,6 @@
 stages:
-  - prepare
   - test
 #  - release
-  - cleanup
-
-prepare:
-  stage: prepare
-  tags: [docker]
-  script:
-    - docker run --name build_cache -v /opt  busybox /bin/true
-    - docker cp $(pwd) build_cache:/opt/app
 
 test:
   stage: test
@@ -25,20 +16,14 @@ test:
   script:
     - docker run --rm
       --network network_testing
-      --volumes-from build_cache
+      -v $(pwd):/opt/app
       -e MIX_ENV=test
       -e POSTGRES_HOST=postgres_testing
       betree/alpine-elixir-gcc:1.5.1
       /bin/sh -c
       "env && mix local.hex --force && mix local.rebar --force && mix deps.get && mix ecto.setup && mix test"
   after_script:
+    - chown -R gitlab-runner _build deps
     - docker stop postgres_testing || /bin/true
     - docker rm postgres_testing || /bin/true
     - docker network rm network_testing || /bin/true
-
-cleanup:
-  stage: cleanup
-  tags: [docker]
-  when: always
-  script:
-    - docker rm build_cache
