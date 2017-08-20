@@ -1,8 +1,9 @@
 stages:
   - prepare
   - test
+  - release
+  # - deploy
   - cleanup
-#  - release
 
 prepare:
   stage: prepare
@@ -37,8 +38,15 @@ test:
     - docker rm postgres_testing || /bin/true
     - docker network rm network_testing || /bin/true
 
+release:
+  stage: release
+  tags: [docker]
+  script: docker build -t captain-fact-api:$CI_COMMIT_REF_SLUG .
+
 cleanup:
   stage: cleanup
   when: always
   tags: [docker]
-  script: docker rm build_cache || /bin/true
+  script:
+    - docker rm build_cache || /bin/true
+    - docker rm captain-fact-api:$CI_COMMIT_REF_SLUG || /bin/true
