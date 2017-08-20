@@ -1,5 +1,7 @@
 use Mix.Config
 
+IO.inspect(System.get_env())
+
 # General config
 config :captain_fact,
   frontend_url: "https://TEST_FRONTEND",
