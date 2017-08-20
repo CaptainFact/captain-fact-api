@@ -2,7 +2,6 @@ stages:
   - prepare
   - test
   - release
-  # - deploy
   - cleanup
 
 prepare:
@@ -41,7 +40,10 @@ test:
 release:
   stage: release
   tags: [docker]
-  script: docker build -t captain-fact-api:$CI_COMMIT_REF_SLUG .
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+    - docker build -t registry.gitlab.com/captainfact/captain-fact-api:$CI_COMMIT_REF_SLUG .
+    - docker push registry.gitlab.com/captainfact/captain-fact-api:$CI_COMMIT_REF_SLUG
 
 cleanup:
   stage: cleanup
