@@ -31,9 +31,9 @@ test:
       /bin/sh -c
       "env && mix local.hex --force && mix local.rebar --force && mix deps.get && mix ecto.setup && mix test"
   after_script:
-    - docker stop postgres_testing
-    - docker rm postgres_testing
-    - docker network rm network_testing
+    - docker stop postgres_testing || /bin/true
+    - docker rm postgres_testing || /bin/true
+    - docker network rm network_testing || /bin/true
 
 cleanup:
   stage: cleanup
