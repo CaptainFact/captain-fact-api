@@ -1,11 +1,20 @@
 stages:
+  - prepare
   - test
-#  - release
   - cleanup
+#  - release
+
+prepare:
+  stage: prepare
+  tags: [docker]
+  script:
+    - docker run --name build_cache -v /opt  busybox /bin/true
+    - docker cp $(pwd) build_cache:/opt/app
 
 test:
   stage: test
   tags: [docker]
+  image:
   before_script:
     - docker network create network_testing
     - docker run -d
@@ -17,7 +26,7 @@ test:
   script:
     - docker run --rm
       --network network_testing
-      -v $(pwd):/opt/app
+      --volumes-from build_cache
       -e MIX_ENV=test
       -e POSTGRES_HOST=postgres_testing
       betree/alpine-elixir-gcc:1.5.1
@@ -28,9 +37,8 @@ test:
     - docker rm postgres_testing || /bin/true
     - docker network rm network_testing || /bin/true
 
-# Dirty fix : files created in docker are owned by root. We change permissions so gitlab-runner can delete them
 cleanup:
   stage: cleanup
-  tags: [docker]
   when: always
-  script: docker run -v $(pwd):/opt/app --rm alpine:latest chmod -R 777 /opt/app/{_build,deps}
+  tags: [docker]
+  script: docker rm build_cache || /bin/true
