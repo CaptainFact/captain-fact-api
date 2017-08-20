@@ -4,6 +4,9 @@ stages:
   - release
   - cleanup
 
+variables:
+  RELEASE_IMAGE: registry.gitlab.com/captainfact/captain-fact-api:$CI_COMMIT_REF_SLUG
+
 prepare:
   stage: prepare
   tags: [docker]
@@ -42,8 +45,8 @@ release:
   tags: [docker]
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
-    - docker build -t registry.gitlab.com/captainfact/captain-fact-api:$CI_COMMIT_REF_SLUG .
-    - docker push registry.gitlab.com/captainfact/captain-fact-api:$CI_COMMIT_REF_SLUG
+    - docker build -t $RELEASE_IMAGE .
+    - docker push $RELEASE_IMAGE
 
 cleanup:
   stage: cleanup
@@ -51,4 +54,4 @@ cleanup:
   tags: [docker]
   script:
     - docker rm build_cache || /bin/true
-    - docker rm captain-fact-api:$CI_COMMIT_REF_SLUG || /bin/true
+    - docker rmi $RELEASE_IMAGE || /bin/true
