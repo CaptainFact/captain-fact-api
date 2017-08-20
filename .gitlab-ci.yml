@@ -26,6 +26,7 @@ test:
     - docker run --rm
       --network network_testing
       --volumes-from build_cache
+      -e MIX_ENV=test
       -e POSTGRES_HOST=postgres_testing
       betree/alpine-elixir-gcc:1.5.1
       /bin/sh -c

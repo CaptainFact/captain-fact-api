@@ -1,6 +1,5 @@
 use Mix.Config
 
-IO.inspect(System.get_env())
 
 # General config
 config :captain_fact,
