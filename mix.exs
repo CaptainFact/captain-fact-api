@@ -47,7 +47,6 @@ defmodule CaptainFact.Mixfile do
       {:ueberauth_facebook, "~> 0.6"},
       {:guardian, "~> 0.10"},
       {:ecto_enum, "~> 1.0"},
-      {:ex_admin, github: "smpallen99/ex_admin"},
       {:arc, "~> 0.8.0"},
       {:arc_ecto, "~> 0.7.0"},
       {:floki, "~> 0.17.0"},
@@ -63,7 +62,6 @@ defmodule CaptainFact.Mixfile do
       {:faker, "~> 0.7", only: [:test, :dev]},
       {:bypass, "~> 0.8", only: :test},
       {:distillery, "~> 1.4", runtime: false},
-      {:mix_docker, "~> 0.5.0", runtime: false},
       # Force last version of timex to fix a bug between distillery and Elixir 1.5 both implementing inspect for
       # DateTime. https://github.com/bitwalker/timex/issues/343
       # TODO: Remove when next distillery version comes out

@@ -1,6 +1,5 @@
 defmodule CaptainFactWeb.Router do
   use CaptainFactWeb, :router
-  use ExAdmin.Router
 
   # ---- Pipelines ----
 
@@ -14,11 +13,6 @@ defmodule CaptainFactWeb.Router do
     plug :put_secure_browser_headers
     plug Guardian.Plug.VerifySession
     plug Guardian.Plug.LoadResource
-  end
-
-  pipeline :browser_auth do
-    plug Guardian.Plug.EnsureAuthenticated
-    plug CaptainFactWeb.Plugs.SuperAdmin
   end
 
   # API
@@ -78,23 +72,10 @@ defmodule CaptainFactWeb.Router do
     post  "/search/video", VideoController, :search
   end
 
-  # Browser (backadmin)
-
-  scope "/jouge42", CaptainFactWeb do
-    pipe_through :browser
-    get    "/login", UserController, :admin_login
-    delete "/logout", UserController, :admin_logout
-  end
-
-  scope "/jouge42/admin", ExAdmin do
-    pipe_through [:browser, :browser_auth]
-    admin_routes()
-  end
-
   # Dev only : mailer. We can use Mix.env here cause file is interpreted at compile time
   if Mix.env == :dev do
     scope "/jouge42/mail" do
-      pipe_through [:browser, :browser_auth]
+      pipe_through [:browser]
       forward "/sent_emails", Bamboo.SentEmailViewerPlug
     end
   end

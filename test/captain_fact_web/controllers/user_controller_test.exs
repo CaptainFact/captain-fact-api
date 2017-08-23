@@ -86,11 +86,10 @@ defmodule CaptainFactWeb.UserControllerTest do
     assert is_number(available) and available > 0
   end
 
-  test "must be authenticated to update, delete, admin_logout and available_flags" do
+  test "must be authenticated to update, delete and available_flags" do
     response(get(build_conn(), "/api/users/me"), 401) =~ "unauthorized"
     response(put(build_conn(), "/api/users/me"), 401) =~ "unauthorized"
     response(get(build_conn(), "/api/users/me/available_flags"), 401) =~ "unauthorized"
     response(delete(build_conn(), "/api/users/me"), 401) =~ "unauthorized"
-    response(delete(build_conn(), "/jouge42/logout"), 401) =~ "unauthorized"
   end
 end

@@ -108,56 +108,6 @@ defmodule CaptainFactWeb.AuthControllerTest do
     end
   end
 
-  describe "admin" do
-    test "can login and is redirected to /jouge42" do
-      reset_users_table()
-
-      password = "kikiTotoX"
-      user = insert_user_with_custom_password(password)
-      response =
-        build_conn()
-        |> post("/api/auth/identity/callback", %{
-             "type" => "session",
-             "email" => user.email,
-             "password" => password
-           })
-
-      assert redirected_to(response, 302) =~ "/jouge42"
-      # TODO Check session
-    end
-
-    test "cannot login with invalid credentials" do
-      reset_users_table()
-
-      user = insert_user_with_custom_password("kikiTotoX")
-      build_conn()
-      |> post("/api/auth/identity/callback", %{
-           "type" => "session",
-           "email" => user.email,
-           "password" => "NotTheOriginalPassword"
-         })
-      |> response(401)
-    end
-
-    test "can only be the user with id 1" do
-      reset_users_table()
-
-      insert(:user)
-      password = "FakeAdmin"
-      user = insert_user_with_custom_password(password)
-      assert Repo.aggregate(User, :count, :id) == 2, "there should be only 2 users"
-      assert user.id != 1
-
-      build_conn()
-      |> post("/api/auth/identity/callback", %{
-           "type" => "session",
-           "email" => user.email,
-           "password" => password
-         })
-      |> response(401)
-    end
-  end
-
   describe "reset password" do
     test "full flow" do
       user = insert(:user)
@@ -210,12 +160,6 @@ defmodule CaptainFactWeb.AuthControllerTest do
       build_conn()
       |> post("/api/auth/request_invitation", %{email: email})
     end
-  end
-
-  defp reset_users_table() do
-    Repo.delete_all(User)
-    query = "ALTER SEQUENCE users_id_seq RESTART WITH 1"
-    Ecto.Adapters.SQL.query!(Repo, query, [])
   end
 
   defp insert_user_with_custom_password(password) do
