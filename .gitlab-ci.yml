@@ -17,7 +17,6 @@ prepare:
 test:
   stage: test
   tags: [docker]
-  image:
   before_script:
     - docker network create network_testing
     - docker run -d

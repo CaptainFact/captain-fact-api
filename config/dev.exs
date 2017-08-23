@@ -18,8 +18,8 @@ config :captain_fact, CaptainFactWeb.Endpoint,
   https: [
     port: 4001,
     otp_app: :captain_fact,
-    keyfile: "priv/keys/localhost.key",
-    certfile: "priv/keys/localhost.cert"
+    keyfile: "priv/keys/privkey.pem",
+    certfile: "priv/keys/cert.pem"
   ]
 
 # Watch static and templates for browser reloading.

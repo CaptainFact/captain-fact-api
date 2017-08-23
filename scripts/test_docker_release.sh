@@ -13,8 +13,8 @@ docker run -it \
   -e "PORT=4000" \
   -e "PORT_SSL=4001" \
   -e "SECRET_KEY_BASE=8C6FsJwjV11d+1WPUIbkEH6gB/VavJrcXWoPLujgpclfxjkLkoNFSjVU9XfeNm6s" \
-  -e "SSL_KEY_PATH=priv/keys/localhost.key" \
-  -e "SSL_CERT_PATH=priv/keys/localhost.cert" \
+  -e "SSL_KEY_PATH=priv/keys/privkey.pem" \
+  -e "SSL_CERT_PATH=priv/keys/cert.pem" \
   -e "DB_HOSTNAME=localhost" \
   -e "DB_USERNAME=postgres" \
   -e "DB_PASSWORD=postgres" \

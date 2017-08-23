@@ -8,15 +8,9 @@ alias CaptainFactWeb.SpeakerPicture
 
 
 defmodule SeedPoliticians do
-  @activate_filter true
-  @filter [
-    "sarkozy", "le pen", "hamon", "mélenchon", "fillon", "poutou", "arthaud", "macron", "cheminade",
-    "aignan", "lassalle", "asselineau", "trump", "obama"
-  ]
-
-  def seed(csv_path, fetch_pictures?) do
-    seed_func = if fetch_pictures?, do: &seed_politician_with_picture/1, else: &seed_politician/1
-    SeedWithCSV.seed(csv_path, seed_func, %{
+  def seed(csv_path, fetch_pictures?, names_filter) do
+    seed_func = if fetch_pictures?, do: &seed_politician_with_picture/2, else: &seed_politician/2
+    SeedWithCSV.seed(csv_path, seed_func, names_filter, %{
       "image" => :picture,
       "politicianLabel" => :full_name,
       "politician" => {:wikidata_item_id, &get_wikidata_item_id/1}
@@ -25,14 +19,14 @@ defmodule SeedPoliticians do
 
   defp get_wikidata_item_id("http://www.wikidata.org/entity/Q" <> id), do: id
 
-  defp seed_politician_with_picture(changes) do
+  defp seed_politician_with_picture(changes, names_filter) do
     {picture_url, changes} = Map.pop(changes, :picture)
-    with speaker when not is_nil(speaker) <- seed_politician(changes),
+    with speaker when not is_nil(speaker) <- seed_politician(changes, names_filter),
       do: fetch_picture(speaker, picture_url)
   end
 
-  defp seed_politician(changes) do
-    if filter(changes) do
+  defp seed_politician(changes, names_filter) do
+    if filter(changes, names_filter) do
       changes =
         changes
         |> Map.delete(:picture)
@@ -47,22 +41,19 @@ defmodule SeedPoliticians do
           nil ->
             Logger.info("Insert speaker #{changeset.changes.full_name}")
             Repo.insert!(changeset)
-          _ -> nil # If speaker already exists, skip it
+          speaker -> speaker
         end
       end
     end
   end
 
-  defp filter(changes) do
-    if !@activate_filter do
-      true
-    else
-      lower_name = String.downcase(changes.full_name)
-      Enum.any?(@filter, &String.contains?(lower_name, &1))
-    end
+  defp filter(_, []), do: true
+  defp filter(changes, names_filter) do
+    lower_name = String.downcase(changes.full_name)
+    Enum.any?(names_filter, &String.contains?(lower_name, &1))
   end
 
-  defp fetch_picture(speaker, picture_url) do
+  defp fetch_picture(speaker = %{picture: nil}, picture_url) do
     case SpeakerPicture.store({picture_url, speaker}) do
       {:ok, picture} ->
         Logger.debug("Fetching picture for #{speaker.full_name} at #{picture_url}")
@@ -73,10 +64,12 @@ defmodule SeedPoliticians do
         Logger.error("Given image path is invalid : #{picture_url}")
     end
   end
+  defp fetch_picture(speaker, _), do: Logger.info("Speaker #{speaker.full_name} already have a picture")
 end
 
-{keywords, args, invalids} = OptionParser.parse(System.argv, switches: [fetch_pictures: :boolean])
+{keywords, args, invalids} =
+  OptionParser.parse(System.argv, strict: [fetch_pictures: :boolean, name: :count], aliases: [n: :name])
 
 if Enum.count(invalids) == 0,
-  do: SeedPoliticians.seed(List.first(args), Keyword.get(keywords, :fetch_pictures)),
-  else: IO.puts "Usage: mix run seed_politicians.exs file.csv --fetch-pictures"
+  do: SeedPoliticians.seed(List.first(args), Keyword.get(keywords, :fetch_pictures), Enum.drop(args, 1)),
+  else: IO.puts "Usage: mix run seed_politicians.exs file.csv [--fetch-pictures] [name_filter] [name_filter2]..."
