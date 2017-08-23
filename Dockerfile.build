@@ -1,0 +1,16 @@
+# Same as Dockerfile but stop after compiling (so no mix release here). This is useful for testing.
+# You should combine this with Dockerfile.release by copying generated captain-fact-api_release.tar
+
+FROM betree/alpine-elixir-gcc:1.5.1
+
+ENV HOME=/opt/app/ TERM=xterm
+
+WORKDIR /opt/app
+ENV MIX_ENV=prod REPLACE_OS_VARS=true
+
+COPY . .
+RUN mix local.hex --force && mix local.rebar --force
+RUN mix deps.get
+RUN mix deps.compile
+RUN mix release --env=prod
+RUN tar c -C ./_build/prod/rel/captain_fact/ -f captain-fact-api_release.tar bin lib releases

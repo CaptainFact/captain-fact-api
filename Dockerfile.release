@@ -1,0 +1,9 @@
+FROM bitwalker/alpine-elixir:1.5.1
+ENV MIX_ENV=prod REPLACE_OS_VARS=true SHELL=/bin/bash PORT=80 PORT_SSL=443
+
+WORKDIR /opt/app
+COPY captain-fact-api_release.tar .
+RUN tar x -f captain-fact-api_release.tar && rm captain-fact-api_release.tar
+
+EXPOSE 80 443
+ENTRYPOINT ["bin/captain_fact"]
