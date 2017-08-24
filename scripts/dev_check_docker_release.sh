@@ -14,6 +14,7 @@ CF_API_BUILD_IMAGE=captain-fact-api-build:dev-check
 docker build -t ${CF_API_BUILD_IMAGE} -f Dockerfile.build .
 BUILD_CONTAINER=$(docker run -d ${CF_API_BUILD_IMAGE})
 docker cp ${BUILD_CONTAINER}:/opt/app/captain-fact-api_release.tar ./captain-fact-api_release.tar
+docker stop ${BUILD_CONTAINER} && docker rm ${BUILD_CONTAINER}
 docker build -t ${CF_API_IMAGE} -f Dockerfile.release .
 
 # Run server
@@ -38,6 +39,5 @@ docker run -it \
   --rm ${CF_API_IMAGE} foreground
 
 # Cleanup
-docker stop ${BUILD_CONTAINER} && docker rm ${BUILD_CONTAINER}
 docker rmi -f ${CF_API_IMAGE} ${CF_API_BUILD_IMAGE}
 rm captain-fact-api_release.tar
