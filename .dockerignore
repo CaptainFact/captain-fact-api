@@ -1,7 +1,11 @@
 .git
+.gitignore
+.idea
 _build
 cover
+Dockerfile.*
 deps
+scripts
 resources
 doc
 tmp
