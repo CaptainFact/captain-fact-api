@@ -8,9 +8,11 @@ ENV HOME=/opt/app/ TERM=xterm
 WORKDIR /opt/app
 ENV MIX_ENV=prod REPLACE_OS_VARS=true
 
+# Cache dependencies
+COPY mix.exs mix.lock ./
+RUN mix local.hex --force && mix local.rebar --force && mix deps.get
+
+# Copy main project
 COPY . .
-RUN mix local.hex --force && mix local.rebar --force
-RUN mix deps.get
-RUN mix deps.compile
 RUN mix release --env=prod
 RUN tar c -C ./_build/prod/rel/captain_fact/ -f captain-fact-api_release.tar bin lib releases
