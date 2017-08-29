@@ -22,9 +22,6 @@ defmodule CaptainFact.ReleaseTasks do
     IO.puts "Loading captainfact for seeding.."
     init()
 
-    # Run migrations
-    Enum.each(@myapps, &run_migrations_for/1)
-
     # Run the seed script if it exists
     seed_script = Path.join([priv_dir(:captain_fact), "repo", "seeds.exs"])
     if File.exists?(seed_script) do
@@ -35,6 +32,19 @@ defmodule CaptainFact.ReleaseTasks do
     # Signal shutdown
     IO.puts "Success!"
     :init.stop()
+  end
+
+  def seed_politicians_from_github() do
+    init()
+    Application.ensure_all_started(:httpoison)
+    seed_script = Path.join([priv_dir(:captain_fact), "repo", "seed_politicians.exs"])
+    [{module, _}] = Code.load_file(seed_script)
+
+    url = "https://raw.githubusercontent.com/CaptainFact/captain-fact-data/master/Wikidata/data/politicians_born_after_1945_having_a_picture.csv"
+    filename = "politicians.csv"
+    %HTTPoison.Response{body: csv_content} = HTTPoison.get!(url)
+    File.write!(filename, csv_content)
+    apply(module, :seed, [filename])
   end
 
   def priv_dir(app), do: "#{:code.priv_dir(app)}"

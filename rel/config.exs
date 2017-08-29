@@ -41,9 +41,11 @@ end
 release :captain_fact do
   set version: current_version(:captain_fact)
   set applications: [:runtime_tools]
+  set post_start_hook: "rel/hooks/post_start.sh"
   set commands: [
     "migrate": "rel/commands/migrate.sh",
-    "seed": "rel/commands/seed.sh"
+    "seed": "rel/commands/seed.sh",
+    "seed_politicians": "rel/commands/seed_politicians.sh"
   ]
 end
 

@@ -8,7 +8,7 @@ alias CaptainFactWeb.SpeakerPicture
 
 
 defmodule SeedPoliticians do
-  def seed(csv_path, fetch_pictures?, names_filter) do
+  def seed(csv_path, fetch_pictures? \\ true, names_filter \\ []) do
     seed_func = if fetch_pictures?, do: &seed_politician_with_picture/2, else: &seed_politician/2
     SeedWithCSV.seed(csv_path, seed_func, names_filter, %{
       "image" => :picture,
@@ -67,9 +67,11 @@ defmodule SeedPoliticians do
   defp fetch_picture(speaker, _), do: Logger.info("Speaker #{speaker.full_name} already have a picture")
 end
 
-{keywords, args, invalids} =
-  OptionParser.parse(System.argv, strict: [fetch_pictures: :boolean, name: :count], aliases: [n: :name])
+# Allow usage from shell on dev / test environments - when Mix is installed
+if Kernel.function_exported?(Mix, :env, 0) do
+  {keywords, args, invalids} = OptionParser.parse(System.argv, strict: [fetch_pictures: :boolean])
 
-if Enum.count(invalids) == 0,
-  do: SeedPoliticians.seed(List.first(args), Keyword.get(keywords, :fetch_pictures), Enum.drop(args, 1)),
-  else: IO.puts "Usage: mix run seed_politicians.exs file.csv [--fetch-pictures] [name_filter] [name_filter2]..."
+  if Enum.count(invalids) == 0 && Enum.count(args) >= 1,
+    do: SeedPoliticians.seed(List.first(args), Keyword.get(keywords, :fetch_pictures), Enum.drop(args, 1)),
+    else: Logger.error "Usage: mix run seed_politicians.exs file.csv [--fetch-pictures] [name_filter] [name_filter2]..."
+end

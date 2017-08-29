@@ -2,7 +2,7 @@ defmodule CaptainFactWeb.SpeakerPicture do
   use Arc.Definition
   use Arc.Ecto.Definition
 
-  @versions [:original, :thumb] # TODO Remove original ?
+  @versions [:thumb]
   @extension_whitelist ~w(.jpg .jpeg .gif .png)
 
   # Whitelist file extensions:
