@@ -25,8 +25,8 @@ defmodule CaptainFact.Accounts.UserPermissions do
     edit_comment:           { 3  , 10 , 15 , 30 , 30 , 100 , 100 , 100 , 100 },
     add_comment:            { 3  ,  5 , 10 , 20 , 30 , 200 , 200 , 200 , 200 },
     # Vote
-    self_vote:              { 3  ,  5 , 15 , 30 , 50 , 250 , 250 , 250 , 250 },
-    vote_up:                { 0  ,  0 , 15 , 30 , 45 , 300 , 500 , 500 , 500 },
+    self_vote:              { 3  ,  10, 15 , 30 , 50 , 250 , 250 , 250 , 250 },
+    vote_up:                { 0  ,  5 , 15 , 30 , 45 , 300 , 500 , 500 , 500 },
     vote_down:              { 0  ,  0 ,  0 ,  5 , 10 ,  20 ,  40 ,  80 , 150 },
     # Flag / Approve
     approve_history_action: { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 },
@@ -51,13 +51,12 @@ defmodule CaptainFact.Accounts.UserPermissions do
   Raises PermissionsError if user doesn't have the permission.
 
   lock! will do an optimistic lock by incrementing the counter for this action then execute func.
-  Returnning a tupe like {:error, _} or throwing / raising in `func` will revert the action
+  Returnning a tupe like {:error, _} or raiseing / raising in `func` will revert the action
   """
   def lock!(user = %User{}, action, func) when is_atom(action) do
     limit = limitation(user, action)
-    if (limit == 0), do: throw %PermissionsError{message: "not_enough_reputation"}
+    if (limit == 0), do: raise %PermissionsError{message: "not_enough_reputation"}
 
-    # TODO Manage own state
     # Optimistic lock
     lock_status = UserState.get_and_update(user, @user_state_key, fn state ->
       state = state || %{}
@@ -65,14 +64,14 @@ defmodule CaptainFact.Accounts.UserPermissions do
         do: {:error, state},
         else: {:ok, do_record_action(state, action)}
     end)
-    if lock_status == :error, do: throw %PermissionsError{message: "limit_reached"}
+    if lock_status == :error, do: raise %PermissionsError{message: "limit_reached"}
 
     try do
       func.(user)
     catch
       e ->
         UserState.update(user, @user_state_key, 0, &do_revert_action(&1, action))
-        throw e
+        raise e
     rescue
       e ->
         UserState.update(user, @user_state_key, 0, &do_revert_action(&1, action))
@@ -86,7 +85,7 @@ defmodule CaptainFact.Accounts.UserPermissions do
   end
   def lock!(user_id, action, func) when is_integer(user_id) and is_atom(action),
     do: lock!(do_load_user!(user_id), action, func)
-  def lock!(nil, _, _), do: throw %PermissionsError{message: "unauthorized"}
+  def lock!(nil, _, _), do: raise %PermissionsError{message: "unauthorized"}
 
   @doc """
   Run Repo.transaction while locking permissions. Usefull when piping
@@ -123,13 +122,13 @@ defmodule CaptainFact.Accounts.UserPermissions do
   def check!(user = %User{}, action) when is_atom(action) do
     case check(user, action) do
       {:ok, _} -> :ok
-      {:error, message} -> throw %PermissionsError{message: message}
+      {:error, message} -> raise %PermissionsError{message: message}
     end
   end
   def check!(user_id, action) when is_integer(user_id) and is_atom(action) do
      check!(do_load_user!(user_id), action)
   end
-  def check!(nil, _), do: throw %PermissionsError{message: "unauthorized"}
+  def check!(nil, _), do: raise %PermissionsError{message: "unauthorized"}
 
   @doc """
   Doesn't verify user's limitation nor reputation, you need to check that by yourself
@@ -167,7 +166,7 @@ defmodule CaptainFact.Accounts.UserPermissions do
   defp do_record_action(user_actions, action), do: Map.update(user_actions, action, 1, &(&1 + 1))
   defp do_revert_action(user_actions, action), do: Map.update(user_actions, action, 0, &(&1 - 1))
 
-  defp do_load_user!(nil), do: throw %PermissionsError{message: "unauthorized"}
+  defp do_load_user!(nil), do: raise %PermissionsError{message: "unauthorized"}
   defp do_load_user!(user_id) do
     User
     |> where([u], u.id == ^user_id)

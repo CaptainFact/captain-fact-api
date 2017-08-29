@@ -17,7 +17,7 @@ defmodule CaptainFactWeb.ErrorView do
   end
 
   def render("403.json", assigns) do
-    Logger.debug(assigns)
+    Logger.debug(inspect(assigns))
     %{error: "forbidden"}
   end
 
@@ -30,12 +30,12 @@ defmodule CaptainFactWeb.ErrorView do
   end
 
   def render("error.json", assigns) do
-    Logger.debug(assigns)
+    Logger.debug(inspect(assigns))
     %{error: "unexpected"}
   end
 
   def render(_, assigns) do
-    Logger.debug(assigns)
+    Logger.debug(inspect(assigns))
     %{error: "unexpected"}
   end
 end

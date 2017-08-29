@@ -40,12 +40,12 @@ defmodule CaptainFactWeb.UserSocket do
     try do
       handler.(command, params, socket)
     catch
-      %UserPermissions.PermissionsError{} = e ->
-        reply_error(socket, Phoenix.View.render(ErrorView, "403.json", %{reason: e}))
       e ->
         Logger.error("[RescueChannel] Uncatched exception : #{inspect(e)}")
         reply_error(socket, Phoenix.View.render(ErrorView, "error.json", []))
     rescue
+      e in UserPermissions.PermissionsError ->
+        reply_error(socket, Phoenix.View.render(ErrorView, "403.json", %{reason: e}))
       e in Ecto.InvalidChangesetError ->
         reply_error(socket, ChangesetView.render("error.json", %{changeset: e.changeset}))
       _ in Ecto.NoResultsError ->

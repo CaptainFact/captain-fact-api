@@ -4,6 +4,7 @@ defmodule CaptainFactWeb.VideoController do
   alias CaptainFactWeb.Video
   alias CaptainFact.Accounts.UserPermissions
 
+  action_fallback CaptainFactWeb.FallbackController
 
   def index(conn, _params) do
     videos = Video
@@ -31,16 +32,10 @@ defmodule CaptainFactWeb.VideoController do
         |> json(%{error: %{url: message}})
       {:ok, title} ->
         changeset = Video.changeset(%Video{title: title}, %{url: video_url})
-        result = UserPermissions.lock!(user, :add_video, fn _ -> Repo.insert(changeset) end)
-        case result do
-          {:ok, video} ->
-            video = Map.put(video, :speakers, [])
-            render(conn, "show.json", video: video)
-          {:error, changeset} ->
-            conn
-            |> put_status(:unprocessable_entity)
-            |> render(CaptainFactWeb.ChangesetView, :error, changeset: changeset)
-        end
+        video =
+          UserPermissions.lock!(user, :add_video, fn _ -> Repo.insert!(changeset) end)
+          |> Map.put(:speakers, [])
+        render(conn, "show.json", video: video)
     end
   end
 
