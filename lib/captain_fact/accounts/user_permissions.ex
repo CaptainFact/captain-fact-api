@@ -30,15 +30,15 @@ defmodule CaptainFact.Accounts.UserPermissions do
     vote_down:              { 0  ,  0 ,  0 ,  5 , 10 ,  20 ,  40 ,  80 , 150 },
     # Flag / Approve
     approve_history_action: { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 },
-    flag_history_action:    { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 },
-    flag_comment:           { 0  ,  0 ,  0 ,  1 ,  3 ,   5 ,  10 ,  15 ,  30 },
+    flag_history_action:    { 0  ,  1 ,  3 ,  5 ,  5 ,   5 ,   5 ,   5 ,   5 },
+    flag_comment:           { 0  ,  1 ,  3 ,  5 ,  5 ,   5 ,  10 ,  15 ,  30 },
     # Statements
-    add_statement:          { 0  ,  2 ,  5 , 15 , 30 ,  50 , 100 , 100 , 100 },
-    edit_statement:         { 0  ,  0 ,  0 ,  3 ,  5 ,  50 , 100 , 100 , 100 },
-    remove_statement:       { 0  ,  0 ,  0 ,  3 ,  5 ,  10 ,  10 ,  10 ,  10 },
-    restore_statement:      { 0  ,  0 ,  0 ,  3 ,  5 ,  15 ,  15 ,  15 ,  15 },
+    add_statement:          { 0  ,  5 ,  5 , 15 , 30 ,  50 , 100 , 100 , 100 },
+    edit_statement:         { 0  ,  5 ,  0 ,  3 ,  5 ,  50 , 100 , 100 , 100 },
+    remove_statement:       { 0  ,  5 ,  0 ,  3 ,  5 ,  10 ,  10 ,  10 ,  10 },
+    restore_statement:      { 0  ,  5 ,  0 ,  3 ,  5 ,  15 ,  15 ,  15 ,  15 },
     # Speakers
-    add_speaker:            { 0  ,  0 ,  3 ,  5 , 10 ,  30 ,  50 , 100 , 100 },
+    add_speaker:            { 0  ,  5 ,  10, 15 , 20 ,  30 ,  50 , 100 , 100 },
     remove_speaker:         { 0  ,  0 ,  3 ,  5 , 10 ,  30 ,  50 , 100 , 100 },
     edit_speaker:           { 0  ,  0 ,  3 ,  5 , 10 ,  30 ,  50 , 100 , 100 },
     restore_speaker:        { 0  ,  0 ,  0 ,  5 , 10 ,  30 ,  50 , 100 , 100 }
