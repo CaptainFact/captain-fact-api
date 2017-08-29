@@ -38,8 +38,7 @@ config :guardian, Guardian,
   permissions: %{default: [:read, :write]}
 
 # Configure file upload
-config :arc,
-  storage: Arc.Storage.Local
+config :arc, storage: Arc.Storage.Local
 
 # Configure scheduler
 config :quantum, :captain_fact,

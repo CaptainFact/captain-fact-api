@@ -1,9 +1,10 @@
 defmodule CaptainFactWeb.SpeakerPicture do
   use Arc.Definition
   use Arc.Ecto.Definition
+  def __storage, do: Arc.Storage.Local
 
   @versions [:thumb]
-  @extension_whitelist ~w(.jpg .jpeg .gif .png)
+  @extension_whitelist ~w(.jpg .jpeg .png)
 
   # Whitelist file extensions:
   def validate({file, _}) do
@@ -17,12 +18,12 @@ defmodule CaptainFactWeb.SpeakerPicture do
   end
 
   # Override the persisted filenames:
-  def filename(version, {_, _}) do
-    version
+  def filename(version, {_, speaker}) do
+    "#{speaker.id}_#{speaker.wikidata_item_id || "no-wiki"}_#{version}"
   end
 
   # Override the storage directory:
-  def storage_dir(_, {_, speaker}) do
-    "resources/speakers/#{speaker.id}"
+  def storage_dir(_, {_, _}) do
+    "resources/speakers"
   end
 end
