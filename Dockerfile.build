@@ -10,7 +10,7 @@ ENV MIX_ENV=prod REPLACE_OS_VARS=true
 
 # Cache dependencies
 COPY mix.exs mix.lock ./
-RUN mix local.hex --force && mix local.rebar --force && mix deps.get && mix deps.compile
+RUN mix local.hex --force && mix local.rebar --force && mix deps.get
 
 # Copy main project
 COPY . .
