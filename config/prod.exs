@@ -10,6 +10,7 @@ config :captain_fact,
 # to set PORT=80 before running your server.
 config :captain_fact, CaptainFactWeb.Endpoint,
   url: [host: "${HOST}", port: "${PORT}"],
+  check_origin: ["${FRONTEND_URL}"],
   secret_key_base: "${SECRET_KEY_BASE}",
   server: true,
   http: [port: "${PORT}"],
