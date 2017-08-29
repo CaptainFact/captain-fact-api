@@ -1,4 +1,6 @@
 FROM bitwalker/alpine-elixir:1.5.1
+RUN apk add imagemagick && rm -rf /var/cache/apk/*
+
 ENV MIX_ENV=prod REPLACE_OS_VARS=true SHELL=/bin/bash PORT=80 PORT_SSL=443
 
 WORKDIR /opt/app
