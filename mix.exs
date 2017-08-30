@@ -42,7 +42,7 @@ defmodule CaptainFact.Mixfile do
       {:cowboy, "~> 1.0"},
       {:corsica, "~> 0.5"},
       {:comeonin, "~> 3.0"},
-      {:ueberauth, github: "CaptainFact/ueberauth", override: true},
+      {:ueberauth, "0.4.0"},
       {:ueberauth_identity, "~> 0.2"},
       {:ueberauth_facebook, "~> 0.6"},
       {:guardian, "~> 0.10"},

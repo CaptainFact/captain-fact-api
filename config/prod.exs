@@ -21,8 +21,12 @@ config :captain_fact, CaptainFactWeb.Endpoint,
     certfile: "${SSL_CERT_PATH}"
   ],
   force_ssl: [hsts: true]
-  # Static resources (for admin)
-#  root: "."
+
+# Mails
+config :captain_fact, CaptainFact.Mailer,
+  adapter: Bamboo.MailgunAdapter,
+  api_key: "${MAILGUN_API_KEY}",
+  domain: "${FRONTEND_URL}"
 
 config :guardian, Guardian,
   secret_key: "${SECRET_KEY_BASE}"

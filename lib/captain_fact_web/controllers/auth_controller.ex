@@ -1,3 +1,32 @@
+defmodule UeberauthWithRedirectUriFixer do
+  @moduledoc """
+  Same as Ueberauth plug, but fixes OAuth redirect URI
+  """
+  
+  def init(_) do
+    Ueberauth.init()
+  end
+
+  @fb_auth_callback "/api/auth/facebook/callback"
+
+  def call(conn = %{request_path: request_path, params: params}, opts) do
+    ueberauth_opts =
+      if request_path == @fb_auth_callback do
+        frontend_url = Application.get_env(:captain_fact, :frontend_url)
+        fixed_url = if Map.has_key?(params, "invitation_token"),
+          do: "#{frontend_url}/login/callback/facebook?invitation_token=#{params["invitation_token"]}",
+          else: "#{frontend_url}/login/callback/facebook"
+
+        Map.update!(opts, @fb_auth_callback, fn {module, :run_callback, callback_opts} ->
+          {module, :run_callback, Map.put(callback_opts, :callback_url, fixed_url)}
+        end)
+      else
+        opts
+      end
+    Ueberauth.call(conn, ueberauth_opts)
+  end
+end
+
 defmodule CaptainFactWeb.AuthController do
   use CaptainFactWeb, :controller
   require Logger
@@ -6,7 +35,7 @@ defmodule CaptainFactWeb.AuthController do
   alias CaptainFact.Accounts.User
   alias CaptainFactWeb.{ErrorView, UserView, AuthController }
 
-  plug Ueberauth
+  plug UeberauthWithRedirectUriFixer
   plug Guardian.Plug.EnsureAuthenticated, [handler: AuthController] when action in [:delete, :me]
 
 

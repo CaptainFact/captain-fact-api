@@ -27,7 +27,10 @@ config :ueberauth, Ueberauth,
   base_path: "/api/auth",
   providers: [
     identity: {Ueberauth.Strategy.Identity, [callback_methods: ["POST"]]},
-    facebook: {Ueberauth.Strategy.Facebook, [profile_fields: "name,email,picture"]}
+    facebook: {Ueberauth.Strategy.Facebook, [
+      callback_methods: ["POST"],
+      profile_fields: "name,email,picture"
+    ]}
   ]
 
 # Configure Guardian (authentication)
