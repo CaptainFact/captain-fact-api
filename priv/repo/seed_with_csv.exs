@@ -1,7 +1,7 @@
 defmodule SeedWithCSV do
   require Logger
 
-  @nb_threads 2
+  @nb_threads 1
   @timeout 60000
 
   def seed(filename, insert_func, insert_func_args, columns_mapping) do

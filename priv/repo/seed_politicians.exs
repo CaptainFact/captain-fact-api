@@ -13,7 +13,8 @@ defmodule SeedPoliticians do
     SeedWithCSV.seed(csv_path, seed_func, names_filter, %{
       "image" => :picture,
       "politicianLabel" => :full_name,
-      "politician" => {:wikidata_item_id, &get_wikidata_item_id/1}
+      "politician" => {:wikidata_item_id, &get_wikidata_item_id/1},
+      "countryCode" => :country
     })
   end
 
@@ -32,9 +33,9 @@ defmodule SeedPoliticians do
         |> Map.delete(:picture)
         |> Map.put(:title, "Politician")
 
-      changeset = Speaker.changeset(%Speaker{is_user_defined: false, country: "FR"}, changes)
+      changeset = Speaker.changeset(%Speaker{is_user_defined: false}, changes)
       if !changeset.valid? do
-        IO.puts(:stderr, "Cannot add speaker #{changes.full_name}: #{inspect(changeset.errors)}")
+        Logger.error(:stderr, "Cannot add speaker #{changes.full_name}: #{inspect(changeset.errors)}")
         nil
       else
         case Repo.get_by(Speaker, wikidata_item_id: changeset.changes.wikidata_item_id) do
@@ -47,8 +48,13 @@ defmodule SeedPoliticians do
     end
   end
 
-  defp filter(_, []), do: true
   defp filter(changes, names_filter) do
+    # Politicians for which name failed to resolve to english have a name like QXXXXX with XXXXX being a number
+    !Regex.match?(~r/Q\d+/i, changes.full_name) && filter_names(changes, names_filter)
+  end
+
+  defp filter_names(_, []), do: true
+  defp filter_names(changes, names_filter) do
     lower_name = String.downcase(changes.full_name)
     Enum.any?(names_filter, &String.contains?(lower_name, &1))
   end
