@@ -2,6 +2,7 @@ defmodule CaptainFactWeb.AuthControllerTest do
   use CaptainFactWeb.ConnCase
   import CaptainFact.Factory
 
+  alias CaptainFactWeb.AuthController
   alias CaptainFact.Accounts.User
   alias CaptainFact.Repo
 
@@ -35,7 +36,7 @@ defmodule CaptainFactWeb.AuthControllerTest do
       response =
         build_conn()
         |> Map.put(:assigns, auth)
-        |> post("/api/auth/facebook/callback")
+        |> AuthController.callback(%{})
         |> json_response(:ok)
 
       assert response["user"]["id"] == user.id, "should use existing account if exists"
@@ -51,7 +52,7 @@ defmodule CaptainFactWeb.AuthControllerTest do
       response =
         build_conn()
         |> Map.put(:assigns, auth)
-        |> post("/api/auth/facebook/callback")
+        |> AuthController.callback(%{})
         |> json_response(:ok)
 
       assert response["user"]["id"] == user.id, "should use existing account if email exists"
@@ -63,7 +64,7 @@ defmodule CaptainFactWeb.AuthControllerTest do
       response =
         build_conn()
         |> Map.put(:assigns, auth)
-        |> post("/api/auth/facebook/callback")
+        |> AuthController.callback(%{})
         |> json_response(:bad_request)
 
       assert response == %{"error" => "invalid_invitation_token"}
@@ -76,7 +77,7 @@ defmodule CaptainFactWeb.AuthControllerTest do
       response =
         build_conn()
         |> Map.put(:assigns, auth)
-        |> post("/api/auth/facebook/callback", %{invitation_token: invit.token})
+        |> AuthController.callback(%{"invitation_token" => invit.token})
         |> json_response(:ok)
 
       Guardian.decode_and_verify!(response["token"])
@@ -98,7 +99,7 @@ defmodule CaptainFactWeb.AuthControllerTest do
         response =
           build_conn()
           |> Map.put(:assigns, auth)
-          |> post("/api/auth/facebook/callback")
+          |> AuthController.callback(%{})
           |> json_response(:ok)
 
         Guardian.decode_and_verify!(response["token"])

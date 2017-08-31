@@ -37,7 +37,6 @@ defmodule CaptainFactWeb.Router do
     scope "/auth" do
       get    "/", AuthController, :me
       delete "/", AuthController, :delete
-      get    "/:provider/callback", AuthController, :callback
       post   "/:provider/callback", AuthController, :callback
 
       scope "/reset_password" do
