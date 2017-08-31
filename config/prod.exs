@@ -25,8 +25,8 @@ config :captain_fact, CaptainFactWeb.Endpoint,
 # Mails
 config :captain_fact, CaptainFact.Mailer,
   adapter: Bamboo.MailgunAdapter,
-  api_key: "${MAILGUN_API_KEY}",
-  domain: "${FRONTEND_URL}"
+  domain: "${MAILGUN_DOMAIN}",
+  api_key: "${MAILGUN_API_KEY}"
 
 config :guardian, Guardian,
   secret_key: "${SECRET_KEY_BASE}"
