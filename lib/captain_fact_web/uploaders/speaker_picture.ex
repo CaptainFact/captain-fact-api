@@ -1,7 +1,6 @@
 defmodule CaptainFactWeb.SpeakerPicture do
   use Arc.Definition
   use Arc.Ecto.Definition
-  def __storage, do: Arc.Storage.Local
 
   @versions [:thumb]
   @extension_whitelist ~w(.jpg .jpeg .png)
@@ -14,7 +13,7 @@ defmodule CaptainFactWeb.SpeakerPicture do
 
   # Define a thumbnail transformation:
   def transform(:thumb, _) do
-    {:convert, "-thumbnail 50x50^ -gravity center -extent 50x50 -format png", :png}
+    {:convert, "-thumbnail 50x50^ -gravity center -extent 50x50 -format jpg", :jpg}
   end
 
   # Override the persisted filenames:

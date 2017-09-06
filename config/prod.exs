@@ -43,5 +43,11 @@ config :captain_fact, CaptainFact.Repo,
   database: "${DB_NAME}",
   pool_size: 20
 
+config :arc, storage: Arc.Storage.S3, bucket: "${S3_BUCKET}"
+
+config :ex_aws,
+       access_key_id: ["${S3_ACCESS_KEY_ID}", :instance_role],
+       secret_access_key: ["${S3_SECRET_ACCESS_KEY}", :instance_role]
+
 # Do not print debug messages in production
 config :logger, level: :info

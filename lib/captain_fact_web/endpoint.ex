@@ -3,7 +3,8 @@ defmodule CaptainFactWeb.Endpoint do
 
   socket "/socket", CaptainFactWeb.UserSocket
 
-  plug Plug.Static, at: "/resources", from: "./resources", gzip: false
+  if (Application.get_env(:arc, :storage) == Arc.Storage.Local),
+    do: plug Plug.Static, at: "/resources", from: "./resources", gzip: false
 
   plug Plug.RequestId
   plug Plug.Logger
@@ -15,14 +16,6 @@ defmodule CaptainFactWeb.Endpoint do
 
   plug Plug.MethodOverride
   plug Plug.Head
-
-  # The session will be stored in the cookie and signed,
-  # this means its contents can be read but not tampered with.
-  # Set :encryption_salt if you would also like to encrypt it.
-  plug Plug.Session,
-    store: :cookie,
-    key: "_captain_fact_key",
-    signing_salt: "M8OYuALs"
 
   plug Corsica,
        max_age: 3600,
