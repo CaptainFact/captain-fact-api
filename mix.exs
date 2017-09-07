@@ -2,15 +2,19 @@ defmodule CaptainFact.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :captain_fact,
-     version: "0.4.0",
-     elixir: "~> 1.5",
-     elixirc_paths: elixirc_paths(Mix.env),
-     compilers: [:phoenix, :gettext] ++ Mix.compilers,
-     build_embedded: Mix.env == :prod,
-     start_permanent: Mix.env == :prod,
-     aliases: aliases(),
-     deps: deps()]
+    [
+      app: :captain_fact,
+      version: "0.4.0",
+      elixir: "~> 1.5",
+      elixirc_paths: elixirc_paths(Mix.env),
+      compilers: [:phoenix, :gettext] ++ Mix.compilers,
+      build_embedded: Mix.env == :prod,
+      start_permanent: Mix.env == :prod,
+      aliases: aliases(),
+      deps: deps(),
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: ["coveralls": :test, "coveralls.detail": :test, "coveralls.post": :test, "coveralls.html": :test]
+    ]
   end
 
   # Configuration for the OTP application.
@@ -64,6 +68,7 @@ defmodule CaptainFact.Mixfile do
       {:ex_machina, "~> 2.0", only: [:test, :dev]},
       {:faker, "~> 0.7", only: [:test, :dev]},
       {:bypass, "~> 0.8", only: :test},
+      {:excoveralls, "~> 0.7", only: :test},
       {:distillery, "~> 1.4", runtime: false},
       # Force last version of timex to fix a bug between distillery and Elixir 1.5 both implementing inspect for
       # DateTime. https://github.com/bitwalker/timex/issues/343
@@ -72,15 +77,11 @@ defmodule CaptainFact.Mixfile do
    ]
   end
 
-  # Aliases are shortcuts or tasks specific to the current project.
-  # For example, to create, migrate and run the seeds file at once:
-  #
-  #     $ mix ecto.setup
-  #
-  # See the documentation for `Mix` for more info on aliases.
   defp aliases do
-    ["ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
-     "ecto.reset": ["ecto.drop", "ecto.setup"],
-     "test": ["ecto.create --quiet", "ecto.migrate", "test"]]
+    [
+      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
+      "ecto.reset": ["ecto.drop", "ecto.setup"],
+      "test": ["ecto.create --quiet", "ecto.migrate", "test"]
+    ]
   end
 end
