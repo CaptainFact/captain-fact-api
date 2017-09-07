@@ -5,7 +5,7 @@ defmodule CaptainFact.Accounts.UserTest do
 
   @valid_attrs %{
     name: "Jouje BigBrother",
-    username: "Hell0World 🌳",
+    username: "Hell0World",
     email: Faker.Internet.email,
     password: "@StrongP4ssword!"
   }
@@ -70,5 +70,20 @@ defmodule CaptainFact.Accounts.UserTest do
 
     changeset = User.registration_changeset(%User{}, %{@valid_attrs | username: "toCaptainFactto"})
     refute changeset.valid?
+  end
+
+  test "username cannot contains illegal characters" do
+    ' !*();:@&=+$,/?#[].\'\\'
+    |> Enum.map(fn char ->
+         changeset = User.registration_changeset(%User{}, %{@valid_attrs | username: "xxxxxxx#{<<char::utf8>>}"})
+         refute changeset.valid?, "Illegal character '#{<<char::utf8>>}' accepted in username when it should not"
+       end)
+  end
+
+  test "characters _ and - are still allowed in username" do
+    changeset = User.registration_changeset(%User{}, %{@valid_attrs | username: "xxxxxxx-y"})
+    changeset2 = User.registration_changeset(%User{}, %{@valid_attrs | username: "xxxxxxx_y"})
+    assert changeset.valid?
+    assert changeset2.valid?
   end
 end
