@@ -178,7 +178,7 @@ defmodule CaptainFactWeb.AuthController do
     infos = %{fb_user_id: auth.uid}
     case auth.extra.raw_info.user["picture"]["data"] do
       %{"is_silhouette" => true} -> infos
-      _ -> Map.merge(infos, %{picture_url: auth.info.image})
+      _ -> Map.merge(infos, %{picture_url: String.replace(auth.info.image, ~r/^http:\/\//, "https://")})
     end
   end
   defp provider_specific_infos(_), do: %{}
