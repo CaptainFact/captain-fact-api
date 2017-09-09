@@ -4,7 +4,9 @@ use Mix.Config
 dev_secret = "8C6FsJwjV11d+1WPUIbkEH6gB/VavJrcXWoPLujgpclfxjkLkoNFSjVU9XfeNm6s"
 
 # General config
-config :captain_fact, frontend_url: "http://localhost:3333"
+config :captain_fact,
+  frontend_url: "http://localhost:3333",
+  cors_origins: ["http://localhost:3333", "chrome-extension://lpdmcoikcclagelhlmibniibjilfifac"]
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
@@ -49,9 +51,11 @@ config :logger, :console, format: "[$level] $message\n"
 # in production as building large stacktraces may be expensive.
 config :phoenix, :stacktrace_depth, 20
 
+# Configure file upload
+config :arc, storage: Arc.Storage.Local
+
 # Configure your database
 config :captain_fact, CaptainFact.Repo,
-  adapter: Ecto.Adapters.Postgres,
   username: "postgres",
   password: "postgres",
   database: "captain_fact_dev",

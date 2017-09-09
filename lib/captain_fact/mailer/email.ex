@@ -8,7 +8,6 @@ defmodule CaptainFact.Email do
   # TODO GetText i18n
 
   @cf_no_reply "no-reply@captainfact.io"
-  @frontend_url Application.fetch_env!(:captain_fact, :frontend_url)
   @confirm_email_reputation ReputationUpdater.action_target_reputation_change(:email_confirmed)
 
 
@@ -21,12 +20,12 @@ defmodule CaptainFact.Email do
     |> html_body("""
        We're glag you joined us on CaptainFact ! To confirm your email and gain a bonus of
        +#{@confirm_email_reputation} reputation right now, click on the link below :
-       <a href="#{@frontend_url}/confirm_email/#{user.email_confirmation_token}">
+       <a href="#{frontend_url()}/confirm_email/#{user.email_confirmation_token}">
          Confirm email
        </a>
 
        If you need help or want to know more about how it works, checkout
-       <a href="#{@frontend_url}/help">the help pages</a>.
+       <a href="#{frontend_url()}/help">the help pages</a>.
        """)
   end
 
@@ -40,7 +39,7 @@ defmodule CaptainFact.Email do
     |> subject("Reset your password")
     |> html_body("""
        You recently asked to reset your password. Click on the link below to do so :
-       <a href="#{@frontend_url}/reset_password/confirm/#{token}">Reset pasword</a>
+       <a href="#{frontend_url()}/reset_password/confirm/#{token}">Reset pasword</a>
 
        Please ignore this email if the request is not comming from you.
 
@@ -58,9 +57,11 @@ defmodule CaptainFact.Email do
     |> subject(invitation_subject(invited_by))
     |> html_body("""
        Please follow this link to create your account :
-       <a href="#{@frontend_url}/signup?invitation_token=#{token}">Create account</a>
+       <a href="#{frontend_url()}/signup?invitation_token=#{token}">Create account</a>
        """)
   end
+
+  defp frontend_url, do: Application.fetch_env!(:captain_fact, :frontend_url)
 
   defp invitation_subject(nil),
     do: "Your invitation to try CaptainFact.io is ready !"

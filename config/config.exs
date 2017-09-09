@@ -5,17 +5,30 @@
 # is restricted to this project.
 use Mix.Config
 
+
 # General application configuration
 config :captain_fact,
   ecto_repos: [CaptainFact.Repo],
   source_url_regex: ~r/[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/,
-  cors_origins: ["http://localhost:3333", "chrome-extension://lpdmcoikcclagelhlmibniibjilfifac"]
+  cors_origins: []
 
 # Configures the endpoint
 config :captain_fact, CaptainFactWeb.Endpoint,
   url: [host: "localhost"],
   render_errors: [view: CaptainFactWeb.ErrorView, accepts: ~w(json), default_format: "json"],
-  pubsub: [name: CaptainFact.PubSub, adapter: Phoenix.PubSub.PG2]
+  pubsub: [name: CaptainFact.PubSub, adapter: Phoenix.PubSub.PG2],
+  check_origin: [],
+  server: true,
+  http: [],
+  https: [otp_app: :captain_fact]
+
+# Database: use postgres
+config :captain_fact, CaptainFact.Repo,
+  adapter: Ecto.Adapters.Postgres,
+  pool_size: 20
+
+# Configure mailer
+config :captain_fact, CaptainFact.Mailer, adapter: Bamboo.MailgunAdapter
 
 # Configures Elixir's Logger
 config :logger, :console,
@@ -40,9 +53,6 @@ config :guardian, Guardian,
   serializer: CaptainFactWeb.GuardianSerializer,
   permissions: %{default: [:read, :write]}
 
-# Configure file upload
-config :arc, storage: Arc.Storage.Local
-
 # Configure scheduler
 config :quantum, :captain_fact,
   cron: [
@@ -50,6 +60,9 @@ config :quantum, :captain_fact,
     "@daily": {CaptainFact.Accounts.UserState, :reset, []}
   ]
 
-# Import environment specific config. This must remain at the bottom
-# of this file so it overrides the configuration defined above.
+config :weave,
+  environment_prefix: "CF_",
+  loaders: [Weave.Loaders.Environment]
+
+# Import environment specific config
 import_config "#{Mix.env}.exs"

@@ -6,6 +6,8 @@ defmodule CaptainFact do
   def start(_type, _args) do
     import Supervisor.Spec
 
+    CaptainFact.Weave.configure()
+
     # Define workers and child supervisors to be supervised
     children = [
       # Start the Ecto repository

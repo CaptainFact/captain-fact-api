@@ -65,15 +65,12 @@ defmodule CaptainFact.Mixfile do
       {:ex_aws, "~> 1.1"},
       {:hackney, "~> 1.6"},
       {:sweet_xml, "~> 0.6"},
+      {:weave, "~> 3.0"},
       {:ex_machina, "~> 2.0", only: [:test, :dev]},
       {:faker, "~> 0.7", only: [:test, :dev]},
       {:bypass, "~> 0.8", only: :test},
       {:excoveralls, "~> 0.7", only: :test},
-      {:distillery, "~> 1.4", runtime: false},
-      # Force last version of timex to fix a bug between distillery and Elixir 1.5 both implementing inspect for
-      # DateTime. https://github.com/bitwalker/timex/issues/343
-      # TODO: Remove when next distillery version comes out
-      {:timex, github: "bitwalker/timex", override: true},
+      {:distillery, "~> 1.5", runtime: false}
    ]
   end
 

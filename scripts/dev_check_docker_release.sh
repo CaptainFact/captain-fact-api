@@ -21,20 +21,20 @@ docker build -t ${CF_API_IMAGE} -f Dockerfile.release .
 docker run -it \
   -p 4000:80 \
   -p 4001:443 \
-  -e "HOST=localhost" \
-  -e "PORT=4000" \
-  -e "PORT_SSL=4001" \
-  -e "SECRET_KEY_BASE=8C6FsJwjV11d+1WPUIbkEH6gB/VavJrcXWoPLujgpclfxjkLkoNFSjVU9XfeNm6s" \
-  -e "SSL_KEY_PATH=priv/keys/privkey.pem" \
-  -e "SSL_CERT_PATH=priv/keys/cert.pem" \
-  -e "DB_HOSTNAME=localhost" \
-  -e "DB_USERNAME=postgres" \
-  -e "DB_PASSWORD=postgres" \
-  -e "DB_NAME=captain_fact_dev" \
-  -e "FACEBOOK_APP_ID=506726596325615" \
-  -e "FACEBOOK_APP_SECRET=4b320056746b8e57144c889f3baf0424" \
-  -e "FRONTEND_URL=http://localhost:3333" \
-  -e "CHROME_EXTENSION_ID=chrome-extension://lpdmcoikcclagelhlmibniibjilfifac" \
+  -e "CF_HOST=localhost" \
+  -e "CF_PORT=4000" \
+  -e "CF_PORT_SSL=4001" \
+  -e "CF_SECRET_KEY_BASE=8C6FsJwjV11d+1WPUIbkEH6gB/VavJrcXWoPLujgpclfxjkLkoNFSjVU9XfeNm6s" \
+  -e "CF_DB_HOSTNAME=localhost" \
+  -e "CF_DB_USERNAME=postgres" \
+  -e "CF_DB_PASSWORD=postgres" \
+  -e "CF_DB_NAME=captain_fact_dev" \
+  -e "CF_FACEBOOK_APP_ID=506726596325615" \
+  -e "CF_FACEBOOK_APP_SECRET=4b320056746b8e57144c889f3baf0424" \
+  -e "CF_FRONTEND_URL=http://localhost:3333" \
+  -e "CF_CHROME_EXTENSION_ID=chrome-extension://lpdmcoikcclagelhlmibniibjilfifac" \
+  -v "$(pwd)/priv/keys:/opt/app/ssl-keys:ro" \
+  -v "$(pwd)/priv/secrets:/opt/app/secrets:ro" \
   --network host \
   --rm ${CF_API_IMAGE} foreground
 

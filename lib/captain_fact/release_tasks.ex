@@ -3,7 +3,9 @@ defmodule CaptainFact.ReleaseTasks do
     :crypto,
     :ssl,
     :postgrex,
-    :ecto
+    :ecto,
+    :weave,
+    :logger
   ]
 
   @myapps [:captain_fact]
@@ -56,6 +58,9 @@ defmodule CaptainFact.ReleaseTasks do
     IO.puts "Starting dependencies.."
     # Start apps necessary for executing migrations
     Enum.each(@start_apps, &Application.ensure_all_started/1)
+
+    # Loading runtime configuration
+    CaptainFact.Weave.configure()
 
     # Start the Repo(s) for myapp
     IO.puts "Starting repos.."
