@@ -4,27 +4,6 @@ defmodule CaptainFact.Weave do
   """
   use Weave
 
-  # ----- Configuration utils -----
-
-  defp put_in_env(app, [head | keys], value) do
-    base = Application.get_env(app, head, [])
-    modified = case keys do
-      [] -> value
-      _ -> put_in(base, keys, value)
-    end
-    Application.put_env(app, head, modified)
-    []
-  end
-
-  defp put_in_endpoint(keys, value),
-    do: put_in_env(:captain_fact, [CaptainFactWeb.Endpoint] ++ keys, value)
-  defp put_in_mailer(keys, value),
-    do: put_in_env(:captain_fact, [CaptainFact.Mailer] ++ keys, value)
-  defp put_in_repo(keys, value),
-    do: put_in_env(:captain_fact, [CaptainFact.Repo] ++ keys, value)
-  defp put_in_oauth_fb(keys, value),
-    do: put_in_env(:ueberauth, [Ueberauth.Strategy.Facebook.OAuth] ++ keys, value)
-
   # ----- Actual configuration -----
 
   # Global stuff
@@ -69,4 +48,25 @@ defmodule CaptainFact.Weave do
   # Facebook OAUTH
   weave "facebook_app_id", handler: fn v -> put_in_oauth_fb([:client_id], v) end
   weave "facebook_app_secret", handler: fn v -> put_in_oauth_fb([:client_secret], v) end
+
+  # ----- Configuration utils -----
+
+  defp put_in_env(app, [head | keys], value) do
+    base = Application.get_env(app, head, [])
+    modified = case keys do
+      [] -> value
+      _ -> put_in(base, keys, value)
+    end
+    Application.put_env(app, head, modified)
+    []
+  end
+
+  defp put_in_endpoint(keys, value),
+       do: put_in_env(:captain_fact, [CaptainFactWeb.Endpoint] ++ keys, value)
+  defp put_in_mailer(keys, value),
+       do: put_in_env(:captain_fact, [CaptainFact.Mailer] ++ keys, value)
+  defp put_in_repo(keys, value),
+       do: put_in_env(:captain_fact, [CaptainFact.Repo] ++ keys, value)
+  defp put_in_oauth_fb(keys, value),
+       do: put_in_env(:ueberauth, [Ueberauth.Strategy.Facebook.OAuth] ++ keys, value)
 end

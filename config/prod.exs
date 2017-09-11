@@ -7,8 +7,8 @@ use Mix.Config
 config :captain_fact, CaptainFactWeb.Endpoint,
   force_ssl: [hsts: true],
   https: [
-    keyfile: "/opt/app/ssl-keys/privkey.pem",
-    certfile: "/opt/app/ssl-keys/cert.pem"
+    keyfile: "/run/secrets/privkey.pem",
+    certfile: "/run/secrets/cert.pem"
   ]
 
 # Do not print debug messages in production
@@ -17,5 +17,5 @@ config :logger, level: :info
 # Env / Secrets are above everything else
 # Weave loads config from env or secret files
 config :weave,
-  file_directories: ["/opt/app/secrets"],
+  file_directories: ["/run/secrets"],
   loaders: [Weave.Loaders.File, Weave.Loaders.Environment]
