@@ -1,0 +1,51 @@
+# ---- Config ----
+
+stages:
+  - build
+  - test
+  - release
+
+variables:
+  CF_API_BUILD_IMAGE: captain-fact-api-build
+  CF_API_IMAGE: registry.gitlab.com/captainfact/captain-fact-api:$CI_COMMIT_REF_SLUG
+
+# ---- Jobs ----
+
+build_api:
+  stage: build
+  only: [tags, triggers, schedules, /^(master|staging)$/]
+  tags: [docker, captainfact, api]
+  script:
+    - docker build -t $CF_API_BUILD_IMAGE -f Dockerfile.build .
+    - BUILD_CONTAINER=$(docker run -d ${CF_API_BUILD_IMAGE})
+    - docker cp ${BUILD_CONTAINER}:/opt/app/captain-fact-api_release.tar captain-fact-api_release.tar
+    - docker stop ${BUILD_CONTAINER} && docker rm ${BUILD_CONTAINER}
+    - docker build -t $CF_API_IMAGE -f Dockerfile.release .
+
+test_api:
+  stage: test
+  only: [tags, triggers, schedules, /^(master|staging)$/]
+  tags: [docker, captainfact, api]
+  variables:
+    TEST_NETWORK: network_api_testing
+    TEST_DB: api_postgres_testing
+  before_script:
+    - (docker network rm $TEST_NETWORK || /bin/true) && docker network create $TEST_NETWORK
+    - ((docker stop $TEST_DB && docker rm $TEST_DB) || /bin/true) &&
+      docker run -d --name $TEST_DB --network $TEST_NETWORK
+      -e POSTGRES_DB=captain_fact_test -e POSTGRES_PASSWORD=postgres
+      postgres:9.6
+  script:
+    docker run --rm --network $TEST_NETWORK -e MIX_ENV=test -e POSTGRES_HOST=$TEST_DB $CF_API_BUILD_IMAGE mix test
+  after_script:
+    - (docker stop $TEST_DB && docker rm $TEST_DB) || /bin/true
+    - docker network rm $TEST_NETWORK || /bin/true
+
+release_api:
+  stage: release
+  only: [tags, triggers, schedules, /^(master|staging)$/]
+  tags: [docker, captainfact, api]
+  script:
+    - echo "Release $CF_API_IMAGE"
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+    - docker push $CF_API_IMAGE
