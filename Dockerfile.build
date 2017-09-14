@@ -1,0 +1,18 @@
+FROM bitwalker/alpine-elixir:1.5.1
+
+# Install build requirements
+RUN apk add gcc make libc-dev libgcc
+
+# Configure
+ENV HOME=/opt/app/ MIX_ENV=prod
+WORKDIR /opt/app
+
+# Cache dependencies
+COPY mix.exs mix.lock ./
+RUN mix local.hex --force && mix local.rebar --force
+RUN mix deps.get
+
+# Copy main project and build release
+COPY . .
+RUN mix release --env=prod
+RUN tar c -C ./_build/prod/rel/captain_fact/ -f captain-fact-api_release.tar bin lib releases

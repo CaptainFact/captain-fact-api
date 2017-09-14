@@ -3,7 +3,8 @@
 .idea
 _build
 cover
-Dockerfile
+Dockerfile.*
+captain-fact-api_release.tar
 deps
 scripts
 resources
