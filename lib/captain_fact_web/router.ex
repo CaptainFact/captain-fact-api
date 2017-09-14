@@ -33,6 +33,9 @@ defmodule CaptainFactWeb.Router do
   scope "/api", CaptainFactWeb do
     pipe_through [:api, :api_auth]
 
+    # Infos
+    get "/", ApiInfoController, :get
+
     # Authentication
     scope "/auth" do
       get    "/", AuthController, :me

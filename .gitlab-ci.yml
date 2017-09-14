@@ -6,7 +6,7 @@ stages:
   - release
 
 variables:
-  CF_API_BUILD_IMAGE: captain-fact-api-build
+  CF_API_BUILD_IMAGE: captain-fact-api-build:$CI_COMMIT_REF_SLUG
   CF_API_IMAGE: registry.gitlab.com/captainfact/captain-fact-api:$CI_COMMIT_REF_SLUG
 
 # ---- Jobs ----

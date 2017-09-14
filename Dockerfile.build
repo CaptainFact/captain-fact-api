@@ -1,18 +1,18 @@
-# Same as Dockerfile but stop after compiling (so no mix release here). This is useful for testing.
-# You should combine this with Dockerfile.release by copying generated captain-fact-api_release.tar
+FROM bitwalker/alpine-elixir:1.5.1
 
-FROM betree/alpine-elixir-gcc:1.5.1
+# Install build requirements
+RUN apk add gcc make libc-dev libgcc
 
-ENV HOME=/opt/app/ TERM=xterm
-
+# Configure
+ENV HOME=/opt/app/ MIX_ENV=prod
 WORKDIR /opt/app
-ENV MIX_ENV=prod REPLACE_OS_VARS=true
 
 # Cache dependencies
 COPY mix.exs mix.lock ./
-RUN mix local.hex --force && mix local.rebar --force && mix deps.get
+RUN mix local.hex --force && mix local.rebar --force
+RUN mix deps.get
 
-# Copy main project
+# Copy main project and build release
 COPY . .
 RUN mix release --env=prod
 RUN tar c -C ./_build/prod/rel/captain_fact/ -f captain-fact-api_release.tar bin lib releases

@@ -6,6 +6,10 @@ defmodule CaptainFact.Weave do
 
   # ----- Actual configuration -----
 
+  # Ignored (loaded directly)
+  weave "privkey.pem", handler: []
+  weave "cert.pem", handler: []
+
   # Global stuff
   weave "frontend_url", handler: fn url -> [
     {:captain_fact, :cors_origins, [url]},
@@ -17,11 +21,6 @@ defmodule CaptainFact.Weave do
 
   # Endpoint
   weave "host", handler:  fn v -> put_in_endpoint([:url, :host], v) end
-  weave "port", handler:  fn v ->
-    put_in_endpoint([:url, :port], v)
-    put_in_endpoint([:http, :port], v)
-  end
-  weave "port_ssl", handler:  fn v -> put_in_endpoint([:https, :port], v) end
   weave "secret_key_base", handler: fn v ->
     put_in_endpoint([:secret_key_base], v)
     put_in_env(:guardian, [Guardian, :secret_key], v)
