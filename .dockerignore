@@ -3,7 +3,7 @@
 .idea
 _build
 cover
-Dockerfile.*
+Dockerfile
 deps
 scripts
 resources

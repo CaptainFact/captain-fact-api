@@ -24,17 +24,6 @@ config :captain_fact, CaptainFactWeb.Endpoint,
     certfile: "priv/keys/cert.pem"
   ]
 
-# Watch static and templates for browser reloading.
-config :captain_fact, CaptainFactWeb.Endpoint,
-  live_reload: [
-    patterns: [
-      ~r{priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$},
-      ~r{priv/gettext/.*(po)$},
-      ~r{lib/captain_fact/web/views/.*(ex)$},
-      ~r{lib/captain_fact/web/templates/.*(eex)$}
-    ]
-  ]
-
 # Guardian + Ueberauth
 
 config :guardian, Guardian,
