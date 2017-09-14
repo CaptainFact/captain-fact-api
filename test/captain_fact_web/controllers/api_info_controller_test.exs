@@ -1,4 +1,4 @@
-defmodule CaptainFactWeb.AuthControllerTest do
+defmodule CaptainFactWeb.ApiInfoControllerTest do
   use CaptainFactWeb.ConnCase
 
   test "GET /api", %{conn: conn} do
