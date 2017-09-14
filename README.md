@@ -1,5 +1,9 @@
 # CaptainFact API
 
+Staging-[![pipeline status](https://gitlab.com/CaptainFact/captain-fact-api/badges/staging/pipeline.svg)](https://gitlab.com/CaptainFact/captain-fact-api/commits/staging)
+&nbsp;&nbsp;
+Master-[![pipeline status](https://gitlab.com/CaptainFact/captain-fact-api/badges/master/pipeline.svg)](https://gitlab.com/CaptainFact/captain-fact-api/commits/master)
+
 ## Install
 
   * Install dependencies with `mix deps.get`
