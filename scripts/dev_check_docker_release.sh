@@ -18,6 +18,7 @@ BUILD_CONTAINER=$(docker run -d ${CF_API_BUILD_IMAGE})
 docker cp ${BUILD_CONTAINER}:/opt/app/captain-fact-api_release.tar ./captain-fact-api_release.tar
 docker stop ${BUILD_CONTAINER} && docker rm ${BUILD_CONTAINER}
 docker build -t ${CF_API_IMAGE} -f Dockerfile.release .
+rm ./captain-fact-api_release.tar
 
 # Run server
 docker run -it \

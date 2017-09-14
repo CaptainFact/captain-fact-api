@@ -1,5 +1,5 @@
 FROM bitwalker/alpine-elixir:1.5.1
-RUN apk add bash imagemagick && rm -rf /var/cache/apk/*
+RUN apk add bash imagemagick curl && rm -rf /var/cache/apk/*
 
 ENV HOME=/opt/app/ SHELL=/bin/bash MIX_ENV=prod
 WORKDIR /opt/app
@@ -7,4 +7,5 @@ COPY captain-fact-api_release.tar .
 RUN tar x -f captain-fact-api_release.tar && rm captain-fact-api_release.tar
 
 EXPOSE 80 443
+HEALTHCHECK RUN curl --fail http://localhost:80/api || exit 1
 ENTRYPOINT ["bin/captain_fact"]

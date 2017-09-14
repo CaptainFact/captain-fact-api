@@ -5,7 +5,6 @@ use Mix.Config
 # --------------------------------------------------------------------------------------
 
 config :captain_fact, CaptainFactWeb.Endpoint,
-  force_ssl: [hsts: true],
   url: [port: 80],
   http: [port: 80],
   https: [

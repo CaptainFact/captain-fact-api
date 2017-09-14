@@ -4,7 +4,6 @@
 _build
 cover
 Dockerfile.*
-captain-fact-api_release.tar
 deps
 scripts
 resources

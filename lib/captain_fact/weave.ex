@@ -6,6 +6,10 @@ defmodule CaptainFact.Weave do
 
   # ----- Actual configuration -----
 
+  # Ignored (loaded directly)
+  weave "privkey.pem", handler: []
+  weave "cert.pem", handler: []
+
   # Global stuff
   weave "frontend_url", handler: fn url -> [
     {:captain_fact, :cors_origins, [url]},
