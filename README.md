@@ -32,7 +32,7 @@ in `/run/secrets`. If a file is supplied, its name must be lowercase and must no
 
 Following files must also exist in `/run/secrets`; the best way is to use docker secrets but it would work if we mount
 a regular directory containing the file:
-* cert.pem
+* fullchain.pem
 * privkey.pem
   
 ## Run

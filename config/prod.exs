@@ -10,7 +10,7 @@ config :captain_fact, CaptainFactWeb.Endpoint,
   https: [
     port: 443,
     keyfile: "/run/secrets/privkey.pem",
-    certfile: "/run/secrets/cert.pem"
+    certfile: "/run/secrets/fullchain.pem"
   ]
 
 # Do not print debug messages in production

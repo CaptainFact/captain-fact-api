@@ -8,7 +8,7 @@ defmodule CaptainFact.Weave do
 
   # Ignored (loaded directly)
   weave "privkey.pem", handler: []
-  weave "cert.pem", handler: []
+  weave "fullchain.pem", handler: []
 
   # Global stuff
   weave "frontend_url", handler: fn url -> [

@@ -21,7 +21,7 @@ config :captain_fact, CaptainFactWeb.Endpoint,
     port: 4001,
     otp_app: :captain_fact,
     keyfile: "priv/keys/privkey.pem",
-    certfile: "priv/keys/cert.pem"
+    certfile: "priv/keys/fullchain.pem"
   ]
 
 # Guardian + Ueberauth
