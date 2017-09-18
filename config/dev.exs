@@ -6,7 +6,7 @@ dev_secret = "8C6FsJwjV11d+1WPUIbkEH6gB/VavJrcXWoPLujgpclfxjkLkoNFSjVU9XfeNm6s"
 # General config
 config :captain_fact,
   frontend_url: "http://localhost:3333",
-  cors_origins: ["http://localhost:3333", "chrome-extension://lpdmcoikcclagelhlmibniibjilfifac"]
+  cors_origins: ["http://localhost:3333", "chrome-extension://fnnhlmbnlbgomamcolcpgncflofhjckm"]
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
