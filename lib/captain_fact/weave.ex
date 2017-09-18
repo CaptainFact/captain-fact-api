@@ -17,7 +17,7 @@ defmodule CaptainFact.Weave do
     {:captain_fact, CaptainFactWeb.Endpoint, [check_origin: [url]]}
   ]
   end
-  weave "chrome_extension_id", handler: {:captain_fact, :cors_origins}
+  weave "chrome_extension_id", handler: fn extension_id -> {:captain_fact, :cors_origins, [extension_id]} end
 
   # Endpoint
   weave "host", handler:  fn v -> put_in_endpoint([:url, :host], v) end
@@ -37,11 +37,9 @@ defmodule CaptainFact.Weave do
   weave "db_name", handler: fn v -> put_in_repo([:database], v) end
   weave "db_pool_size", handler: fn v -> put_in_repo([:pool_size], String.to_integer(v)) end
 
-  # AWS
+  # Arc storage - AWS
   weave "s3_access_key_id", handler: fn v -> put_in_env(:ex_aws, [:access_key_id], [v, :instance_role]) end
   weave "s3_secret_access_key", handler: fn v -> put_in_env(:ex_aws, [:secret_access_key], [v, :instance_role]) end
-
-  # Arc storage
   weave "s3_bucket", handler: {:arc, :bucket}
 
   # Facebook OAUTH
