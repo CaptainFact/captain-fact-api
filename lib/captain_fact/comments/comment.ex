@@ -60,7 +60,7 @@ defmodule CaptainFact.Comments.Comment do
     from c in query, left_join: source in Source, on: [id: c.source_id]
   end
 
-  @required_fields ~w(statement_id)a
+  @required_fields ~w(statement_id user_id)a
   @optional_fields ~w(approve text reply_to_id)a
 
   @doc """
