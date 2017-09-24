@@ -8,11 +8,9 @@ Faker.start
 
 defmodule CaptainFact.DemoFr do
   use CaptainFactWeb.ChannelCase
-  alias CaptainFactWeb.VideoDebateChannel
   alias CaptainFactWeb.{Speaker, Video, VideoSpeaker, Statement}
   alias CaptainFact.Accounts.User
   alias CaptainFact.Comments
-  alias CaptainFact.Comments.CommentsChannel
   alias CaptainFact.{Repo, VideoHashId}
 
   @video_url "https://www.youtube.com/watch?v=OhWRT3PhMJs"
@@ -21,14 +19,15 @@ defmodule CaptainFact.DemoFr do
   @min_sleep 2000
   @max_sleep 4000 # 0.0-1.0
   @users [
-    %{username: "killozor",     name: "Frank Zappa", picture_url: "http://images.wolfgangsvault.com/images/catalog/thumb/JRM02019-VL.jpg"},
-    %{username: "marcus",       name: "Patrick"},
-    %{username: "herbiVor",     name: "Mélissa"},
-    %{username: "patrick",      name: "Nadine Lapoutre"},
-    %{username: "foobar",       name: "Jean Dupont"},
-    %{username: "FactChecker03"},
-    %{username: "LaLoupe"},
-    %{username: "Anonymous"},
+    %{username: "killozor",       name: "Frank Zappa", picture_url: "http://images.wolfgangsvault.com/images/catalog/thumb/JRM02019-VL.jpg"},
+    %{username: "patrick",        name: "Patrick"},
+    %{username: "herbiVor",       name: "Mélissa"},
+    %{username: "nadine",         name: "Nadine Lapoutre"},
+    %{username: "foobar",         name: "Jean Dupont"},
+    %{username: "CerealKiller",   name: "Bob Machine"},
+    %{username: "LaLoupe",        name: "Medhi China"},
+    %{username: "Anonymous",      name: "Bernard Chapelet"},
+    %{username: "Anonymous"}
   ]
   @statements %{
     "Nathalie Arthaud" => [],
@@ -39,9 +38,9 @@ defmodule CaptainFact.DemoFr do
         time: 1130,
         text: "Ça n’a jamais créé de l’emploi de réduire le temps de travail",
         comments: [
-          %{user_idx: 0, text: "Un rapport du sénat affirme pourtant l'inverse", approve: false, async: true, source: "https://www.senat.fr/rap/r00-414/r00-4146.html", replies: [
-            %{user_idx: 1, text: "Le rapport dit aussi que \"cet effet n'est, en réalité, guère « très significatif » puisque les 35 heures sont à l'origine de moins de 30 % des créations d'emploi en 2000 !\"", replies: [
-              %{user_idx: 2, text: "En même temps c'est dur de mesurer ça avec précision, entre la hausse naturelle du chomage et tout le reste !"}
+          %{user_idx: 3, text: "Un rapport du sénat affirme pourtant l'inverse", approve: false, async: true, source: "https://www.senat.fr/rap/r00-414/r00-4146.html", replies: [
+            %{user_idx: 1, text: "Le rapport dit aussi que \"cet effet n'est, en réalité, guère « très significatif » puisque les 35 heures sont à l'origine de moins de 30% des créations d'emploi en 2000 !\"", replies: [
+              %{user_idx: 2, text: "En même temps c'est dur de mesurer ça avec précision, entre la hausse naturelle du chomage et tout le reste!"}
             ]},
           ]},
           %{user_idx: 1, text: "A lire cette tribute du Figaro qui montre bien l'incohérence de la mesure", approve: true, source: "http://www.lefigaro.fr/social/2015/01/30/09010-20150130ARTFIG00002-la-france-paie-toujours-la-facture-des-35heures.php"},
@@ -51,7 +50,7 @@ defmodule CaptainFact.DemoFr do
               %{user_idx: 3, text: "Je sais pas où t'as trouvé tes chiffres mais ça tourne plus autour des 60 milliards", source: "http://www.lepoint.fr/economie/la-dette-publique-de-la-france-se-rapproche-des-100-du-pib-30-06-2017-2139426_28.php"}
             ]}
           ]},
-          %{user_idx: 6, text: "Moi j'ai pas d'avis"},
+          %{user_idx: 0, text: "Moi j'ai pas d'avis"},
           %{user_idx: 7, text: "C'EST LA FAUTE AU CAPITALISME!!!"}
         ]
       },
@@ -83,10 +82,12 @@ defmodule CaptainFact.DemoFr do
 #      %{
 #        time: 0,
 #        text: "En CM2, 20% des élève ne savent pas proprement lire, écrire ou compter. Cette proportion peut atteindre les 50 voire 60% dans les ZEP"
-#      }, %{
-#        time: 0,
-#        text: "L’administration française accorde 200 000 titres de séjours chaque année"
-#      }, %{
+#      },
+      %{
+        time: 5000,
+        text: "L’administration française accorde 200 000 titres de séjours chaque année"
+      },
+#     %{
 #        time: 0,
 #        text: "La France n’accueille pas assez de demandeurs d’asiles, seulement quelques milliers"
 #      }
@@ -100,7 +101,9 @@ defmodule CaptainFact.DemoFr do
         time: 1149,
         text: "Dans le prochain mandat, 18 réacteurs nucléaires fêteront leurs 40 ans, il faut 100 milliards pour les caréner",
         comments: [
-          %{user_idx: 6, approve: false, text: "Faux: C'est la rénovation de l'ensemble du parc nucléaire qui coûterait 100 milliards", source: "http://energie.lexpansion.com/energie-nucleaire/nucleaire-qu-est-ce-que-le-grand-carenage-_a-32-8015.html"}
+          %{user_idx: 6, approve: false, text: "Faux: C'est la rénovation de l'ensemble du parc nucléaire qui coûterait 100 milliards", source: "http://energie.lexpansion.com/energie-nucleaire/nucleaire-qu-est-ce-que-le-grand-carenage-_a-32-8015.html", replies: [
+            %{user_idx: 7, text: "ESPECE DE PROPAGANDISTE!!!"}
+          ]}
         ]
       },
 #      %{
@@ -110,6 +113,8 @@ defmodule CaptainFact.DemoFr do
     ],
     "Philippe Poutou" => []
   }
+
+  def init_and_run, do: run(init())
 
   def init() do
     # Create or reset video
@@ -141,7 +146,7 @@ defmodule CaptainFact.DemoFr do
   end
 
   def run({video, users, speakers}) do
-    for {speaker, statements} <- speakers do
+    for {_, statements} <- speakers do
       for statement <- statements do
         Enum.map(statement.comments || [], &(add_comment(users, video.id, statement.id, &1)))
       end
