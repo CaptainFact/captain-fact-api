@@ -3,7 +3,7 @@ defmodule CaptainFact.Factory do
 
   alias CaptainFact.Accounts.{User, InvitationRequest}
   alias CaptainFactWeb.{Video, Statement, Speaker}
-  alias CaptainFact.Comments.Comment
+  alias CaptainFact.Comments.{Comment, Vote}
   alias CaptainFact.Sources.Source
 
 
@@ -70,6 +70,14 @@ defmodule CaptainFact.Factory do
       site_name: Faker.Internet.domain_word,
       language: String.downcase(Faker.Address.country_code),
       title: Faker.Lorem.sentence(1..10)
+    }
+  end
+
+  def vote_factory do
+    %Vote{
+      user: build(:user),
+      comment: build(:comment),
+      value: 1
     }
   end
 

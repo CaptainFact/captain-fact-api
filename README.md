@@ -11,6 +11,16 @@ Master-[![pipeline status](https://gitlab.com/CaptainFact/captain-fact-api/badge
   
 ## Configure
 
+### Dev
+
+Most secrets are already set to defaults in dev (see `config/dev.exs`). However, setting secrets is useful when you need
+to work with APIs (S3, mailgun, youtube...).
+
+You can add them either using env or by supplying files in `priv/secrets` 
+
+[!] If you don't specify a `youtube_api_key` secret, videos metadata will be fetched from OpenGraph metadata, which
+is unable to extract video's language.
+
 ### Prod
 
 Following environment variables are required to run in prod. They may be supplied

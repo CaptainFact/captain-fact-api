@@ -16,18 +16,19 @@ defmodule CaptainFact.DemoFr do
   @video_url "https://www.youtube.com/watch?v=OhWRT3PhMJs"
   @video_youtube_id "OhWRT3PhMJs"
   @video_title "Le replay du grand débat de la présidentielle"
-  @min_sleep 2000
-  @max_sleep 4000 # 0.0-1.0
+  @min_sleep 0
+  @max_sleep 10 # 0.0-1.0
   @users [
     %{username: "killozor",       name: "Frank Zappa", picture_url: "http://images.wolfgangsvault.com/images/catalog/thumb/JRM02019-VL.jpg"},
     %{username: "patrick",        name: "Patrick"},
     %{username: "herbiVor",       name: "Mélissa"},
-    %{username: "nadine",         name: "Nadine Lapoutre"},
+    %{username: "sarah56",        name: "Sarah Fréchit"},
     %{username: "foobar",         name: "Jean Dupont"},
     %{username: "CerealKiller",   name: "Bob Machine"},
-    %{username: "LaLoupe",        name: "Medhi China"},
-    %{username: "Anonymous",      name: "Bernard Chapelet"},
-    %{username: "Anonymous"}
+    %{username: "LaLoupe",        name: "Medhi Sine"},
+    %{username: "Berni55",        name: "Bernard Chapelet"},
+    %{username: "jouge",          name: "Jean Tanrien"},
+    %{username: "homerLeFact",    name: "Homer Dalors"}
   ]
   @statements %{
     "Nathalie Arthaud" => [],
@@ -62,17 +63,18 @@ defmodule CaptainFact.DemoFr do
 #        text: "Chaque année, 150 000 élèves sortent du système scolaire sans diplôme"
 #      }
     ],
-    "Benoît Hamon" => [],
+    "Benoît Hamon" => [
+#      %{
+#        time: 0,
+#        text: "Nous avons aujourd’hui un solde migratoire qui doit être entre 50 000 et 70 000 personnes"
+#      }
+    ],
     "Jean Lassalle" => [],
     "Marine Le Pen" => [
 #      %{
 #        time: 0,
 #        text: "Les résultats de la Grande Bretagne sont formidables"
 #      },
-      %{
-        time: 3000,
-        text: "En réalité, sous le mandat de Nicolas Sarkozy, il y a eu 12 500 policiers et gendarmes qui ont été supprimés"
-      },
 #      %{
 #        time: 0,
 #        text: "200 000 étrangers légaux entrent en France chaque année"
@@ -84,9 +86,20 @@ defmodule CaptainFact.DemoFr do
 #        text: "En CM2, 20% des élève ne savent pas proprement lire, écrire ou compter. Cette proportion peut atteindre les 50 voire 60% dans les ZEP"
 #      },
       %{
-        time: 5000,
-        text: "L’administration française accorde 200 000 titres de séjours chaque année"
+          time: 2269,
+          text: "On oublie de dire à chaque fois qu’il y a près de 300.000 Français qui sont travailleurs détachés.",
+          comments: [
+            %{user_idx: 3, approve: false, score: 42, text: "C'est 125.000, et non pas 300.000 (chiffres de 2014)", source: "https://www.franceinter.fr/emissions/le-vrai-faux-de-l-europe/le-vrai-faux-de-l-europe-04-fevrier-2017"},
+            %{user_idx: 9, approve: false, score: 11, text: "Le chiffre de 300.000 correspond au nombre de travailleurs détachés EN FRANCE et non pas au nombre de travailleurs détachés francais", source: "http://travail-emploi.gouv.fr/droit-du-travail/detachement-des-salaries-et-lutte-contre-la-fraude-au-detachement/"}
+          ]
       },
+      %{
+        time: 2628,
+        text: "Le lait Français est à 40% exporté en Europe",
+        comments: [
+          %{user_idx: 6, approve: true, score: 8, source: "http://www.maison-du-lait.com/fr/filiere-laitiere/un-marche-qui-croit-lexport"}
+        ]
+      }
 #     %{
 #        time: 0,
 #        text: "La France n’accueille pas assez de demandeurs d’asiles, seulement quelques milliers"
@@ -101,15 +114,15 @@ defmodule CaptainFact.DemoFr do
         time: 1149,
         text: "Dans le prochain mandat, 18 réacteurs nucléaires fêteront leurs 40 ans, il faut 100 milliards pour les caréner",
         comments: [
-          %{user_idx: 6, approve: false, text: "Faux: C'est la rénovation de l'ensemble du parc nucléaire qui coûterait 100 milliards", source: "http://energie.lexpansion.com/energie-nucleaire/nucleaire-qu-est-ce-que-le-grand-carenage-_a-32-8015.html", replies: [
+          %{user_idx: 6, approve: false, text: "C'est la rénovation de l'ensemble du parc nucléaire qui coûterait 100 milliards", source: "http://energie.lexpansion.com/energie-nucleaire/nucleaire-qu-est-ce-que-le-grand-carenage-_a-32-8015.html", replies: [
             %{user_idx: 7, text: "ESPECE DE PROPAGANDISTE!!!"}
           ]}
         ]
       },
-#      %{
-#        time: 0,
-#        text: "La France est l’un des pays qui produit le plus d’ingénieurs pour 100 000 habitants"
-#      }
+      %{
+        time: 10000,
+        text: "La France est l’un des pays qui produit le plus d’ingénieurs pour 100 000 habitants"
+      }
     ],
     "Philippe Poutou" => []
   }
@@ -122,7 +135,9 @@ defmodule CaptainFact.DemoFr do
     video = insert(:video, %{url: @video_url, provider: "youtube", provider_id: @video_youtube_id, title: @video_title})
 
     # Create users
-    users = Enum.map(@users, &(Repo.get_by(User, username: &1.username) || insert(:user, &1)))
+    users = Enum.map(@users, &(
+      Repo.get_by(User, username: &1.username) || insert(:user, Map.merge(%{reputation: 1000}, &1)))
+    )
 
     # Add speakers & statements
     Application.put_env(:captain_fact, :manual_seed, true)
@@ -161,13 +176,16 @@ defmodule CaptainFact.DemoFr do
       |> Map.put(:reply_to_id, reply_to_id)
       |> Map.put(:source, (comment_base[:source] && %{url: comment_base.source}) || nil)
 
-    comment = Comments.add_comment(Enum.at(users, comment_base.user_idx), params, comment_base[:source], fn comment ->
-      comment = Repo.preload(comment, :source) |> Repo.preload(:user)
-      CaptainFactWeb.Endpoint.broadcast(
-        "comments:video:#{VideoHashId.encode(video_id)}", "comment_updated",
-        CaptainFactWeb.CommentView.render("comment.json", comment: comment)
-      )
-    end)
+    comment =
+      Comments.add_comment(Enum.at(users, comment_base.user_idx), params, comment_base[:source], fn comment ->
+        comment = Repo.preload(comment, :source) |> Repo.preload(:user)
+        CaptainFactWeb.Endpoint.broadcast(
+          "comments:video:#{VideoHashId.encode(video_id)}", "comment_updated",
+          CaptainFactWeb.CommentView.render("comment.json", comment: comment)
+        )
+      end)
+      |> update_score(comment_base[:score])
+
     CaptainFactWeb.Endpoint.broadcast(
       "comments:video:#{VideoHashId.encode(video_id)}", "comment_added",
       CaptainFactWeb.CommentView.render("comment.json", comment: comment)
@@ -180,6 +198,14 @@ defmodule CaptainFact.DemoFr do
         do: add_comment(users, video_id, statement_id, reply, comment.id)
     end)
     if comment_base[:async] != true, do: Task.await(add_replies_task, @max_sleep * 10000)
+  end
+
+  defp update_score(comment, nil), do: comment
+  defp update_score(comment, target_score) when is_integer(target_score) do
+    for _ <- 1..target_score do
+      insert(:vote, %{comment: comment, value: 1})
+    end
+    Map.put(comment, :score, target_score)
   end
 
   defp get_video_by_url(url) do
