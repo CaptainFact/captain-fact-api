@@ -6,11 +6,22 @@ defmodule CaptainFactWeb.VideoController do
 
   action_fallback CaptainFactWeb.FallbackController
 
+  def index(conn, %{"language" => language}) do
+    videos =
+      Video
+      |> Video.with_speakers
+      |> where([v], language: ^language)
+      |> order_by([v], desc: v.id)
+      |> Repo.all()
+    render(conn, :index, videos: videos)
+  end
+
   def index(conn, _params) do
-    videos = Video
-    |> Video.with_speakers
-    |> order_by([v], desc: v.id)
-    |> Repo.all()
+    videos =
+      Video
+      |> Video.with_speakers
+      |> order_by([v], desc: v.id)
+      |> Repo.all()
     render(conn, :index, videos: videos)
   end
 
