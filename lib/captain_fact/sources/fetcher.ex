@@ -67,18 +67,41 @@ defmodule CaptainFact.Sources.Fetcher do
   defp source_params_from_tree(tree) do
     %{
       title: Floki.attribute(tree, "meta[property='og:title']", "content"),
+      title_alt: Floki.attribute(tree, "meta[name='abstract']", "content"),
       language: Floki.attribute(tree, "html", "lang"),
       site_name: Floki.attribute(tree, "meta[property='og:site_name']", "content"),
       url: Floki.attribute(tree, "meta[property='og:url']", "content")
     }
     |> Enum.map(fn({key, values}) -> {key, List.first(values)} end) # Only first entry
     |> Enum.filter(fn({_, value}) -> value != nil end)
+    |> select_best_title()
     |> Enum.map(fn(entry = {key, value}) ->
       if key in [:title, :site_name],
         do: {key, HtmlEntities.decode(value)},
         else: entry
       end)
     |> Enum.into(%{})
+  end
+
+  # Select the best title between meta abstract and og:title then truncate it if needed
+  defp select_best_title(attrs) do
+    cond do
+      Keyword.has_key?(attrs, :title) ->
+        Keyword.update!(attrs, :title, &format_title/1)
+      Keyword.has_key?(attrs, :title_alt) ->
+        attrs
+        |> Keyword.put(:title, format_title(Keyword.get(attrs, :title_alt)))
+        |> Keyword.delete(:title_alt)
+      true -> attrs
+    end
+  end
+
+  defp format_title(title) do
+    if String.length(title) > 250 do
+      String.slice(title, 0, 250) <> "..."
+    else
+      title
+    end
   end
 
   # Link checker

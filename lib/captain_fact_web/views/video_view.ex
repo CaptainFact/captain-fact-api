@@ -17,7 +17,8 @@ defmodule CaptainFactWeb.VideoView do
       provider_id: video.provider_id,
       url: CaptainFactWeb.Video.build_url(video),
       posted_at: video.inserted_at,
-      speakers: render_many(video.speakers, CaptainFactWeb.SpeakerView, "speaker.json")
+      speakers: render_many(video.speakers, CaptainFactWeb.SpeakerView, "speaker.json"),
+      language: video.language
     }
   end
 end

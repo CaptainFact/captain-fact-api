@@ -5,6 +5,7 @@ defmodule CaptainFact.CommentTest do
 
   @valid_attrs %{
     statement_id: 1,
+    user_id: 42,
     source: %{url: Faker.Internet.url},
     text: Faker.Lorem.sentence,
     source_title: Faker.Lorem.sentence

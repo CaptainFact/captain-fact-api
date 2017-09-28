@@ -8,6 +8,7 @@ defmodule CaptainFactWeb.Video do
     field :url, :string, virtual: true
     field :provider, :string, null: false
     field :provider_id, :string, null: false
+    field :language, :string, null: true
 
     many_to_many :speakers, Speaker, join_through: VideoSpeaker, on_delete: :delete_all
     has_many :statements, Statement, on_delete: :delete_all
@@ -42,7 +43,7 @@ defmodule CaptainFactWeb.Video do
   """
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:url, :title])
+    |> cast(params, [:url, :title, :language])
     |> validate_required([:url, :title])
     |> parse_url()
     |> validate_required([:provider, :provider_id])

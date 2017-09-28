@@ -53,3 +53,9 @@ config :captain_fact, CaptainFact.Repo,
 
 # Mails
 config :captain_fact, CaptainFact.Mailer, adapter: Bamboo.LocalAdapter
+
+# Env / Secrets are above everything else
+# Weave loads config from env or secret files
+config :weave,
+       file_directories: ["priv/secrets"],
+       loaders: [Weave.Loaders.File, Weave.Loaders.Environment]
