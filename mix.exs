@@ -4,7 +4,7 @@ defmodule CaptainFact.Mixfile do
   def project do
     [
       app: :captain_fact,
-      version: "0.4.0",
+      version: "0.4.2",
       elixir: "~> 1.5",
       elixirc_paths: elixirc_paths(Mix.env),
       compilers: [:phoenix, :gettext] ++ Mix.compilers,
@@ -29,6 +29,7 @@ defmodule CaptainFact.Mixfile do
 
   # Specifies which paths to compile per environment.
   defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(:dev), do: ["lib", "test/support/factory.ex", "test/support/channel_case.ex", "scripts/demos"]
   defp elixirc_paths(_),     do: ["lib"]
 
   # Specifies your project dependencies.

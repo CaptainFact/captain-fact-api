@@ -46,6 +46,9 @@ defmodule CaptainFact.Weave do
   weave "facebook_app_id", handler: fn v -> put_in_oauth_fb([:client_id], v) end
   weave "facebook_app_secret", handler: fn v -> put_in_oauth_fb([:client_secret], v) end
 
+  # Youtube API key
+  weave "youtube_api_key", handler: {:captain_fact, :youtube_api_key}
+
   # ----- Configuration utils -----
 
   defp put_in_env(app, [head | keys], value) do

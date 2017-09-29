@@ -10,6 +10,7 @@ alias CaptainFactWeb.SpeakerPicture
 defmodule SeedPoliticians do
   def seed(csv_path, fetch_pictures? \\ true, names_filter \\ []) do
     seed_func = if fetch_pictures?, do: &seed_politician_with_picture/2, else: &seed_politician/2
+    names_filter = Enum.map(names_filter, &String.downcase/1)
     SeedWithCSV.seed(csv_path, seed_func, names_filter, %{
       "image" => :picture,
       "politicianLabel" => :full_name,
@@ -74,8 +75,8 @@ defmodule SeedPoliticians do
 end
 
 # Allow usage from shell on dev / test environments - when Mix is installed
-if Kernel.function_exported?(Mix, :env, 0) do
-  {keywords, args, invalids} = OptionParser.parse(System.argv, strict: [fetch_pictures: :boolean])
+if Kernel.function_exported?(Mix, :env, 0) && Application.get_env(:captain_fact, :manual_seed) != true do
+  {keywords, args, invalids} = OptionParser.parse(System.argv, strict: [fetch_pictures: :boolean]) |> IO.inspect()
 
   if Enum.count(invalids) == 0 && Enum.count(args) >= 1,
     do: SeedPoliticians.seed(List.first(args), Keyword.get(keywords, :fetch_pictures), Enum.drop(args, 1)),

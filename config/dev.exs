@@ -6,7 +6,7 @@ dev_secret = "8C6FsJwjV11d+1WPUIbkEH6gB/VavJrcXWoPLujgpclfxjkLkoNFSjVU9XfeNm6s"
 # General config
 config :captain_fact,
   frontend_url: "http://localhost:3333",
-  cors_origins: ["http://localhost:3333", "chrome-extension://fnnhlmbnlbgomamcolcpgncflofhjckm"]
+  cors_origins: ["http://localhost:3333", "chrome-extension://fnnhlmbnlbgomamcolcpgncflofhjckm", "https://localhost"]
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
@@ -53,3 +53,9 @@ config :captain_fact, CaptainFact.Repo,
 
 # Mails
 config :captain_fact, CaptainFact.Mailer, adapter: Bamboo.LocalAdapter
+
+# Env / Secrets are above everything else
+# Weave loads config from env or secret files
+config :weave,
+       file_directories: ["priv/secrets"],
+       loaders: [Weave.Loaders.File, Weave.Loaders.Environment]
