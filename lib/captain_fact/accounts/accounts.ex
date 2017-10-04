@@ -9,7 +9,7 @@ defmodule CaptainFact.Accounts do
   alias CaptainFact.Repo
   alias CaptainFact.Email
 
-  alias CaptainFact.Accounts.{User, ResetPasswordRequest, UserPermissions, InvitationRequest}
+  alias CaptainFact.Accounts.{User, ResetPasswordRequest, UserPermissions, InvitationRequest, Achievement}
   alias CaptainFact.Accounts.{UsernameGenerator, ReputationUpdater}
 
   @max_ip_reset_requests 3
@@ -53,12 +53,17 @@ defmodule CaptainFact.Accounts do
     # We willingly delete token using `invitation_token` string because we accept having
     # multiple invitations with the same token
     if invitation_token, do: delete_invitation(invitation_token)
-    # Send welcome mail
-    CaptainFact.Email.welcome_email(user) |> CaptainFact.Mailer.deliver_later()
 
+    # Send welcome mail
+    send_welcome_email(user)
+
+    # Return final result
     result
   end
 
+  def send_welcome_email(user) do
+    CaptainFact.Mailer.deliver_later(CaptainFact.Email.welcome_email(user))
+  end
 
   defp do_create_account(user_params, provider_params) do
     User.registration_changeset(%User{}, user_params)
@@ -94,15 +99,35 @@ defmodule CaptainFact.Accounts do
   # ---- Confirm email ----
 
   def confirm_email!(token) do
-    Repo.get_by(User, email_confirmation_token: token)
-    |> User.changeset_confirm_email(true)
-    |> Repo.update!()
-    |> ReputationUpdater.register_action(:email_confirmed)
+    user =
+      Repo.get_by(User, email_confirmation_token: token)
+      |> User.changeset_confirm_email(true)
+      |> Repo.update!()
+
+    ReputationUpdater.register_action(user, :email_confirmed)
+    unlock_achievement(user, "not-a-robot")
+  end
+
+  # ---- Achievements -----
+
+  def unlock_achievement(user = %User{id: user_id}, slug, async \\ true) when is_binary(slug) do
+    func = fn ->
+      achievement = Repo.get_by!(Achievement, slug: slug)
+      Repo.transaction(fn ->
+        User
+        |> where(id: ^user_id)
+        |> lock("FOR UPDATE")
+        |> Repo.one!()
+        |> Ecto.Changeset.change(achievements: [achievement.id | user.achievements])
+        |> Repo.update!()
+      end)
+    end
+    if async, do: Task.start(func), else: func.()
   end
 
   # ---- Reset Password ----
 
-  @doc """
+  @doc"""
   Returns the user associated with given reset password token
   """
   def reset_password!(email, source_ip_address) when is_binary(source_ip_address) do

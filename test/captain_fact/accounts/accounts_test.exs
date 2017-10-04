@@ -216,4 +216,14 @@ defmodule CaptainFact.AccountsTest do
     end
   end
 
+  describe "achievements" do
+    test "unlock achievements" do
+      user = insert(:user)
+      achievement = Repo.get_by!(Accounts.Achievement, slug: "bulletproof")
+      Accounts.unlock_achievement(user, achievement.slug, false)
+      updated = Repo.get(Accounts.User, user.id)
+      assert achievement.id in updated.achievements
+    end
+  end
+
 end

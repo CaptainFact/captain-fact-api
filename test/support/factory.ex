@@ -15,7 +15,8 @@ defmodule CaptainFact.Factory do
       encrypted_password: "$2b$12$fe55IfCdqNzKp1wMIJDwVeG3f7guOduEE5HS2C9IJyfkuk3avbjQG",
       fb_user_id: Integer.to_string(Enum.random(10000..9999999999999)),
       reputation: 0,
-      email_confirmation_token: random_string(64)
+      email_confirmation_token: random_string(64),
+      achievements: [1] # Users are always created with the "Welcome" achievement
     }
   end
 
