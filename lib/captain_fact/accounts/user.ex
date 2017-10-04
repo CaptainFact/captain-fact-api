@@ -11,6 +11,7 @@ defmodule CaptainFact.Accounts.User do
     field :picture_url, :string
     field :reputation, :integer, default: 0
     field :locale, :string
+    field :achievements, {:array, :integer}, default: []
 
     # Social networks profiles
     field :fb_user_id, :string
@@ -64,6 +65,7 @@ defmodule CaptainFact.Accounts.User do
     |> common_changeset(params)
     |> password_changeset(params)
     |> generate_email_verification_token(false)
+    |> put_change(:achievements, [1]) # Default to "welcome" achievement
   end
 
   def changeset_confirm_email(model, is_confirmed) do

@@ -22,7 +22,8 @@ defmodule CaptainFactWeb.UserView do
       username: user.username,
       reputation: user.reputation,
       picture_url: user.picture_url,
-      registered_at: registered_at(user)
+      registered_at: registered_at(user),
+      achievements: user.achievements
     }
   end
 
@@ -36,6 +37,7 @@ defmodule CaptainFactWeb.UserView do
       picture_url: user.picture_url,
       locale: user.locale,
       registered_at: registered_at(user),
+      achievements: user.achievements
     }
   end
 
