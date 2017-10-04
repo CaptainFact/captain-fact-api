@@ -16,8 +16,7 @@ defmodule CaptainFact.Accounts.UserPermissionsTest do
     negative_user = %User{id: 1, reputation: -15}
     new_user = %User{id: 2, reputation: 42}
     positive_user = %User{id: 3, reputation: 80000}
-    {:ok, [negative_user: negative_user, new_user: new_user, positive_user: positive_user,
-           banned_user: banned_user]}
+    {:ok, [negative_user: negative_user, new_user: new_user, positive_user: positive_user, banned_user: banned_user]}
   end
 
   test "for each limitation, we must define all levels" do

@@ -98,28 +98,29 @@ defmodule CaptainFact.Accounts do
 
   # ---- Confirm email ----
 
-  def confirm_email!(token) do
+  def confirm_email!(token, async \\ true) do
     user =
       Repo.get_by(User, email_confirmation_token: token)
       |> User.changeset_confirm_email(true)
       |> Repo.update!()
 
     ReputationUpdater.register_action(user, :email_confirmed)
-    unlock_achievement(user, "not-a-robot")
+    unlock_achievement(user, "not-a-robot", async)
   end
 
   # ---- Achievements -----
 
-  def unlock_achievement(user = %User{id: user_id}, slug, async \\ true) when is_binary(slug) do
+  def unlock_achievement(%User{id: user_id}, slug, async \\ true) when is_binary(slug) do
     func = fn ->
       achievement = Repo.get_by!(Achievement, slug: slug)
       Repo.transaction(fn ->
-        User
-        |> where(id: ^user_id)
-        |> lock("FOR UPDATE")
-        |> Repo.one!()
-        |> Ecto.Changeset.change(achievements: [achievement.id | user.achievements])
-        |> Repo.update!()
+        user =
+          User
+          |> where(id: ^user_id)
+          |> lock("FOR UPDATE")
+          |> Repo.one!()
+
+        Repo.update!(Ecto.Changeset.change(user, achievements: [achievement.id | user.achievements]))
       end)
     end
     if async, do: Task.start(func), else: func.()

@@ -9,5 +9,6 @@ defmodule CaptainFact.Repo.Migrations.CreateAchievements do
       timestamps()
     end
 
+    create unique_index(:achievements, [:slug])
   end
 end
