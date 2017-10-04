@@ -29,7 +29,7 @@ defmodule CaptainFact.Accounts.ReputationUpdater do
     # Actions without source
     comment_banned:           {  0   , -20   },
     comment_flagged:          {  0   , -5    },
-    email_confirmed:          {  0   , +15   }
+    email_confirmed:          {  +15 , 0     }
   }
 
   # --- Client API ---
@@ -96,7 +96,9 @@ defmodule CaptainFact.Accounts.ReputationUpdater do
         Repo.update(User.reputation_changeset(user, %{reputation: new_reputation}))
       end)
     rescue
-      _ -> Logger.warn("DB reputation update (#{reputation_change}) for user #{user_id} failed")
+      _ ->
+        Logger.warn("DB reputation update (#{reputation_change}) for user #{user_id} failed")
+        Logger.debug(inspect(System.stacktrace(), pretty: true))
     end
   end
 

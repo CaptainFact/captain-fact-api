@@ -37,7 +37,7 @@ defmodule CaptainFactWeb.StatementsChannel do
     |> Multi.run(:action_create, fn %{statement: statement} ->
          Repo.insert(action_create(user_id, video_id, statement))
        end)
-    |> UserPermissions.lock_transaction!(user_id, :add_statement)
+    |> UserPermissions.lock_transaction!(user_id, :create, :statement)
     |> case do
       {:ok, %{statement: statement}} ->
         rendered_statement = StatementView.render("show.json", statement: statement)
@@ -59,7 +59,7 @@ defmodule CaptainFactWeb.StatementsChannel do
         Multi.new
         |> Multi.update(:statement, changeset)
         |> Multi.insert(:action_update, action_update)
-        |> UserPermissions.lock_transaction!(user_id, :edit_statement)
+        |> UserPermissions.lock_transaction!(user_id, :update, :statement)
         |> case do
           {:ok, %{statement: updated_statement}} ->
             rendered_statement = StatementView.render("show.json", statement: updated_statement)
@@ -79,7 +79,7 @@ defmodule CaptainFactWeb.StatementsChannel do
     |> Multi.run(:action_delete, fn %{statement: statement} ->
          Repo.insert(action_delete(user_id, video_id, statement))
        end)
-    |> UserPermissions.lock_transaction!(user_id, :remove_statement)
+    |> UserPermissions.lock_transaction!(user_id, :remove, :statement)
     |> case do
         {:ok, _} ->
           broadcast!(socket, "statement_removed", %{id: id})

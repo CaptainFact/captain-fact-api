@@ -35,13 +35,13 @@ defmodule CaptainFact.Videos do
   """
   def create!(user, video_url) do
     # Unsafe check before request just to ensure user is not using this method to DDOS youtube
-    UserPermissions.check!(user, :add_video)
+    UserPermissions.check!(user, :add, :video)
 
     case fetch_video_metadata(video_url) do
       {:ok, metadata} ->
         changeset = Video.changeset(%Video{}, metadata)
         user
-        |> UserPermissions.lock!(:add_video, fn _ -> Repo.insert!(changeset) end)
+        |> UserPermissions.lock!(:add, :video, fn _ -> Repo.insert!(changeset) end)
         |> Map.put(:speakers, [])
       error -> error
     end

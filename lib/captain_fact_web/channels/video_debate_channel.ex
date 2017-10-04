@@ -38,7 +38,7 @@ defmodule CaptainFactWeb.VideoDebateChannel do
     Multi.new
     |> Multi.insert(:video_speaker, changeset)
     |> Multi.insert(:action_add, action_add(user_id, video_id, speaker))
-    |> UserPermissions.lock_transaction!(user_id, :add_speaker)
+    |> UserPermissions.lock_transaction!(user_id, :add, :speaker)
     |> case do
       {:ok, %{}} ->
         rendered_speaker = SpeakerView.render("show.json", speaker: speaker)
@@ -49,7 +49,7 @@ defmodule CaptainFactWeb.VideoDebateChannel do
   end
 
   @doc """
-  Add a new speaker to the video
+  Create a new speaker for this video
   """
   def handle_in_authenticated!("new_speaker", params, socket) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
@@ -66,7 +66,7 @@ defmodule CaptainFactWeb.VideoDebateChannel do
     |> Multi.run(:action_create, fn %{speaker: speaker} ->
          Repo.insert(action_create(user_id, video_id, speaker))
        end)
-    |> UserPermissions.lock_transaction!(user_id, :add_speaker)
+    |> UserPermissions.lock_transaction!(user_id, :create, :speaker)
     |> case do
       {:ok, %{speaker: speaker}} ->
         # Broadcast the speaker
@@ -91,7 +91,7 @@ defmodule CaptainFactWeb.VideoDebateChannel do
           Multi.new
           |> Multi.update(:speaker, changeset)
           |> Multi.insert(:action_update, action_update(user_id, video_id, changeset))
-          |> UserPermissions.lock_transaction!(user_id, :edit_speaker)
+          |> UserPermissions.lock_transaction!(user_id, :update, :speaker)
           |> case do
             {:ok, %{speaker: speaker}} ->
               rendered_speaker = View.render_one(speaker, SpeakerView, "speaker.json")
@@ -134,7 +134,7 @@ defmodule CaptainFactWeb.VideoDebateChannel do
     |> Multi.update(:speaker, Speaker.changeset_remove(speaker))
     |> Multi.delete(:video_speaker, VideoSpeaker.changeset(video_speaker))
     |> Multi.insert(:action_delete, action_delete(user_id, video_id, speaker))
-    |> UserPermissions.lock_transaction!(user_id, :remove_speaker)
+    |> UserPermissions.lock_transaction!(user_id, :remove, :speaker)
   end
 
   defp do_remove_speaker(socket, speaker = %{is_user_defined: false}) do
@@ -144,6 +144,6 @@ defmodule CaptainFactWeb.VideoDebateChannel do
     Multi.new
     |> Multi.delete(:video_speaker, VideoSpeaker.changeset(video_speaker))
     |> Multi.insert(:action_remove, action_remove(user_id, video_id, speaker))
-    |> UserPermissions.lock_transaction!(user_id, :remove_speaker)
+    |> UserPermissions.lock_transaction!(user_id, :remove, :speaker)
   end
 end

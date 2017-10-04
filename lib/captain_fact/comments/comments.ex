@@ -21,7 +21,7 @@ defmodule CaptainFact.Comments do
       |> Comment.changeset(params)
 
     full_comment =
-      UserPermissions.lock!(user, :add_comment, fn _ -> Repo.insert!(comment_changeset) end)
+      UserPermissions.lock!(user, :create, :comment, fn _ -> Repo.insert!(comment_changeset) end)
       |> Map.put(:user, user)
       |> Repo.preload(:source)
       |> Map.put(:score, 1)
@@ -43,20 +43,20 @@ defmodule CaptainFact.Comments do
       |> Repo.get(comment_id)
 
     # Define vote type (self, up, down)
-    action = cond do
+    action_type = cond do
       user.id == comment.user_id -> :self_vote
       value >= 0 -> :vote_up
       true -> :vote_down
     end
 
-    {base_vote, new_vote} = UserPermissions.lock!(user, action, fn user ->
+    {base_vote, new_vote} = UserPermissions.lock!(user, action_type, :comment, fn user ->
       base_vote =
         Repo.get_by(Vote, user_id: user.id, comment_id: comment_id) ||
         %Vote{user_id: user.id, comment_id: comment_id}
       new_vote = Repo.insert_or_update!(Vote.changeset(base_vote, %{value: value}))
       {base_vote, new_vote}
     end)
-    with true <- action != :self_vote,
+    with true <- action_type != :self_vote,
          vote_type when not is_nil(vote_type) <- Vote.get_vote_type(comment, base_vote.value, new_vote.value) do
       ReputationUpdater.register_action(user.id, comment.user_id, vote_type)
     end

@@ -45,7 +45,7 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
     |> Multi.run(:action_restore, fn %{statement: statement} ->
          Repo.insert(action_restore(user_id, video_id, statement))
        end)
-    |> UserPermissions.lock_transaction!(user_id, :restore_statement)
+    |> UserPermissions.lock_transaction!(user_id, :restore, :statement)
     |> case do
         {:ok, %{action_restore: action, statement: statement}} ->
           # Broadcast action
@@ -77,7 +77,7 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
     |> multi_undelete_speaker(speaker)
     |> Multi.insert(:video_speaker, video_speaker)
     |> Multi.insert(:action_restore, action_restore(user_id, video_id, speaker))
-    |> UserPermissions.lock_transaction!(user_id, :restore_speaker)
+    |> UserPermissions.lock_transaction!(user_id, :restore, :speaker)
     |> case do
       {:ok, %{action_restore: action}} ->
         # Broadcast the action
