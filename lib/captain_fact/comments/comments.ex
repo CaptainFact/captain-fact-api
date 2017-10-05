@@ -37,18 +37,18 @@ defmodule CaptainFact.Comments do
   end
 
   def vote(user, comment_id, 0),
-    do: delete_vote(user, Repo.one!(from(c in Comment, where: c.id == ^comment_id, select: c.user_id)))
+    do: delete_vote(user, Repo.get!(Comment, comment_id))
   def vote(user, comment_id, value) do
     comment = Repo.get!(Comment, comment_id)
     vote_type = Vote.vote_type(user, comment, value)
     comment_type = comment_type(comment)
+    UserPermissions.check!(user, vote_type, comment_type)
 
     # Delete prev vote if any
     prev_vote = Repo.get_by(Vote, user_id: user.id, comment_id: comment_id)
     if prev_vote, do: delete_vote(user, comment, prev_vote)
 
     # Record vote
-    UserPermissions.check!(user, vote_type, comment_type)
     return =
       Ecto.build_assoc(user, :votes)
       |> Vote.changeset(%{comment_id: comment_id, value: value})
@@ -65,6 +65,7 @@ defmodule CaptainFact.Comments do
     UserPermissions.check!(user, vote_type, comment_type)
     Repo.delete(vote)
     Recorder.record!(user, vote_type, comment_type, %{target_user_id: comment.user_id})
+    %Vote{comment_id: comment.id}
   end
 
   def comment_type(%Comment{source_id: nil}), do: :comment
@@ -72,9 +73,9 @@ defmodule CaptainFact.Comments do
 
   # ---- Private ----
 
-  defp reverse_vote_type(:vote_up), do: :vote_down
-  defp reverse_vote_type(:vote_down), do: :vote_up
-  defp reverse_vote_type(:self_vote), do: :self_vote
+  defp reverse_vote_type(:vote_up), do: :revert_vote_up
+  defp reverse_vote_type(:vote_down), do: :revert_vote_down
+  defp reverse_vote_type(:self_vote), do: :revert_self_vote
 
   defp fetch_source_metadata_and_update_comment(%Comment{source: nil}, _), do: nil
   defp fetch_source_metadata_and_update_comment(comment = %Comment{source: base_source}, callback) do

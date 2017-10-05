@@ -12,11 +12,10 @@ defmodule CaptainFact.Accounts.ReputationUpdater do
 
   alias CaptainFact.Repo
   alias CaptainFact.Accounts.{User}
-  alias CaptainFact.Actions.{UserAction, UsersActionsReport}
+  alias CaptainFact.Actions.{UserAction, UsersActionsReport, ReportManager}
 
   @name __MODULE__
   @analyser_id UsersActionsReport.analyser_id(:reputation_updater)
-#  @max_daily_reputation_gain 30
   @actions %{
     UserAction.type(:vote_up) => %{
       UserAction.entity(:comment) =>  {  0  , +2  },
@@ -26,17 +25,22 @@ defmodule CaptainFact.Accounts.ReputationUpdater do
       UserAction.entity(:comment) =>  {  -1 , -2   },
       UserAction.entity(:fact) =>     {  -1 , -3   }
     },
-    UserAction.type(:flag) => %{
-      UserAction.entity(:comment) =>  {  0 , -5   },
-      UserAction.entity(:fact) =>     {  0 , -5   }
+    UserAction.type(:revert_vote_up) => %{
+      UserAction.entity(:comment) =>  {  0  , -2  },
+      UserAction.entity(:fact) =>     {  0  , -3  },
+    },
+    UserAction.type(:revert_vote_down) => %{
+      UserAction.entity(:comment) =>  {  +1 , +2   },
+      UserAction.entity(:fact) =>     {  +1 , +3   }
     },
 
+    # Wildcards
+    UserAction.type(:flag) =>         {  0  , -5   },
+
     # Special actions
-    UserAction.type(:email_confirmed) => %{
-      UserAction.entity(:user) =>     {  +15,  0   }
-    }
+    UserAction.type(:email_confirmed) => {  +15,  0 }
     # TODO
-#    comment_banned:           {  0  , -20   },
+    # comment_banned:                 {  0  , -20   },
   }
 
   # --- Client API ---
@@ -45,13 +49,15 @@ defmodule CaptainFact.Accounts.ReputationUpdater do
     GenServer.start_link(@name, :ok, name: @name)
   end
 
-  # Static API
-
   @timeout 120_000 # 2 minutes
   def force_update() do
     GenServer.call(@name, :update_reputations, @timeout)
   end
 
+  # Utils
+
+  def action_reputation_change(type) when is_integer(type), do: Map.get(@actions, type)
+  def action_reputation_change(type) when is_atom(type), do: action_reputation_change(UserAction.type(type))
   def action_reputation_change(type, entity) when is_integer(type) and is_integer(entity),
     do: get_in(@actions, [type, entity])
   def action_reputation_change(type, entity) when is_atom(type) and is_atom(entity),
@@ -62,60 +68,47 @@ defmodule CaptainFact.Accounts.ReputationUpdater do
   # --- Server callbacks ---
 
   def handle_call(:update_reputations, _from, _state) do
-    # TODO lock table ?
-    # TODO setup a daily limit
-    last_action_id =
-      UsersActionsReport
-      |> where([r], r.analyser_id == ^@analyser_id)
-      |> order_by([r], desc: r.id)
-      |> limit(1)
-      |> Repo.one()
-      |> case do
-           nil -> 0
-           report -> report.last_action_id
-         end
+    last_action_id = case ReportManager.get_last_report(@analyser_id) do
+      nil -> 0
+      %{status: :running} -> -1
+      report -> report.last_action_id
+    end
 
-
-    start_analysis(Repo.all(from a in UserAction, where: a.id > ^last_action_id))
+    unless last_action_id == -1, do: start_analysis(Repo.all(from a in UserAction, where: a.id > ^last_action_id))
     {:reply, :ok , :ok}
-    # TODO Schedule next run
   end
 
   defp start_analysis([]), do: {:noreply, :ok}
   defp start_analysis(actions) do
-    # TODO update in transaction
     Logger.info("[ReputationUpdater] Update reputations")
-    start_time = :os.system_time(:seconds)
-    last_action_id = Enum.max(actions, &(&1.id)).id
-    report = Repo.insert!(UsersActionsReport.changeset(%UsersActionsReport{}, %{
-      analyser_id: @analyser_id,
-      nb_actions: Enum.count(actions),
-      last_action_id: last_action_id,
-      status: UsersActionsReport.status(:running)
-    }))
-
-    # Build map like: user_id => total_reputation_change
-    nb_users_updated =
-      Enum.reduce(actions, %{}, fn (action, all_changes) ->
-        {source_change, target_change} = reputation_changes(action)
-        all_changes
-        |> changes_updater(action.user_id, source_change)
-        |> changes_updater(action.target_user_id, target_change)
-      end)
-      |> Enum.filter(fn {_, diff} -> diff != 0 end)
-      |> Enum.map(fn {user_id, diff} ->
-        User
-        |> where(id: ^user_id)
-        |> Repo.update_all(inc: [reputation: diff])
-      end)
-      |> Enum.count()
+    report = ReportManager.create_report!(@analyser_id, :running, actions)
+    nb_users_updated = do_update_reputations(actions)
 
     # Update report
-    Repo.update!(UsersActionsReport.changeset(report, %{
+    ReportManager.update_report!(report, %{
       nb_users: nb_users_updated,
-      run_duration: :os.system_time(:seconds) - start_time,
+      run_duration: NaiveDateTime.diff(NaiveDateTime.utc_now(), report.inserted_at),
       status: UsersActionsReport.status(:success)
-    }))
+    })
+  end
+
+  # Update reputations, return the number of updated users
+  defp do_update_reputations(actions) do
+    actions
+    |> Enum.reduce(%{}, fn (action, all_changes) ->
+         {source_change, target_change} = reputation_changes(action)
+         all_changes
+         |> changes_updater(action.user_id, source_change)
+         |> changes_updater(action.target_user_id, target_change)
+       end)
+    |> Enum.filter(fn {_, diff} -> diff != 0 end)
+    |> Enum.map(fn {user_id, diff} ->
+         User
+         |> where(id: ^user_id)
+         |> Repo.update_all(inc: [reputation: diff])
+         |> elem(0)
+       end)
+    |> Enum.sum()
   end
 
   defp changes_updater(changes, _, 0), do: changes
@@ -124,7 +117,8 @@ defmodule CaptainFact.Accounts.ReputationUpdater do
   defp reputation_changes(%{type: type, entity: entity}) do
     case Map.get(@actions, type) do
       nil -> {0, 0}
-      res -> Map.get(res, entity) || {0, 0}
+      res when is_map(res) -> Map.get(res, entity) || {0, 0}
+      res when is_tuple(res) -> res
     end
   end
 end

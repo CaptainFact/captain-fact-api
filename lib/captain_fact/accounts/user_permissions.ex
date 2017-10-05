@@ -13,6 +13,7 @@ defmodule CaptainFact.Accounts.UserPermissions do
     defexception message: "forbidden", plug_status: 403
   end
 
+  @limitations_age 12 * 60 * 60 # 12 hours
   @levels [-30, -5, 15, 30, 50, 100, 200, 500, 1000]
   @reverse_levels Enum.reverse(@levels)
   @nb_levels Enum.count(@levels)
@@ -55,7 +56,10 @@ defmodule CaptainFact.Accounts.UserPermissions do
     },
     vote_up:                { 0  ,  5 , 15 , 30 , 45 , 100 , 125 , 150 , 200 },
     vote_down:              { 0  ,  0 ,  0 ,  5 , 10 ,  20 ,  40 ,  80 , 150 },
-    self_vote:              { 3  ,  10, 15 , 30 , 50 , 250 , 250 , 250 , 250 },
+    self_vote:              { 10  , 20, 30 , 50 , 75 , 250 , 300 , 500 , 500 },
+    revert_vote_up:         { 10  , 20, 30 , 50 , 75 , 150 , 300 , 500 , 500 },
+    revert_vote_down:       { 10  , 20, 30 , 50 , 75 , 150 , 300 , 500 , 500 },
+    revert_self_vote:       { 10  , 20, 30 , 50 , 75 , 150 , 300 , 500 , 500 },
   }
   @error_not_enough_reputation "not_enough_reputation"
   @error_limit_reached "limit_reached"
@@ -106,8 +110,8 @@ defmodule CaptainFact.Accounts.UserPermissions do
       {:error, @error_not_enough_reputation}
     else
       action_count = if is_wildcard_limitation(action_type),
-        do: Recorder.count(user, action_type),
-        else: Recorder.count(user, action_type, entity)
+        do: Recorder.count_wildcard(user, action_type, @limitations_age),
+        else: Recorder.count(user, action_type, entity, @limitations_age)
       if action_count >= limit do
         if action_count >= limit + @limit_warning_threshold,
           do: Logger.warn("User #{user.username} (#{user.id}) overthrown its limit for [#{action_type} #{entity}] (#{action_count}/#{limit})")

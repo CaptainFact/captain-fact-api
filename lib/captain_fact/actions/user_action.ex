@@ -29,17 +29,21 @@ defmodule CaptainFact.Actions.UserAction do
 
   # Common actions
   def type(value) when is_integer(value), do: value
-  def type(:create),    do: 1
-  def type(:add),       do: 2
-  def type(:update),    do: 3
-  def type(:delete),    do: 4
-  def type(:remove),    do: 5
-  def type(:restore),   do: 6
-  def type(:approve),   do: 7
-  def type(:flag),      do: 8
-  def type(:vote_up),   do: 9
-  def type(:vote_down), do: 10
-  def type(:self_vote), do: 11
+  def type(:create),            do: 1
+  def type(:remove),            do: 2
+  def type(:update),            do: 3
+  def type(:delete),            do: 4
+  def type(:add),               do: 5
+  def type(:restore),           do: 6
+  def type(:approve),           do: 7
+  def type(:flag),              do: 8
+  # Voting stuff
+  def type(:vote_up),           do: 9
+  def type(:vote_down),         do: 10
+  def type(:self_vote),         do: 11
+  def type(:revert_vote_up),    do: 12
+  def type(:revert_vote_down),  do: 13
+  def type(:revert_self_vote),  do: 14
 
   # Special actions
   def type(:email_confirmed), do: 100
