@@ -2,10 +2,10 @@ defmodule CaptainFact.Comments.CommentsChannel do
   use CaptainFactWeb, :channel
 
   import CaptainFactWeb.UserSocket, only: [handle_in_authenticated: 4]
-  alias CaptainFact.Accounts.User
   alias CaptainFactWeb.{ CommentView, VoteView, Flag }
-  alias CaptainFact.{ VideoHashId, Flagger }
-  alias CaptainFact.Comments
+  alias CaptainFact.Accounts.User
+  alias CaptainFact.{Comments, VideoHashId}
+  alias CaptainFact.Actions.Flagger
   alias CaptainFact.Comments.{Comment, Vote, VoteDebouncer}
 
 
@@ -75,7 +75,7 @@ defmodule CaptainFact.Comments.CommentsChannel do
       {:reply, :ok, socket}
     rescue e in Ecto.ConstraintError ->
       # TODO migrate to user_socket rescue_channel_errors with other constraints violations
-      if e.constraint == "flags_source_user_id_type_entity_id_index" do
+      if e.constraint == "flags_source_user_id_entity_entity_id_index" do
         {:reply, {:error, %{message: "action_already_done"}}, socket}
       else
         throw e
@@ -85,6 +85,7 @@ defmodule CaptainFact.Comments.CommentsChannel do
 
   defp load_user_data(response, nil, _), do: response
   defp load_user_data(response = %{comments: comments}, user = %User{}, video_id) do
+    # TODO move these queries to Flagger
     comments_ids = Enum.map(comments, &(&1.id))
     response
     |> Map.put(:my_votes, VoteView.render("my_votes.json", votes:
@@ -97,7 +98,7 @@ defmodule CaptainFact.Comments.CommentsChannel do
     |> Map.put(:my_flags,
         Flag
         |> where([f], f.source_user_id == ^user.id)
-        |> where([f], f.type == 1) #TODO Use method
+        |> where([f], f.entity == 1) #TODO Use method
         |> where([f], f.entity_id in ^comments_ids)
         |> select([:entity_id])
         |> Repo.all()

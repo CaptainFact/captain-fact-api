@@ -1,8 +1,7 @@
 defmodule CaptainFact.Accounts.ReputationUpdater do
   @moduledoc """
-  Updates a user reputation asynchronously, verifying at the same time that the maximum reputation
+  Updates a user reputation periodically, verifying at the same time that the maximum reputation
   gain per day quota is respected.
-  State is a map like : `%{user_id: today_reputation_gain}`
   """
 
   use GenServer
@@ -15,7 +14,7 @@ defmodule CaptainFact.Accounts.ReputationUpdater do
   alias CaptainFact.Actions.{UserAction, UsersActionsReport, ReportManager}
 
   @name __MODULE__
-  @analyser_id UsersActionsReport.analyser_id(:reputation_updater)
+  @analyser_id UsersActionsReport.analyser_id(__MODULE__)
   @actions %{
     UserAction.type(:vote_up) => %{
       UserAction.entity(:comment) =>  {  0  , +2  },
@@ -68,11 +67,7 @@ defmodule CaptainFact.Accounts.ReputationUpdater do
   # --- Server callbacks ---
 
   def handle_call(:update_reputations, _from, _state) do
-    last_action_id = case ReportManager.get_last_report(@analyser_id) do
-      nil -> 0
-      %{status: :running} -> -1
-      report -> report.last_action_id
-    end
+    last_action_id = ReportManager.get_last_action_id(@analyser_id)
 
     unless last_action_id == -1, do: start_analysis(Repo.all(from a in UserAction, where: a.id > ^last_action_id))
     {:reply, :ok , :ok}
@@ -86,7 +81,7 @@ defmodule CaptainFact.Accounts.ReputationUpdater do
 
     # Update report
     ReportManager.update_report!(report, %{
-      nb_users: nb_users_updated,
+      nb_entries_updated: nb_users_updated,
       run_duration: NaiveDateTime.diff(NaiveDateTime.utc_now(), report.inserted_at),
       status: UsersActionsReport.status(:success)
     })

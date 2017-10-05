@@ -11,6 +11,18 @@ defmodule CaptainFact.Actions.ReportManager do
     |> Repo.one()
   end
 
+  @doc"""
+  Return last treated action id. If an analyser is already `:running` for this `analyser_id`, return value will be -1.
+  If not report exists, returns 0
+  """
+  def get_last_action_id(analyser_id) do
+    case get_last_report(analyser_id) do
+      nil -> 0
+      %{status: :running} -> -1
+      report -> report.last_action_id
+    end
+  end
+
   def create_report!(analyser_id, status, actions, params \\ %{}) do
     Repo.insert! UsersActionsReport.changeset(%UsersActionsReport{}, Map.merge(%{
       analyser_id: analyser_id,

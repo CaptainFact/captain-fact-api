@@ -9,7 +9,7 @@ defmodule CaptainFact.Repo.Migrations.CreateUsersActionsReports do
 
       # Various stats
       add :nb_actions, :integer, null: true
-      add :nb_users, :integer, null: true
+      add :nb_entries_updated, :integer, null: true
       add :run_duration, :integer, null: true
 
       timestamps()

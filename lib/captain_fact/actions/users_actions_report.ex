@@ -11,7 +11,7 @@ defmodule CaptainFact.Actions.UsersActionsReport do
 
     # Various stats
     field :nb_actions, :integer
-    field :nb_users, :integer
+    field :nb_entries_updated, :integer
     field :run_duration, :integer
 
     timestamps()
@@ -26,7 +26,8 @@ defmodule CaptainFact.Actions.UsersActionsReport do
     |> validate_required(@required)
   end
 
-  def analyser_id(:reputation_updater), do: 1
+  def analyser_id(CaptainFact.Accounts.ReputationUpdater), do: 1
+  def analyser_id(CaptainFact.Actions.FlagsAnalyser), do: 2
 
   def status(:pending), do: 1
   def status(:running), do: 2

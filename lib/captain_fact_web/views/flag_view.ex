@@ -7,7 +7,7 @@ defmodule CaptainFactWeb.FlagView do
 
   def render("my_flag.json", %{flag: flag}) do
     %{
-      type: flag.type,
+      entity: flag.entity,
       entity_id: flag.entity_id
     }
   end
