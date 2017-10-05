@@ -1,7 +1,7 @@
 defmodule CaptainFact.Accounts.ReputationUpdaterTest do
   use CaptainFact.DataCase
-
   import ExUnit.CaptureLog
+
   alias CaptainFact.Accounts.{User, ReputationUpdater}
 
 
@@ -74,11 +74,11 @@ defmodule CaptainFact.Accounts.ReputationUpdaterTest do
     other_ok_users = insert_list(10, :user)
 
     all_users = some_ok_users ++ [invalid_user] ++ other_ok_users
-#    assert capture_log(fn ->
+    assert capture_log(fn ->
       for user <- all_users,
         do: :ok = ReputationUpdater.register_action(user, action)
       ReputationUpdater.wait_queue()
-#    end) =~ "[warn] DB reputation update"
+    end) =~ "[warn] DB reputation update"
 
     for user <- (some_ok_users ++ other_ok_users) do
       assert ReputationUpdater.get_today_reputation_gain(user) == reputation_gain

@@ -29,7 +29,7 @@ defmodule CaptainFact.Accounts.ReputationUpdater do
     # Actions without source
     comment_banned:           {  0   , -20   },
     comment_flagged:          {  0   , -5    },
-    email_confirmed:          {  +15 , 0     }
+    email_confirmed:          {  0   , +15   }
   }
 
   # --- Client API ---

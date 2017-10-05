@@ -24,6 +24,7 @@ defmodule CaptainFact.Accounts.User do
     field :password, :string, virtual: true
 
     # Assocs
+    has_many :actions, CaptainFact.Actions.UserAction, on_delete: :delete_all
     has_many :comments, CaptainFact.Comments.Comment, on_delete: :delete_all
     has_many :votes, CaptainFact.Comments.Vote, on_delete: :delete_all
     has_many :video_debate_actions, CaptainFactWeb.VideoDebateAction, on_delete: :nilify_all

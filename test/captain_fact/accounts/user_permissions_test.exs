@@ -1,21 +1,16 @@
 defmodule CaptainFact.Accounts.UserPermissionsTest do
   use CaptainFact.DataCase
 
-  alias CaptainFact.Accounts.{User, UserPermissions, UserState}
+  alias CaptainFact.Accounts.{User, UserPermissions}
   alias UserPermissions.PermissionsError
 
   doctest UserPermissions
 
   setup do
-    UserState.reset()
-    :ok
-  end
-
-  setup_all do
-    banned_user = %User{id: 1, reputation: -4200}
-    negative_user = %User{id: 1, reputation: -15}
-    new_user = %User{id: 2, reputation: 42}
-    positive_user = %User{id: 3, reputation: 80000}
+    banned_user = insert(:user, %{reputation: -4200})
+    negative_user = insert(:user, %{reputation: -15})
+    new_user = insert(:user, %{reputation: 42})
+    positive_user = insert(:user, %{reputation: 80000})
     {:ok, [negative_user: negative_user, new_user: new_user, positive_user: positive_user, banned_user: banned_user]}
   end
 
@@ -75,13 +70,27 @@ defmodule CaptainFact.Accounts.UserPermissionsTest do
     assert_raise PermissionsError, fn -> UserPermissions.lock!(user, action_type, entity, fn _ -> 42 end) end
   end
 
+  test "lock! must fail if we hit the limit", context do
+    user = context[:positive_user]
+    action_type = :vote_up
+    entity = :comment
+    max_occurences = UserPermissions.limitation(user, action_type, entity)
+    for _ <- 1..max_occurences do
+      UserPermissions.lock!(user, action_type, entity, fn _ -> 42 end)
+    end
+    assert_raise PermissionsError, "limit_reached", fn ->
+      UserPermissions.lock!(user, action_type, entity, fn _ -> 42 end)
+    end
+  end
+
   test "running lock! concurrently isn't messing up with state", context do
-    nb_threads = 5000
+    nb_threads = 500
     user = context[:positive_user]
     action_type = :vote_up
     entity = :comment
     max_occurences = UserPermissions.limitation(user, action_type, entity)
     Stream.repeatedly(fn ->
+      Process.sleep(1) # To better simulate requests
       Task.async(fn ->
         try do
           UserPermissions.lock!(user, action_type, entity, fn _ -> 42 end)
