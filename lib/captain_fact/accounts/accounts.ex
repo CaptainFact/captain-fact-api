@@ -10,7 +10,8 @@ defmodule CaptainFact.Accounts do
   alias CaptainFact.Email
 
   alias CaptainFact.Accounts.{User, ResetPasswordRequest, UserPermissions, InvitationRequest, Achievement}
-  alias CaptainFact.Accounts.{UsernameGenerator, ReputationUpdater}
+  alias CaptainFact.Accounts.{UsernameGenerator}
+  alias CaptainFact.Actions.Recorder
 
   @max_ip_reset_requests 3
   @request_validity 48 * 60 * 60 # 48 hours
@@ -104,7 +105,7 @@ defmodule CaptainFact.Accounts do
       |> User.changeset_confirm_email(true)
       |> Repo.update!()
 
-    ReputationUpdater.register_action(user, :email_confirmed)
+    Recorder.record!(user, :email_confirmed, :user)
     unlock_achievement(user, "not-a-robot", async)
   end
 

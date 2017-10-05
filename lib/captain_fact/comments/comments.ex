@@ -4,8 +4,9 @@ defmodule CaptainFact.Comments do
 
   alias CaptainFact.Repo
   alias CaptainFact.Comments.{Comment, Vote}
-  alias CaptainFact.Accounts.{UserPermissions, ReputationUpdater}
+  alias CaptainFact.Accounts.{UserPermissions, User}
   alias CaptainFact.Sources.{Fetcher, Source}
+  alias CaptainFact.Actions.Recorder
 
 
   # ---- Public API ----
@@ -35,35 +36,45 @@ defmodule CaptainFact.Comments do
     full_comment
   end
 
+  def vote(user, comment_id, 0),
+    do: delete_vote(user, Repo.one!(from(c in Comment, where: c.id == ^comment_id, select: c.user_id)))
   def vote(user, comment_id, value) do
-    # Find initial comment
-    comment =
-      Comment.with_source(Comment, false)
-      |> select([:user_id])
-      |> Repo.get(comment_id)
+    comment = Repo.get!(Comment, comment_id)
+    vote_type = Vote.vote_type(user, comment, value)
+    comment_type = comment_type(comment)
 
-    # Define vote type (self, up, down)
-    action_type = cond do
-      user.id == comment.user_id -> :self_vote
-      value >= 0 -> :vote_up
-      true -> :vote_down
-    end
+    # Delete prev vote if any
+    prev_vote = Repo.get_by(Vote, user_id: user.id, comment_id: comment_id)
+    if prev_vote, do: delete_vote(user, comment, prev_vote)
 
-    {base_vote, new_vote} = UserPermissions.lock!(user, action_type, :comment, fn user ->
-      base_vote =
-        Repo.get_by(Vote, user_id: user.id, comment_id: comment_id) ||
-        %Vote{user_id: user.id, comment_id: comment_id}
-      new_vote = Repo.insert_or_update!(Vote.changeset(base_vote, %{value: value}))
-      {base_vote, new_vote}
-    end)
-    with true <- action_type != :self_vote,
-         vote_type when not is_nil(vote_type) <- Vote.get_vote_type(comment, base_vote.value, new_vote.value) do
-      ReputationUpdater.register_action(user.id, comment.user_id, vote_type)
-    end
-    new_vote
+    # Record vote
+    UserPermissions.check!(user, vote_type, comment_type)
+    return =
+      Ecto.build_assoc(user, :votes)
+      |> Vote.changeset(%{comment_id: comment_id, value: value})
+      |> Repo.insert!()
+    Recorder.record!(user, vote_type, comment_type, %{target_user_id: comment.user_id})
+    return
   end
 
+  def delete_vote(user, comment = %Comment{}),
+    do: delete_vote(user, comment, Repo.get_by!(Vote, user_id: user.id, comment_id: comment.id))
+  def delete_vote(user = %User{id: user_id}, comment = %Comment{}, vote = %Vote{user_id: user_id}) do
+    vote_type = reverse_vote_type(Vote.vote_type(user, comment, vote.value))
+    comment_type = comment_type(comment)
+    UserPermissions.check!(user, vote_type, comment_type)
+    Repo.delete(vote)
+    Recorder.record!(user, vote_type, comment_type, %{target_user_id: comment.user_id})
+  end
+
+  def comment_type(%Comment{source_id: nil}), do: :comment
+  def comment_type(%Comment{}), do: :fact
+
   # ---- Private ----
+
+  defp reverse_vote_type(:vote_up), do: :vote_down
+  defp reverse_vote_type(:vote_down), do: :vote_up
+  defp reverse_vote_type(:self_vote), do: :self_vote
 
   defp fetch_source_metadata_and_update_comment(%Comment{source: nil}, _), do: nil
   defp fetch_source_metadata_and_update_comment(comment = %Comment{source: base_source}, callback) do

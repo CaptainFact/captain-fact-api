@@ -37,7 +37,6 @@ defmodule CaptainFact.Accounts.UserPermissions do
       speaker:              { 0  ,  0 ,  3 ,  5 , 10 ,  30 ,  50 , 100 , 100 },
     },
     delete: %{
-
     },
     remove: %{
       statement:            { 0  ,  5 ,  0 ,  3 ,  5 ,  10 ,  10 ,  10 ,  10 },
@@ -54,15 +53,9 @@ defmodule CaptainFact.Accounts.UserPermissions do
       history_action:       { 0  ,  1 ,  3 ,  5 ,  5 ,   5 ,   5 ,   5 ,   5 },
       comment:              { 0  ,  0 ,  1 ,  3 ,  3 ,   5 ,  10 ,  10 ,  10 },
     },
-    vote_up: %{
-      comment:              { 0  ,  5 , 15 , 30 , 45 , 100 , 125 , 150 , 200 },
-    },
-    vote_down: %{
-      comment:              { 0  ,  0 ,  0 ,  5 , 10 ,  20 ,  40 ,  80 , 150 },
-    },
-    self_vote: %{
-      comment:              { 3  ,  10, 15 , 30 , 50 , 250 , 250 , 250 , 250 },
-    }
+    vote_up:                { 0  ,  5 , 15 , 30 , 45 , 100 , 125 , 150 , 200 },
+    vote_down:              { 0  ,  0 ,  0 ,  5 , 10 ,  20 ,  40 ,  80 , 150 },
+    self_vote:              { 3  ,  10, 15 , 30 , 50 , 250 , 250 , 250 , 250 },
   }
   @error_not_enough_reputation "not_enough_reputation"
   @error_limit_reached "limit_reached"
@@ -87,10 +80,6 @@ defmodule CaptainFact.Accounts.UserPermissions do
   def lock!(user_id, action_type, entity, func) when is_integer(user_id) or is_nil(user_id),
     do: lock!(do_load_user!(user_id), action_type, entity, func)
 
-  def deprecated_action(action_type, entity) do
-    Atom.to_string(action_type) <> Atom.to_string(entity) # TODO Just for UserState storage
-  end
-
   @doc """
   Run Repo.transaction while locking permissions. Usefull when piping
   """
@@ -101,7 +90,7 @@ defmodule CaptainFact.Accounts.UserPermissions do
   Check if user can execute action. Return {:ok, nb_available} if yes, {:error, reason} otherwise
   ## Examples
       iex> alias CaptainFact.Accounts.{User, UserPermissions}
-      iex> user = %User{id: 1, reputation: 42}
+      iex> user = CaptainFact.Factory.insert(:user, %{reputation: 45})
       iex> UserPermissions.check(user, :create, :comment)
       {:ok, 20}
       iex> UserPermissions.check(%{user | reputation: -42}, :remove, :statement)
@@ -116,7 +105,9 @@ defmodule CaptainFact.Accounts.UserPermissions do
     if (limit == 0) do
       {:error, @error_not_enough_reputation}
     else
-      action_count = Recorder.count(user, action_type, entity)
+      action_count = if is_wildcard_limitation(action_type),
+        do: Recorder.count(user, action_type),
+        else: Recorder.count(user, action_type, entity)
       if action_count >= limit do
         if action_count >= limit + @limit_warning_threshold,
           do: Logger.warn("User #{user.username} (#{user.id}) overthrown its limit for [#{action_type} #{entity}] (#{action_count}/#{limit})")
@@ -156,8 +147,16 @@ defmodule CaptainFact.Accounts.UserPermissions do
   def limitation(user = %User{}, action_type, entity) do
     case level(user) do
       -1 -> 0 # Reputation under minimum user can't do anything
-      level -> elem(get_in(@limitations, [action_type, entity]), level)
+      level ->
+        case Map.get(@limitations, action_type) do
+          l when is_tuple(l) -> elem(l, level)
+          l when is_map(l) -> elem(Map.get(l, entity), level)
+        end
     end
+  end
+
+  def is_wildcard_limitation(action_type) do
+    is_tuple(Map.get(@limitations, action_type))
   end
 
   def level(%User{reputation: reputation}) do

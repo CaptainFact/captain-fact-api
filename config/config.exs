@@ -57,7 +57,7 @@ config :guardian, Guardian,
 config :quantum, :captain_fact,
   cron: [
     # Reset score limit counter at midnight
-    "@daily": {CaptainFact.Accounts.UserState, :reset, []}
+    "*/1 * * * *": {CaptainFact.Accounts.ReputationUpdater, :force_update, []}
   ]
 
 config :weave,

@@ -8,7 +8,7 @@ defmodule CaptainFact.Email do
   # TODO GetText i18n
 
   @cf_no_reply "no-reply@captainfact.io"
-  @confirm_email_reputation ReputationUpdater.action_target_reputation_change(:email_confirmed)
+  @confirm_email_reputation elem(ReputationUpdater.action_reputation_change(:email_confirmed, :user), 0)
 
 
   # Welcome + verify email

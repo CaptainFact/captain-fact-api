@@ -13,6 +13,13 @@ defmodule CaptainFact.Actions.Recorder do
     |> Repo.insert!()
   end
 
+  def count(user, action_type) do
+    UserAction
+    |> where([a], a.user_id == ^user_id(user))
+    |> where([a], a.type == ^UserAction.type(action_type))
+    |> Repo.aggregate(:count, :id)
+  end
+
   def count(user, action_type, entity) do
     UserAction
     |> where([a], a.user_id == ^user_id(user))

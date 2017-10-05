@@ -11,25 +11,32 @@ defmodule CaptainFact.Accounts.ReputationUpdater do
   import Ecto.Query
 
   alias CaptainFact.Repo
-  alias CaptainFact.Accounts.{User, UserState}
+  alias CaptainFact.Accounts.{User}
+  alias CaptainFact.Actions.{UserAction, UsersActionsReport}
 
   @name __MODULE__
-  @max_daily_reputation_gain 30
-  @user_state_key :today_reputation_gain
+  @analyser_id UsersActionsReport.analyser_id(:reputation_updater)
+#  @max_daily_reputation_gain 30
   @actions %{
-    # :action_atom            {source, target}
-    comment_vote_up:          {  0   , +2    },
-    comment_vote_down:        { -1   , -2    },
-    comment_vote_down_to_up:  { +1   , +4    },
-    comment_vote_up_to_down:  { -2   , -4    },
-    fact_vote_up:             {  0   , +3    },
-    fact_vote_down:           { -1   , -3    },
-    fact_vote_down_to_up:     { +1   , +6    },
-    fact_vote_up_to_down:     {  0   , -6    },
-    # Actions without source
-    comment_banned:           {  0   , -20   },
-    comment_flagged:          {  0   , -5    },
-    email_confirmed:          {  0   , +15   }
+    UserAction.type(:vote_up) => %{
+      UserAction.entity(:comment) =>  {  0  , +2  },
+      UserAction.entity(:fact) =>     {  0  , +3  },
+    },
+    UserAction.type(:vote_down) => %{
+      UserAction.entity(:comment) =>  {  -1 , -2   },
+      UserAction.entity(:fact) =>     {  -1 , -3   }
+    },
+    UserAction.type(:flag) => %{
+      UserAction.entity(:comment) =>  {  0 , -5   },
+      UserAction.entity(:fact) =>     {  0 , -5   }
+    },
+
+    # Special actions
+    UserAction.type(:email_confirmed) => %{
+      UserAction.entity(:user) =>     {  +15,  0   }
+    }
+    # TODO
+#    comment_banned:           {  0  , -20   },
   }
 
   # --- Client API ---
@@ -40,68 +47,84 @@ defmodule CaptainFact.Accounts.ReputationUpdater do
 
   # Static API
 
-  def max_daily_reputation_gain, do: @max_daily_reputation_gain
+  @timeout 120_000 # 2 minutes
+  def force_update() do
+    GenServer.call(@name, :update_reputations, @timeout)
+  end
+
+  def action_reputation_change(type, entity) when is_integer(type) and is_integer(entity),
+    do: get_in(@actions, [type, entity])
+  def action_reputation_change(type, entity) when is_atom(type) and is_atom(entity),
+    do: action_reputation_change(UserAction.type(type), UserAction.entity(entity))
+
   def actions, do: @actions
-  def action_target_reputation_change(action), do: elem(Map.get(@actions, action), 1)
-  def get_today_reputation_gain(user), do: UserState.get(user_id(user), @user_state_key, 0)
-  def wait_queue(), do: GenServer.call(@name, {:ping})
-
-  # Async methods
-
-  def register_action(source_user, target_user, action) when is_atom(action) do
-    {source_change, target_change} = Map.get(@actions, action)
-    GenServer.cast(@name, {:register_change, user_id(source_user), source_change})
-    GenServer.cast(@name, {:register_change, user_id(target_user), target_change})
-  end
-
-  def register_action(target_user, action) when is_atom(action) do
-    change = action_target_reputation_change(action)
-    GenServer.cast(@name, {:register_change, user_id(target_user), change})
-  end
 
   # --- Server callbacks ---
 
-  def handle_cast({:register_change, _, 0}, _state), do: {:noreply, :ok}
-  def handle_cast({:register_change, user_id, change}, _state) do
-    # Get max reputation gain from user state and updates it ({action_gain, new_daily_gain})
-    real_change = UserState.get_and_update(user_id, @user_state_key, fn
-      today_gain when is_nil(today_gain) ->
-        {change, change}
-      today_gain when today_gain + change <= @max_daily_reputation_gain ->
-        {change, today_gain + change}
-      today_gain when today_gain >= @max_daily_reputation_gain ->
-        {0, @max_daily_reputation_gain}
-      today_gain ->
-        {@max_daily_reputation_gain - today_gain , @max_daily_reputation_gain}
-    end)
-    db_update_reputation(user_id, real_change)
-    {:noreply, :ok}
+  def handle_call(:update_reputations, _from, _state) do
+    # TODO lock table ?
+    # TODO setup a daily limit
+    last_action_id =
+      UsersActionsReport
+      |> where([r], r.analyser_id == ^@analyser_id)
+      |> order_by([r], desc: r.id)
+      |> limit(1)
+      |> Repo.one()
+      |> case do
+           nil -> 0
+           report -> report.last_action_id
+         end
+
+
+    start_analysis(Repo.all(from a in UserAction, where: a.id > ^last_action_id))
+    {:reply, :ok , :ok}
+    # TODO Schedule next run
   end
 
-  def handle_call({:ping}, _caller, _state), do: {:reply, :ok, :ok}
+  defp start_analysis([]), do: {:noreply, :ok}
+  defp start_analysis(actions) do
+    # TODO update in transaction
+    Logger.info("[ReputationUpdater] Update reputations")
+    start_time = :os.system_time(:seconds)
+    last_action_id = Enum.max(actions, &(&1.id)).id
+    report = Repo.insert!(UsersActionsReport.changeset(%UsersActionsReport{}, %{
+      analyser_id: @analyser_id,
+      nb_actions: Enum.count(actions),
+      last_action_id: last_action_id,
+      status: UsersActionsReport.status(:running)
+    }))
 
-  # --- Methods ---
-
-  defp db_update_reputation(_user_id, 0), do: true
-  defp db_update_reputation(user_id, reputation_change) do
-    try do
-      Repo.transaction(fn ->
-        user =
-          User
-          |> where(id: ^user_id)
-          |> lock("FOR UPDATE")
-          |> Repo.one!()
-
-        new_reputation = user.reputation + reputation_change
-        Repo.update(User.reputation_changeset(user, %{reputation: new_reputation}))
+    # Build map like: user_id => total_reputation_change
+    nb_users_updated =
+      Enum.reduce(actions, %{}, fn (action, all_changes) ->
+        {source_change, target_change} = reputation_changes(action)
+        all_changes
+        |> changes_updater(action.user_id, source_change)
+        |> changes_updater(action.target_user_id, target_change)
       end)
-    rescue
-      _ ->
-        Logger.warn("DB reputation update (#{reputation_change}) for user #{user_id} failed")
-        Logger.debug(inspect(System.stacktrace(), pretty: true))
+      |> Enum.filter(fn {_, diff} -> diff != 0 end)
+      |> Enum.map(fn {user_id, diff} ->
+        User
+        |> where(id: ^user_id)
+        |> Repo.update_all(inc: [reputation: diff])
+      end)
+      |> Enum.count()
+
+    # Update report
+    Repo.update!(UsersActionsReport.changeset(report, %{
+      nb_users: nb_users_updated,
+      run_duration: :os.system_time(:seconds) - start_time,
+      status: UsersActionsReport.status(:success)
+    }))
+  end
+
+  defp changes_updater(changes, _, 0), do: changes
+  defp changes_updater(changes, key, diff), do: Map.update(changes, key, diff, &(&1 + diff))
+
+  defp reputation_changes(%{type: type, entity: entity}) do
+    case Map.get(@actions, type) do
+      nil -> {0, 0}
+      res -> Map.get(res, entity) || {0, 0}
     end
   end
-
-  defp user_id(%User{id: id}), do: id
-  defp user_id(id) when is_integer(id), do: id
 end

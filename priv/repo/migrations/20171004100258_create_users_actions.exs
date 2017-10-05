@@ -7,8 +7,8 @@ defmodule CaptainFact.Repo.Migrations.CreateUsersActions do
       add :target_user_id, references(:users, on_delete: :nothing), null: true
 
       add :type, :integer, null: false
+      add :entity, :integer, null: false
       add :context, :string, null: true
-      add :entity, :integer, null: true
       add :entity_id, :integer, null: true
       add :changes, :map, null: true
 

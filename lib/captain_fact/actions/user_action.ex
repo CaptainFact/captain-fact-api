@@ -21,9 +21,10 @@ defmodule CaptainFact.Actions.UserAction do
   @doc false
   def changeset(%UserAction{} = user_action, attrs) do
     user_action
-    |> cast(attrs, [:context, :type, :entity, :entity_id, :changes])
+    |> cast(attrs, [:context, :type, :entity, :entity_id, :changes, :user_id, :target_user_id])
     |> validate_required([:user_id, :type])
     |> cast_assoc(:user)
+    |> cast_assoc(:target_user)
   end
 
   # Common actions
@@ -41,7 +42,7 @@ defmodule CaptainFact.Actions.UserAction do
   def type(:self_vote), do: 11
 
   # Special actions
-  def type(:email_verified), do: 100
+  def type(:email_confirmed), do: 100
 
   # Entities
   def entity(value) when is_integer(value), do: value
@@ -49,6 +50,8 @@ defmodule CaptainFact.Actions.UserAction do
   def entity(:speaker),         do: 2
   def entity(:statement),       do: 3
   def entity(:comment),         do: 4
-  def entity(:history_action),  do: 5
+  def entity(:fact),            do: 5
+  def entity(:history_action),  do: 6
+  def entity(:user),            do: 7
 
 end

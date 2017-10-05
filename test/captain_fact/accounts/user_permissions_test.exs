@@ -124,8 +124,12 @@ defmodule CaptainFact.Accounts.UserPermissionsTest do
 
   defp each_limitation(func) do
     for {action_type, entities_limitations} <- UserPermissions.limitations do
-      for {entity, limitation} <- entities_limitations do
-        func.({action_type, entity, limitation})
+      case entities_limitations do
+        limitation when is_tuple(limitation) -> nil # Ignore wildcards (cannot guess entity)
+        limitations when is_map(limitations) ->
+          for {entity, limitation} <- limitations do
+            func.({action_type, entity, limitation})
+          end
       end
     end
   end
