@@ -4,8 +4,9 @@ defmodule CaptainFact.Comments.CommentsChannel do
   import CaptainFactWeb.UserSocket, only: [handle_in_authenticated: 4]
   alias CaptainFactWeb.{ CommentView, VoteView, Flag }
   alias CaptainFact.Accounts.User
-  alias CaptainFact.{Comments, VideoHashId}
+  alias CaptainFact.Videos.VideoHashId
   alias CaptainFact.Actions.Flagger
+  alias CaptainFact.Comments
   alias CaptainFact.Comments.{Comment, Vote, VoteDebouncer}
 
 

@@ -19,7 +19,7 @@ defmodule CaptainFact do
       worker(CaptainFact.Accounts.ReputationUpdater, []),
       worker(CaptainFact.Actions.FlagsAnalyser, []),
       worker(CaptainFact.Comments.VoteDebouncer, []),
-      worker(CaptainFact.VideoHashId, []),
+      worker(CaptainFact.Videos.VideoHashId, []),
       worker(CaptainFact.Accounts.UsernameGenerator, [])
     ]
 

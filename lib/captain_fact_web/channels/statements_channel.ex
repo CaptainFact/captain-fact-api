@@ -6,7 +6,7 @@ defmodule CaptainFactWeb.StatementsChannel do
     only: [action_create: 3, action_update: 3, action_delete: 3]
 
   alias Ecto.Multi
-  alias CaptainFact.VideoHashId
+  alias CaptainFact.Videos.VideoHashId
   alias CaptainFactWeb.{Statement, StatementView, ErrorView}
   alias CaptainFact.Accounts.UserPermissions
 

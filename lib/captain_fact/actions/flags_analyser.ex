@@ -100,7 +100,7 @@ defmodule CaptainFact.Actions.FlagsAnalyser do
     )
     # TODO Use a event bus here
     CaptainFactWeb.Endpoint.broadcast(
-      "comments:video:#{CaptainFact.VideoHashId.encode(comment_context.video_id)}", "comment_removed",
+      "comments:video:#{CaptainFact.Videos.VideoHashId.encode(comment_context.video_id)}", "comment_removed",
       %{id: comment_id, statement_id: comment_context.statement_id}
     )
   end

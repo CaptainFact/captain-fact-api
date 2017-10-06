@@ -15,6 +15,21 @@ defmodule CaptainFact.Accounts.ReputationUpdaterTest do
     assert Repo.get!(User, action.target_user_id).reputation == user_before.reputation + expected_diff
   end
 
+# TODO
+#  test "user gains should be limited" do
+#    source_user = insert(:user, %{reputation: 42000})
+#    target_user = insert(:user, %{reputation: 0})
+#    assert ReputationUpdater.get_today_reputation_gain(target_user) == 0
+#    action = :comment_vote_up
+#    limit = ReputationUpdater.max_daily_reputation_gain()
+#
+#    for _ <- 0..(limit * 2),
+#      do: ReputationUpdater.register_action(source_user, target_user, action)
+#    ReputationUpdater.wait_queue()
+#
+#    assert ReputationUpdater.get_today_reputation_gain(target_user) == limit
+#  end
+
   test "some actions should have impact on both users reputation" do
     # Register action
     action = insert_action(:vote_down, :fact)

@@ -5,7 +5,7 @@ defmodule CaptainFactWeb.StatementController do
   alias CaptainFact.Comments.Comment
 
   def get(conn, %{"video_id" => video_id}) do
-    video_id = CaptainFact.VideoHashId.decode!(video_id)
+    video_id = CaptainFact.Videos.VideoHashId.decode!(video_id)
     statements = Repo.all from statement in Statement,
       left_join: speaker in assoc(statement, :speaker),
       where: statement.video_id == ^video_id,

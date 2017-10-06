@@ -9,7 +9,7 @@ defmodule CaptainFactWeb.VideoDebateChannel do
 
   alias Phoenix.View
   alias Ecto.Multi
-  alias CaptainFact.VideoHashId
+  alias CaptainFact.Videos.VideoHashId
   alias CaptainFact.Accounts.UserPermissions
   alias CaptainFactWeb.{ Video, VideoView, Speaker, SpeakerView, VideoSpeaker, ChangesetView}
 
