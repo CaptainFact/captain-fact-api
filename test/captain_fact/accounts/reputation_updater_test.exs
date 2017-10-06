@@ -1,6 +1,6 @@
 defmodule CaptainFact.Accounts.ReputationUpdaterTest do
   use CaptainFact.DataCase
-  import ExUnit.CaptureLog
+#  import ExUnit.CaptureLog
 
   alias CaptainFact.Accounts.{User, ReputationUpdater}
   alias CaptainFact.Actions.UserAction

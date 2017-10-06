@@ -93,14 +93,15 @@ defmodule CaptainFact.Accounts.UserPermissions do
   @doc """
   Check if user can execute action. Return {:ok, nb_available} if yes, {:error, reason} otherwise
   ## Examples
-      iex> alias CaptainFact.Accounts.{User, UserPermissions}
+      iex> alias CaptainFact.Accounts.UserPermissions
+      iex> alias CaptainFact.Actions.Recorder
       iex> user = CaptainFact.Factory.insert(:user, %{reputation: 45})
       iex> UserPermissions.check(user, :create, :comment)
       {:ok, 20}
       iex> UserPermissions.check(%{user | reputation: -42}, :remove, :statement)
       {:error, "not_enough_reputation"}
       iex> limitation = UserPermissions.limitation(user, :create, :comment)
-      iex> for _ <- 1..limitation, do: UserPermissions.record_action(user, :create, :comment)
+      iex> for _ <- 1..limitation, do: Recorder.record!(user, :create, :comment)
       iex> UserPermissions.check(user, :create, :comment)
       {:error, "limit_reached"}
   """
@@ -132,21 +133,6 @@ defmodule CaptainFact.Accounts.UserPermissions do
      check!(do_load_user!(user_id), action_type, entity)
   end
   def check!(nil, _, _), do: raise %PermissionsError{message: "unauthorized"}
-
-  @doc """
-  DEPRECATED - This is a job for CaptainFact.Actions.Recorder
-  Doesn't verify user's limitation nor reputation, you need to check that by yourself
-  """
-  def record_action(user = %User{}, action_type, entity) do
-    Recorder.record!(user, action_type, entity)
-  end
-  def record_action(user_id, action_type, entity) when is_integer(user_id),
-    do: record_action(%User{id: user_id}, action_type, entity)
-
-  # DEPRECATED - Use Recorder
-  def user_nb_action_occurences(user = %User{}, action_type, entity) do
-    Recorder.count(user, action_type, entity)
-  end
 
   def limitation(user = %User{}, action_type, entity) do
     case level(user) do

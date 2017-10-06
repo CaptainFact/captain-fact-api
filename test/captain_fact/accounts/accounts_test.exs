@@ -206,7 +206,7 @@ defmodule CaptainFact.AccountsTest do
   describe "confirm email" do
     test "set email_confirmed to true, reset the token and update reputation" do
       user = insert(:user)
-      Accounts.confirm_email!(user.email_confirmation_token, false)
+      Accounts.confirm_email!(user.email_confirmation_token)
       Accounts.ReputationUpdater.force_update()
       updated_user = Repo.get(Accounts.User, user.id)
 
@@ -220,7 +220,7 @@ defmodule CaptainFact.AccountsTest do
     test "unlock achievements" do
       user = insert(:user)
       achievement = Repo.get_by!(Accounts.Achievement, slug: "bulletproof")
-      Accounts.unlock_achievement(user, achievement.slug, false)
+      Accounts.unlock_achievement(user, achievement.slug)
       updated = Repo.get(Accounts.User, user.id)
       assert achievement.id in updated.achievements
     end

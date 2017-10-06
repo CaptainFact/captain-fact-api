@@ -1,7 +1,8 @@
 defmodule CaptainFact.Accounts.UserPermissionsTest do
   use CaptainFact.DataCase
 
-  alias CaptainFact.Accounts.{User, UserPermissions}
+  alias CaptainFact.Actions.Recorder
+  alias CaptainFact.Accounts.UserPermissions
   alias UserPermissions.PermissionsError
 
   doctest UserPermissions
@@ -31,22 +32,22 @@ defmodule CaptainFact.Accounts.UserPermissionsTest do
     action_type = :create
     entity = :comment
     expected_result = 42
-    assert UserPermissions.user_nb_action_occurences(user, action_type, entity) == 0
+    assert Recorder.count(user, action_type, entity) == 0
     assert UserPermissions.lock!(context[:new_user], action_type, entity, fn _ -> 42 end) == expected_result
-    assert UserPermissions.user_nb_action_occurences(user, action_type, entity) == 1
+    assert Recorder.count(user, action_type, entity) == 1
   end
 
   test "if an exception is throwed in func state will not be updated", context do
     user = context[:new_user]
     action_type = :create
     entity = :comment
-    assert UserPermissions.user_nb_action_occurences(user, action_type, entity) == 0
+    assert Recorder.count(user, action_type, entity) == 0
     try do
       UserPermissions.lock!(user, action_type, entity, fn _ ->
         raise "Oh no 😱😱😱 !"
       end)
     rescue e -> e end
-    assert UserPermissions.user_nb_action_occurences(user, action_type, entity) == 0
+    assert Recorder.count(user, action_type, entity) == 0
   end
 
   test "if an exception is throwed in func lock! will re-throw it", context do
@@ -66,7 +67,7 @@ defmodule CaptainFact.Accounts.UserPermissionsTest do
     action_type = :create
     entity = :comment
     max_occurences = UserPermissions.limitation(user, action_type, entity)
-    for _ <- 0..max_occurences, do: UserPermissions.record_action(user, action_type, entity)
+    for _ <- 0..max_occurences, do: Recorder.record!(user, action_type, entity)
     assert_raise PermissionsError, fn -> UserPermissions.lock!(user, action_type, entity, fn _ -> 42 end) end
   end
 
@@ -100,7 +101,7 @@ defmodule CaptainFact.Accounts.UserPermissionsTest do
     end)
     |> Enum.take(nb_threads)
     |> Enum.map(&Task.await/1)
-    assert UserPermissions.user_nb_action_occurences(user, action_type, entity) - tolerated_errors <= max_occurences
+    assert Recorder.count(user, action_type, entity) - tolerated_errors <= max_occurences
   end
 
   test "users with too low reputation shouldn't be able to do anything", context do
