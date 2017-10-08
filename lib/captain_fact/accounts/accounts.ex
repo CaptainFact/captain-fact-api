@@ -62,6 +62,10 @@ defmodule CaptainFact.Accounts do
     result
   end
 
+  @doc"""
+  Send user a welcome email, with a link to confirm it
+  `user`: A user with email_confirmed set to false
+  """
   def send_welcome_email(user) do
     CaptainFact.Mailer.deliver_later(CaptainFact.Email.welcome_email(user))
   end
@@ -106,7 +110,6 @@ defmodule CaptainFact.Accounts do
       |> Repo.update!()
 
     Recorder.record!(user, :email_confirmed, :user)
-    unlock_achievement(user, "not-a-robot")
   end
 
   # ---- Achievements -----
@@ -120,7 +123,8 @@ defmodule CaptainFact.Accounts do
         |> lock("FOR UPDATE")
         |> Repo.one!()
 
-      Repo.update!(Ecto.Changeset.change(user, achievements: [achievement.id | user.achievements]))
+      updated_achievements = Enum.uniq([achievement.id | user.achievements])
+      Repo.update!(Ecto.Changeset.change(user, achievements: updated_achievements))
     end)
   end
 

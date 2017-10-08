@@ -1,4 +1,4 @@
-defmodule CaptainFact.Actions.Analysers.AchievementUnlocker do
+defmodule CaptainFact.Actions.Analysers.Achievements do
   @moduledoc """
   Analyse flags periodically to ban innapropriate content
   """
@@ -7,13 +7,16 @@ defmodule CaptainFact.Actions.Analysers.AchievementUnlocker do
 
   require Logger
   import Ecto.Query
+  import CaptainFact.Accounts, only: [unlock_achievement: 2]
 
   alias CaptainFact.Repo
+  alias CaptainFact.Accounts.User
   alias CaptainFact.Actions.{UserAction, UsersActionsReport, ReportManager}
 
   @name __MODULE__
   @analyser_id UsersActionsReport.analyser_id(__MODULE__)
-  @comments_nb_flags_to_ban 3
+  @action_email_confirmed UserAction.type(:email_confirmed)
+  @watched_action_types [@action_email_confirmed]
 
   # --- Client API ---
 
@@ -21,12 +24,10 @@ defmodule CaptainFact.Actions.Analysers.AchievementUnlocker do
     GenServer.start_link(@name, :ok, name: @name)
   end
 
-  @timeout 60_000 # 1 minute
+  @timeout 120_000 # 2 minute
   def force_update() do
     GenServer.call(@name, :update_flags, @timeout)
   end
-
-  def comments_nb_flags_to_ban(), do: @comments_nb_flags_to_ban
 
   # --- Server callbacks ---
 
@@ -35,7 +36,7 @@ defmodule CaptainFact.Actions.Analysers.AchievementUnlocker do
     unless last_action_id == -1 do
       UserAction
       |> where([a], a.id > ^last_action_id)
-      |> where([a], a.type == ^UserAction.type(:flag))
+      |> where([a], a.type in ^@watched_action_types)
       |> Repo.all()
       |> start_analysis()
     end
@@ -44,7 +45,10 @@ defmodule CaptainFact.Actions.Analysers.AchievementUnlocker do
 
   defp start_analysis([]), do: :ok
   defp start_analysis(actions) do
-    Logger.info("[Analysers.AchievementUnlocker] Updating achievements")
-
+    Logger.info("[Analysers.Achievements] Updating achievements")
+    Enum.map(actions, fn
+      %{type: @action_email_confirmed, user_id: id} -> unlock_achievement(Repo.get!(User, id), "not-a-robot")
+      _ -> nil
+    end)
   end
 end

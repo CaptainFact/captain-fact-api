@@ -3,7 +3,7 @@ defmodule CaptainFact.AccountsTest do
   use Bamboo.Test
 
   alias CaptainFact.Accounts
-  alias CaptainFact.Actions.Analysers.Reputation
+  alias CaptainFact.Actions.Analysers.{Reputation, Achievements}
 
   describe "reset_password_requests" do
     alias CaptainFact.Accounts.ResetPasswordRequest
@@ -209,6 +209,7 @@ defmodule CaptainFact.AccountsTest do
       user = insert(:user)
       Accounts.confirm_email!(user.email_confirmation_token)
       Reputation.force_update()
+      Achievements.force_update()
       updated_user = Repo.get(Accounts.User, user.id)
 
       assert updated_user.email_confirmed
