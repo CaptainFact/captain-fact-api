@@ -1,8 +1,9 @@
 defmodule CaptainFact.Actions.FlaggerTest do
   use CaptainFact.DataCase
 
-  alias CaptainFact.Actions.{Flagger, FlagsAnalyser}
-  alias CaptainFact.Accounts.{User, ReputationUpdater}
+  alias CaptainFact.Actions.Flagger
+  alias CaptainFact.Actions.Analysers.{Flags, Reputation}
+  alias CaptainFact.Accounts.User
   alias CaptainFactWeb.Flag
   alias CaptainFact.Comments.Comment
 
@@ -12,7 +13,7 @@ defmodule CaptainFact.Actions.FlaggerTest do
     Repo.delete_all(User)
     target_user = insert(:user, %{reputation: 10000})
     comment = insert(:comment, %{user: target_user})
-    source_users = insert_list(FlagsAnalyser.comments_nb_flags_to_ban, :user, %{reputation: 10000})
+    source_users = insert_list(Flags.comments_nb_flags_to_ban, :user, %{reputation: 10000})
     {:ok, [source_users: source_users, target_user: target_user, comment: comment]}
   end
 
@@ -21,8 +22,8 @@ defmodule CaptainFact.Actions.FlaggerTest do
     comment = context[:comment]
 
     Flagger.flag!(comment, 1, source.id)
-    ReputationUpdater.force_update()
-    FlagsAnalyser.force_update()
+    Reputation.force_update()
+    Flags.force_update()
     assert Flagger.get_nb_flags(comment) == 1
     assert Repo.get!(User, context[:target_user].id).reputation < context[:target_user].reputation
   end
@@ -34,8 +35,8 @@ defmodule CaptainFact.Actions.FlaggerTest do
     for source <- context[:source_users] do
       Flagger.flag!(comment, 1, source.id)
     end
-    ReputationUpdater.force_update()
-    FlagsAnalyser.force_update()
+    Reputation.force_update()
+    Flags.force_update()
     assert Repo.get(Comment, comment.id).is_banned == true
     assert Repo.get!(User, target.id).reputation < target.reputation
   end

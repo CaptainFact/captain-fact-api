@@ -1,7 +1,7 @@
 defmodule CaptainFact.Actions.UsersActionsReport do
   use Ecto.Schema
   import Ecto.Changeset
-  alias CaptainFact.Actions.UsersActionsReport
+  alias CaptainFact.Actions.{UsersActionsReport, Analysers}
 
 
   schema "users_actions_reports" do
@@ -26,8 +26,9 @@ defmodule CaptainFact.Actions.UsersActionsReport do
     |> validate_required(@required)
   end
 
-  def analyser_id(CaptainFact.Accounts.ReputationUpdater), do: 1
-  def analyser_id(CaptainFact.Actions.FlagsAnalyser), do: 2
+  def analyser_id(Analysers.Reputation), do: 1
+  def analyser_id(Analysers.Flags), do: 2
+  def analyser_id(Analysers.AchievementUnlocker), do: 2
 
   def status(:pending), do: 1
   def status(:running), do: 2

@@ -16,8 +16,8 @@ defmodule CaptainFact do
       supervisor(CaptainFactWeb.Endpoint, []),
       # Other custom workers
       supervisor(CaptainFact.Sources.Fetcher, []),
-      worker(CaptainFact.Accounts.ReputationUpdater, []),
-      worker(CaptainFact.Actions.FlagsAnalyser, []),
+      worker(CaptainFact.Actions.Analysers.Reputation, []),
+      worker(CaptainFact.Actions.Analysers.Flags, []),
       worker(CaptainFact.Comments.VoteDebouncer, []),
       worker(CaptainFact.Videos.VideoHashId, []),
       worker(CaptainFact.Accounts.UsernameGenerator, [])

@@ -1,4 +1,4 @@
-defmodule CaptainFact.Actions.FlagsAnalyser do
+defmodule CaptainFact.Actions.Analysers.Flags do
   @moduledoc """
   Analyse flags periodically to ban innapropriate content
   """
@@ -45,7 +45,7 @@ defmodule CaptainFact.Actions.FlagsAnalyser do
 
   defp start_analysis([]), do: :ok
   defp start_analysis(actions) do
-    Logger.info("[FlagsAnalyser] Update flags")
+    Logger.info("[Analyser.Flags] Update flags")
     report = ReportManager.create_report!(@analyser_id, :running, actions)
     nb_entities_banned = do_update_flags(actions)
 
