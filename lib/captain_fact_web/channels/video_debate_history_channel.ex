@@ -8,29 +8,19 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
   alias Ecto.Multi
   alias CaptainFact.Videos.VideoHashId
   alias CaptainFact.Accounts.UserPermissions
-  alias CaptainFactWeb.{ Statement, Speaker, VideoSpeaker, VideoDebateAction, VideoDebateActionView, StatementView, SpeakerView }
+  alias CaptainFactWeb.{ Statement, Speaker, VideoSpeaker, VideoDebateActionView, StatementView, SpeakerView }
+  alias CaptainFact.VideoDebate.History
 
 
   def join("video_debate_history:" <> video_id_hash, _payload, socket) do
     video_id = VideoHashId.decode!(video_id_hash)
-    rendered_actions =
-      VideoDebateAction
-      |> VideoDebateAction.with_user
-      |> where([a], a.video_id == ^video_id)
-      |> Repo.all()
-      |> View.render_many(VideoDebateActionView, "action.json")
-    {:ok, %{actions: rendered_actions}, assign(socket, :video_id, video_id)}
+    actions = View.render_many(History.video_history(video_id), VideoDebateActionView, "action.json")
+    {:ok, %{actions: actions}, assign(socket, :video_id, video_id)}
   end
 
   def join("statements_history:" <> statement_id, _payload, socket) do
-    rendered_actions =
-      VideoDebateAction
-      |> VideoDebateAction.with_user
-      |> where([a], a.entity == "statement")
-      |> where([a], a.entity_id == ^statement_id)
-      |> Repo.all()
-      |> View.render_many(VideoDebateActionView, "action.json")
-    {:ok, %{actions: rendered_actions}, assign(socket, :statement_id, statement_id)}
+    actions = View.render_many(History.statement_history(statement_id), VideoDebateActionView, "action.json")
+    {:ok, %{actions: actions}, assign(socket, :statement_id, statement_id)}
   end
 
   def handle_in(command, params, socket) do

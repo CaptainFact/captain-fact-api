@@ -11,9 +11,7 @@ defmodule CaptainFact.Actions.Recorder do
   Record an action for user. User can be a %User{} struct or a user_id integer
   """
   def record!(user, action_type, entity, params \\ %{}) do
-    Ecto.build_assoc(user(user), :actions)
-    |> UserAction.changeset(Map.merge(params, %{type: type(action_type), entity: entity(entity)}))
-    |> Repo.insert!()
+    Repo.insert!(build_action_changeset(user, action_type, entity, params))
   end
 
 
@@ -40,6 +38,14 @@ defmodule CaptainFact.Actions.Recorder do
     |> where([a], a.entity == ^UserAction.entity(entity))
     |> age_filter(max_age)
     |> Repo.aggregate(:count, :id)
+  end
+
+  # ---- Private methods ----
+
+  defp build_action_changeset(user, action_type, entity, params) do
+    action = Ecto.build_assoc(user(user), :actions)
+    params = Map.merge(params, %{type: type(action_type), entity: entity(entity)})
+    UserAction.changeset(action, params)
   end
 
   defp age_filter(query, -1), do: query

@@ -1,6 +1,6 @@
 defmodule CaptainFact.Actions.Analysers.Achievements do
   @moduledoc """
-  Analyse flags periodically to ban innapropriate content
+  Checks for special actions or actions combinations that could trigger an achievement
   """
 
   use GenServer

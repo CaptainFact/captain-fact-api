@@ -56,7 +56,6 @@ config :guardian, Guardian,
 # Configure scheduler
 config :quantum, :captain_fact,
   cron: [
-    # Reset score limit counter at midnight
     "*/1 * * * *": {CaptainFact.Actions.Analysers.Reputation, :force_update, []},
     "*/1 * * * *": {CaptainFact.Actions.Analysers.Flags, :force_update, []},
     "*/3 * * * *": {CaptainFact.Actions.Analysers.Achievements, :force_update, []}
