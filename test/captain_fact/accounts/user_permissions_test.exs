@@ -21,70 +21,25 @@ defmodule CaptainFact.Accounts.UserPermissionsTest do
     end)
   end
 
-  test "lock! passes user to given func", context do
-    UserPermissions.lock!(context[:new_user], :create, :comment, fn user ->
-      assert context[:new_user] == user
-    end)
+  test "check! loads user if given an id", context do
+    max_occurences = UserPermissions.limitation(context[:positive_user], :create, :comment)
+    assert UserPermissions.check!(context[:positive_user].id, :create, :comment) == max_occurences
   end
 
-  test "lock! updates state and return func's return", context do
-    user = context[:new_user]
-    action_type = :create
-    entity = :comment
-    expected_result = 42
-    assert Recorder.count(user, action_type, entity) == 0
-    assert UserPermissions.lock!(context[:new_user], action_type, entity, fn _ -> 42 end) == expected_result
-    assert Recorder.count(user, action_type, entity) == 1
+  test "check! ensures permissions are verified and throws exception otherwise", context do
+    assert_raise PermissionsError, fn -> UserPermissions.check!(context[:negative_user], :vote_down, :comment) end
   end
 
-  test "if an exception is throwed in func state will not be updated", context do
-    user = context[:new_user]
-    action_type = :create
-    entity = :comment
-    assert Recorder.count(user, action_type, entity) == 0
-    try do
-      UserPermissions.lock!(user, action_type, entity, fn _ ->
-        raise "Oh no 😱😱😱 !"
-      end)
-    rescue e -> e end
-    assert Recorder.count(user, action_type, entity) == 0
-  end
-
-  test "if an exception is throwed in func lock! will re-throw it", context do
-    exception_message = "Oh no 😱😱😱 !"
-    assert_raise(RuntimeError, exception_message, fn ->
-      UserPermissions.lock!(context[:new_user], :create, :comment, fn _ ->
-        raise exception_message
-      end)
-    end)
-  end
-
-  test "lock! ensures permissions are verified and throws exception otherwise", context do
-    assert_raise PermissionsError, fn -> UserPermissions.lock!(context[:negative_user], :vote_down, :comment, fn _ -> 42 end) end
-
-    # Check limitation
+  test "check! must fail if we hit the limit", context do
     user = context[:new_user]
     action_type = :create
     entity = :comment
     max_occurences = UserPermissions.limitation(user, action_type, entity)
     for _ <- 0..max_occurences, do: Recorder.record!(user, action_type, entity)
-    assert_raise PermissionsError, fn -> UserPermissions.lock!(user, action_type, entity, fn _ -> 42 end) end
+    assert_raise PermissionsError, fn -> UserPermissions.check!(user, action_type, entity) end
   end
 
-  test "lock! must fail if we hit the limit", context do
-    user = context[:positive_user]
-    action_type = :vote_up
-    entity = :comment
-    max_occurences = UserPermissions.limitation(user, action_type, entity)
-    for _ <- 1..max_occurences do
-      UserPermissions.lock!(user, action_type, entity, fn _ -> 42 end)
-    end
-    assert_raise PermissionsError, "limit_reached", fn ->
-      UserPermissions.lock!(user, action_type, entity, fn _ -> 42 end)
-    end
-  end
-
-  test "running lock! concurrently isn't messing up with state", context do
+  test "running check! and record! concurrently isn't messing up with state", context do
     nb_threads = 500
     user = context[:positive_user]
     action_type = :vote_up
@@ -95,7 +50,8 @@ defmodule CaptainFact.Accounts.UserPermissionsTest do
       Process.sleep(1) # To better simulate requests
       Task.async(fn ->
         try do
-          UserPermissions.lock!(user, action_type, entity, fn _ -> 42 end)
+          UserPermissions.check!(user, action_type, entity)
+          Recorder.record!(user, action_type, entity)
         rescue e in PermissionsError -> e end
       end)
     end)
@@ -117,9 +73,6 @@ defmodule CaptainFact.Accounts.UserPermissionsTest do
   end
 
   test "nil user will throw UserPermissions error" do
-    # Lock
-    assert_raise PermissionsError, fn -> UserPermissions.lock!(nil, :add, :video, fn _ -> 42 end) end
-
     # Check
     assert_raise PermissionsError, fn -> UserPermissions.check!(nil, :add, :video) end
   end

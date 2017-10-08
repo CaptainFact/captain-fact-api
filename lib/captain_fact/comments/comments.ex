@@ -13,6 +13,7 @@ defmodule CaptainFact.Comments do
 
   def add_comment(user, params, source_url, source_fetch_callback \\ nil) do
     # TODO [Security] What if reply_to_id refer to a comment that is on a different statement ?
+    UserPermissions.check!(user, :create, :comment)
     source = source_url && (Repo.get_by(Source, url: source_url) || %{url: source_url})
     comment_changeset =
       user
@@ -22,10 +23,13 @@ defmodule CaptainFact.Comments do
       |> Comment.changeset(params)
 
     full_comment =
-      UserPermissions.lock!(user, :create, :comment, fn _ -> Repo.insert!(comment_changeset) end)
+      Repo.insert!(comment_changeset)
       |> Map.put(:user, user)
       |> Repo.preload(:source)
       |> Map.put(:score, 1)
+
+    # Record action
+    Recorder.record!(user, :create, :comment, %{entity_id: full_comment.id})
 
     # Self vote
     Task.start(fn() -> vote(user, full_comment.id, 1) end)

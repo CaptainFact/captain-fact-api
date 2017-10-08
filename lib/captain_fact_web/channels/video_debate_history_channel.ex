@@ -39,13 +39,14 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
 
   def handle_in_authenticated!("restore_statement", %{"id" => id}, socket) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
+    UserPermissions.check!(user_id, :restore, :statement)
     statement = Repo.get_by!(Statement, id: id, is_removed: true)
     Multi.new
     |> Multi.update(:statement, Statement.changeset_restore(statement))
     |> Multi.run(:action_restore, fn %{statement: statement} ->
          Repo.insert(action_restore(user_id, video_id, statement))
        end)
-    |> UserPermissions.lock_transaction!(user_id, :restore, :statement)
+    |> Repo.transaction()
     |> case do
         {:ok, %{action_restore: action, statement: statement}} ->
           # Broadcast action
@@ -70,6 +71,7 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
 
   def handle_in_authenticated!("restore_speaker", %{"id" => id}, socket) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
+    UserPermissions.check!(user_id, :restore, :speaker)
     speaker = Repo.get(Speaker, id)
     video_speaker = VideoSpeaker.changeset(%VideoSpeaker{speaker_id: speaker.id, video_id: video_id})
 
@@ -77,7 +79,7 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
     |> multi_undelete_speaker(speaker)
     |> Multi.insert(:video_speaker, video_speaker)
     |> Multi.insert(:action_restore, action_restore(user_id, video_id, speaker))
-    |> UserPermissions.lock_transaction!(user_id, :restore, :speaker)
+    |> Repo.transaction()
     |> case do
       {:ok, %{action_restore: action}} ->
         # Broadcast the action

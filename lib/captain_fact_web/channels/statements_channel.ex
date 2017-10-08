@@ -31,13 +31,14 @@ defmodule CaptainFactWeb.StatementsChannel do
   """
   def handle_in_authenticated!("new_statement", params, socket) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
+    UserPermissions.check!(user_id, :create, :statement)
     changeset = Statement.changeset(%Statement{video_id: video_id}, params)
     Multi.new
     |> Multi.insert(:statement, changeset)
     |> Multi.run(:action_create, fn %{statement: statement} ->
          Repo.insert(action_create(user_id, video_id, statement))
        end)
-    |> UserPermissions.lock_transaction!(user_id, :create, :statement)
+    |> Repo.transaction()
     |> case do
       {:ok, %{statement: statement}} ->
         rendered_statement = StatementView.render("show.json", statement: statement)
@@ -50,16 +51,18 @@ defmodule CaptainFactWeb.StatementsChannel do
 
   def handle_in_authenticated!("update_statement", params = %{"id" => id}, socket) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
+    UserPermissions.check!(user_id, :update, :statement)
     statement = Repo.get_by!(Statement, id: id, is_removed: false)
     changeset = Statement.changeset(statement, params)
     case changeset.changes do
-      changes when changes === %{} -> {:reply, :ok, socket}
+      changes when changes === %{} ->
+        {:reply, :ok, socket}
       _ ->
         action_update = action_update(user_id, video_id, changeset)
         Multi.new
         |> Multi.update(:statement, changeset)
         |> Multi.insert(:action_update, action_update)
-        |> UserPermissions.lock_transaction!(user_id, :update, :statement)
+        |> Repo.transaction()
         |> case do
           {:ok, %{statement: updated_statement}} ->
             rendered_statement = StatementView.render("show.json", statement: updated_statement)
@@ -73,13 +76,14 @@ defmodule CaptainFactWeb.StatementsChannel do
 
   def handle_in_authenticated!("remove_statement", %{"id" => id}, socket) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
+    UserPermissions.check!(user_id, :remove, :statement)
     statement = Repo.get_by!(Statement, id: id, is_removed: false)
     Multi.new
     |> Multi.update(:statement, Statement.changeset_remove(statement))
     |> Multi.run(:action_delete, fn %{statement: statement} ->
          Repo.insert(action_delete(user_id, video_id, statement))
        end)
-    |> UserPermissions.lock_transaction!(user_id, :remove, :statement)
+    |> Repo.transaction()
     |> case do
         {:ok, _} ->
           broadcast!(socket, "statement_removed", %{id: id})

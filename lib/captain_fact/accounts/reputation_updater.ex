@@ -41,6 +41,7 @@ defmodule CaptainFact.Accounts.ReputationUpdater do
     # TODO
     # comment_banned:                 {  0  , -20   },
   }
+  @actions_types Map.keys(@actions)
 
   # --- Client API ---
 
@@ -69,7 +70,8 @@ defmodule CaptainFact.Accounts.ReputationUpdater do
   def handle_call(:update_reputations, _from, _state) do
     last_action_id = ReportManager.get_last_action_id(@analyser_id)
 
-    unless last_action_id == -1, do: start_analysis(Repo.all(from a in UserAction, where: a.id > ^last_action_id))
+    unless last_action_id == -1,
+      do: start_analysis(Repo.all(from a in UserAction, where: a.id > ^last_action_id, where: a.type in @actions_types))
     {:reply, :ok , :ok}
   end
 

@@ -67,30 +67,6 @@ defmodule CaptainFact.Accounts.UserPermissions do
   # --- API ---
 
   @doc """
-  DEPRECATED - No need for such a security, use check!
-
-  The safe way to ensure limitations and record actions as state is locked during `func` execution.
-  Raises PermissionsError if user doesn't have the permission.
-
-  lock! will do an optimistic lock by incrementing the counter for this action then execute func.
-  Returning a tupe like {:error, _} or raiseing / raising in `func` will revert the action
-  """
-  def lock!(user = %User{}, action_type, entity, func) do
-    check!(user, action_type, entity)
-    return = func.(user)
-    unless match?({:error, _}, return), do: Recorder.record!(user, action_type, entity)
-    return
-  end
-  def lock!(user_id, action_type, entity, func) when is_integer(user_id) or is_nil(user_id),
-    do: lock!(do_load_user!(user_id), action_type, entity, func)
-
-  @doc """
-  Run Repo.transaction while locking permissions. Usefull when piping
-  """
-  def lock_transaction!(transaction = %Ecto.Multi{}, user, action_type, entity),
-    do: lock!(user, action_type, entity, fn _ -> Repo.transaction(transaction) end)
-
-  @doc """
   Check if user can execute action. Return {:ok, nb_available} if yes, {:error, reason} otherwise
   ## Examples
       iex> alias CaptainFact.Accounts.UserPermissions
@@ -125,8 +101,8 @@ defmodule CaptainFact.Accounts.UserPermissions do
   def check(nil, _, _), do: {:error, "unauthorized"}
   def check!(user = %User{}, action_type, entity) do
     case check(user, action_type, entity) do
-      {:ok, _} -> :ok
       {:error, message} -> raise %PermissionsError{message: message}
+      {:ok, nb_available} -> nb_available
     end
   end
   def check!(user_id, action_type, entity) when is_integer(user_id)  do
