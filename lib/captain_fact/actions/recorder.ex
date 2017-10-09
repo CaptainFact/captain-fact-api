@@ -9,11 +9,19 @@ defmodule CaptainFact.Actions.Recorder do
 
   @doc"""
   Record an action for user. User can be a %User{} struct or a user_id integer
+  Return {:ok, action} on success or {:error, action_changeset} on failure
+  """
+  def record(user, action_type, entity, params \\ %{}) do
+    Repo.insert(build_action_changeset(user, action_type, entity, params))
+  end
+
+  @doc"""
+  Record an action for user. User can be a %User{} struct or a user_id integer
+  Return action
   """
   def record!(user, action_type, entity, params \\ %{}) do
     Repo.insert!(build_action_changeset(user, action_type, entity, params))
   end
-
 
   @doc"""
   Count all actions with `action_type` type for this entity

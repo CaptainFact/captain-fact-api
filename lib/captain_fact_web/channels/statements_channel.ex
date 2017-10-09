@@ -2,7 +2,7 @@ defmodule CaptainFactWeb.StatementsChannel do
   use CaptainFactWeb, :channel
 
   import CaptainFactWeb.UserSocket, only: [handle_in_authenticated: 4]
-  import CaptainFact.VideoDebateActionCreator,
+  import CaptainFact.VideoDebate.ActionCreator,
     only: [action_create: 3, action_update: 3, action_delete: 3]
 
   alias Ecto.Multi

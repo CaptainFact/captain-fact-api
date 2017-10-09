@@ -1,4 +1,4 @@
-defmodule CaptainFact.VideoTest do
+defmodule CaptainFact.Videos.VideoTest do
   use CaptainFact.DataCase, async: true
 
   alias CaptainFactWeb.Video

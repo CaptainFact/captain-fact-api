@@ -1,4 +1,4 @@
-defmodule CaptainFact.CommentTest do
+defmodule CaptainFact.Comments.CommentTest do
   use CaptainFact.DataCase, async: true
 
   alias CaptainFact.Comments.Comment

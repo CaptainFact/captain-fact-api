@@ -1,7 +1,7 @@
 defmodule CaptainFactWeb.VideoDebateChannel do
   use CaptainFactWeb, :channel
 
-  import CaptainFact.VideoDebateActionCreator, only: [
+  import CaptainFact.VideoDebate.ActionCreator, only: [
     action_add: 3, action_create: 3, action_update: 3, action_delete: 3,
     action_remove: 3
   ]

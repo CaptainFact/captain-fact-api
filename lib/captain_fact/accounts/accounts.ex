@@ -10,7 +10,7 @@ defmodule CaptainFact.Accounts do
   alias CaptainFact.Email
 
   alias CaptainFact.Accounts.{User, ResetPasswordRequest, UserPermissions, InvitationRequest, Achievement}
-  alias CaptainFact.Accounts.{UsernameGenerator}
+  alias CaptainFact.Accounts.{UsernameGenerator, ForbiddenEmailProviders}
   alias CaptainFact.Actions.Recorder
 
   @max_ip_reset_requests 3

@@ -1,25 +1,26 @@
 defmodule CaptainFactWeb.VideoDebateHistoryChannel do
   use CaptainFactWeb, :channel
 
-  import CaptainFact.VideoDebateActionCreator, only: [action_restore: 3]
+  import CaptainFact.VideoDebate.ActionCreator, only: [action_restore: 3]
   import CaptainFactWeb.UserSocket, only: [handle_in_authenticated: 4]
 
   alias Phoenix.View
   alias Ecto.Multi
   alias CaptainFact.Videos.VideoHashId
   alias CaptainFact.Accounts.UserPermissions
-  alias CaptainFactWeb.{ Statement, Speaker, VideoSpeaker, VideoDebateActionView, StatementView, SpeakerView }
+  alias CaptainFactWeb.{ Statement, Speaker, VideoSpeaker, StatementView, SpeakerView }
   alias CaptainFact.VideoDebate.History
+  alias CaptainFactWeb.UserActionView
 
 
   def join("video_debate_history:" <> video_id_hash, _payload, socket) do
     video_id = VideoHashId.decode!(video_id_hash)
-    actions = View.render_many(History.video_history(video_id), VideoDebateActionView, "action.json")
+    actions = View.render_many(History.video_debate_history(video_id), UserActionView, "action.json")
     {:ok, %{actions: actions}, assign(socket, :video_id, video_id)}
   end
 
-  def join("statements_history:" <> statement_id, _payload, socket) do
-    actions = View.render_many(History.statement_history(statement_id), VideoDebateActionView, "action.json")
+  def join("statement_history:" <> statement_id, _payload, socket) do
+    actions = View.render_many(History.statement_history(statement_id), UserActionView, "action.json")
     {:ok, %{actions: actions}, assign(socket, :statement_id, statement_id)}
   end
 
@@ -43,7 +44,7 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
           rendered_action =
             action
             |> Map.put(:user, Repo.one!(Ecto.assoc(action, :user)))
-            |> View.render_one(VideoDebateActionView, "action.json")
+            |> View.render_one(UserActionView, "action.json")
           broadcast!(socket, "action_added", rendered_action)
 
           # Broadcast statement
@@ -76,7 +77,7 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
         rendered_action =
           action
           |> Map.put(:user, Repo.one!(Ecto.assoc(action, :user)))
-          |> View.render_one(VideoDebateActionView, "action.json")
+          |> View.render_one(UserActionView, "action.json")
         broadcast!(socket, "action_added", rendered_action)
         # Broadcast the speaker
         CaptainFactWeb.Endpoint.broadcast(

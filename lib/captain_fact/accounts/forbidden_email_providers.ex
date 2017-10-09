@@ -1,6 +1,10 @@
-# List from https://github.com/wesbos/burner-email-providers/blob/master/emails.txt
+defmodule CaptainFact.Accounts.ForbiddenEmailProviders do
+  @moduledoc """
+  TODO: Move this to DB
+  Temporary / spammy email providers. Use `is_forbidden/1` to check if provider is forbidden
+  List from https://github.com/wesbos/burner-email-providers/blob/master/emails.txt
+  """
 
-defmodule ForbiddenEmailProviders do
   @temporary_email_providers ~w(
     027168.com
     0815.ru

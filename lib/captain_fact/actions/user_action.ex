@@ -44,7 +44,6 @@ defmodule CaptainFact.Actions.UserAction do
   def type(:revert_vote_up),    do: 12
   def type(:revert_vote_down),  do: 13
   def type(:revert_self_vote),  do: 14
-
   # Special actions
   def type(:email_confirmed), do: 100
 
@@ -58,4 +57,6 @@ defmodule CaptainFact.Actions.UserAction do
   def entity(:history_action),  do: 6
   def entity(:user),            do: 7
 
+  # Context helpers
+  def video_debate_context(video_id), do: "VD:#{video_id}"
 end

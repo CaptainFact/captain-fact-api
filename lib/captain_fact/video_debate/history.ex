@@ -2,20 +2,20 @@ defmodule CaptainFact.VideoDebate.History do
   import Ecto.Query
 
   alias CaptainFact.Repo
-  alias CaptainFactWeb.VideoDebateAction
+  alias CaptainFact.Actions.UserAction
 
 
-  def video_history(video_id) do
-    VideoDebateAction
-    |> VideoDebateAction.with_user
-    |> where([a], a.video_id == ^video_id)
+  def video_debate_history(video_id) do
+    UserAction
+    |> preload(:user)
+    |> where([a], a.context == ^UserAction.video_debate_context(video_id))
     |> Repo.all()
   end
 
   def statement_history(statement_id) do
-    VideoDebateAction
-    |> VideoDebateAction.with_user
-    |> where([a], a.entity == "statement")
+    UserAction
+    |> preload(:user)
+    |> where([a], a.entity == ^UserAction.entity(:statement))
     |> where([a], a.entity_id == ^statement_id)
     |> Repo.all()
   end

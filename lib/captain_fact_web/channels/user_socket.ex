@@ -9,7 +9,7 @@ defmodule CaptainFactWeb.UserSocket do
   ## Channels
   channel "video_debate:*", CaptainFactWeb.VideoDebateChannel
   channel "video_debate_history:*", CaptainFactWeb.VideoDebateHistoryChannel
-  channel "statements_history:*", CaptainFactWeb.VideoDebateHistoryChannel
+  channel "statement_history:*", CaptainFactWeb.VideoDebateHistoryChannel
   channel "statements:video:*", CaptainFactWeb.StatementsChannel
   channel "comments:video:*", CaptainFact.Comments.CommentsChannel
 
