@@ -1,14 +1,14 @@
-defmodule CaptainFact.VideoDebateActionTest do
+defmodule CaptainFact.Actions.UserActionTest do
   use CaptainFact.DataCase, async: true
 
-  alias CaptainFactWeb.VideoDebateAction
+  alias CaptainFact.Actions.UserAction
 
   @valid_attrs %{
     user_id: 1,
-    video_id: 2,
-    entity: "statement",
+    context: "VD:1",
+    entity: UserAction.entity(:statement),
     entity_id: 42,
-    type: "update",
+    type: UserAction.type(:update),
     changes: %{
       text: "Updated !"
     }
@@ -21,24 +21,24 @@ defmodule CaptainFact.VideoDebateActionTest do
 
 
   test "changeset with valid attributes" do
-    changeset = VideoDebateAction.changeset(%VideoDebateAction{}, @valid_attrs)
+    changeset = UserAction.changeset(%UserAction{}, @valid_attrs)
     assert changeset.valid?
   end
 
   test "changeset with invalid attributes" do
-    changeset = VideoDebateAction.changeset(%VideoDebateAction{}, @invalid_attrs)
+    changeset = UserAction.changeset(%UserAction{}, @invalid_attrs)
     refute changeset.valid?
   end
 
   test "entity cannot be anything" do
     attrs = Map.put(@valid_attrs, :entity, "Not a valid entity !")
-    changeset = VideoDebateAction.changeset(%VideoDebateAction{}, attrs)
+    changeset = UserAction.changeset(%UserAction{}, attrs)
     refute changeset.valid?
   end
 
   test "action type must be create, remove, update, delete, or add" do
     attrs = Map.put(@valid_attrs, :type, "invalid_action_type")
-    changeset = VideoDebateAction.changeset(%VideoDebateAction{}, attrs)
+    changeset = UserAction.changeset(%UserAction{}, attrs)
     refute changeset.valid?
   end
 
@@ -48,7 +48,7 @@ defmodule CaptainFact.VideoDebateActionTest do
         type: action_type,
         changes: %{text: "Beer Time ! 🍺🍺🍺"}
       }
-      changeset = VideoDebateAction.changeset(%VideoDebateAction{}, attrs)
+      changeset = UserAction.changeset(%UserAction{}, attrs)
       refute changeset.valid?
     end
   end
@@ -59,7 +59,7 @@ defmodule CaptainFact.VideoDebateActionTest do
         type: action_type,
         changes: nil
       }
-      changeset = VideoDebateAction.changeset(%VideoDebateAction{}, attrs)
+      changeset = UserAction.changeset(%UserAction{}, attrs)
       refute changeset.valid?
     end
   end
@@ -70,7 +70,7 @@ defmodule CaptainFact.VideoDebateActionTest do
         type: action_type,
         changes: %{}
       }
-      changeset = VideoDebateAction.changeset(%VideoDebateAction{}, attrs)
+      changeset = UserAction.changeset(%UserAction{}, attrs)
       refute changeset.valid?
     end
   end

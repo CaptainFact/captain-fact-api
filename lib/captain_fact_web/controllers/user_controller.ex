@@ -50,7 +50,7 @@ defmodule CaptainFactWeb.UserController do
 
   def available_flags(conn, _) do
     current_user = Guardian.Plug.current_resource(conn)
-    case UserPermissions.check(current_user, :flag_comment) do
+    case UserPermissions.check(current_user, :flag, :comment) do
       {:ok, num_available} -> json(conn, %{flags_available: num_available})
       {:error, _reason} ->
         json(conn, %{flags_available: 0})

@@ -2,6 +2,7 @@ defmodule CaptainFact.Factory do
   use ExMachina.Ecto, repo: CaptainFact.Repo
 
   alias CaptainFact.Accounts.{User, InvitationRequest}
+  alias CaptainFact.Actions.UserAction
   alias CaptainFactWeb.{Video, Statement, Speaker}
   alias CaptainFact.Comments.{Comment, Vote}
   alias CaptainFact.Sources.Source
@@ -79,6 +80,18 @@ defmodule CaptainFact.Factory do
       user: build(:user),
       comment: build(:comment),
       value: 1
+    }
+  end
+
+  def user_action_factory do
+    %UserAction{
+      user: build(:user),
+      target_user: build(:user),
+      context: nil,
+      type: UserAction.type(:create),
+      entity: UserAction.entity(:comment),
+      entity_id: nil,
+      changes: nil
     }
   end
 

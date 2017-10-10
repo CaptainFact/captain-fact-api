@@ -19,11 +19,13 @@ for params <- achievements do
   end
 end
 
-# Create Admin
-admin = User.registration_changeset(%User{reputation: 4200}, %{
-  username: "Betree",
-  email: "admin@captainfact.io",
-  password: "password"
-})
+# Create Admin for dev
+if Kernel.function_exported?(Mix, :env, 0) && Mix.env == :dev do
+  admin = User.registration_changeset(%User{reputation: 4200}, %{
+    username: "Betree",
+    email: "admin@captainfact.io",
+    password: "password"
+  })
 
-Repo.insert(admin) # No need to warn if already exists
+  Repo.insert(admin) # No need to warn if already exists
+end

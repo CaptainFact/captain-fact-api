@@ -4,7 +4,7 @@ defmodule CaptainFact.Mixfile do
   def project do
     [
       app: :captain_fact,
-      version: "0.4.2",
+      version: "0.5.0-rc1",
       elixir: "~> 1.5",
       elixirc_paths: elixirc_paths(Mix.env),
       compilers: [:phoenix, :gettext] ++ Mix.compilers,
@@ -60,7 +60,7 @@ defmodule CaptainFact.Mixfile do
       {:httpoison, "~> 0.11.2"},
       {:poison, "~> 2.2.0"},
       {:csv, "~> 1.4.4"},
-      {:quantum, ">= 1.9.2"},
+      {:quantum, "~> 2.1.0"},
       {:not_qwerty123, "~> 2.1"},
       {:bamboo, "~> 1.0.0-rc.1"},
       {:ex_aws, "~> 1.1"},

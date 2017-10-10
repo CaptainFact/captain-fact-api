@@ -7,6 +7,7 @@ defmodule CaptainFact.Videos do
   import CaptainFact.Videos.MetadataFetcher
 
   alias CaptainFact.Repo
+  alias CaptainFact.Actions.Recorder
   alias CaptainFact.Accounts.UserPermissions
   alias CaptainFactWeb.Video
 
@@ -34,15 +35,15 @@ defmodule CaptainFact.Videos do
   Returns video if success or {:error, reason} if something bad append. Can also throw if bad permissions
   """
   def create!(user, video_url) do
-    # Unsafe check before request just to ensure user is not using this method to DDOS youtube
-    UserPermissions.check!(user, :add_video)
-
+    UserPermissions.check!(user, :add, :video)
     case fetch_video_metadata(video_url) do
       {:ok, metadata} ->
-        changeset = Video.changeset(%Video{}, metadata)
-        user
-        |> UserPermissions.lock!(:add_video, fn _ -> Repo.insert!(changeset) end)
-        |> Map.put(:speakers, [])
+        video =
+          Video.changeset(%Video{}, metadata)
+          |> Repo.insert!()
+          |> Map.put(:speakers, [])
+        Recorder.record!(user, :add, :video, %{entity_id: video.id})
+        video
       error -> error
     end
   end

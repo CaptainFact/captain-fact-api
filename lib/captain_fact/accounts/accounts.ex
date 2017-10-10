@@ -10,7 +10,8 @@ defmodule CaptainFact.Accounts do
   alias CaptainFact.Email
 
   alias CaptainFact.Accounts.{User, ResetPasswordRequest, UserPermissions, InvitationRequest, Achievement}
-  alias CaptainFact.Accounts.{UsernameGenerator, ReputationUpdater}
+  alias CaptainFact.Accounts.{UsernameGenerator, ForbiddenEmailProviders}
+  alias CaptainFact.Actions.Recorder
 
   @max_ip_reset_requests 3
   @request_validity 48 * 60 * 60 # 48 hours
@@ -61,6 +62,10 @@ defmodule CaptainFact.Accounts do
     result
   end
 
+  @doc"""
+  Send user a welcome email, with a link to confirm it
+  `user`: A user with email_confirmed set to false
+  """
   def send_welcome_email(user) do
     CaptainFact.Mailer.deliver_later(CaptainFact.Email.welcome_email(user))
   end
@@ -104,25 +109,23 @@ defmodule CaptainFact.Accounts do
       |> User.changeset_confirm_email(true)
       |> Repo.update!()
 
-    ReputationUpdater.register_action(user, :email_confirmed)
-    unlock_achievement(user, "not-a-robot")
+    Recorder.record!(user, :email_confirmed, :user)
   end
 
   # ---- Achievements -----
 
-  def unlock_achievement(user = %User{id: user_id}, slug, async \\ true) when is_binary(slug) do
-    func = fn ->
-      achievement = Repo.get_by!(Achievement, slug: slug)
-      Repo.transaction(fn ->
+  def unlock_achievement(%User{id: user_id}, slug) when is_binary(slug) do
+    achievement = Repo.get_by!(Achievement, slug: slug)
+    Repo.transaction(fn ->
+      user =
         User
         |> where(id: ^user_id)
         |> lock("FOR UPDATE")
         |> Repo.one!()
-        |> Ecto.Changeset.change(achievements: [achievement.id | user.achievements])
-        |> Repo.update!()
-      end)
-    end
-    if async, do: Task.start(func), else: func.()
+
+      updated_achievements = Enum.uniq([achievement.id | user.achievements])
+      Repo.update!(Ecto.Changeset.change(user, achievements: updated_achievements))
+    end)
   end
 
   # ---- Reset Password ----
