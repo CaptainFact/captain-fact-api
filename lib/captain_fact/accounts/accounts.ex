@@ -63,9 +63,9 @@ defmodule CaptainFact.Accounts do
   end
 
   @doc"""
-  Send user a welcome email, with a link to confirm it
-  `user`: A user with email_confirmed set to false
+  Send user a welcome email, with a link to confirm it (only if not already confirmed)
   """
+  def send_welcome_email(user = %User{email_confirmed: true}), do: nil
   def send_welcome_email(user) do
     CaptainFact.Mailer.deliver_later(CaptainFact.Email.welcome_email(user))
   end
