@@ -29,7 +29,6 @@ config :captain_fact, CaptainFact.Repo,
 
 # Configure scheduler
 config :captain_fact, CaptainFact.Scheduler,
-  overlap: false,
   jobs: [
     {{:extended,  "*/5 * * * * *"}, {CaptainFact.Actions.Analysers.Votes, :update, []}}, # Every 5 seconds
     {{:cron,      "*/1 * * * *"},   {CaptainFact.Actions.Analysers.Reputation, :update, []}}, # Every minute
