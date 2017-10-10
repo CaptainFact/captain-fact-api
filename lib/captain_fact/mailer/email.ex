@@ -20,11 +20,11 @@ defmodule CaptainFact.Email do
     |> subject("Welcome to CaptainFact.io !")
     |> html_body("""
        We're glad having you joining us on CaptainFact ! To confirm your email and gain a bonus of
-       +#{@confirm_email_reputation} reputation right now, click on the link below :
+       +#{@confirm_email_reputation} reputation right now, click on this link :
        <a href="#{frontend_url()}/confirm_email/#{user.email_confirmation_token}">
          Confirm email
        </a>
-
+       <br/><br/>
        If you need help or want to know more about how it works, check
        <a href="#{frontend_url()}/help">the help pages</a>.
        """)
@@ -37,13 +37,13 @@ defmodule CaptainFact.Email do
   def reset_password_request_mail(%ResetPasswordRequest{user: user, token: token, source_ip: ip}) do
     new_email(from: @cf_no_reply)
     |> to(user)
-    |> subject("Reset your password")
+    |> subject("CaptainFact.io - Reset your password")
     |> html_body("""
-       You recently asked to reset your password. Click on the link below to do so :
+       You recently asked to reset your password on https://captainfact.io. Click on the link below to do so :
        <a href="#{frontend_url()}/reset_password/confirm/#{token}">Reset pasword</a>
-
+       <br/>
        Please ignore this email if the request is not comming from you.
-
+       <br/><br/>
        Reset requested by ip : #{ip}
        """)
   end
