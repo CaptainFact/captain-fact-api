@@ -2,6 +2,7 @@ defmodule CaptainFact.Factory do
   use ExMachina.Ecto, repo: CaptainFact.Repo
 
   alias CaptainFact.Accounts.{User, InvitationRequest}
+  alias CaptainFact.Actions.UserAction
   alias CaptainFactWeb.{Video, Statement, Speaker}
   alias CaptainFact.Comments.{Comment, Vote}
   alias CaptainFact.Sources.Source
@@ -15,7 +16,8 @@ defmodule CaptainFact.Factory do
       encrypted_password: "$2b$12$fe55IfCdqNzKp1wMIJDwVeG3f7guOduEE5HS2C9IJyfkuk3avbjQG",
       fb_user_id: Integer.to_string(Enum.random(10000..9999999999999)),
       reputation: 0,
-      email_confirmation_token: random_string(64)
+      email_confirmation_token: random_string(64),
+      achievements: [1] # Users are always created with the "Welcome" achievement
     }
   end
 
@@ -78,6 +80,18 @@ defmodule CaptainFact.Factory do
       user: build(:user),
       comment: build(:comment),
       value: 1
+    }
+  end
+
+  def user_action_factory do
+    %UserAction{
+      user: build(:user),
+      target_user: build(:user),
+      context: nil,
+      type: UserAction.type(:create),
+      entity: UserAction.entity(:comment),
+      entity_id: nil,
+      changes: nil
     }
   end
 

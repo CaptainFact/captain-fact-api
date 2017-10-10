@@ -3,20 +3,6 @@ defmodule CaptainFactWeb.Router do
 
   # ---- Pipelines ----
 
-  # Browser (backadmin)
-
-  pipeline :browser do
-    plug :accepts, ["html"]
-    plug :fetch_session
-    plug :fetch_flash
-    plug :protect_from_forgery
-    plug :put_secure_browser_headers
-    plug Guardian.Plug.VerifySession
-    plug Guardian.Plug.LoadResource
-  end
-
-  # API
-
   pipeline :api do
     plug :accepts, ["json"]
   end
@@ -76,6 +62,10 @@ defmodule CaptainFactWeb.Router do
 
   # Dev only : mailer. We can use Mix.env here cause file is interpreted at compile time
   if Mix.env == :dev do
+    pipeline :browser do
+      plug :accepts, ["html"]
+    end
+
     scope "/jouge42/mail" do
       pipe_through [:browser]
       forward "/sent_emails", Bamboo.SentEmailViewerPlug

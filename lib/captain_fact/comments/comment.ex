@@ -47,7 +47,8 @@ defmodule CaptainFact.Comments.Comment do
           username: u.username,
           reputation: u.reputation,
           inserted_at: u.inserted_at,
-          picture_url: u.picture_url
+          picture_url: u.picture_url,
+          achievements: u.achievements
         }
       })
   end

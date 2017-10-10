@@ -3,6 +3,7 @@ defmodule CaptainFact.AccountsTest do
   use Bamboo.Test
 
   alias CaptainFact.Accounts
+  alias CaptainFact.Actions.Analysers.{Reputation, Achievements}
 
   describe "reset_password_requests" do
     alias CaptainFact.Accounts.ResetPasswordRequest
@@ -207,12 +208,23 @@ defmodule CaptainFact.AccountsTest do
     test "set email_confirmed to true, reset the token and update reputation" do
       user = insert(:user)
       Accounts.confirm_email!(user.email_confirmation_token)
-      CaptainFact.Accounts.ReputationUpdater.wait_queue()
+      Reputation.update()
+      Achievements.update()
       updated_user = Repo.get(Accounts.User, user.id)
 
       assert updated_user.email_confirmed
       assert updated_user.email_confirmation_token == nil
       assert user.reputation < updated_user.reputation
+    end
+  end
+
+  describe "achievements" do
+    test "unlock achievements" do
+      user = insert(:user)
+      achievement = Repo.get_by!(Accounts.Achievement, slug: "bulletproof")
+      Accounts.unlock_achievement(user, achievement.slug)
+      updated = Repo.get(Accounts.User, user.id)
+      assert achievement.id in updated.achievements
     end
   end
 

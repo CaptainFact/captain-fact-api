@@ -32,5 +32,8 @@ config :captain_fact, CaptainFact.Repo,
   hostname: (if is_nil(System.get_env("POSTGRES_HOST")), do: "localhost", else: System.get_env("POSTGRES_HOST")),
   pool: Ecto.Adapters.SQL.Sandbox
 
+# Disable CRON tasks on test
+config :quantum, :captain_fact, cron: []
+
 # Mails
 config :captain_fact, CaptainFact.Mailer, adapter: Bamboo.TestAdapter

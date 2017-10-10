@@ -36,7 +36,7 @@ test_api:
       -e POSTGRES_DB=captain_fact_test -e POSTGRES_PASSWORD=postgres
       postgres:9.6
   script:
-    docker run --rm --network $TEST_NETWORK -e MIX_ENV=test -e POSTGRES_HOST=$TEST_DB $CF_API_BUILD_IMAGE mix test
+    docker run --rm --network $TEST_NETWORK -e MIX_ENV=test -e POSTGRES_HOST=$TEST_DB $CF_API_BUILD_IMAGE /bin/sh -c "mix ecto.reset && mix test"
   after_script:
     - (docker stop $TEST_DB && docker rm $TEST_DB) || /bin/true
     - docker network rm $TEST_NETWORK || /bin/true

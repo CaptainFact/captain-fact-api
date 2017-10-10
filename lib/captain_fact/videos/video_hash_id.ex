@@ -1,4 +1,4 @@
-defmodule CaptainFact.VideoHashId do
+defmodule CaptainFact.Videos.VideoHashId do
   defmodule InvalidVideoHashError do
     @moduledoc """
     Exception throwed when hash is not valid
@@ -25,7 +25,7 @@ defmodule CaptainFact.VideoHashId do
   @doc """
   Encode a given id
   ## Examples
-      iex> CaptainFact.VideoHashId.encode(42)
+      iex> CaptainFact.Videos.VideoHashId.encode(42)
       "4VyJ"
   """
   @spec encode(Integer.t) :: String.t
@@ -36,9 +36,9 @@ defmodule CaptainFact.VideoHashId do
   @doc """
   Decode a given hash
   ## Examples
-      iex> CaptainFact.VideoHashId.decode("JbOz")
+      iex> CaptainFact.Videos.VideoHashId.decode("JbOz")
       {:ok, 1337}
-      iex> CaptainFact.VideoHashId.decode("€€€€€€€€€€€€€€€€€")
+      iex> CaptainFact.Videos.VideoHashId.decode("€€€€€€€€€€€€€€€€€")
       {:error, :invalid_input_data}
   """
   @spec decode(String.t) :: Integer.t
@@ -52,10 +52,10 @@ defmodule CaptainFact.VideoHashId do
   @doc """
   Decode a given hash. Raise if hash is invalid
   ## Examples
-      iex> CaptainFact.VideoHashId.decode!("JbOz")
+      iex> CaptainFact.Videos.VideoHashId.decode!("JbOz")
       1337
-      iex> catch_throw(CaptainFact.VideoHashId.decode!("€€€"))
-      CaptainFact.VideoHashId.InvalidVideoHashError
+      iex> catch_throw(CaptainFact.Videos.VideoHashId.decode!("€€€"))
+      CaptainFact.Videos.VideoHashId.InvalidVideoHashError
   """
   @spec decode!(String.t) :: Integer.t
   def decode!(hash) do

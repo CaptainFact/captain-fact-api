@@ -2,6 +2,8 @@ defmodule CaptainFact.Accounts.User do
   use CaptainFactWeb, :model
 
   alias CaptainFact.TokenGenerator
+  alias CaptainFact.Accounts.ForbiddenEmailProviders
+
 
   schema "users" do
     field :username, :string
@@ -11,6 +13,7 @@ defmodule CaptainFact.Accounts.User do
     field :picture_url, :string
     field :reputation, :integer, default: 0
     field :locale, :string
+    field :achievements, {:array, :integer}, default: []
 
     # Social networks profiles
     field :fb_user_id, :string
@@ -23,9 +26,9 @@ defmodule CaptainFact.Accounts.User do
     field :password, :string, virtual: true
 
     # Assocs
+    has_many :actions, CaptainFact.Actions.UserAction, on_delete: :delete_all
     has_many :comments, CaptainFact.Comments.Comment, on_delete: :delete_all
     has_many :votes, CaptainFact.Comments.Vote, on_delete: :delete_all
-    has_many :video_debate_actions, CaptainFactWeb.VideoDebateAction, on_delete: :nilify_all
 
     has_many :flags_posted, CaptainFactWeb.Flag, foreign_key: :source_user_id, on_delete: :delete_all
     has_many :flags_received, CaptainFactWeb.Flag, foreign_key: :target_user_id, on_delete: :delete_all
@@ -64,6 +67,7 @@ defmodule CaptainFact.Accounts.User do
     |> common_changeset(params)
     |> password_changeset(params)
     |> generate_email_verification_token(false)
+    |> put_change(:achievements, [1]) # Default to "welcome" achievement
   end
 
   def changeset_confirm_email(model, is_confirmed) do

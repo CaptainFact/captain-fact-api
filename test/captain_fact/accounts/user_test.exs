@@ -2,6 +2,7 @@ defmodule CaptainFact.Accounts.UserTest do
   use CaptainFact.DataCase, async: true
 
   alias CaptainFact.Accounts.User
+  alias CaptainFact.Accounts.ForbiddenEmailProviders
 
   @valid_attrs %{
     name: "Jouje BigBrother",

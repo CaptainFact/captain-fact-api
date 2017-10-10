@@ -2,11 +2,12 @@ defmodule CaptainFact.Comments.CommentsChannel do
   use CaptainFactWeb, :channel
 
   import CaptainFactWeb.UserSocket, only: [handle_in_authenticated: 4]
-  alias CaptainFact.Accounts.User
   alias CaptainFactWeb.{ CommentView, VoteView, Flag }
-  alias CaptainFact.{ VideoHashId, Flagger }
+  alias CaptainFact.Accounts.User
+  alias CaptainFact.Videos.VideoHashId
+  alias CaptainFact.Actions.{Flagger, UserAction}
   alias CaptainFact.Comments
-  alias CaptainFact.Comments.{Comment, Vote, VoteDebouncer}
+  alias CaptainFact.Comments.{Comment, Vote}
 
 
   def join("comments:video:" <> video_id_hash, _payload, socket) do
@@ -33,7 +34,7 @@ defmodule CaptainFact.Comments.CommentsChannel do
   def handle_in_authenticated!("new_comment", params, socket) do
     source_url = get_in(params, ["source", "url"])
     user = Repo.get!(User, socket.assigns.user_id)
-    comment = Comments.add_comment(user, params, source_url, fn comment ->
+    comment = Comments.add_comment(user, context(socket), params, source_url, fn comment ->
       comment = Repo.preload(comment, :source) |> Repo.preload(:user)
       rendered_comment = CommentView.render("comment.json", comment: comment)
       broadcast!(socket, "comment_updated", rendered_comment)
@@ -58,8 +59,7 @@ defmodule CaptainFact.Comments.CommentsChannel do
   end
 
   def handle_in_authenticated!("vote", %{"comment_id" => comment_id, "value" => value}, socket) do
-    vote = Comments.vote(Repo.get(User, socket.assigns.user_id), comment_id, value)
-    VoteDebouncer.add_vote(socket.topic, vote.comment_id)
+    Comments.vote(Repo.get!(User, socket.assigns.user_id), context(socket), comment_id, value)
     {:reply, :ok, socket}
   end
 
@@ -75,7 +75,7 @@ defmodule CaptainFact.Comments.CommentsChannel do
       {:reply, :ok, socket}
     rescue e in Ecto.ConstraintError ->
       # TODO migrate to user_socket rescue_channel_errors with other constraints violations
-      if e.constraint == "flags_source_user_id_type_entity_id_index" do
+      if e.constraint == "flags_source_user_id_entity_entity_id_index" do
         {:reply, {:error, %{message: "action_already_done"}}, socket}
       else
         throw e
@@ -83,8 +83,11 @@ defmodule CaptainFact.Comments.CommentsChannel do
     end
   end
 
+  defp context(socket), do: UserAction.video_debate_context(socket.assigns.video_id)
+
   defp load_user_data(response, nil, _), do: response
   defp load_user_data(response = %{comments: comments}, user = %User{}, video_id) do
+    # TODO move these queries to Flagger
     comments_ids = Enum.map(comments, &(&1.id))
     response
     |> Map.put(:my_votes, VoteView.render("my_votes.json", votes:
@@ -97,7 +100,7 @@ defmodule CaptainFact.Comments.CommentsChannel do
     |> Map.put(:my_flags,
         Flag
         |> where([f], f.source_user_id == ^user.id)
-        |> where([f], f.type == 1) #TODO Use method
+        |> where([f], f.entity == 1) #TODO Use method
         |> where([f], f.entity_id in ^comments_ids)
         |> select([:entity_id])
         |> Repo.all()

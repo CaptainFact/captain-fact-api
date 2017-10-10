@@ -9,7 +9,7 @@ defmodule CaptainFactWeb.UserSocket do
   ## Channels
   channel "video_debate:*", CaptainFactWeb.VideoDebateChannel
   channel "video_debate_history:*", CaptainFactWeb.VideoDebateHistoryChannel
-  channel "statements_history:*", CaptainFactWeb.VideoDebateHistoryChannel
+  channel "statement_history:*", CaptainFactWeb.VideoDebateHistoryChannel
   channel "statements:video:*", CaptainFactWeb.StatementsChannel
   channel "comments:video:*", CaptainFact.Comments.CommentsChannel
 
@@ -27,6 +27,12 @@ defmodule CaptainFactWeb.UserSocket do
       _ ->
         {:ok, assign(socket, :user_id, nil)}
     end
+  end
+
+  def multi_assign(socket, assigns_list) do
+    Enum.reduce(assigns_list, socket, fn ({key, value}, socket) ->
+      assign(socket, key, value)
+    end)
   end
 
   def handle_in_authenticated(command, params, socket, handler) do
@@ -52,6 +58,7 @@ defmodule CaptainFactWeb.UserSocket do
         reply_error(socket, Phoenix.View.render(ErrorView, "404.json", []))
       e ->
         Logger.error("[RescueChannel] An unknown error just popped : #{inspect(e)}")
+        Logger.debug(fn ->"Stacktrace: #{inspect(System.stacktrace(), pretty: true)}" end)
         reply_error(socket, Phoenix.View.render(ErrorView, "error.json", []))
     end
   end

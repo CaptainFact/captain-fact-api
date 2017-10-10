@@ -1,7 +1,7 @@
 defmodule CaptainFactWeb.VideoDebateChannel do
   use CaptainFactWeb, :channel
 
-  import CaptainFact.VideoDebateActionCreator, only: [
+  import CaptainFact.VideoDebate.ActionCreator, only: [
     action_add: 3, action_create: 3, action_update: 3, action_delete: 3,
     action_remove: 3
   ]
@@ -9,13 +9,14 @@ defmodule CaptainFactWeb.VideoDebateChannel do
 
   alias Phoenix.View
   alias Ecto.Multi
-  alias CaptainFact.VideoHashId
+  alias CaptainFact.Videos.VideoHashId
   alias CaptainFact.Accounts.UserPermissions
+  alias CaptainFact.Actions.Recorder
   alias CaptainFactWeb.{ Video, VideoView, Speaker, SpeakerView, VideoSpeaker, ChangesetView}
 
 
-  def join("video_debate:" <> video_id_hash, _payload, socket) do
-    with {:ok, video_id} <- VideoHashId.decode(video_id_hash),
+  def join("video_debate:" <> video_hash_id, _payload, socket) do
+    with {:ok, video_id} <- VideoHashId.decode(video_hash_id),
          video when not is_nil(video) <- Repo.get(Video.with_speakers(Video), video_id)
     do
       {:ok, View.render_one(video, VideoView, "video.json"), assign(socket, :video_id, video_id)}
@@ -33,12 +34,13 @@ defmodule CaptainFactWeb.VideoDebateChannel do
   """
   def handle_in_authenticated!("new_speaker", %{"id" => id}, socket) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
+    UserPermissions.check!(user_id, :add, :speaker)
     speaker = Repo.get!(Speaker, id)
     changeset = VideoSpeaker.changeset(%VideoSpeaker{speaker_id: speaker.id, video_id: video_id})
     Multi.new
     |> Multi.insert(:video_speaker, changeset)
     |> Multi.insert(:action_add, action_add(user_id, video_id, speaker))
-    |> UserPermissions.lock_transaction!(user_id, :add_speaker)
+    |> Repo.transaction()
     |> case do
       {:ok, %{}} ->
         rendered_speaker = SpeakerView.render("show.json", speaker: speaker)
@@ -49,10 +51,11 @@ defmodule CaptainFactWeb.VideoDebateChannel do
   end
 
   @doc """
-  Add a new speaker to the video
+  Create a new speaker for this video
   """
   def handle_in_authenticated!("new_speaker", params, socket) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
+    UserPermissions.check!(user_id, :create, :speaker)
     speaker_changeset = Speaker.changeset(%Speaker{is_user_defined: true}, params)
 
     Multi.new
@@ -64,9 +67,9 @@ defmodule CaptainFactWeb.VideoDebateChannel do
          |> Repo.insert()
        end)
     |> Multi.run(:action_create, fn %{speaker: speaker} ->
-         Repo.insert(action_create(user_id, video_id, speaker))
+         Recorder.record(action_create(user_id, video_id, speaker))
        end)
-    |> UserPermissions.lock_transaction!(user_id, :add_speaker)
+    |> Repo.transaction()
     |> case do
       {:ok, %{speaker: speaker}} ->
         # Broadcast the speaker
@@ -79,19 +82,19 @@ defmodule CaptainFactWeb.VideoDebateChannel do
   end
 
   def handle_in_authenticated!("update_speaker", params, socket) do
+    UserPermissions.check!(socket.assigns.user_id, :update, :speaker)
     speaker = Repo.get_by!(Speaker, id: params["id"], is_removed: false)
     if !speaker.is_user_defined do
       {:reply, {:error, %{speaker: "forbidden"}}, socket}
     else
-      %{user_id: user_id, video_id: video_id} = socket.assigns
       changeset = Speaker.changeset(speaker, params)
       case changeset.changes do
         changes when changes === %{} -> {:reply, :ok, socket}
         _ ->
           Multi.new
           |> Multi.update(:speaker, changeset)
-          |> Multi.insert(:action_update, action_update(user_id, video_id, changeset))
-          |> UserPermissions.lock_transaction!(user_id, :edit_speaker)
+          |> Multi.insert(:action_update, action_update(socket.assigns.user_id, socket.assigns.video_id, changeset))
+          |> Repo.transaction()
           |> case do
             {:ok, %{speaker: speaker}} ->
               rendered_speaker = View.render_one(speaker, SpeakerView, "speaker.json")
@@ -129,21 +132,23 @@ defmodule CaptainFactWeb.VideoDebateChannel do
 
   defp do_remove_speaker(socket, speaker = %{is_user_defined: true}) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
+    UserPermissions.check!(user_id, :remove, :speaker)
     video_speaker = %VideoSpeaker{speaker_id: speaker.id, video_id: video_id}
     Multi.new
     |> Multi.update(:speaker, Speaker.changeset_remove(speaker))
     |> Multi.delete(:video_speaker, VideoSpeaker.changeset(video_speaker))
     |> Multi.insert(:action_delete, action_delete(user_id, video_id, speaker))
-    |> UserPermissions.lock_transaction!(user_id, :remove_speaker)
+    |> Repo.transaction()
   end
 
   defp do_remove_speaker(socket, speaker = %{is_user_defined: false}) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
+    UserPermissions.check!(user_id, :remove, :speaker)
     video_speaker = %VideoSpeaker{speaker_id: speaker.id, video_id: video_id}
 
     Multi.new
     |> Multi.delete(:video_speaker, VideoSpeaker.changeset(video_speaker))
     |> Multi.insert(:action_remove, action_remove(user_id, video_id, speaker))
-    |> UserPermissions.lock_transaction!(user_id, :remove_speaker)
+    |> Repo.transaction()
   end
 end
