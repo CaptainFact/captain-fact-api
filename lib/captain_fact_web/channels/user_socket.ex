@@ -29,6 +29,12 @@ defmodule CaptainFactWeb.UserSocket do
     end
   end
 
+  def multi_assign(socket, assigns_list) do
+    Enum.reduce(assigns_list, socket, fn ({key, value}, socket) ->
+      assign(socket, key, value)
+    end)
+  end
+
   def handle_in_authenticated(command, params, socket, handler) do
     case socket.assigns.user_id do
       nil -> {:reply, :error, socket}

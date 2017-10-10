@@ -23,7 +23,7 @@ defmodule CaptainFact.Actions.Analysers.Flags do
   end
 
   @timeout 60_000 # 1 minute
-  def force_update() do
+  def update() do
     GenServer.call(@name, :update_flags, @timeout)
   end
 
@@ -37,7 +37,7 @@ defmodule CaptainFact.Actions.Analysers.Flags do
       UserAction
       |> where([a], a.id > ^last_action_id)
       |> where([a], a.type == ^UserAction.type(:flag))
-      |> Repo.all()
+      |> Repo.all(log: false)
       |> start_analysis()
     end
     {:reply, :ok , :ok}
@@ -48,13 +48,7 @@ defmodule CaptainFact.Actions.Analysers.Flags do
     Logger.info("[Analyser.Flags] Update flags")
     report = ReportManager.create_report!(@analyser_id, :running, actions)
     nb_entities_banned = do_update_flags(actions)
-
-    # Update report
-    ReportManager.update_report!(report, %{
-      nb_entries_updated: nb_entities_banned,
-      run_duration: NaiveDateTime.diff(NaiveDateTime.utc_now(), report.inserted_at),
-      status: UsersActionsReport.status(:success)
-    })
+    ReportManager.set_success!(report, nb_entities_banned)
   end
 
   # Update flags, return the number of updated users

@@ -208,8 +208,8 @@ defmodule CaptainFact.AccountsTest do
     test "set email_confirmed to true, reset the token and update reputation" do
       user = insert(:user)
       Accounts.confirm_email!(user.email_confirmation_token)
-      Reputation.force_update()
-      Achievements.force_update()
+      Reputation.update()
+      Achievements.update()
       updated_user = Repo.get(Accounts.User, user.id)
 
       assert updated_user.email_confirmed

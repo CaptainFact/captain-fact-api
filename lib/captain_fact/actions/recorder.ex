@@ -16,6 +16,13 @@ defmodule CaptainFact.Actions.Recorder do
   end
 
   @doc"""
+  A helper to make the transition from deprecated VideoDebateAction smoother
+  """
+  def record(changeset = %Ecto.Changeset{data: %UserAction{}}) do
+    Repo.insert(changeset)
+  end
+
+  @doc"""
   Record an action for user. User can be a %User{} struct or a user_id integer
   Return action
   """

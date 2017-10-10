@@ -5,9 +5,9 @@ defmodule CaptainFact.Comments.CommentsChannel do
   alias CaptainFactWeb.{ CommentView, VoteView, Flag }
   alias CaptainFact.Accounts.User
   alias CaptainFact.Videos.VideoHashId
-  alias CaptainFact.Actions.Flagger
+  alias CaptainFact.Actions.{Flagger, UserAction}
   alias CaptainFact.Comments
-  alias CaptainFact.Comments.{Comment, Vote, VoteDebouncer}
+  alias CaptainFact.Comments.{Comment, Vote}
 
 
   def join("comments:video:" <> video_id_hash, _payload, socket) do
@@ -34,7 +34,7 @@ defmodule CaptainFact.Comments.CommentsChannel do
   def handle_in_authenticated!("new_comment", params, socket) do
     source_url = get_in(params, ["source", "url"])
     user = Repo.get!(User, socket.assigns.user_id)
-    comment = Comments.add_comment(user, params, source_url, fn comment ->
+    comment = Comments.add_comment(user, context(socket), params, source_url, fn comment ->
       comment = Repo.preload(comment, :source) |> Repo.preload(:user)
       rendered_comment = CommentView.render("comment.json", comment: comment)
       broadcast!(socket, "comment_updated", rendered_comment)
@@ -59,8 +59,7 @@ defmodule CaptainFact.Comments.CommentsChannel do
   end
 
   def handle_in_authenticated!("vote", %{"comment_id" => comment_id, "value" => value}, socket) do
-    vote = Comments.vote(Repo.get(User, socket.assigns.user_id), comment_id, value)
-    VoteDebouncer.add_vote(socket.topic, vote.comment_id)
+    Comments.vote(Repo.get!(User, socket.assigns.user_id), context(socket), comment_id, value)
     {:reply, :ok, socket}
   end
 
@@ -83,6 +82,8 @@ defmodule CaptainFact.Comments.CommentsChannel do
       end
     end
   end
+
+  defp context(socket), do: UserAction.video_debate_context(socket.assigns.video_id)
 
   defp load_user_data(response, nil, _), do: response
   defp load_user_data(response = %{comments: comments}, user = %User{}, video_id) do

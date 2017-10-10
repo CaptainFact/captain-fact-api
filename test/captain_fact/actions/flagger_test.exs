@@ -22,8 +22,8 @@ defmodule CaptainFact.Actions.FlaggerTest do
     comment = context[:comment]
 
     Flagger.flag!(comment, 1, source.id)
-    Reputation.force_update()
-    Flags.force_update()
+    Reputation.update()
+    Flags.update()
     assert Flagger.get_nb_flags(comment) == 1
     assert Repo.get!(User, context[:target_user].id).reputation < context[:target_user].reputation
   end
@@ -35,8 +35,8 @@ defmodule CaptainFact.Actions.FlaggerTest do
     for source <- context[:source_users] do
       Flagger.flag!(comment, 1, source.id)
     end
-    Reputation.force_update()
-    Flags.force_update()
+    Reputation.update()
+    Flags.update()
     assert Repo.get(Comment, comment.id).is_banned == true
     assert Repo.get!(User, target.id).reputation < target.reputation
   end

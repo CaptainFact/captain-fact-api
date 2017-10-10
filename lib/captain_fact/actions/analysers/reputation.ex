@@ -50,7 +50,7 @@ defmodule CaptainFact.Actions.Analysers.Reputation do
   end
 
   @timeout 120_000 # 2 minutes
-  def force_update() do
+  def update() do
     GenServer.call(@name, :update_reputations, @timeout)
   end
 
@@ -71,7 +71,7 @@ defmodule CaptainFact.Actions.Analysers.Reputation do
     last_action_id = ReportManager.get_last_action_id(@analyser_id)
 
     unless last_action_id == -1,
-      do: start_analysis(Repo.all(from a in UserAction, where: a.id > ^last_action_id, where: a.type in @actions_types))
+      do: start_analysis(Repo.all(from(a in UserAction, where: a.id > ^last_action_id, where: a.type in @actions_types), log: false))
     {:reply, :ok , :ok}
   end
 
@@ -80,13 +80,7 @@ defmodule CaptainFact.Actions.Analysers.Reputation do
     Logger.info("[Analysers.Reputation] Update reputations")
     report = ReportManager.create_report!(@analyser_id, :running, actions)
     nb_users_updated = do_update_reputations(actions)
-
-    # Update report
-    ReportManager.update_report!(report, %{
-      nb_entries_updated: nb_users_updated,
-      run_duration: NaiveDateTime.diff(NaiveDateTime.utc_now(), report.inserted_at),
-      status: UsersActionsReport.status(:success)
-    })
+    ReportManager.set_success!(report, nb_users_updated)
   end
 
   # Update reputations, return the number of updated users

@@ -11,7 +11,7 @@ defmodule CaptainFact.Comments do
 
   # ---- Public API ----
 
-  def add_comment(user, params, source_url, source_fetch_callback \\ nil) do
+  def add_comment(user, context, params, source_url, source_fetch_callback \\ nil) do
     # TODO [Security] What if reply_to_id refer to a comment that is on a different statement ?
     UserPermissions.check!(user, :create, :comment)
     source = source_url && (Repo.get_by(Source, url: source_url) || %{url: source_url})
@@ -29,10 +29,10 @@ defmodule CaptainFact.Comments do
       |> Map.put(:score, 1)
 
     # Record action
-    Recorder.record!(user, :create, :comment, %{entity_id: full_comment.id})
+    Recorder.record!(user, :create, :comment, action_params(context, full_comment))
 
     # Self vote
-    Task.start(fn() -> vote(user, full_comment.id, 1) end)
+    Task.start(fn() -> vote(user, context, full_comment.id, 1) end)
 
     # If new source, fetch metadata
     unless is_nil(source) || Map.get(source, :id),
@@ -40,9 +40,9 @@ defmodule CaptainFact.Comments do
     full_comment
   end
 
-  def vote(user, comment_id, 0),
-    do: delete_vote(user, Repo.get!(Comment, comment_id))
-  def vote(user, comment_id, value) do
+  def vote(user, context, comment_id, 0),
+    do: delete_vote(user, context, Repo.get!(Comment, comment_id))
+  def vote(user, context, comment_id, value) do
     comment = Repo.get!(Comment, comment_id)
     vote_type = Vote.vote_type(user, comment, value)
     comment_type = comment_type(comment)
@@ -50,25 +50,25 @@ defmodule CaptainFact.Comments do
 
     # Delete prev vote if any
     prev_vote = Repo.get_by(Vote, user_id: user.id, comment_id: comment_id)
-    if prev_vote, do: delete_vote(user, comment, prev_vote)
+    if prev_vote, do: delete_vote(user, context, comment, prev_vote)
 
     # Record vote
     return =
       Ecto.build_assoc(user, :votes)
       |> Vote.changeset(%{comment_id: comment_id, value: value})
       |> Repo.insert!()
-    Recorder.record!(user, vote_type, comment_type, %{target_user_id: comment.user_id})
+    Recorder.record!(user, vote_type, comment_type, action_params(context, comment))
     return
   end
 
-  def delete_vote(user, comment = %Comment{}),
-    do: delete_vote(user, comment, Repo.get_by!(Vote, user_id: user.id, comment_id: comment.id))
-  def delete_vote(user = %User{id: user_id}, comment = %Comment{}, vote = %Vote{user_id: user_id}) do
+  def delete_vote(user, context, comment = %Comment{}),
+    do: delete_vote(user, context, comment, Repo.get_by!(Vote, user_id: user.id, comment_id: comment.id))
+  def delete_vote(user = %User{id: user_id}, context, comment = %Comment{}, vote = %Vote{user_id: user_id}) do
     vote_type = reverse_vote_type(Vote.vote_type(user, comment, vote.value))
     comment_type = comment_type(comment)
     UserPermissions.check!(user, vote_type, comment_type)
     Repo.delete(vote)
-    Recorder.record!(user, vote_type, comment_type, %{target_user_id: comment.user_id})
+    Recorder.record!(user, vote_type, comment_type, action_params(context, comment))
     %Vote{comment_id: comment.id}
   end
 
@@ -76,6 +76,8 @@ defmodule CaptainFact.Comments do
   def comment_type(%Comment{}), do: :fact
 
   # ---- Private ----
+
+  defp action_params(context, comment), do: %{context: context, target_user_id: comment.user_id, entity_id: comment.id}
 
   defp reverse_vote_type(:vote_up), do: :revert_vote_up
   defp reverse_vote_type(:vote_down), do: :revert_vote_down

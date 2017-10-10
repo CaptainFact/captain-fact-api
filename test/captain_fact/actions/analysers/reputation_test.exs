@@ -12,7 +12,7 @@ defmodule CaptainFact.Actions.Analysers.ReputationTest do
     user_before = Repo.get!(User, action.target_user_id)
     {_, expected_diff} = Reputation.action_reputation_change(action.type, action.entity)
 
-    Reputation.force_update()
+    Reputation.update()
     assert Repo.get!(User, action.target_user_id).reputation == user_before.reputation + expected_diff
   end
 
@@ -37,7 +37,7 @@ defmodule CaptainFact.Actions.Analysers.ReputationTest do
     {diff_source, diff_target} = Reputation.action_reputation_change(action.type, action.entity)
     source_user = Repo.get!(User, action.user_id)
     target_user = Repo.get!(User, action.target_user_id)
-    Reputation.force_update()
+    Reputation.update()
 
     assert Repo.get!(User, action.user_id).reputation == source_user.reputation + diff_source
     assert Repo.get!(User, action.target_user_id).reputation == target_user.reputation + diff_target

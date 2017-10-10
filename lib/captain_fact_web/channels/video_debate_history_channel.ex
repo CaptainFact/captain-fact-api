@@ -1,5 +1,6 @@
 defmodule CaptainFactWeb.VideoDebateHistoryChannel do
   use CaptainFactWeb, :channel
+  require Logger
 
   import CaptainFact.VideoDebate.ActionCreator, only: [action_restore: 3]
   import CaptainFactWeb.UserSocket, only: [handle_in_authenticated: 4]
@@ -8,20 +9,32 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
   alias Ecto.Multi
   alias CaptainFact.Videos.VideoHashId
   alias CaptainFact.Accounts.UserPermissions
-  alias CaptainFactWeb.{ Statement, Speaker, VideoSpeaker, StatementView, SpeakerView }
+  alias CaptainFact.Actions.{Recorder, UserAction}
   alias CaptainFact.VideoDebate.History
+  alias CaptainFactWeb.{ Statement, Speaker, VideoSpeaker, StatementView, SpeakerView }
   alias CaptainFactWeb.UserActionView
 
 
   def join("video_debate_history:" <> video_id_hash, _payload, socket) do
     video_id = VideoHashId.decode!(video_id_hash)
-    actions = View.render_many(History.video_debate_history(video_id), UserActionView, "action.json")
+    actions =
+      video_id
+      |> UserAction.video_debate_context()
+      |> History.context_history()
+      |> View.render_many(UserActionView, "action.json")
+
     {:ok, %{actions: actions}, assign(socket, :video_id, video_id)}
   end
 
   def join("statement_history:" <> statement_id, _payload, socket) do
+    statement = Repo.get!(Statement, statement_id)
     actions = View.render_many(History.statement_history(statement_id), UserActionView, "action.json")
-    {:ok, %{actions: actions}, assign(socket, :statement_id, statement_id)}
+    socket =
+      socket
+      |> assign(:statement_id, statement_id)
+      |> assign(:video_id, statement.video_id)
+
+    {:ok, %{actions: actions}, socket}
   end
 
   def handle_in(command, params, socket) do
@@ -35,7 +48,7 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
     Multi.new
     |> Multi.update(:statement, Statement.changeset_restore(statement))
     |> Multi.run(:action_restore, fn %{statement: statement} ->
-         Repo.insert(action_restore(user_id, video_id, statement))
+         Recorder.record(action_restore(user_id, video_debate_channel(video_id), statement))
        end)
     |> Repo.transaction()
     |> case do
@@ -49,13 +62,12 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
 
           # Broadcast statement
           CaptainFactWeb.Endpoint.broadcast(
-            "statements:video:#{VideoHashId.encode(video_id)}",
-            "statement_added",
+            "statements:video:#{VideoHashId.encode(video_id)}", "statement_added",
             StatementView.render("show.json", statement: statement)
           )
           {:reply, :ok, socket}
         {:error, _, reason, _} ->
-          IO.inspect(reason)
+          Logger.debug(fn -> inspect(reason) end)
           {:reply, :error, socket}
     end
   end
@@ -69,7 +81,7 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
     Multi.new
     |> multi_undelete_speaker(speaker)
     |> Multi.insert(:video_speaker, video_speaker)
-    |> Multi.insert(:action_restore, action_restore(user_id, video_id, speaker))
+    |> Multi.insert(:action_restore, action_restore(user_id, video_debate_channel(video_id), speaker))
     |> Repo.transaction()
     |> case do
       {:ok, %{action_restore: action}} ->
@@ -81,8 +93,7 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
         broadcast!(socket, "action_added", rendered_action)
         # Broadcast the speaker
         CaptainFactWeb.Endpoint.broadcast(
-          "video_debate:#{VideoHashId.encode(video_id)}",
-          "speaker_added",
+          "video_debate:#{VideoHashId.encode(video_id)}", "speaker_added",
           SpeakerView.render("show.json", speaker: speaker)
         )
 
@@ -97,4 +108,6 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
   defp multi_undelete_speaker(multi, speaker) do
     Multi.update(multi, :speaker, Speaker.changeset_restore(speaker))
   end
+
+  defp video_debate_channel(video_id), do: "video_debate:#{VideoHashId.encode(video_id)}"
 end

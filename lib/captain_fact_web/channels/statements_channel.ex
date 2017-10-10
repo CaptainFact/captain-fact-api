@@ -7,19 +7,20 @@ defmodule CaptainFactWeb.StatementsChannel do
 
   alias Ecto.Multi
   alias CaptainFact.Videos.VideoHashId
-  alias CaptainFactWeb.{Statement, StatementView, ErrorView}
   alias CaptainFact.Accounts.UserPermissions
+  alias CaptainFact.Actions.Recorder
+  alias CaptainFactWeb.{Statement, StatementView, ErrorView}
 
 
-  def join("statements:video:" <> video_id_hash, _payload, socket) do
-    video_id = VideoHashId.decode!(video_id_hash)
+  def join("statements:video:" <> video_hash_id, _payload, socket) do
+    video_id = VideoHashId.decode!(video_hash_id)
     statements =
       Statement
       |> where(video_id: ^video_id)
       |> where(is_removed: false)
       |> Repo.all
-    rendered_statements = StatementView.render("index.json", statements: statements)
-    {:ok, rendered_statements, assign(socket, :video_id, video_id)}
+
+    {:ok, StatementView.render("index.json", statements: statements), assign(socket, :video_id, video_id)}
   end
 
   def handle_in(command, params, socket) do
@@ -36,7 +37,7 @@ defmodule CaptainFactWeb.StatementsChannel do
     Multi.new
     |> Multi.insert(:statement, changeset)
     |> Multi.run(:action_create, fn %{statement: statement} ->
-         Repo.insert(action_create(user_id, video_id, statement))
+         Recorder.record(action_create(user_id, video_id, statement))
        end)
     |> Repo.transaction()
     |> case do
@@ -58,10 +59,9 @@ defmodule CaptainFactWeb.StatementsChannel do
       changes when changes === %{} ->
         {:reply, :ok, socket}
       _ ->
-        action_update = action_update(user_id, video_id, changeset)
         Multi.new
         |> Multi.update(:statement, changeset)
-        |> Multi.insert(:action_update, action_update)
+        |> Multi.insert(:action_update, action_update(user_id, video_id, changeset))
         |> Repo.transaction()
         |> case do
           {:ok, %{statement: updated_statement}} ->
@@ -81,7 +81,7 @@ defmodule CaptainFactWeb.StatementsChannel do
     Multi.new
     |> Multi.update(:statement, Statement.changeset_remove(statement))
     |> Multi.run(:action_delete, fn %{statement: statement} ->
-         Repo.insert(action_delete(user_id, video_id, statement))
+         Recorder.record(action_delete(user_id, video_id, statement))
        end)
     |> Repo.transaction()
     |> case do

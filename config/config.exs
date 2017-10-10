@@ -27,6 +27,16 @@ config :captain_fact, CaptainFact.Repo,
   adapter: Ecto.Adapters.Postgres,
   pool_size: 20
 
+# Configure scheduler
+config :captain_fact, CaptainFact.Scheduler,
+  overlap: false,
+  jobs: [
+    {{:extended,  "*/5 * * * * *"}, {CaptainFact.Actions.Analysers.Votes, :update, []}}, # Every 5 seconds
+    {{:cron,      "*/1 * * * *"},   {CaptainFact.Actions.Analysers.Reputation, :update, []}}, # Every minute
+    {{:cron,      "*/1 * * * *"},   {CaptainFact.Actions.Analysers.Flags, :update, []}}, # Every minute
+    {{:cron,      "*/3 * * * *"},   {CaptainFact.Actions.Analysers.Achievements, :update, []}}, # Every 3 minutes
+  ]
+
 # Configure mailer
 config :captain_fact, CaptainFact.Mailer, adapter: Bamboo.MailgunAdapter
 
@@ -52,14 +62,6 @@ config :guardian, Guardian,
   ttl: {30, :days},
   serializer: CaptainFactWeb.GuardianSerializer,
   permissions: %{default: [:read, :write]}
-
-# Configure scheduler
-config :quantum, :captain_fact,
-  cron: [
-    "*/1 * * * *": {CaptainFact.Actions.Analysers.Reputation, :force_update, []},
-    "*/1 * * * *": {CaptainFact.Actions.Analysers.Flags, :force_update, []},
-    "*/3 * * * *": {CaptainFact.Actions.Analysers.Achievements, :force_update, []}
-  ]
 
 config :weave,
   environment_prefix: "CF_",

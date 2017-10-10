@@ -8,7 +8,7 @@ defmodule CaptainFact.Actions.ReportManager do
     |> where([r], r.analyser_id == ^analyser_id)
     |> order_by([r], desc: r.id)
     |> limit(1)
-    |> Repo.one()
+    |> Repo.one(log: false) # Don't log queries as report queries happen very often
   end
 
   @doc"""
@@ -34,5 +34,13 @@ defmodule CaptainFact.Actions.ReportManager do
 
   def update_report!(report, params \\ %{}) do
     Repo.update!(UsersActionsReport.changeset(report, params))
+  end
+
+  def set_success!(report, nb_entries_updated \\ 0) do
+    update_report!(report, %{
+      nb_entries_updated: nb_entries_updated,
+      run_duration: NaiveDateTime.diff(NaiveDateTime.utc_now(), report.inserted_at),
+      status: UsersActionsReport.status(:success)
+    })
   end
 end

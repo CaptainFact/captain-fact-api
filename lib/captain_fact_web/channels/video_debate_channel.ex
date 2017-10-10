@@ -11,11 +11,12 @@ defmodule CaptainFactWeb.VideoDebateChannel do
   alias Ecto.Multi
   alias CaptainFact.Videos.VideoHashId
   alias CaptainFact.Accounts.UserPermissions
+  alias CaptainFact.Actions.Recorder
   alias CaptainFactWeb.{ Video, VideoView, Speaker, SpeakerView, VideoSpeaker, ChangesetView}
 
 
-  def join("video_debate:" <> video_id_hash, _payload, socket) do
-    with {:ok, video_id} <- VideoHashId.decode(video_id_hash),
+  def join("video_debate:" <> video_hash_id, _payload, socket) do
+    with {:ok, video_id} <- VideoHashId.decode(video_hash_id),
          video when not is_nil(video) <- Repo.get(Video.with_speakers(Video), video_id)
     do
       {:ok, View.render_one(video, VideoView, "video.json"), assign(socket, :video_id, video_id)}
@@ -66,7 +67,7 @@ defmodule CaptainFactWeb.VideoDebateChannel do
          |> Repo.insert()
        end)
     |> Multi.run(:action_create, fn %{speaker: speaker} ->
-         Repo.insert(action_create(user_id, video_id, speaker))
+         Recorder.record(action_create(user_id, video_id, speaker))
        end)
     |> Repo.transaction()
     |> case do
@@ -86,14 +87,13 @@ defmodule CaptainFactWeb.VideoDebateChannel do
     if !speaker.is_user_defined do
       {:reply, {:error, %{speaker: "forbidden"}}, socket}
     else
-      %{user_id: user_id, video_id: video_id} = socket.assigns
       changeset = Speaker.changeset(speaker, params)
       case changeset.changes do
         changes when changes === %{} -> {:reply, :ok, socket}
         _ ->
           Multi.new
           |> Multi.update(:speaker, changeset)
-          |> Multi.insert(:action_update, action_update(user_id, video_id, changeset))
+          |> Multi.insert(:action_update, action_update(socket.assigns.user_id, socket.assigns.video_id, changeset))
           |> Repo.transaction()
           |> case do
             {:ok, %{speaker: speaker}} ->

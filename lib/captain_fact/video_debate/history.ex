@@ -5,10 +5,10 @@ defmodule CaptainFact.VideoDebate.History do
   alias CaptainFact.Actions.UserAction
 
 
-  def video_debate_history(video_id) do
+  def context_history(context) do
     UserAction
     |> preload(:user)
-    |> where([a], a.context == ^UserAction.video_debate_context(video_id))
+    |> where([a], a.context == ^context)
     |> Repo.all()
   end
 

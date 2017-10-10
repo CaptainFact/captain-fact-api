@@ -29,6 +29,7 @@ defmodule CaptainFact.Actions.UsersActionsReport do
   def analyser_id(Analysers.Reputation), do: 1
   def analyser_id(Analysers.Flags), do: 2
   def analyser_id(Analysers.Achievements), do: 3
+  def analyser_id(Analysers.Votes), do: 4
 
   def status(:pending), do: 1
   def status(:running), do: 2

@@ -25,7 +25,7 @@ defmodule CaptainFact.Actions.Analysers.Achievements do
   end
 
   @timeout 120_000 # 2 minute
-  def force_update() do
+  def update() do
     GenServer.call(@name, :update_flags, @timeout)
   end
 
@@ -37,7 +37,7 @@ defmodule CaptainFact.Actions.Analysers.Achievements do
       UserAction
       |> where([a], a.id > ^last_action_id)
       |> where([a], a.type in ^@watched_action_types)
-      |> Repo.all()
+      |> Repo.all(log: false)
       |> start_analysis()
     end
     {:reply, :ok , :ok}
@@ -46,9 +46,12 @@ defmodule CaptainFact.Actions.Analysers.Achievements do
   defp start_analysis([]), do: :ok
   defp start_analysis(actions) do
     Logger.info("[Analysers.Achievements] Updating achievements")
-    Enum.map(actions, fn
-      %{type: @action_email_confirmed, user_id: id} -> unlock_achievement(Repo.get!(User, id), "not-a-robot")
-      _ -> nil
-    end)
+    report = ReportManager.create_report!(@analyser_id, :running, actions)
+    nb_achievements_unlocked = Enum.count(Enum.map(actions, &check_action/1), &(&1 != nil))
+    ReportManager.set_success!(report, nb_achievements_unlocked)
   end
+
+  defp check_action(nil), do: nil
+  defp check_action(%{type: @action_email_confirmed, user_id: id}),
+    do: unlock_achievement(Repo.get!(User, id), "not-a-robot")
 end

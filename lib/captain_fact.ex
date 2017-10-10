@@ -16,12 +16,14 @@ defmodule CaptainFact do
       supervisor(CaptainFactWeb.Endpoint, []),
       # Other custom supervisors
       supervisor(CaptainFact.Sources.Fetcher, []),
+      # Scheduler for all CRON jobs (like action analysers below)
+      worker(CaptainFact.Scheduler, []),
       # Actions analysers
       worker(CaptainFact.Actions.Analysers.Reputation, []),
       worker(CaptainFact.Actions.Analysers.Flags, []),
       worker(CaptainFact.Actions.Analysers.Achievements, []),
+      worker(CaptainFact.Actions.Analysers.Votes, []),
       # Misc workers
-      worker(CaptainFact.Comments.VoteDebouncer, []),
       worker(CaptainFact.Videos.VideoHashId, []),
       worker(CaptainFact.Accounts.UsernameGenerator, [])
     ]
