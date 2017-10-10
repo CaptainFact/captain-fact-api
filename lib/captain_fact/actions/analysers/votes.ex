@@ -70,6 +70,7 @@ defmodule CaptainFact.Actions.Analysers.Votes do
     0
   end
 
+  defp update_comments_votes(nil, _), do: 0 # Should only happen in test
   defp update_comments_votes(context, actions) do
     updated_comments_ids =
       actions

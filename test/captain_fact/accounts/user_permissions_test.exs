@@ -40,14 +40,14 @@ defmodule CaptainFact.Accounts.UserPermissionsTest do
   end
 
   test "running check! and record! concurrently isn't messing up with state", context do
-    nb_threads = 500
-    user = context[:positive_user]
-    action_type = :vote_up
+    user = context[:new_user]
+    action_type = :create
     entity = :comment
     max_occurences = UserPermissions.limitation(user, action_type, entity)
-    tolerated_errors = 5
+    nb_threads = max_occurences * 2
+    tolerated_errors = 10
     Stream.repeatedly(fn ->
-      Process.sleep(1) # To better simulate requests
+      Process.sleep(10) # To better simulate requests
       Task.async(fn ->
         try do
           UserPermissions.check!(user, action_type, entity)
