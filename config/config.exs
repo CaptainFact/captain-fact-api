@@ -46,7 +46,7 @@ config :logger, :console,
 
 # Configure ueberauth
 config :ueberauth, Ueberauth,
-  base_path: "/api/auth",
+  base_path: "/auth",
   providers: [
     identity: {Ueberauth.Strategy.Identity, [callback_methods: ["POST"]]},
     facebook: {Ueberauth.Strategy.Facebook, [

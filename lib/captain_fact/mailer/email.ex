@@ -8,7 +8,7 @@ defmodule CaptainFact.Email do
 
   # TODO GetText i18n
 
-  @cf_no_reply "no-reply@captainfact.io"
+  @cf_no_reply {"CaptainFact", "no-reply@captainfact.io"}
   @confirm_email_reputation elem(Reputation.action_reputation_change(:email_confirmed), 0)
 
 
@@ -19,11 +19,9 @@ defmodule CaptainFact.Email do
     |> to(user)
     |> subject("Welcome to CaptainFact.io !")
     |> html_body("""
-       We're glad having you joining us on CaptainFact ! To confirm your email and gain a bonus of
+       We're glad having you joining us on CaptainFact.io ! To confirm your email and gain a bonus of
        +#{@confirm_email_reputation} reputation right now, click on this link :
-       <a href="#{frontend_url()}/confirm_email/#{user.email_confirmation_token}">
-         Confirm email
-       </a>
+       <a href="#{frontend_url()}/confirm_email/#{user.email_confirmation_token}">Confirm email</a>
        <br/><br/>
        If you need help or want to know more about how it works, check
        <a href="#{frontend_url()}/help">the help pages</a>.
