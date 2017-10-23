@@ -19,7 +19,8 @@ defmodule CaptainFactWeb.VideoController do
              {:error, message} -> json(put_status(conn, :unprocessable_entity), %{error: %{url: message}})
              video -> render(conn, "show.json", video: video)
            end
-      video -> render(conn, "show.json", video: video)
+      video ->
+        render(conn, "show.json", video: video)
     end
   end
 

@@ -4,12 +4,12 @@ defmodule CaptainFactWeb.UserControllerTest do
 
   alias CaptainFact.Accounts.User
 
-  describe "GET /api/users/:username" do
+  describe "GET /users/:username" do
     test "displays sensitive info (email...) when requesting /me" do
       user = insert(:user)
       returned_user =
         build_authenticated_conn(user)
-        |> get("/api/users/me")
+        |> get("/users/me")
         |> json_response(:ok)
 
       assert Map.has_key?(returned_user, "email")
@@ -20,7 +20,7 @@ defmodule CaptainFactWeb.UserControllerTest do
       requested_user = insert(:user)
       returned_user =
         build_authenticated_conn(requesting_user)
-        |> get("/api/users/#{requested_user.username}")
+        |> get("/users/#{requested_user.username}")
         |> json_response(:ok)
 
       refute Map.has_key?(returned_user, "email")
@@ -37,7 +37,7 @@ defmodule CaptainFactWeb.UserControllerTest do
 
       response =
         build_conn()
-        |> post("/api/users", %{user: user, invitation_token: invit.token})
+        |> post("/users", %{user: user, invitation_token: invit.token})
         |> json_response(:created)
 
       Guardian.decode_and_verify!(response["token"])
@@ -51,7 +51,7 @@ defmodule CaptainFactWeb.UserControllerTest do
 
       response =
         build_conn()
-        |> post("/api/users", %{user: user})
+        |> post("/users", %{user: user})
         |> json_response(:bad_request)
 
       assert response == %{"error" => "invalid_invitation_token"}
@@ -63,7 +63,7 @@ defmodule CaptainFactWeb.UserControllerTest do
     refute user.email_confirmed
 
     build_conn() # No need to be authenticated to validate email
-    |> put("/api/users/me/confirm_email/#{user.email_confirmation_token}")
+    |> put("/users/me/confirm_email/#{user.email_confirmation_token}")
     |> response(:no_content)
 
     assert Repo.get(User, user.id).email_confirmed
@@ -71,15 +71,15 @@ defmodule CaptainFactWeb.UserControllerTest do
 
   test "confirm email with bad token returns 404" do
     build_conn() # No need to be authenticated to validate email
-    |> put("/api/users/me/confirm_email/-----TotallyBullshitToken-----")
+    |> put("/users/me/confirm_email/-----TotallyBullshitToken-----")
     |> response(:not_found)
   end
 
-  test "GET /api/users/me/available_flags" do
+  test "GET /users/me/available_flags" do
     user = build(:user) |> Map.put(:reputation, 4200) |> insert()
     available =
       build_authenticated_conn(user)
-      |> get("/api/users/me/available_flags")
+      |> get("/users/me/available_flags")
       |> json_response(:ok)
       |> Map.get("flags_available")
 
@@ -87,9 +87,9 @@ defmodule CaptainFactWeb.UserControllerTest do
   end
 
   test "must be authenticated to update, delete and available_flags" do
-    response(get(build_conn(), "/api/users/me"), 401) =~ "unauthorized"
-    response(put(build_conn(), "/api/users/me"), 401) =~ "unauthorized"
-    response(get(build_conn(), "/api/users/me/available_flags"), 401) =~ "unauthorized"
-    response(delete(build_conn(), "/api/users/me"), 401) =~ "unauthorized"
+    response(get(build_conn(), "/users/me"), 401) =~ "unauthorized"
+    response(put(build_conn(), "/users/me"), 401) =~ "unauthorized"
+    response(get(build_conn(), "/users/me/available_flags"), 401) =~ "unauthorized"
+    response(delete(build_conn(), "/users/me"), 401) =~ "unauthorized"
   end
 end

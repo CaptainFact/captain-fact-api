@@ -1,10 +1,10 @@
 defmodule CaptainFactWeb.ApiInfoControllerTest do
   use CaptainFactWeb.ConnCase
 
-  test "GET /api", %{conn: conn} do
+  test "GET / returns API info", %{conn: conn} do
     response =
       conn
-      |> get("/api")
+      |> get("/")
       |> json_response(200)
 
     assert is_binary(response["version"])

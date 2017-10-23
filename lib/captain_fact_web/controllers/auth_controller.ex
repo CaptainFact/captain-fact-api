@@ -7,7 +7,7 @@ defmodule UeberauthWithRedirectUriFixer do
     Ueberauth.init()
   end
 
-  @fb_auth_callback "/api/auth/facebook/callback"
+  @fb_auth_callback "/auth/facebook/callback"
 
   def call(conn = %{request_path: request_path, params: params}, opts) do
     ueberauth_opts =

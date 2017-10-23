@@ -22,7 +22,6 @@ defmodule CaptainFactWeb.Router do
     get "/videos", VideoController, :index
     get "/videos/:video_id/statements", StatementController, :get
     post "/search/video", VideoController, :search
-    post  "/videos", VideoController, :get_or_create
 
     # Authenticathed endpoints
     scope "/" do
@@ -53,6 +52,9 @@ defmodule CaptainFactWeb.Router do
         get    "/me", UserController, :show_me
         get    "/:username", UserController, :show
       end
+
+      # Videos
+      post  "/videos", VideoController, :get_or_create
     end
   end
 
