@@ -1,5 +1,6 @@
-defmodule CaptainFactWeb.Flag do
-  use CaptainFactWeb, :model
+defmodule CaptainFact.Actions.Flag do
+  use Ecto.Schema
+  import Ecto.Changeset
 
   alias CaptainFact.Comments.Comment
 

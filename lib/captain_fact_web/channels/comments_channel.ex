@@ -2,10 +2,10 @@ defmodule CaptainFact.Comments.CommentsChannel do
   use CaptainFactWeb, :channel
 
   import CaptainFactWeb.UserSocket, only: [handle_in_authenticated: 4]
-  alias CaptainFactWeb.{ CommentView, VoteView, Flag }
+  alias CaptainFactWeb.{ CommentView, VoteView }
   alias CaptainFact.Accounts.User
   alias CaptainFact.Videos.VideoHashId
-  alias CaptainFact.Actions.{Flagger, UserAction}
+  alias CaptainFact.Actions.{Flagger, UserAction, Flag}
   alias CaptainFact.Comments
   alias CaptainFact.Comments.{Comment, Vote}
 

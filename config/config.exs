@@ -59,7 +59,7 @@ config :ueberauth, Ueberauth,
 config :guardian, Guardian,
   issuer: "CaptainFact",
   ttl: {30, :days},
-  serializer: CaptainFactWeb.GuardianSerializer,
+  serializer: CaptainFact.Accounts.GuardianSerializer,
   permissions: %{default: [:read, :write]}
 
 config :weave,

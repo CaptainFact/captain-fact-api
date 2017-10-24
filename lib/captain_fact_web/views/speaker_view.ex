@@ -10,7 +10,7 @@ defmodule CaptainFactWeb.SpeakerView do
       id: speaker.id,
       full_name: speaker.full_name,
       title: speaker.title,
-      picture: CaptainFactWeb.SpeakerPicture.url({speaker.picture, speaker}, :thumb),
+      picture: CaptainFact.Speakers.Picture.url({speaker.picture, speaker}, :thumb),
       is_user_defined: speaker.is_user_defined,
       country: speaker.country
     }

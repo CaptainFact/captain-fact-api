@@ -1,7 +1,8 @@
 defmodule CaptainFact.Comments.Vote do
-  use CaptainFactWeb, :model
+  use Ecto.Schema
+  import Ecto.{Changeset, Query} # TODO Move queries to Comments
 
-  alias CaptainFactWeb.Statement
+  alias CaptainFact.Speakers.Statement
   alias CaptainFact.Comments.Comment
 
 

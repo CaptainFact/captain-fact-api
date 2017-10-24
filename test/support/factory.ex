@@ -3,9 +3,10 @@ defmodule CaptainFact.Factory do
 
   alias CaptainFact.Accounts.{User, InvitationRequest}
   alias CaptainFact.Actions.UserAction
-  alias CaptainFactWeb.{Video, Statement, Speaker}
+  alias CaptainFact.Videos.Video
   alias CaptainFact.Comments.{Comment, Vote}
   alias CaptainFact.Sources.Source
+  alias CaptainFact.Speakers.{Speaker, Statement}
 
 
   def user_factory do

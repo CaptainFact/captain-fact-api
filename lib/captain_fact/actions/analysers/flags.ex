@@ -88,7 +88,7 @@ defmodule CaptainFact.Actions.Analysers.Flags do
   def broadcast_ban(:comment, comment_id) do
     comment_context = Repo.one!(
       from c in Comment,
-      join: s in CaptainFactWeb.Statement, on: c.statement_id == s.id,
+      join: s in CaptainFact.Speakers.Statement, on: c.statement_id == s.id,
       where: c.id == ^comment_id,
       select: %{video_id: s.video_id, statement_id: s.id}
     )

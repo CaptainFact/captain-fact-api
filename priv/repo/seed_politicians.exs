@@ -3,8 +3,8 @@ require Logger
 require Arc.Ecto.Schema
 
 alias CaptainFact.Repo
-alias CaptainFactWeb.Speaker
-alias CaptainFactWeb.SpeakerPicture
+alias CaptainFact.Speakers
+alias CaptainFact.Speakers.Speaker
 
 
 defmodule SeedPoliticians do
@@ -61,14 +61,9 @@ defmodule SeedPoliticians do
   end
 
   defp fetch_picture(speaker = %{picture: nil}, picture_url) do
-    case SpeakerPicture.store({picture_url, speaker}) do
-      {:ok, picture} ->
-        Logger.debug("Fetching picture for #{speaker.full_name} at #{picture_url}")
-        speaker
-        |> Ecto.Changeset.change(picture: %{file_name: picture, updated_at: Ecto.DateTime.utc})
-        |> Repo.update!()
-      {:error, :invalid_file_path} ->
-        Logger.error("Given image path is invalid : #{picture_url}")
+    case Speakers.fetch_picture(speaker, picture_url) do
+      {:ok, _} -> Logger.debug("Fetched picture for #{speaker.full_name} at #{picture_url}")
+      {:error, reason} -> Logger.warn("Fetch picture #{picture_url} failed for #{speaker.full_name} (#{reason})")
     end
   end
   defp fetch_picture(speaker, _), do: Logger.info("Speaker #{speaker.full_name} already have a picture")
@@ -76,7 +71,7 @@ end
 
 # Allow usage from shell on dev / test environments - when Mix is installed
 if Kernel.function_exported?(Mix, :env, 0) && Application.get_env(:captain_fact, :manual_seed) != true do
-  {keywords, args, invalids} = OptionParser.parse(System.argv, strict: [fetch_pictures: :boolean]) |> IO.inspect()
+  {keywords, args, invalids} = OptionParser.parse(System.argv, strict: [fetch_pictures: :boolean])
 
   if Enum.count(invalids) == 0 && Enum.count(args) >= 1,
     do: SeedPoliticians.seed(List.first(args), Keyword.get(keywords, :fetch_pictures), Enum.drop(args, 1)),

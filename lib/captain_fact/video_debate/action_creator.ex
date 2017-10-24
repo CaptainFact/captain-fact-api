@@ -1,5 +1,5 @@
 defmodule CaptainFact.VideoDebate.ActionCreator do
-  alias CaptainFactWeb.{ Speaker, Statement }
+  alias CaptainFact.Speakers.{ Speaker, Statement }
   alias CaptainFact.Actions.UserAction
 
 

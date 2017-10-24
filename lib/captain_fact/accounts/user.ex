@@ -1,5 +1,6 @@
 defmodule CaptainFact.Accounts.User do
-  use CaptainFactWeb, :model
+  use Ecto.Schema
+  import Ecto.Changeset
 
   alias CaptainFact.TokenGenerator
   alias CaptainFact.Accounts.ForbiddenEmailProviders
@@ -30,8 +31,8 @@ defmodule CaptainFact.Accounts.User do
     has_many :comments, CaptainFact.Comments.Comment, on_delete: :delete_all
     has_many :votes, CaptainFact.Comments.Vote, on_delete: :delete_all
 
-    has_many :flags_posted, CaptainFactWeb.Flag, foreign_key: :source_user_id, on_delete: :delete_all
-    has_many :flags_received, CaptainFactWeb.Flag, foreign_key: :target_user_id, on_delete: :delete_all
+    has_many :flags_posted, CaptainFact.Actions.Flag, foreign_key: :source_user_id, on_delete: :delete_all
+    has_many :flags_received, CaptainFact.Actions.Flag, foreign_key: :target_user_id, on_delete: :delete_all
 
     timestamps()
   end

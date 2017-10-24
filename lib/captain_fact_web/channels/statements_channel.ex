@@ -9,7 +9,8 @@ defmodule CaptainFactWeb.StatementsChannel do
   alias CaptainFact.Videos.VideoHashId
   alias CaptainFact.Accounts.UserPermissions
   alias CaptainFact.Actions.Recorder
-  alias CaptainFactWeb.{Statement, StatementView, ErrorView}
+  alias CaptainFact.Speakers.Statement
+  alias CaptainFactWeb.{StatementView, ErrorView}
 
 
   def join("statements:video:" <> video_hash_id, _payload, socket) do

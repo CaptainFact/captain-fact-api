@@ -9,7 +9,7 @@ defmodule CaptainFact.Videos do
   alias CaptainFact.Repo
   alias CaptainFact.Actions.Recorder
   alias CaptainFact.Accounts.UserPermissions
-  alias CaptainFactWeb.Video
+  alias CaptainFact.Videos.Video
 
 
   @doc"""

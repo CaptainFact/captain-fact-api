@@ -1,6 +1,7 @@
 defmodule CaptainFact.Actions.UserAction do
   use Ecto.Schema
   import Ecto.Changeset
+
   alias CaptainFact.Actions.UserAction
   alias CaptainFact.Accounts.User
 

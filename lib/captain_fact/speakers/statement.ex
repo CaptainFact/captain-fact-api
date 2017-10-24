@@ -1,13 +1,15 @@
-defmodule CaptainFactWeb.Statement do
-  use CaptainFactWeb, :model
+defmodule CaptainFact.Speakers.Statement do
+  use Ecto.Schema
+  import Ecto.Changeset
+
 
   schema "statements" do
     field :text, :string
     field :time, :integer
     field :is_removed, :boolean, default: false
 
-    belongs_to :video, CaptainFactWeb.Video
-    belongs_to :speaker, CaptainFactWeb.Speaker
+    belongs_to :video, CaptainFact.Videos.Video
+    belongs_to :speaker, CaptainFact.Speakers.Speaker
 
     has_many :comments, CaptainFact.Comments.Comment, on_delete: :delete_all
 

@@ -4,7 +4,7 @@ defmodule CaptainFact.Actions.FlaggerTest do
   alias CaptainFact.Actions.Flagger
   alias CaptainFact.Actions.Analysers.{Flags, Reputation}
   alias CaptainFact.Accounts.User
-  alias CaptainFactWeb.Flag
+  alias CaptainFact.Actions.Flag
   alias CaptainFact.Comments.Comment
 
 
