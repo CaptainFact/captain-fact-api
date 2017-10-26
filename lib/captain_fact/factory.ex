@@ -1,4 +1,9 @@
 defmodule CaptainFact.Factory do
+  @moduledoc"""
+  This file should be in `test/support` but we bundle it in release until API is released in open source to
+  give frontend developers the ability to easily create new users and other entitites
+  """
+
   use ExMachina.Ecto, repo: CaptainFact.Repo
 
   alias CaptainFact.Accounts.{User, InvitationRequest}

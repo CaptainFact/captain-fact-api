@@ -36,7 +36,7 @@ docker run -it \
   -e "CF_CHROME_EXTENSION_ID=chrome-extension://lpdmcoikcclagelhlmibniibjilfifac" \
   -v "$(pwd)/priv/keys:/run/secrets:ro" \
   --network host \
-  --rm ${CF_API_IMAGE} foreground
+  --rm ${CF_API_IMAGE} console
 
 # Cleanup
 #docker rmi -f ${CF_API_IMAGE}
