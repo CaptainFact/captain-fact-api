@@ -6,9 +6,11 @@ defmodule CaptainFact.Videos do
   import Ecto.Query, warn: false
   import CaptainFact.Videos.MetadataFetcher
 
+  alias Ecto.Multi
   alias CaptainFact.Repo
   alias CaptainFact.Actions.Recorder
   alias CaptainFact.Accounts.UserPermissions
+  alias CaptainFact.Speakers.Statement
   alias CaptainFact.Videos.Video
 
 
@@ -46,6 +48,23 @@ defmodule CaptainFact.Videos do
         video
       error -> error
     end
+  end
+
+  @doc"""
+  Shift all video's statements by given offset.
+  Returns {:ok, statements} if success, {:error, reason} otherwise. Returned statements contains only an id and a key
+  """
+  def shift_statements(user, video_id, offset) when is_integer(offset) do
+    UserPermissions.check!(user, :update, :video)
+    statements_query = where(Statement, [s], s.video_id == ^video_id)
+    Multi.new
+    |> Multi.update_all(:statements_update, statements_query, [inc: [time: offset]], returning: [:id, :time])
+    |> Recorder.multi_record(user, :update, :video, %{entity_id: video_id, changes: %{"statements_time" => offset}})
+    |> Repo.transaction()
+    |> case do
+         {:ok, %{statements_update: {_, statements}}} -> {:ok, Enum.map(statements, &(%{id: &1.id, time: &1.time}))}
+         {:error, _, reason, _} -> {:error, reason}
+       end
   end
 
   defp videos_query("unknown"), do: where(videos_query(), [v], is_nil(v.language))

@@ -36,6 +36,7 @@ defmodule CaptainFact.Accounts.UserPermissions do
       comment:              { 3  , 10 , 15 , 30 , 30 , 100 , 100 , 100 , 100 },
       statement:            { 0  ,  5 ,  0 ,  3 ,  5 ,  50 , 100 , 100 , 100 },
       speaker:              { 0  ,  0 ,  3 ,  5 , 10 ,  30 ,  50 , 100 , 100 },
+      video:                { 0  ,  0 ,  0 ,  0 , 0  ,  5  ,  8  ,  10 , 20  },
     },
     delete: %{
     },
@@ -48,7 +49,7 @@ defmodule CaptainFact.Accounts.UserPermissions do
       speaker:              { 0  ,  0 ,  0 ,  5 , 10 ,  30 ,  50 , 100 , 100 }
     },
     approve: %{
-      history_action:       { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   0 ,   0 },
+      history_action:       { 0  ,  0 ,  0 ,  0 ,  0 ,   3 ,  10 ,  20 ,  30 },
     },
     flag: %{
       history_action:       { 0  ,  1 ,  3 ,  5 ,  5 ,   5 ,   5 ,   5 ,   5 },
