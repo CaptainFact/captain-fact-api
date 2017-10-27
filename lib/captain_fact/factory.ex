@@ -23,7 +23,8 @@ defmodule CaptainFact.Factory do
       fb_user_id: Integer.to_string(Enum.random(10000..9999999999999)),
       reputation: 0,
       email_confirmation_token: random_string(64),
-      achievements: [1] # Users are always created with the "Welcome" achievement
+      achievements: [1], # Users are always created with the "Welcome" achievement
+      today_reputation_gain: 0
     }
   end
 

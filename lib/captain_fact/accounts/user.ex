@@ -13,6 +13,7 @@ defmodule CaptainFact.Accounts.User do
     field :name, :string
     field :picture_url, :string
     field :reputation, :integer, default: 0
+    field :today_reputation_gain, :integer, default: 0
     field :locale, :string
     field :achievements, {:array, :integer}, default: []
 
@@ -59,8 +60,12 @@ defmodule CaptainFact.Accounts.User do
     |> put_encrypted_pw
   end
 
-  def reputation_changeset(model, params) do
-    cast(model, params, [:reputation])
+  @doc"""
+  Generate a changeset to update `reputation` and `today_reputation_gain` without verifying daily limits
+  """
+  def reputation_changeset(model = %{reputation: reputation, today_reputation_gain: today_gain}, change)
+  when is_integer(change) do
+    change(model, %{reputation: reputation + change, today_reputation_gain: today_gain + change})
   end
 
   def registration_changeset(model, params \\ %{}) do
