@@ -14,8 +14,6 @@ defmodule CaptainFact.Accounts.InvitationRequest do
     timestamps()
   end
 
-  @token_length 12
-
   @doc false
   def changeset(%InvitationRequest{} = invitation_request, attrs) do
     invitation_request
@@ -25,8 +23,8 @@ defmodule CaptainFact.Accounts.InvitationRequest do
     |> unique_constraint(:email)
   end
 
-  def changeset_token(request) do
-    change(request, token: CaptainFact.TokenGenerator.generate(@token_length))
+  def changeset_token(request, token) do
+    change(request, token: token)
   end
 
   def changeset_sent(request, is_sent) do

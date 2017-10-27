@@ -4,6 +4,7 @@ defmodule CaptainFact.Accounts do
   """
 
   import Ecto.Query, warn: false
+  require Logger
 
   alias Ecto.Multi
   alias CaptainFact.Repo
@@ -12,6 +13,8 @@ defmodule CaptainFact.Accounts do
   alias CaptainFact.Accounts.{User, ResetPasswordRequest, UserPermissions, InvitationRequest, Achievement}
   alias CaptainFact.Accounts.{UsernameGenerator, ForbiddenEmailProviders}
   alias CaptainFact.Actions.Recorder
+  alias CaptainFact.TokenGenerator
+
 
   @max_ip_reset_requests 3
   @request_validity 48 * 60 * 60 # 48 hours
@@ -33,7 +36,7 @@ defmodule CaptainFact.Accounts do
   def create_account(_, nil, _),
     do: {:error, "invalid_invitation_token"}
   def create_account(user_params, invitation_token, opts) when is_binary(invitation_token),
-    do: create_account(user_params, Repo.get_by(InvitationRequest, token: invitation_token), opts)
+    do: create_account(user_params, get_invitation_for_token(invitation_token), opts)
   def create_account(user_params, %InvitationRequest{token: invitation_token}, opts) do
     allow_empty_username = Keyword.get(opts, :allow_empty_username, false)
     provider_params = Keyword.get(opts, :provider_params, %{})
@@ -187,6 +190,7 @@ defmodule CaptainFact.Accounts do
   end
 
   # ---- Invitations ----
+
   @doc """
   Request an invitation for given email
   """
@@ -210,24 +214,14 @@ defmodule CaptainFact.Accounts do
       _ -> {:error, "invalid_email"}
     end
   end
-  def request_invitation(email, %User{id: id}),
-    do: request_invitation(email, id)
-
-  @doc """
-  Delete an invitation
-  """
-  def delete_invitation(invitation_token) do
-    case Repo.get_by(InvitationRequest, token: invitation_token) do
-      nil -> {:error, nil}
-      invit -> Repo.delete(invit)
-    end
-  end
+  def request_invitation(email, %User{id: id}), do: request_invitation(email, id)
 
   @doc """
   Send `nb_invites` invitations to most recently updated users
   """
   def send_invites(nb_invites) do
     InvitationRequest
+    |> where([i], not is_nil(i.email))
     |> where([i], i.invitation_sent == false)
     |> order_by([i], i.updated_at)
     |> preload(:invited_by)
@@ -236,11 +230,20 @@ defmodule CaptainFact.Accounts do
     |> Enum.each(&send_invite/1)
   end
 
+  @default_token_length 12
   @doc """
-  Send invite to the given invitation request
+  Send invite to the given email or invitation request
   """
-  def send_invite(request = %InvitationRequest{token: nil}),
-    do: send_invite(Repo.update!(InvitationRequest.changeset_token(request)))
+  def send_invite(email) when is_binary(email) do
+    {:ok, request} = request_invitation(email)
+    send_invite(request)
+  end
+  def send_invite(request = %InvitationRequest{token: nil}) do
+    request
+    |> InvitationRequest.changeset_token(TokenGenerator.generate(@default_token_length))
+    |> Repo.update!()
+    |> send_invite()
+  end
   def send_invite(request = %InvitationRequest{}) do
     request
     |> CaptainFact.Email.invite_user_email()
@@ -248,5 +251,25 @@ defmodule CaptainFact.Accounts do
 
     # Email sent successfuly
     Repo.update!(InvitationRequest.changeset_sent(request, true))
+  end
+
+  def generate_invites(number), do: generate_invites(number, TokenGenerator.generate(@default_token_length))
+  def generate_invites(number, token) do
+    time = Ecto.DateTime.utc
+    Repo.insert_all(InvitationRequest, (for _ <- 1..number, do: %{token: token, inserted_at: time, updated_at: time}))
+    frontend_url = Application.fetch_env!(:captain_fact, :frontend_url)
+    Logger.info("Generated #{number} invites for token #{token}. Url: #{frontend_url}/signup?invitation_token=#{token}")
+  end
+
+  def get_invitation_for_token(token),
+    do: InvitationRequest |> where(token: ^token) |> limit(1) |> Repo.one()
+
+  defp delete_invitation(invitation_token) do
+    case get_invitation_for_token(invitation_token) do
+      nil -> {:error, nil}
+      invit ->
+        Repo.delete(invit)
+        Logger.debug("Invitation #{invit.id} for token #{invit.token} has been consumed")
+    end
   end
 end
