@@ -1,6 +1,6 @@
 alias CaptainFact.Repo
 alias CaptainFact.Accounts.{User, Achievement}
-import Logger
+require Logger
 
 
 # Create achievements

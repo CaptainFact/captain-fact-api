@@ -14,7 +14,7 @@ defmodule CaptainFact.Actions.Analysers.Flags do
 
   @name __MODULE__
   @analyser_id UsersActionsReport.analyser_id(__MODULE__)
-  @comments_nb_flags_to_ban 3
+  @comments_nb_flags_to_ban 5
 
   # --- Client API ---
 

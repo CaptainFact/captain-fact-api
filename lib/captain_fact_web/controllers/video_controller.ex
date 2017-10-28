@@ -6,9 +6,12 @@ defmodule CaptainFactWeb.VideoController do
 
 
   def index(conn, %{"language" => language}),
-    do: render(conn, :index, videos: videos_list(language))
+    do: render(conn, :index, videos: videos_list(language: language))
   def index(conn, _params),
     do: render(conn, :index, videos: videos_list())
+
+  def index_ids(conn, %{"min_id" => min_id}),
+    do: json(conn, videos_index(min_id))
 
   def get_or_create(conn, %{"url" => url}) do
     case get_video_by_url(url) do

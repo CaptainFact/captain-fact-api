@@ -14,15 +14,15 @@ defmodule CaptainFact.Videos.MetadataFetcher do
   """
   def fetch_video_metadata(nil), do: {:error, "Invalid URL"}
   def fetch_video_metadata(url) when is_binary(url), do: fetch_video_metadata(Video.parse_url(url))
-  def fetch_video_metadata({"youtube", video_id}) do
+  def fetch_video_metadata({"youtube", provider_id}) do
     case Application.get_env(:captain_fact, :youtube_api_key) do
-      nil -> fetch_video_metadata_html("youtube", video_id)
-      api_key -> fetch_video_metadata_api("youtube", video_id, api_key)
+      nil -> fetch_video_metadata_html("youtube", provider_id)
+      api_key -> fetch_video_metadata_api("youtube", provider_id, api_key)
     end
   end
 
-  defp fetch_video_metadata_api("youtube", video_id, api_key) do
-    case HTTPoison.get("https://www.googleapis.com/youtube/v3/videos?id=#{video_id}&part=snippet&key=#{api_key}") do
+  defp fetch_video_metadata_api("youtube", provider_id, api_key) do
+    case HTTPoison.get("https://www.googleapis.com/youtube/v3/videos?id=#{provider_id}&part=snippet&key=#{api_key}") do
       {:ok, %HTTPoison.Response{body: body}} ->
         # Parse JSON and extract intresting info
         full_metadata = Poison.decode!(body) |> Map.get("items") |> List.first()
@@ -32,7 +32,7 @@ defmodule CaptainFact.Videos.MetadataFetcher do
           {:ok, %{
             title: full_metadata["snippet"]["title"],
             language: full_metadata["snippet"]["defaultLanguage"] || full_metadata["snippet"]["defaultAudioLanguage"],
-            url: Video.build_url(%{provider: "youtube", provider_id: video_id})
+            url: Video.build_url(%{provider: "youtube", provider_id: provider_id})
           }}
         end
       {_, _} ->

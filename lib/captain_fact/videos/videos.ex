@@ -15,12 +15,22 @@ defmodule CaptainFact.Videos do
 
 
   @doc"""
-  List videos
-  `lang_filter` can be provided as a two-letters locale (fr,de,en...etc). The special value "unknown" will list all
-  the videos for which locale is unknown
+  List videos. `filters` may contain the following entries:
+    * language: two characters identifier string (fr,en,es...etc) or "unknown" to list videos with unknown language
   """
-  def videos_list(lang_filter), do: Repo.all(videos_query(lang_filter))
-  def videos_list(), do: Repo.all(videos_query())
+  def videos_list(filters \\ []), do: Repo.all(videos_query(filters))
+
+  @doc"""
+  Index videos, returning only their id, provider_id and provider.
+  Accepted filters are the same than for `videos_list/1`
+  """
+  def videos_index(from_id \\ 0) do
+    Video
+    |> select([v], %{id: v.id, provider: v.provider, provider_id: v.provider_id})
+    |> where([v], v.id > ^from_id)
+    |> Repo.all()
+  end
+
 
   @doc"""
   Return the corresponding video if it has already been added, `nil` otherwise
@@ -67,11 +77,14 @@ defmodule CaptainFact.Videos do
        end
   end
 
-  defp videos_query("unknown"), do: where(videos_query(), [v], is_nil(v.language))
-  defp videos_query(language), do: where(videos_query(), [v], language: ^language)
-  defp videos_query() do
+  defp videos_query(filters) do
     Video
     |> Video.with_speakers
+    |> language_filter(Keyword.get(filters, :language))
     |> order_by([v], desc: v.id)
   end
+
+  defp language_filter(query, nil), do: query
+  defp language_filter(query, "unknown"), do: where(query, [v], is_nil(v.language))
+  defp language_filter(query, language), do: where(query, [v], language: ^language)
 end

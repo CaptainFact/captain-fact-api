@@ -20,6 +20,7 @@ defmodule CaptainFactWeb.Router do
     # Public endpoints
     get "/", ApiInfoController, :get
     get "/videos", VideoController, :index
+    get "/videos/index", VideoController, :index_ids
     get "/videos/:video_id/statements", StatementController, :get
     post "/search/video", VideoController, :search
 
