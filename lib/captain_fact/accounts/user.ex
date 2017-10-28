@@ -1,5 +1,6 @@
 defmodule CaptainFact.Accounts.User do
-  use CaptainFactWeb, :model
+  use Ecto.Schema
+  import Ecto.Changeset
 
   alias CaptainFact.TokenGenerator
   alias CaptainFact.Accounts.ForbiddenEmailProviders
@@ -12,6 +13,7 @@ defmodule CaptainFact.Accounts.User do
     field :name, :string
     field :picture_url, :string
     field :reputation, :integer, default: 0
+    field :today_reputation_gain, :integer, default: 0
     field :locale, :string
     field :achievements, {:array, :integer}, default: []
 
@@ -30,8 +32,8 @@ defmodule CaptainFact.Accounts.User do
     has_many :comments, CaptainFact.Comments.Comment, on_delete: :delete_all
     has_many :votes, CaptainFact.Comments.Vote, on_delete: :delete_all
 
-    has_many :flags_posted, CaptainFactWeb.Flag, foreign_key: :source_user_id, on_delete: :delete_all
-    has_many :flags_received, CaptainFactWeb.Flag, foreign_key: :target_user_id, on_delete: :delete_all
+    has_many :flags_posted, CaptainFact.Actions.Flag, foreign_key: :source_user_id, on_delete: :delete_all
+    has_many :flags_received, CaptainFact.Actions.Flag, foreign_key: :target_user_id, on_delete: :delete_all
 
     timestamps()
   end
@@ -58,8 +60,12 @@ defmodule CaptainFact.Accounts.User do
     |> put_encrypted_pw
   end
 
-  def reputation_changeset(model, params) do
-    cast(model, params, [:reputation])
+  @doc"""
+  Generate a changeset to update `reputation` and `today_reputation_gain` without verifying daily limits
+  """
+  def reputation_changeset(model = %{reputation: reputation, today_reputation_gain: today_gain}, change)
+  when is_integer(change) do
+    change(model, %{reputation: reputation + change, today_reputation_gain: today_gain + change})
   end
 
   def registration_changeset(model, params \\ %{}) do

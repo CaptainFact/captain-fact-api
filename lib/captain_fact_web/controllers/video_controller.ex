@@ -6,9 +6,12 @@ defmodule CaptainFactWeb.VideoController do
 
 
   def index(conn, %{"language" => language}),
-    do: render(conn, :index, videos: videos_list(language))
+    do: render(conn, :index, videos: videos_list(language: language))
   def index(conn, _params),
     do: render(conn, :index, videos: videos_list())
+
+  def index_ids(conn, %{"min_id" => min_id}),
+    do: json(conn, videos_index(min_id))
 
   def get_or_create(conn, %{"url" => url}) do
     case get_video_by_url(url) do
@@ -19,7 +22,8 @@ defmodule CaptainFactWeb.VideoController do
              {:error, message} -> json(put_status(conn, :unprocessable_entity), %{error: %{url: message}})
              video -> render(conn, "show.json", video: video)
            end
-      video -> render(conn, "show.json", video: video)
+      video ->
+        render(conn, "show.json", video: video)
     end
   end
 

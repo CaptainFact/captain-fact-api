@@ -1,7 +1,8 @@
-defmodule CaptainFactWeb.Video do
-  use CaptainFactWeb, :model
+defmodule CaptainFact.Videos.Video do
+  use Ecto.Schema
+  import Ecto.{Changeset, Query} # TODO Move query functions to CaptainFact.Videos
 
-  alias CaptainFactWeb.{ VideoSpeaker, Statement, Speaker }
+  alias CaptainFact.Speakers.{Speaker, Statement, VideoSpeaker}
 
   schema "videos" do
     field :title, :string

@@ -1,11 +1,17 @@
 defmodule CaptainFact.Factory do
+  @moduledoc"""
+  This file should be in `test/support` but we bundle it in release until API is released in open source to
+  give frontend developers the ability to easily create new users and other entitites
+  """
+
   use ExMachina.Ecto, repo: CaptainFact.Repo
 
   alias CaptainFact.Accounts.{User, InvitationRequest}
   alias CaptainFact.Actions.UserAction
-  alias CaptainFactWeb.{Video, Statement, Speaker}
+  alias CaptainFact.Videos.Video
   alias CaptainFact.Comments.{Comment, Vote}
   alias CaptainFact.Sources.Source
+  alias CaptainFact.Speakers.{Speaker, Statement}
 
 
   def user_factory do
@@ -17,7 +23,8 @@ defmodule CaptainFact.Factory do
       fb_user_id: Integer.to_string(Enum.random(10000..9999999999999)),
       reputation: 0,
       email_confirmation_token: random_string(64),
-      achievements: [1] # Users are always created with the "Welcome" achievement
+      achievements: [1], # Users are always created with the "Welcome" achievement
+      today_reputation_gain: 0
     }
   end
 

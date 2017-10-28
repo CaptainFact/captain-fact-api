@@ -8,7 +8,8 @@ Faker.start
 
 defmodule CaptainFact.DemoFr do
   use CaptainFactWeb.ChannelCase
-  alias CaptainFactWeb.{Speaker, Video, VideoSpeaker, Statement}
+  alias CaptainFact.Videos.Video
+  alias CaptainFact.Speakers.{Speaker, Statement, VideoSpeaker}
   alias CaptainFact.Accounts.User
   alias CaptainFact.Comments
   alias CaptainFact.{Repo, VideoHashId}

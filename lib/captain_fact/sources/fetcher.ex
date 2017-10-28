@@ -65,15 +65,16 @@ defmodule CaptainFact.Sources.Fetcher do
   end
 
   defp source_params_from_tree(tree) do
+    head = Floki.find(tree, "head")
     %{
-      title: Floki.attribute(tree, "meta[property='og:title']", "content"),
-      title_alt: Floki.attribute(tree, "meta[name='abstract']", "content"),
-      language: Floki.attribute(tree, "html", "lang"),
-      site_name: Floki.attribute(tree, "meta[property='og:site_name']", "content"),
-      url: Floki.attribute(tree, "meta[property='og:url']", "content")
+      title: attribute(head, "meta[property='og:title']", "content"),
+      title_alt: attribute(head, "meta[name='abstract']", "content"),
+      title_alt2: Floki.text(Floki.find(head, "title")),
+      language: attribute(tree, "html", "lang"),
+      site_name: attribute(head, "meta[property='og:site_name']", "content"),
+      url: attribute(head, "meta[property='og:url']", "content")
     }
-    |> Enum.map(fn({key, values}) -> {key, List.first(values)} end) # Only first entry
-    |> Enum.filter(fn({_, value}) -> value != nil end)
+    |> Enum.filter(fn({_, value}) -> value != nil && value != "" end)
     |> select_best_title()
     |> Enum.map(fn(entry = {key, value}) ->
       if key in [:title, :site_name],
@@ -83,25 +84,28 @@ defmodule CaptainFact.Sources.Fetcher do
     |> Enum.into(%{})
   end
 
+  defp attribute(head, anchor, attribute), do: List.first(Floki.attribute(head, anchor, attribute))
+
   # Select the best title between meta abstract and og:title then truncate it if needed
   defp select_best_title(attrs) do
     cond do
-      Keyword.has_key?(attrs, :title) ->
-        Keyword.update!(attrs, :title, &format_title/1)
-      Keyword.has_key?(attrs, :title_alt) ->
-        attrs
-        |> Keyword.put(:title, format_title(Keyword.get(attrs, :title_alt)))
-        |> Keyword.delete(:title_alt)
+      Keyword.has_key?(attrs, :title) -> Keyword.update!(attrs, :title, &format_title/1)
+      Keyword.has_key?(attrs, :title_alt) -> extract_alt_title(attrs, :title_alt)
+      Keyword.has_key?(attrs, :title_alt2) -> extract_alt_title(attrs, :title_alt2)
       true -> attrs
     end
   end
 
+  defp extract_alt_title(attrs, key) do
+    attrs
+    |> Keyword.put(:title, format_title(Keyword.get(attrs, key)))
+    |> Keyword.delete(key)
+  end
+
   defp format_title(title) do
-    if String.length(title) > 250 do
-      String.slice(title, 0, 250) <> "..."
-    else
-      title
-    end
+    if String.length(title) > 250,
+      do: String.slice(title, 0, 250) <> "...",
+      else: title
   end
 
   # Link checker

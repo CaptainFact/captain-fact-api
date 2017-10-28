@@ -5,9 +5,8 @@ defmodule CaptainFact.Actions.Flagger do
 
   alias CaptainFact.Accounts.{UserPermissions, User}
   alias CaptainFact.Repo
-  alias CaptainFact.Actions.{Recorder, UserAction}
+  alias CaptainFact.Actions.{Recorder, UserAction, Flag}
   alias CaptainFact.Comments.Comment
-  alias CaptainFactWeb.Flag
 
 
   @doc"""

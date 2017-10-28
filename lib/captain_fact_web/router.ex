@@ -14,50 +14,49 @@ defmodule CaptainFactWeb.Router do
 
   # ---- Routes ----
 
-  # APIs
+  scope "/", CaptainFactWeb do
+    pipe_through [:api]
 
-  scope "/api", CaptainFactWeb do
-    pipe_through [:api, :api_auth]
-
-    # Infos
+    # Public endpoints
     get "/", ApiInfoController, :get
+    get "/videos", VideoController, :index
+    get "/videos/index", VideoController, :index_ids
+    get "/videos/:video_id/statements", StatementController, :get
+    post "/search/video", VideoController, :search
 
-    # Authentication
-    scope "/auth" do
-      get    "/", AuthController, :me
-      delete "/", AuthController, :delete
-      post   "/:provider/callback", AuthController, :callback
+    # Authenticathed endpoints
+    scope "/" do
+      pipe_through [:api_auth]
 
-      scope "/reset_password" do
-        post "/request", AuthController, :reset_password_request
-        get  "/verify/:token", AuthController, :reset_password_verify
-        post "/confirm", AuthController, :reset_password_confirm
+      # Authentication
+      scope "/auth" do
+        get    "/", AuthController, :me
+        delete "/", AuthController, :delete
+        post   "/:provider/callback", AuthController, :callback
+
+        scope "/reset_password" do
+          post "/request", AuthController, :reset_password_request
+          get  "/verify/:token", AuthController, :reset_password_verify
+          post "/confirm", AuthController, :reset_password_confirm
+        end
+
+        post   "/request_invitation", AuthController, :request_invitation
       end
 
-      post   "/request_invitation", AuthController, :request_invitation
+      # Users
+      scope "/users" do
+        post   "/", UserController, :create
+        delete "/me", UserController, :delete
+        put    "/me", UserController, :update
+        get    "/me/available_flags", UserController, :available_flags
+        put    "/me/confirm_email/:token", UserController, :confirm_email
+        get    "/me", UserController, :show_me
+        get    "/:username", UserController, :show
+      end
+
+      # Videos
+      post  "/videos", VideoController, :get_or_create
     end
-
-    # Users
-    post   "/users", UserController, :create
-    delete "/users/me", UserController, :delete
-    put    "/users/me", UserController, :update
-    get    "/users/me/available_flags", UserController, :available_flags
-    put    "/users/me/confirm_email/:token", UserController, :confirm_email
-    get    "/users/me", UserController, :show_me
-    get    "/users/:username", UserController, :show
-    get    "/users/:user_id/videos", VideoController, :index
-
-    # Videos
-    get   "/videos", VideoController, :index
-    post  "/videos", VideoController, :get_or_create
-  end
-
-  scope "/extension_api", CaptainFactWeb do
-    pipe_through [:api, :api_auth]
-
-    # Statements
-    get   "/videos/:video_id/statements", StatementController, :get
-    post  "/search/video", VideoController, :search
   end
 
   # Dev only : mailer. We can use Mix.env here cause file is interpreted at compile time

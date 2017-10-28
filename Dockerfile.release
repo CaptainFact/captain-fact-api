@@ -7,5 +7,5 @@ COPY captain-fact-api_release.tar .
 RUN tar x -f captain-fact-api_release.tar && rm captain-fact-api_release.tar
 
 EXPOSE 80 443
-HEALTHCHECK CMD curl --fail http://localhost:80/api || exit 1
+HEALTHCHECK CMD curl --fail http://localhost:80 || exit 1
 ENTRYPOINT ["bin/captain_fact"]

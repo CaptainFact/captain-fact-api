@@ -1,4 +1,4 @@
-defmodule CaptainFactWeb.GuardianSerializer do
+defmodule CaptainFact.Accounts.GuardianSerializer do
   @behaviour Guardian.Serializer
 
   alias CaptainFact.Repo

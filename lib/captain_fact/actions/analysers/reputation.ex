@@ -15,6 +15,7 @@ defmodule CaptainFact.Actions.Analysers.Reputation do
 
   @name __MODULE__
   @analyser_id UsersActionsReport.analyser_id(__MODULE__)
+  @daily_gain_limit 25
   @actions %{
     UserAction.type(:vote_up) => %{
       UserAction.entity(:comment) =>  {  0  , +2  },
@@ -54,6 +55,10 @@ defmodule CaptainFact.Actions.Analysers.Reputation do
     GenServer.call(@name, :update_reputations, @timeout)
   end
 
+  def reset_daily_limits() do
+    GenServer.call(@name, :reset_daily_limits, @timeout)
+  end
+
   # Utils
 
   def action_reputation_change(type) when is_integer(type), do: Map.get(@actions, type)
@@ -65,6 +70,8 @@ defmodule CaptainFact.Actions.Analysers.Reputation do
 
   def actions, do: @actions
 
+  def daily_gain_limit, do: @daily_gain_limit
+
   # --- Server callbacks ---
 
   def handle_call(:update_reputations, _from, _state) do
@@ -72,6 +79,13 @@ defmodule CaptainFact.Actions.Analysers.Reputation do
 
     unless last_action_id == -1,
       do: start_analysis(Repo.all(from(a in UserAction, where: a.id > ^last_action_id, where: a.type in @actions_types), log: false))
+    {:reply, :ok , :ok}
+  end
+
+  def handle_call(:reset_daily_limits, _from, _state) do
+    User
+    |> where([u], u.today_reputation_gain != 0)
+    |> Repo.update_all(set: [today_reputation_gain: 0])
     {:reply, :ok , :ok}
   end
 
@@ -92,14 +106,32 @@ defmodule CaptainFact.Actions.Analysers.Reputation do
          |> changes_updater(action.user_id, source_change)
          |> changes_updater(action.target_user_id, target_change)
        end)
-    |> Enum.filter(fn {_, diff} -> diff != 0 end)
     |> Enum.map(fn {user_id, diff} ->
          User
-         |> where(id: ^user_id)
-         |> Repo.update_all(inc: [reputation: diff])
-         |> elem(0)
+         |> select([:id, :reputation, :today_reputation_gain])
+         |> Repo.get(user_id)
+         |> update_user_reputation(diff)
        end)
-    |> Enum.sum()
+    |> Enum.count(&(&1 == true))
+  end
+
+  # User may have deleted its account. Ignore him/her
+  defp update_user_reputation(nil, _), do: false
+  # Ignore null reputation changes
+  defp update_user_reputation(_, 0), do: false
+  # No need to check anything when lowering reputation
+  defp update_user_reputation(user, change) when change < 0, do: do_update_user_reputation(user, change)
+  # Ignore update if limit has already been reached
+  defp update_user_reputation(%{today_reputation_gain: today_gain}, _) when today_gain > @daily_gain_limit, do: false
+  # Limit gains to `@daily_gain_limit`
+  defp update_user_reputation(user = %{today_reputation_gain: today_gain}, change),
+    do: do_update_user_reputation(user, min(change, @daily_gain_limit - today_gain))
+
+  defp do_update_user_reputation(user, change) do
+    case Repo.update(User.reputation_changeset(user, change), log: false) do
+      {:ok, _} -> true
+      {:error, _} -> false
+    end
   end
 
   defp changes_updater(changes, _, 0), do: changes

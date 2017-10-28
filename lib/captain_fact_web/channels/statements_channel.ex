@@ -6,10 +6,12 @@ defmodule CaptainFactWeb.StatementsChannel do
     only: [action_create: 3, action_update: 3, action_delete: 3]
 
   alias Ecto.Multi
+  alias CaptainFact.Videos
   alias CaptainFact.Videos.VideoHashId
   alias CaptainFact.Accounts.UserPermissions
   alias CaptainFact.Actions.Recorder
-  alias CaptainFactWeb.{Statement, StatementView, ErrorView}
+  alias CaptainFact.Speakers.Statement
+  alias CaptainFactWeb.{StatementView, ErrorView}
 
 
   def join("statements:video:" <> video_hash_id, _payload, socket) do
@@ -25,6 +27,19 @@ defmodule CaptainFactWeb.StatementsChannel do
 
   def handle_in(command, params, socket) do
     handle_in_authenticated(command, params, socket, &handle_in_authenticated!/3)
+  end
+
+  @doc"""
+  Shift all video's statements
+  """
+  def handle_in_authenticated!("shift_all", offset, socket) do
+    case Videos.shift_statements(socket.assigns.user_id, socket.assigns.video_id, String.to_integer(offset)) do
+      {:ok, statements} ->
+        broadcast!(socket, "statements_updated", %{statements: statements})
+        {:reply, :ok, socket}
+      {:error, _} ->
+        {:reply, :error, socket}
+    end
   end
 
   @doc """

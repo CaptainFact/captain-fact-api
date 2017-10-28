@@ -1,5 +1,6 @@
 defmodule CaptainFact.Sources.Source do
-  use CaptainFactWeb, :model
+  use Ecto.Schema
+  import Ecto.Changeset
 
   schema "sources" do
     field :url, :string

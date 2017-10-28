@@ -8,7 +8,7 @@ defmodule CaptainFact.Sources.FetcherTest do
 
 
   @valid_attributes %{
-    language: "fr", # TODO remplace by locale
+    language: "fr",
     title: "The article of the year",
     site_name: "Best site ever !",
     url: "/test"

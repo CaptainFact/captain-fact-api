@@ -1,7 +1,7 @@
 defmodule CaptainFact.StatementTest do
   use CaptainFact.DataCase, async: true
 
-  alias CaptainFactWeb.Statement
+  alias CaptainFact.Speakers.Statement
 
   @valid_attrs %{
     text: "Be proud of you Because you can be do what we want to do !",

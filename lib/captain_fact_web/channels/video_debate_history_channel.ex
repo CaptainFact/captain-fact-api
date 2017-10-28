@@ -11,7 +11,8 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
   alias CaptainFact.Accounts.UserPermissions
   alias CaptainFact.Actions.{Recorder, UserAction}
   alias CaptainFact.VideoDebate.History
-  alias CaptainFactWeb.{ Statement, Speaker, VideoSpeaker, StatementView, SpeakerView }
+  alias CaptainFact.Speakers.{Statement, Speaker, VideoSpeaker}
+  alias CaptainFactWeb.{StatementView, SpeakerView}
   alias CaptainFactWeb.UserActionView
 
 

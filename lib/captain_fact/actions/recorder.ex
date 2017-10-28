@@ -2,6 +2,7 @@ defmodule CaptainFact.Actions.Recorder do
   import Ecto.Query, warn: false
   import CaptainFact.Actions.UserAction, only: [type: 1, entity: 1]
 
+  alias Ecto.Multi
   alias CaptainFact.Repo
   alias CaptainFact.Actions.UserAction
   alias CaptainFact.Accounts.User
@@ -28,6 +29,13 @@ defmodule CaptainFact.Actions.Recorder do
   """
   def record!(user, action_type, entity, params \\ %{}) do
     Repo.insert!(build_action_changeset(user, action_type, entity, params))
+  end
+
+  @doc"""
+  Same as record/4 but act on an Ecto.Multi object. Action is recorded under `:action_record` key
+  """
+  def multi_record(multi, user, action_type, entity, params \\ %{}) do
+    Multi.insert(multi, :action_record, build_action_changeset(user, action_type, entity, params))
   end
 
   @doc"""

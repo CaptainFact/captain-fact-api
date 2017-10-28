@@ -10,7 +10,7 @@ defmodule CaptainFactWeb.AuthControllerTest do
 
   describe "identity" do
     test "can login with the good email / password combination" do
-      auth_path = "/api/auth/identity/callback"
+      auth_path = "/auth/identity/callback"
       password = "nic€P@ssword!"
       user = insert_user_with_custom_password(password)
 
@@ -116,20 +116,20 @@ defmodule CaptainFactWeb.AuthControllerTest do
 
       # Ask for password reset
       build_conn()
-      |> post("/api/auth/reset_password/request", %{email: user.email})
+      |> post("/auth/reset_password/request", %{email: user.email})
       |> response(204)
 
       # Verify token
       req = Repo.get_by!(CaptainFact.Accounts.ResetPasswordRequest, user_id: user.id)
       resp =
-        get(build_conn(), "/api/auth/reset_password/verify/#{req.token}")
+        get(build_conn(), "/auth/reset_password/verify/#{req.token}")
         |> json_response(200)
       assert Map.has_key?(resp, "username")
 
       # Confirm (change password)
       resp =
         build_conn()
-        |> post("/api/auth/reset_password/confirm", %{
+        |> post("/auth/reset_password/confirm", %{
              token: req.token,
              password: new_password
            })
@@ -139,7 +139,7 @@ defmodule CaptainFactWeb.AuthControllerTest do
 
     test "should not inform user if email doesn't exists" do
         build_conn()
-        |> post("/api/auth/reset_password/request", %{email: "total_bullshit!"})
+        |> post("/auth/reset_password/request", %{email: "total_bullshit!"})
         |> response(204)
       end
   end
@@ -159,7 +159,7 @@ defmodule CaptainFactWeb.AuthControllerTest do
 
     defp request_invite(email) do
       build_conn()
-      |> post("/api/auth/request_invitation", %{email: email})
+      |> post("/auth/request_invitation", %{email: email})
     end
   end
 

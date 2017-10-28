@@ -1,6 +1,8 @@
-defmodule CaptainFactWeb.Speaker do
-  use CaptainFactWeb, :model
+defmodule CaptainFact.Speakers.Speaker do
+  use Ecto.Schema
   use Arc.Ecto.Schema
+  import Ecto.Changeset
+
 
   schema "speakers" do
     field :full_name, :string
@@ -8,11 +10,11 @@ defmodule CaptainFactWeb.Speaker do
     field :country, :string
     field :wikidata_item_id, :integer
     field :is_user_defined, :boolean, default: true
-    field :picture, CaptainFactWeb.SpeakerPicture.Type
+    field :picture, CaptainFact.Speakers.Picture.Type
     field :is_removed, :boolean, default: false
 
-    has_many :statements, CaptainFactWeb.Statement, on_delete: :nilify_all
-    many_to_many :videos, CaptainFactWeb.Video, join_through: "videos_speakers", on_delete: :delete_all
+    has_many :statements, CaptainFact.Speakers.Statement, on_delete: :nilify_all
+    many_to_many :videos, CaptainFact.Videos.Video, join_through: "videos_speakers", on_delete: :delete_all
 
     timestamps()
   end

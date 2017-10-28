@@ -6,19 +6,31 @@ defmodule CaptainFact.Videos do
   import Ecto.Query, warn: false
   import CaptainFact.Videos.MetadataFetcher
 
+  alias Ecto.Multi
   alias CaptainFact.Repo
   alias CaptainFact.Actions.Recorder
   alias CaptainFact.Accounts.UserPermissions
-  alias CaptainFactWeb.Video
+  alias CaptainFact.Speakers.Statement
+  alias CaptainFact.Videos.Video
 
 
   @doc"""
-  List videos
-  `lang_filter` can be provided as a two-letters locale (fr,de,en...etc). The special value "unknown" will list all
-  the videos for which locale is unknown
+  List videos. `filters` may contain the following entries:
+    * language: two characters identifier string (fr,en,es...etc) or "unknown" to list videos with unknown language
   """
-  def videos_list(lang_filter), do: Repo.all(videos_query(lang_filter))
-  def videos_list(), do: Repo.all(videos_query())
+  def videos_list(filters \\ []), do: Repo.all(videos_query(filters))
+
+  @doc"""
+  Index videos, returning only their id, provider_id and provider.
+  Accepted filters are the same than for `videos_list/1`
+  """
+  def videos_index(from_id \\ 0) do
+    Video
+    |> select([v], %{id: v.id, provider: v.provider, provider_id: v.provider_id})
+    |> where([v], v.id > ^from_id)
+    |> Repo.all()
+  end
+
 
   @doc"""
   Return the corresponding video if it has already been added, `nil` otherwise
@@ -48,11 +60,31 @@ defmodule CaptainFact.Videos do
     end
   end
 
-  defp videos_query("unknown"), do: where(videos_query(), [v], is_nil(v.language))
-  defp videos_query(language), do: where(videos_query(), [v], language: ^language)
-  defp videos_query() do
+  @doc"""
+  Shift all video's statements by given offset.
+  Returns {:ok, statements} if success, {:error, reason} otherwise. Returned statements contains only an id and a key
+  """
+  def shift_statements(user, video_id, offset) when is_integer(offset) do
+    UserPermissions.check!(user, :update, :video)
+    statements_query = where(Statement, [s], s.video_id == ^video_id)
+    Multi.new
+    |> Multi.update_all(:statements_update, statements_query, [inc: [time: offset]], returning: [:id, :time])
+    |> Recorder.multi_record(user, :update, :video, %{entity_id: video_id, changes: %{"statements_time" => offset}})
+    |> Repo.transaction()
+    |> case do
+         {:ok, %{statements_update: {_, statements}}} -> {:ok, Enum.map(statements, &(%{id: &1.id, time: &1.time}))}
+         {:error, _, reason, _} -> {:error, reason}
+       end
+  end
+
+  defp videos_query(filters) do
     Video
     |> Video.with_speakers
+    |> language_filter(Keyword.get(filters, :language))
     |> order_by([v], desc: v.id)
   end
+
+  defp language_filter(query, nil), do: query
+  defp language_filter(query, "unknown"), do: where(query, [v], is_nil(v.language))
+  defp language_filter(query, language), do: where(query, [v], language: ^language)
 end

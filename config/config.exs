@@ -30,10 +30,11 @@ config :captain_fact, CaptainFact.Repo,
 # Configure scheduler
 config :captain_fact, CaptainFact.Scheduler,
   jobs: [
-    {{:extended,  "*/5 * * * * *"}, {CaptainFact.Actions.Analysers.Votes, :update, []}}, # Every 5 seconds
-    {{:cron,      "*/1 * * * *"},   {CaptainFact.Actions.Analysers.Reputation, :update, []}}, # Every minute
-    {{:cron,      "*/1 * * * *"},   {CaptainFact.Actions.Analysers.Flags, :update, []}}, # Every minute
-    {{:cron,      "*/3 * * * *"},   {CaptainFact.Actions.Analysers.Achievements, :update, []}}, # Every 3 minutes
+    {{:extended, "*/5 * * * * *"}, {CaptainFact.Actions.Analysers.Votes, :update, []}}, # Every 5 seconds
+    {            "*/1 * * * *",    {CaptainFact.Actions.Analysers.Reputation, :update, []}}, # Every minute
+    {            "@daily",         {CaptainFact.Actions.Analysers.Reputation, :reset_daily_limits, []}}, # Every day
+    {            "*/1 * * * *",    {CaptainFact.Actions.Analysers.Flags, :update, []}}, # Every minute
+    {            "*/3 * * * *",    {CaptainFact.Actions.Analysers.Achievements, :update, []}}, # Every 3 minutes
   ]
 
 # Configure mailer
@@ -46,7 +47,7 @@ config :logger, :console,
 
 # Configure ueberauth
 config :ueberauth, Ueberauth,
-  base_path: "/api/auth",
+  base_path: "/auth",
   providers: [
     identity: {Ueberauth.Strategy.Identity, [callback_methods: ["POST"]]},
     facebook: {Ueberauth.Strategy.Facebook, [
@@ -59,7 +60,7 @@ config :ueberauth, Ueberauth,
 config :guardian, Guardian,
   issuer: "CaptainFact",
   ttl: {30, :days},
-  serializer: CaptainFactWeb.GuardianSerializer,
+  serializer: CaptainFact.Accounts.GuardianSerializer,
   permissions: %{default: [:read, :write]}
 
 config :weave,
