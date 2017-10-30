@@ -14,14 +14,14 @@ defmodule CaptainFact.Accounts.UserPermissions do
   end
 
   @limitations_age 12 * 60 * 60 # 12 hours
-  @levels [-30, -5, 15, 30, 50, 100, 200, 500, 1000]
+  @limit_warning_threshold 5
+  @levels [-30, -5, 15, 30, 75, 125, 200, 500, 1000]
   @reverse_levels Enum.reverse(@levels)
   @nb_levels Enum.count(@levels)
   @lowest_acceptable_reputation List.first(@levels)
-  @limit_warning_threshold 5
   @limitations %{
     #                        /!\ |️ New user          | Confirmed user
-    # reputation            {-30 , -5 , 15 , 30 , 50 , 100 , 200 , 500 , 1000}
+    # reputation            {-30 , -5 , 15 , 30 , 75 , 125 , 200 , 500 , 1000}
     #-------------------------------------------------------------------------
     create: %{
       comment:              { 2  ,  7 , 10 , 20 , 30 , 200 , 200 , 200 , 200 },
@@ -29,24 +29,24 @@ defmodule CaptainFact.Accounts.UserPermissions do
       speaker:              { 0  ,  3 , 10 , 15 , 20 ,  30 ,  50 , 100 , 100 },
     },
     add: %{
-      video:                { 0  ,  0 ,  0 , 0  , 1  ,  3  ,  5  ,  10 ,  10 },
+      video:                { 0  ,  0 ,  0 , 0  , 0  ,  0  ,  2  ,  5  ,  10 },
       speaker:              { 0  ,  3 ,  5 , 10 , 20 ,  30 ,  50 , 100 , 100 },
     },
     update: %{
       comment:              { 3  , 10 , 15 , 30 , 30 , 100 , 100 , 100 , 100 },
-      statement:            { 0  ,  0 ,  3 ,  5 , 10 ,  50 , 100 , 100 , 100 },
-      speaker:              { 0  ,  0 ,  3 ,  5 , 10 ,  30 ,  50 , 100 , 100 },
+      statement:            { 0  ,  0 ,  0 ,  5 , 10 ,  50 , 100 , 100 , 100 },
+      speaker:              { 0  ,  0 ,  0 ,  5 , 10 ,  30 ,  50 , 100 , 100 },
       video:                { 0  ,  0 ,  0 ,  0 , 0  ,  5  ,  8  ,  10 , 20  },
     },
     delete: %{
     },
     remove: %{
-      statement:            { 0  ,  0 ,  0 ,  1 ,  3 ,  10 ,  10 ,  10 ,  10 },
+      statement:            { 0  ,  0 ,  0 ,  0 ,  3 ,  10 ,  10 ,  10 ,  10 },
       speaker:              { 0  ,  0 ,  0 ,  0 ,  3 ,  30 ,  50 , 100 , 100 },
     },
     restore: %{
-      statement:            { 0  ,  0 ,  0 ,  2 ,  5 ,  15 ,  15 ,  15 ,  15 },
-      speaker:              { 0  ,  0 ,  0 ,  2 , 10 ,  30 ,  50 , 100 , 100 }
+      statement:            { 0  ,  0 ,  0 ,  0 ,  5 ,  15 ,  15 ,  15 ,  15 },
+      speaker:              { 0  ,  0 ,  0 ,  0 , 10 ,  30 ,  50 , 100 , 100 }
     },
     approve: %{
       history_action:       { 0  ,  0 ,  0 ,  0 ,  0 ,   3 ,  10 ,  20 ,  30 },
