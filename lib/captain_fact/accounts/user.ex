@@ -1,5 +1,6 @@
 defmodule CaptainFact.Accounts.User do
   use Ecto.Schema
+  use Arc.Ecto.Schema
   import Ecto.Changeset
 
   alias CaptainFact.TokenGenerator
@@ -11,7 +12,7 @@ defmodule CaptainFact.Accounts.User do
     field :email, :string
     field :encrypted_password, :string
     field :name, :string
-    field :picture_url, :string
+    field :picture_url, CaptainFact.Accounts.UserPicture.Type
     field :reputation, :integer, default: 0
     field :today_reputation_gain, :integer, default: 0
     field :locale, :string
@@ -90,8 +91,9 @@ defmodule CaptainFact.Accounts.User do
     |> put_encrypted_pw
   end
 
-  def provider_changeset(model, params \\ %{}),
-    do: cast(model, params, [:fb_user_id, :picture_url])
+  def provider_changeset(model, params \\ %{}) do
+    cast(model, params, [:fb_user_id])
+  end
 
   @token_length 32
   defp generate_email_verification_token(changeset, false),

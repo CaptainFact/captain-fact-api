@@ -36,7 +36,7 @@ defmodule CaptainFactWeb.AuthController do
   alias CaptainFactWeb.{ErrorView, UserView, AuthController }
 
   plug UeberauthWithRedirectUriFixer
-  plug Guardian.Plug.EnsureAuthenticated, [handler: AuthController] when action in [:delete, :me]
+  plug Guardian.Plug.EnsureAuthenticated, [handler: AuthController] when action in [:delete, :me, :unlink_provider]
 
 
   @err_authentication_failed "authentication_failed"
@@ -67,21 +67,22 @@ defmodule CaptainFactWeb.AuthController do
   end
 
   # For all others (OAuth) - create if doesn't exists, link otherwise
-  def callback(%{assigns: %{ueberauth_auth: auth}} = conn, params) do
-    case third_paty_auth(auth, Map.get(params, "invitation_token")) do
-      {:ok, user} -> case signin_user(conn, user) do
-        {:ok, user, token} ->
-          render(conn, UserView, "user_with_token.json", %{user: user, token: token})
-        {:error, _} ->
-          conn
-          |> put_status(:bad_request)
-          |> render(ErrorView, "error.json", message: @err_authentication_failed)
-      end
-      {:error, error} ->
-        conn
-        |> put_status(:bad_request)
-        |> render(ErrorView, "error.json", message: error)
+  # TODO If success, unlock achievement
+  def callback(conn, params) do
+    case Guardian.Plug.current_resource(conn) do
+      nil -> third_party_auth_unauthenticated(conn, Map.get(params, "invitation_token"))
+      user -> third_paty_auth_authenticated(conn, user)
     end
+  end
+
+  def unlink_provider(conn, %{"provider" => "facebook"}) do
+    updated_user =
+      Guardian.Plug.current_resource(conn)
+      |> User.provider_changeset(%{fb_user_id: nil})
+      |> Repo.update!()
+
+    # TODO Send a request to facebook to unlink on their side too
+    render(conn, UserView, :show, user: updated_user)
   end
 
   def me(conn, _params) do
@@ -145,25 +146,73 @@ defmodule CaptainFactWeb.AuthController do
 
   # ---- Private ----
 
+  defp third_paty_auth_authenticated(%{assigns: %{ueberauth_auth: auth}} = conn, user) do
+    user
+    |> link_user_to_third_party_provider(provider_specific_infos(auth))
+    |> case do
+         {:ok, updated_user} ->
+           {:ok, _, token} = signin_user(conn, updated_user)
+           render(conn, UserView, "user_with_token.json", %{user: updated_user, token: token})
+         {:error, _} ->
+           conn
+           |> put_status(:bad_request)
+           |> render(ErrorView, "error.json", message: @err_authentication_failed)
+       end
+  end
+
+  defp third_party_auth_unauthenticated(conn, nil),
+       do: render(put_status(conn, :bad_request), ErrorView, message: "invalid_token")
+  defp third_party_auth_unauthenticated(%{assigns: %{ueberauth_auth: auth}} = conn, invitation_token) do
+    case third_paty_auth(auth, invitation_token) do
+      {:ok, user} ->
+        case signin_user(conn, user) do
+          {:ok, user, token} ->
+            render(conn, UserView, "user_with_token.json", %{user: user, token: token})
+          {:error, _} ->
+            conn
+            |> put_status(:bad_request)
+            |> render(ErrorView, "error.json", message: @err_authentication_failed)
+        end
+      {:error, error} ->
+        conn
+        |> put_status(:bad_request)
+        |> render(ErrorView, "error.json", message: error)
+    end
+  end
+
   defp third_paty_auth(auth, invitation_token) do
     case user_from_auth(auth) do
-      # User already exists
-      {:ok, user} ->
-        # Let's update user infos from third party
-        user
-        |> User.provider_changeset(provider_specific_infos(auth))
+      # A user with this email already exists, link third party to email
+      {:ok, user} -> link_user_to_third_party_provider(user, provider_specific_infos(auth))
+      # User doesn't exist, create account
+      {:error, _} -> Accounts.create_account(auth_info_to_user_info(auth), invitation_token, [
+        provider_params: provider_specific_infos(auth),
+        allow_empty_username: true
+      ])
+    end
+  end
+
+  defp link_user_to_third_party_provider(user, provider_infos) do
+    {:ok, updated_user} =
+      user
+      |> User.provider_changeset(provider_infos)
+      |> Repo.update()
+
+    # TODO picture url may not exist
+    # TODO put this in a separate process
+    case CaptainFact.Accounts.UserPicture.store({provider_infos.picture_url, updated_user}) do
+      {:ok, picture} ->
+        updated_user
+        |> Ecto.Changeset.change(picture_url: %{file_name: picture, updated_at: Ecto.DateTime.utc})
         |> Repo.update()
         |> case do
-             {:error, _} -> {:ok, user} # Not a big deal if this fails, just return the user
-             {:ok, updated_user} -> {:ok, updated_user}
+             {:ok, user_with_picture} -> {:ok, user_with_picture}
+             _ -> {:ok, updated_user}
            end
-      # User doesn't exist, create account
-      {:error, _} ->
-        Accounts.create_account(auth_info_to_user_info(auth), invitation_token, [
-          provider_params: provider_specific_infos(auth),
-          allow_empty_username: true
-        ])
+      error -> IO.inspect(error)
     end
+
+
   end
 
   defp auth_info_to_user_info(auth) do
