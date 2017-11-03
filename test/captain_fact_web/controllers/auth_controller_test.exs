@@ -30,6 +30,8 @@ defmodule CaptainFactWeb.AuthControllerTest do
   end
 
   describe "facebook auth" do
+    @social_network_achievement 6
+
     test "can login" do
       user = insert(:user)
       auth = %{ueberauth_auth: build_auth(:facebook, user.fb_user_id, user.email, user.name)}
@@ -40,6 +42,7 @@ defmodule CaptainFactWeb.AuthControllerTest do
         |> json_response(:ok)
 
       assert response["user"]["id"] == user.id, "should use existing account if exists"
+      assert @social_network_achievement in response["user"]["achievements"], "should unlock social-network achievement"
     end
 
     test "link profile if same email" do
@@ -56,6 +59,7 @@ defmodule CaptainFactWeb.AuthControllerTest do
         |> json_response(:ok)
 
       assert response["user"]["id"] == user.id, "should use existing account if email exists"
+      assert @social_network_achievement in response["user"]["achievements"], "should unlock social-network achievement"
     end
 
     test "show an error if not invited" do
@@ -81,6 +85,7 @@ defmodule CaptainFactWeb.AuthControllerTest do
         |> json_response(:ok)
 
       Guardian.decode_and_verify!(response["token"])
+      assert @social_network_achievement in response["user"]["achievements"], "should unlock social-network achievement"
     end
 
     test "if user changed its email and has 2 accounts, always prefer facebook auth account" do
@@ -106,60 +111,6 @@ defmodule CaptainFactWeb.AuthControllerTest do
         assert response["user"]["id"] == user_facebook.id, "should always preferer facebook uid over email"
         assert Repo.aggregate(User, :count, :id) == nb_accounts_before + nb_to_create
       end
-    end
-  end
-
-  describe "reset password" do
-    test "full flow" do
-      user = insert(:user)
-      new_password = "Passw0rDChanged...=)"
-
-      # Ask for password reset
-      build_conn()
-      |> post("/auth/reset_password/request", %{email: user.email})
-      |> response(204)
-
-      # Verify token
-      req = Repo.get_by!(CaptainFact.Accounts.ResetPasswordRequest, user_id: user.id)
-      resp =
-        get(build_conn(), "/auth/reset_password/verify/#{req.token}")
-        |> json_response(200)
-      assert Map.has_key?(resp, "username")
-
-      # Confirm (change password)
-      resp =
-        build_conn()
-        |> post("/auth/reset_password/confirm", %{
-             token: req.token,
-             password: new_password
-           })
-        |> json_response(200)
-      assert Map.has_key?(resp, "email")
-    end
-
-    test "should not inform user if email doesn't exists" do
-        build_conn()
-        |> post("/auth/reset_password/request", %{email: "total_bullshit!"})
-        |> response(204)
-      end
-  end
-
-  describe "invitations" do
-    test "should say ok everytime the user request with valid info" do
-      email = "test@email.fr"
-      request_invite(email) |> response(204)
-      request_invite(email) |> response(204)
-    end
-
-    test "should inform the user if email is not valid" do
-      assert json_response(request_invite("xxx"), 400) == %{"error" => "invalid_email"}
-      assert json_response(request_invite("toto@yopmail.fr"), 400) == %{"error" => "invalid_email"}
-      assert json_response(request_invite("x@xx"), 400) == %{"error" => "invalid_email"}
-    end
-
-    defp request_invite(email) do
-      build_conn()
-      |> post("/auth/request_invitation", %{email: email})
     end
   end
 

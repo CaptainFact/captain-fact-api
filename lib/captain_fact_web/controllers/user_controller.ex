@@ -3,6 +3,8 @@ defmodule CaptainFactWeb.UserController do
 
   alias CaptainFact.Accounts
   alias CaptainFact.Accounts.{User, UserPermissions}
+  alias CaptainFactWeb.UserView
+
 
   plug Guardian.Plug.EnsureAuthenticated, [handler: CaptainFactWeb.AuthController]
   when action in [:update, :delete, :available_flags, :show_me]
@@ -31,7 +33,7 @@ defmodule CaptainFactWeb.UserController do
   end
 
   def show_me(conn, _params) do
-    render(conn, "show.json", user: Guardian.Plug.current_resource(conn))
+    render(conn, UserView, :show, user: Guardian.Plug.current_resource(conn))
   end
 
   def update(conn, params) do
@@ -67,8 +69,43 @@ defmodule CaptainFactWeb.UserController do
   end
 
   def delete(conn, _params) do
-    # TODO Soft delete, do the real delete after 1 week to avaoid user mistakes
+    # TODO Soft delete, do the real delete after 1 week to avoid user mistakes
     Repo.delete!(Guardian.Plug.current_resource(conn))
     send_resp(conn, :no_content, "")
+  end
+
+  # ---- Reset password ----
+
+  def reset_password_request(conn, %{"email" => email}) do
+    try do
+      Accounts.reset_password!(email, Enum.join(Tuple.to_list(conn.remote_ip), "."))
+    rescue
+      _ in Ecto.NoResultsError -> "I won't tell the user ;)'"
+    end
+    send_resp(conn, :no_content, "")
+  end
+
+  def reset_password_verify(conn, %{"token" => token}) do
+    user = Accounts.check_reset_password_token!(token)
+    render(conn, UserView, :show, %{user: user})
+  end
+
+  def reset_password_confirm(conn, %{"token" => token, "password" => password}) do
+    user = Accounts.confirm_password_reset!(token, password)
+    render(conn, UserView, :show, %{user: user})
+  end
+
+  # ---- Invitations ----
+
+  def request_invitation(conn, %{"email" => email}) do
+    case Accounts.request_invitation(email, Guardian.Plug.current_resource(conn)) do
+      {:ok, _} ->
+        send_resp(conn, :no_content, "")
+      {:error, "invalid_email"} ->
+        put_status(conn, :bad_request)
+        |> json(%{error: "invalid_email"})
+      {:error, _} ->
+        send_resp(conn, :bad_request, "")
+    end
   end
 end

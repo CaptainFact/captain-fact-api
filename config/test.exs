@@ -22,6 +22,9 @@ config :guardian, Guardian,
 # Print only warnings and errors during test
 config :logger, level: :warn
 
+# Configure file upload
+config :arc, storage: Arc.Storage.Local
+
 # Configure your database
 # Dirty fix : if CONTINUOUS_INTEGRATION is present, it means we are on CI and postgres is linked to us
 config :captain_fact, CaptainFact.Repo,
