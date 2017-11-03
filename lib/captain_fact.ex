@@ -33,4 +33,18 @@ defmodule CaptainFact do
     opts = [strategy: :one_for_one, name: CaptainFact.Supervisor]
     Supervisor.start_link(children, opts)
   end
+
+  def version() do
+    case :application.get_key(:captain_fact, :vsn) do
+      {:ok, version} -> to_string(version)
+      _ -> "unknown"
+    end
+  end
+
+  @doc """
+  If Mix is available, returns Mix.env(). If not available (in releases) return :prod
+  """
+  def env() do
+    (Kernel.function_exported?(Mix, :env, 0) && Mix.env) || :prod
+  end
 end

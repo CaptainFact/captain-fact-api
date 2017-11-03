@@ -4,7 +4,8 @@ defmodule CaptainFactWeb.UserControllerTest do
 
   alias CaptainFact.Accounts.User
 
-  describe "GET /users/:username" do
+
+  describe "Get user" do
     test "displays sensitive info (email...) when requesting /me" do
       user = insert(:user)
       returned_user =
@@ -20,7 +21,7 @@ defmodule CaptainFactWeb.UserControllerTest do
       requested_user = insert(:user)
       returned_user =
         build_authenticated_conn(requesting_user)
-        |> get("/users/#{requested_user.username}")
+        |> get("/users/username/#{requested_user.username}")
         |> json_response(:ok)
 
       refute Map.has_key?(returned_user, "email")
@@ -55,6 +56,60 @@ defmodule CaptainFactWeb.UserControllerTest do
         |> json_response(:bad_request)
 
       assert response == %{"error" => "invalid_invitation_token"}
+    end
+  end
+
+  describe "reset password" do
+    test "full flow" do
+      user = insert(:user)
+      new_password = "Passw0rDChanged...=)"
+
+      # Ask for password reset
+      build_conn()
+      |> post("/users/reset_password/request", %{email: user.email})
+      |> response(204)
+
+      # Verify token
+      req = Repo.get_by!(CaptainFact.Accounts.ResetPasswordRequest, user_id: user.id)
+      resp =
+        get(build_conn(), "/users/reset_password/verify/#{req.token}")
+        |> json_response(200)
+      assert Map.has_key?(resp, "username")
+
+      # Confirm (change password)
+      resp =
+        build_conn()
+        |> post("/users/reset_password/confirm", %{
+          token: req.token,
+          password: new_password
+        })
+        |> json_response(200)
+      assert Map.has_key?(resp, "email")
+    end
+
+    test "should not inform user if email doesn't exists" do
+      build_conn()
+      |> post("/users/reset_password/request", %{email: "total_bullshit!"})
+      |> response(204)
+    end
+  end
+
+  describe "invitations" do
+    test "should say ok everytime the user request with valid info" do
+      email = "test@email.fr"
+      request_invite(email) |> response(204)
+      request_invite(email) |> response(204)
+    end
+
+    test "should inform the user if email is not valid" do
+      assert json_response(request_invite("xxx"), 400) == %{"error" => "invalid_email"}
+      assert json_response(request_invite("toto@yopmail.fr"), 400) == %{"error" => "invalid_email"}
+      assert json_response(request_invite("x@xx"), 400) == %{"error" => "invalid_email"}
+    end
+
+    defp request_invite(email) do
+      build_conn()
+      |> post("/users/request_invitation", %{email: email})
     end
   end
 

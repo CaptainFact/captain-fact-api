@@ -28,74 +28,83 @@ defmodule UeberauthWithRedirectUriFixer do
 end
 
 defmodule CaptainFactWeb.AuthController do
+  @moduledoc"""
+  Auth controller. Deal with user sign_in, logout and interactions with Ueberauth
+  """
+
   use CaptainFactWeb, :controller
   require Logger
 
   alias CaptainFact.Accounts
-  alias CaptainFact.Accounts.User
+  alias CaptainFact.Accounts.{User, Authenticator}
   alias CaptainFactWeb.{ErrorView, UserView, AuthController }
 
   plug UeberauthWithRedirectUriFixer
-  plug Guardian.Plug.EnsureAuthenticated, [handler: AuthController] when action in [:delete, :me, :unlink_provider]
+  plug Guardian.Plug.EnsureAuthenticated, [handler: AuthController] when action in [:logout, :unlink_provider]
 
 
   @err_authentication_failed "authentication_failed"
   @err_invalid_email_password "invalid_email_password"
 
 
-  # If auth fails
+  @doc """
+  Called when auth fails
+  """
   def callback(%{assigns: %{ueberauth_failure: f}} = conn, _params) do
-    Logger.debug(inspect(f))
+    Logger.debug(fn -> inspect(f)  end)
     conn
     |> put_status(:bad_request)
     |> render(ErrorView, "error.json", message: @err_authentication_failed)
   end
 
-  # Special case for identity
+
+  @doc"""
+  Auth with identity (email + password)
+  """
   def callback(%{assigns: %{ueberauth_auth: auth = %{provider: :identity}}} = conn, _params) do
     result = with {:ok, user} <- user_from_auth(auth),
-                  :ok <- validate_pass(user.encrypted_password, auth.credentials.other.password),
+                  :ok <- Authenticator.validate_pass(user.encrypted_password, auth.credentials.other.password),
                   do: signin_user(conn, user)
+
     case result do
-      {:ok, user, token} ->
-        render(conn, UserView, "user_with_token.json", %{user: user, token: token})
       {:error, _} ->
         conn
         |> put_status(:unauthorized)
         |> render(ErrorView, "error.json", message: @err_invalid_email_password)
+      response ->
+        response
     end
   end
 
-  # For all others (OAuth) - create if doesn't exists, link otherwise
-  # TODO If success, unlock achievement
-  def callback(conn, params) do
+  @doc"""
+  Auth with third party provider (OAuth)
+  """
+  def callback(conn = %{assigns: %{ueberauth_auth: auth}}, params) do
     case Guardian.Plug.current_resource(conn) do
-      nil -> third_party_auth_unauthenticated(conn, Map.get(params, "invitation_token"))
-      user -> third_paty_auth_authenticated(conn, user)
+      nil -> third_party_signin_unauthenticated(conn, Map.get(params, "invitation_token"))
+      user -> signin_user(conn, Authenticator.link_provider!(user, provider_specific_infos(auth)))
     end
   end
 
+  @doc"""
+  Unlink given provider from user's account
+  """
   def unlink_provider(conn, %{"provider" => "facebook"}) do
-    updated_user =
-      Guardian.Plug.current_resource(conn)
-      |> User.provider_changeset(%{fb_user_id: nil})
-      |> Repo.update!()
-
-    # TODO Send a request to facebook to unlink on their side too
+    updated_user = Authenticator.unlink_provider!(Guardian.Plug.current_resource(conn), :facebook)
     render(conn, UserView, :show, user: updated_user)
   end
 
-  def me(conn, _params) do
-    user = Guardian.Plug.current_resource(conn)
-    render(conn, UserView, :show, user: user)
-  end
-
-  def delete(conn, _params) do
+  @doc"""
+  Logout user. TODO: invalidate token (must use ecto)
+  """
+  def logout(conn, _params) do
     conn
     |> Guardian.Plug.current_token
     |> Guardian.revoke!
     send_resp(conn, 204, "")
   end
+
+  # Guardian methods: render errors on unauthenticated / unauthorized
 
   def unauthenticated(conn, _params) do
     conn
@@ -109,110 +118,26 @@ defmodule CaptainFactWeb.AuthController do
     |> render(ErrorView, "403.json")
   end
 
-  # ---- Reset password ----
-
-  def reset_password_request(conn, %{"email" => email}) do
-    try do
-      Accounts.reset_password!(email, Enum.join(Tuple.to_list(conn.remote_ip), "."))
-    rescue
-      _ in Ecto.NoResultsError -> "I won't tell the user ;)'"
-    end
-    send_resp(conn, :no_content, "")
-  end
-
-  def reset_password_verify(conn, %{"token" => token}) do
-    user = Accounts.check_reset_password_token!(token)
-    render(conn, UserView, :show, %{user: user})
-  end
-
-  def reset_password_confirm(conn, %{"token" => token, "password" => password}) do
-    user = Accounts.confirm_password_reset!(token, password)
-    render(conn, UserView, :show, %{user: user})
-  end
-
-  # ---- Invitations ----
-
-  def request_invitation(conn, %{"email" => email}) do
-    case Accounts.request_invitation(email, Guardian.Plug.current_resource(conn)) do
-      {:ok, _} ->
-        send_resp(conn, :no_content, "")
-      {:error, "invalid_email"} ->
-        put_status(conn, :bad_request)
-        |> json(%{error: "invalid_email"})
-      {:error, _} ->
-        send_resp(conn, :bad_request, "")
-    end
-  end
-
   # ---- Private ----
 
-  defp third_paty_auth_authenticated(%{assigns: %{ueberauth_auth: auth}} = conn, user) do
-    user
-    |> link_user_to_third_party_provider(provider_specific_infos(auth))
-    |> case do
-         {:ok, updated_user} ->
-           {:ok, _, token} = signin_user(conn, updated_user)
-           render(conn, UserView, "user_with_token.json", %{user: updated_user, token: token})
-         {:error, _} ->
-           conn
-           |> put_status(:bad_request)
-           |> render(ErrorView, "error.json", message: @err_authentication_failed)
-       end
-  end
-
-  defp third_party_auth_unauthenticated(conn, nil),
-       do: render(put_status(conn, :bad_request), ErrorView, message: "invalid_token")
-  defp third_party_auth_unauthenticated(%{assigns: %{ueberauth_auth: auth}} = conn, invitation_token) do
-    case third_paty_auth(auth, invitation_token) do
-      {:ok, user} ->
-        case signin_user(conn, user) do
-          {:ok, user, token} ->
-            render(conn, UserView, "user_with_token.json", %{user: user, token: token})
-          {:error, _} ->
-            conn
-            |> put_status(:bad_request)
-            |> render(ErrorView, "error.json", message: @err_authentication_failed)
-        end
-      {:error, error} ->
-        conn
-        |> put_status(:bad_request)
-        |> render(ErrorView, "error.json", message: error)
-    end
-  end
-
-  defp third_paty_auth(auth, invitation_token) do
+  defp third_party_signin_unauthenticated(%{assigns: %{ueberauth_auth: auth}} = conn, invitation_token) do
     case user_from_auth(auth) do
       # A user with this email already exists, link third party to email
-      {:ok, user} -> link_user_to_third_party_provider(user, provider_specific_infos(auth))
+      {:ok, user} ->
+        signin_user(conn, Authenticator.link_provider!(user, provider_specific_infos(auth)))
       # User doesn't exist, create account
-      {:error, _} -> Accounts.create_account(auth_info_to_user_info(auth), invitation_token, [
-        provider_params: provider_specific_infos(auth),
-        allow_empty_username: true
-      ])
+      {:error, _} ->
+        case Accounts.create_account(auth_info_to_user_info(auth), invitation_token, [
+          provider_params: provider_specific_infos(auth),
+          allow_empty_username: true
+        ]) do
+          {:ok, user} -> signin_user(conn, user)
+          {:error, error} ->
+            conn
+            |> put_status(:bad_request)
+            |> render(ErrorView, "error.json", message: error)
+        end
     end
-  end
-
-  defp link_user_to_third_party_provider(user, provider_infos) do
-    {:ok, updated_user} =
-      user
-      |> User.provider_changeset(provider_infos)
-      |> Repo.update()
-
-    # TODO picture url may not exist
-    # TODO put this in a separate process
-    case CaptainFact.Accounts.UserPicture.store({provider_infos.picture_url, updated_user}) do
-      {:ok, picture} ->
-        updated_user
-        |> Ecto.Changeset.change(picture_url: %{file_name: picture, updated_at: Ecto.DateTime.utc})
-        |> Repo.update()
-        |> case do
-             {:ok, user_with_picture} -> {:ok, user_with_picture}
-             _ -> {:ok, updated_user}
-           end
-      error -> IO.inspect(error)
-    end
-
-
   end
 
   defp auth_info_to_user_info(auth) do
@@ -226,25 +151,21 @@ defmodule CaptainFactWeb.AuthController do
   defp provider_specific_infos(auth = %{provider: :facebook}) do
     infos = %{fb_user_id: auth.uid}
     case auth.extra.raw_info.user["picture"]["data"] do
-      %{"is_silhouette" => true} -> infos
-      _ -> Map.merge(infos, %{picture_url: String.replace(auth.info.image, ~r/^http:\/\//, "https://")})
+      %{"is_silhouette" => true} ->
+        infos
+      _ ->
+        picture_url =
+          auth.info.image
+          |> String.replace(~r/^http:\/\//, "https://")
+          |> String.replace(~r/\?type=square/, "?type=normal")
+
+        Map.merge(infos, %{picture_url: picture_url})
     end
   end
   defp provider_specific_infos(_), do: %{}
 
   defp user_from_auth(auth = %{provider: :facebook}) do
-    User
-    |> where([u], u.fb_user_id == ^auth.uid)
-    |> or_where([u], u.email == ^auth.info.email)
-    |> Repo.all()
-    |> Enum.reduce(nil, fn (user, best_fit) ->
-         # User may link a facebook account, change its facebook email and re-connect with facebook
-         # so we link by default using the facebook account and if none we try to link with email
-         if user.fb_user_id == auth.uid or is_nil(best_fit),
-          do: user,
-          else: best_fit
-       end)
-    |> case do
+    case Authenticator.get_user_by_third_party(auth.provider, auth.uid, auth.info.email) do
       nil -> {:error, %{"email" => ["Invalid email"]}}
       user -> {:ok, user}
     end
@@ -256,23 +177,19 @@ defmodule CaptainFactWeb.AuthController do
     end
   end
 
-  defp validate_pass(_encrypted, password) when password in [nil, ""] do
-    {:error, "password_required"}
-  end
-
-  defp validate_pass(encrypted, password) do
-    if Comeonin.Bcrypt.checkpw(password, encrypted) do
-      :ok
-    else
-      {:error, "invalid_password"}
-    end
-  end
-
+  # [!] Must be called once all verifications (password, third party...) have been done
+  # Render a user_with token %{user, token}
   defp signin_user(conn, user) do
-    token =
-      conn
-      |> Guardian.Plug.api_sign_in(user)
-      |> Guardian.Plug.current_token
-    {:ok, user, token}
+    conn
+    |> Guardian.Plug.api_sign_in(user)
+    |> Guardian.Plug.current_token
+    |> case do
+         nil ->
+           conn
+           |> put_status(:bad_request)
+           |> render(ErrorView, "error.json", message: @err_authentication_failed)
+         token ->
+           render(conn, UserView, "user_with_token.json", %{user: user, token: token})
+       end
   end
 end

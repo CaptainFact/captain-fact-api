@@ -11,6 +11,7 @@ achievements = [
   %{slug: "help", rarity: 0},
   %{slug: "bulletproof", rarity: 0},
   %{slug: "you-re-fake-news", rarity: 1},
+  %{slug: "social-network", rarity: 0},
 ]
 
 for params <- achievements do
