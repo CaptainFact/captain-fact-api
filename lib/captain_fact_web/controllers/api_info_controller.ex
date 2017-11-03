@@ -6,14 +6,7 @@ defmodule CaptainFactWeb.ApiInfoController do
     |> put_status(:ok)
     |> json(%{
          status: "✔",
-         version: api_version()
+         version: CaptainFact.version()
        })
-  end
-
-  defp api_version do
-    case :application.get_key(:captain_fact, :vsn) do
-      {:ok, version} -> to_string(version)
-      _ -> "unknown"
-    end
   end
 end

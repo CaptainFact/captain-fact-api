@@ -30,28 +30,30 @@ defmodule CaptainFactWeb.Router do
 
       # Authentication
       scope "/auth" do
-        get    "/", AuthController, :me
-        delete "/", AuthController, :delete
+        delete "/", AuthController, :logout
+        delete "/:provider/link", AuthController, :unlink_provider
         post   "/:provider/callback", AuthController, :callback
-
-        scope "/reset_password" do
-          post "/request", AuthController, :reset_password_request
-          get  "/verify/:token", AuthController, :reset_password_verify
-          post "/confirm", AuthController, :reset_password_confirm
-        end
-
-        post   "/request_invitation", AuthController, :request_invitation
       end
 
       # Users
       scope "/users" do
         post   "/", UserController, :create
-        delete "/me", UserController, :delete
-        put    "/me", UserController, :update
-        get    "/me/available_flags", UserController, :available_flags
-        put    "/me/confirm_email/:token", UserController, :confirm_email
-        get    "/me", UserController, :show_me
-        get    "/:username", UserController, :show
+        post   "/request_invitation", UserController, :request_invitation
+        get    "/username/:username", UserController, :show
+
+        scope "/reset_password" do
+          post "/request", UserController, :reset_password_request
+          get  "/verify/:token", UserController, :reset_password_verify
+          post "/confirm", UserController, :reset_password_confirm
+        end
+
+        scope "/me" do
+          get    "/", UserController, :show_me
+          put    "/", UserController, :update
+          delete "/", UserController, :delete
+          get    "/available_flags", UserController, :available_flags
+          put    "/confirm_email/:token", UserController, :confirm_email
+        end
       end
 
       # Videos

@@ -73,6 +73,7 @@ defmodule CaptainFact.Accounts do
     CaptainFact.Mailer.deliver_later(CaptainFact.Email.welcome_email(user))
   end
 
+  @social_network_achievement 6
   defp do_create_account(user_params, provider_params) do
     User.registration_changeset(%User{}, user_params)
     |> User.provider_changeset(provider_params)
@@ -84,6 +85,10 @@ defmodule CaptainFact.Accounts do
     |> Multi.insert(:base_user,
          %User{username: temporary_username(email)}
          |> User.registration_changeset(Map.drop(params, [:username, "username"]))
+         |> Ecto.Changeset.update_change(:achievements, fn list ->
+              if Map.has_key?(provider_params, :fb_user_id),
+                do: Enum.uniq([@social_network_achievement | list]), else: list
+            end)
          |> User.provider_changeset(provider_params)
        )
     |> Multi.run(:final_user, fn %{base_user: user} ->
@@ -117,18 +122,21 @@ defmodule CaptainFact.Accounts do
 
   # ---- Achievements -----
 
-  def unlock_achievement(%User{id: user_id}, slug) when is_binary(slug) do
+  def unlock_achievement(user = %User{id: user_id}, slug) when is_binary(slug) do
     achievement = Repo.get_by!(Achievement, slug: slug)
-    Repo.transaction(fn ->
-      user =
-        User
-        |> where(id: ^user_id)
-        |> lock("FOR UPDATE")
-        |> Repo.one!()
+    if achievement.id in user.achievements do
+      {:ok, user} # Don't update user if achievement is already unlocked
+    else
+      Repo.transaction(fn ->
+        user =
+          User
+          |> where(id: ^user_id)
+          |> lock("FOR UPDATE")
+          |> Repo.one!()
 
-      updated_achievements = Enum.uniq([achievement.id | user.achievements])
-      Repo.update!(Ecto.Changeset.change(user, achievements: updated_achievements))
-    end)
+        Repo.update!(Ecto.Changeset.change(user, achievements: Enum.uniq([achievement.id | user.achievements])))
+      end)
+    end
   end
 
   # ---- Reset Password ----

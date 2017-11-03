@@ -21,8 +21,9 @@ defmodule CaptainFactWeb.UserView do
       name: user.name,
       username: user.username,
       reputation: user.reputation,
-      picture_url: user.picture_url,
-      registered_at: registered_at(user),
+      picture_url: CaptainFact.Accounts.UserPicture.url({user.picture_url, user}, :thumb),
+      mini_picture_url: CaptainFact.Accounts.UserPicture.url({user.picture_url, user}, :mini_thumb),
+      registered_at: user.inserted_at,
       achievements: user.achievements
     }
   end
@@ -31,12 +32,14 @@ defmodule CaptainFactWeb.UserView do
     %{
       id: user.id,
       email: user.email,
+      fb_user_id: user.fb_user_id,
       name: user.name,
       username: user.username,
       reputation: user.reputation,
-      picture_url: user.picture_url,
+      picture_url: CaptainFact.Accounts.UserPicture.url({user.picture_url, user}, :thumb),
+      mini_picture_url: CaptainFact.Accounts.UserPicture.url({user.picture_url, user}, :mini_thumb),
       locale: user.locale,
-      registered_at: registered_at(user),
+      registered_at: user.inserted_at,
       achievements: user.achievements
     }
   end
@@ -46,11 +49,5 @@ defmodule CaptainFactWeb.UserView do
       user: UserView.render("show.json", %{user: user}),
       token: token
     }
-  end
-
-  defp registered_at(%{inserted_at: naive_datetime}) do
-    naive_datetime
-    |> DateTime.from_naive!("Etc/UTC")
-    |> DateTime.to_date()
   end
 end
