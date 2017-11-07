@@ -66,7 +66,7 @@ defmodule CaptainFact.Actions.Analysers.Flags do
 
   @comment_entity UserAction.entity(:comment)
   defp update_entity_flags(@comment_entity, %UserAction{entity_id: comment_id}) do
-    nb_flags = Flagger.get_nb_flags(@comment_entity, comment_id)
+    nb_flags = Flagger.get_nb_flags(:create, :comment, comment_id)
     if nb_flags >= @comments_nb_flags_to_ban do
       # Ban comment
       {nb_updated, _} = Repo.update_all((

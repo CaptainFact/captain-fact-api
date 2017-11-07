@@ -50,13 +50,13 @@ defmodule CaptainFact.Actions.UserAction do
 
   # Entities
   def entity(value) when is_integer(value), do: value
-  def entity(:video),           do: 1
-  def entity(:speaker),         do: 2
-  def entity(:statement),       do: 3
-  def entity(:comment),         do: 4
-  def entity(:fact),            do: 5
-  def entity(:history_action),  do: 6
-  def entity(:user),            do: 7
+  def entity(:video),                 do: 1
+  def entity(:speaker),               do: 2
+  def entity(:statement),             do: 3
+  def entity(:comment),               do: 4
+  def entity(:fact),                  do: 5
+  def entity(:video_debate_action),   do: 6
+  def entity(:user),                  do: 7
 
   # Context helpers
   def video_debate_context(video_id), do: "VD:#{video_id}"

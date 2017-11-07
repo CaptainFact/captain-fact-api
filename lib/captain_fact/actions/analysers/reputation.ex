@@ -34,9 +34,6 @@ defmodule CaptainFact.Actions.Analysers.Reputation do
       UserAction.entity(:fact) =>     {  +1 , +3   }
     },
 
-    # Wildcards
-    UserAction.type(:flag) =>         {  0  , -5   },
-
     # Special actions
     UserAction.type(:email_confirmed) => {  +15,  0 }
     # TODO

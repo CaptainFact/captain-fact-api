@@ -49,10 +49,10 @@ defmodule CaptainFact.Accounts.UserPermissions do
       speaker:              { 0  ,  0 ,  0 ,  0 , 10 ,  30 ,  50 , 100 , 100 }
     },
     approve: %{
-      history_action:       { 0  ,  0 ,  0 ,  0 ,  0 ,   3 ,  10 ,  20 ,  30 },
+      video_debate_action:  { 0  ,  0 ,  0 ,  0 ,  0 ,   3 ,  10 ,  20 ,  30 },
     },
     flag: %{
-      history_action:       { 0  ,  0 ,  0 ,  5 ,  5 ,   5 ,   5 ,   5 ,   5 },
+      video_debate_action:  { 0  ,  0 ,  0 ,  5 ,  5 ,   5 ,   5 ,   5 ,   5 },
       comment:              { 0  ,  0 ,  1 ,  3 ,  3 ,   5 ,  10 ,  10 ,  10 },
     },
     vote_up:                { 0  ,  3 , 10 , 15 , 30 , 50  ,  65 ,  80 , 100 },

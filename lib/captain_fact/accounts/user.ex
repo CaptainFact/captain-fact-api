@@ -34,7 +34,6 @@ defmodule CaptainFact.Accounts.User do
     has_many :votes, CaptainFact.Comments.Vote, on_delete: :delete_all
 
     has_many :flags_posted, CaptainFact.Actions.Flag, foreign_key: :source_user_id, on_delete: :delete_all
-    has_many :flags_received, CaptainFact.Actions.Flag, foreign_key: :target_user_id, on_delete: :delete_all
 
     timestamps()
   end
@@ -137,7 +136,7 @@ defmodule CaptainFact.Accounts.User do
   end
   def validate_email(changeset), do: changeset
 
-  @forbidden_username_keywords ~w(captainfact admin newuser temporary anonymous)
+  @forbidden_username_keywords ~w(captainfact captain admin newuser temporary anonymous)
   @username_regex ~r/^[a-zA-Z0-9-_]+$/ # Only alphanum, '-' and '_'
   defp validate_username(%{changes: %{username: username}} = changeset) do
     lower_username = String.downcase(username)

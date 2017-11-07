@@ -1,7 +1,9 @@
-defmodule CaptainFact.CommentsTest do
+defmodule CaptainFact.Comments.CommentsTest do
   use CaptainFact.DataCase
 
   import CaptainFact.Support.MetaPage
+  import CaptainFact.Actions.UserAction, only: [video_debate_context: 1]
+
   alias CaptainFact.Comments
   alias CaptainFact.TokenGenerator
   alias CaptainFact.Sources.{Source, Fetcher}
@@ -25,13 +27,13 @@ defmodule CaptainFact.CommentsTest do
       # Add comment
       user = insert(:user)
       statement = insert(:statement)
-      comment = Comments.add_comment(user, %{statement_id: statement.id}, url, fn updated_comment ->
+      context = video_debate_context(statement.video_id)
+      comment = Comments.add_comment(user, context, %{statement_id: statement.id}, url, fn updated_comment ->
         assert updated_comment.source.url == url
         assert updated_comment.source.title == attributes.title
         assert updated_comment.source.site_name == attributes.site_name
         assert updated_comment.source.language == attributes.language
       end)
-
       wait_fetcher()
 
       assert comment.source.title == nil
@@ -49,7 +51,7 @@ defmodule CaptainFact.CommentsTest do
       # Add comment
       user = insert(:user)
       statement = insert(:statement)
-      Comments.add_comment(user, %{statement_id: statement.id}, url, fn _ ->
+      Comments.add_comment(user, video_debate_context(statement.video_id), %{statement_id: statement.id}, url, fn _ ->
         raise "callback shouldn't be called if there's nothing to update"
       end)
       wait_fetcher()
@@ -66,10 +68,10 @@ defmodule CaptainFact.CommentsTest do
       user = insert(:user)
       statement = insert(:statement)
       comment_params = %{statement_id: statement.id}
-      Comments.add_comment(user, comment_params, url, fn update_comment ->
+      Comments.add_comment(user, video_debate_context(statement.video_id), comment_params, url, fn update_comment ->
         assert update_comment.source.title === attributes.title
       end)
-      Comments.add_comment(user, comment_params, url, fn _ -> raise "source is re-fetched" end)
+      Comments.add_comment(user, video_debate_context(statement.video_id), comment_params, url, fn _ -> raise "source is re-fetched" end)
       wait_fetcher()
     end
 
@@ -85,7 +87,7 @@ defmodule CaptainFact.CommentsTest do
       user = insert(:user)
       statement = insert(:statement)
       comment_params = %{statement_id: statement.id}
-      Comments.add_comment(user, comment_params, url, fn comment ->
+      Comments.add_comment(user, video_debate_context(statement.video_id), comment_params, url, fn comment ->
         assert comment.source.title === attributes.title
         refute String.ends_with?(comment.source.url, base_url)
         assert String.ends_with?(comment.source.url, meta_url)
@@ -109,9 +111,9 @@ defmodule CaptainFact.CommentsTest do
       user = insert(:user)
       statement = insert(:statement)
       comment_params = %{statement_id: statement.id}
-      Comments.add_comment(user, comment_params, url, fn comment ->
-        assert comment.source.title === attributes.title
-        assert comment.source.url, real_source.url
+      Comments.add_comment(user, video_debate_context(statement.video_id), comment_params, url, fn comment ->
+        assert comment.source.title == attributes.title
+        assert comment.source.url == real_source.url
         assert comment.source.id == real_source.id
         # Ensure base source is deleted
         assert Repo.get_by(Source, url: url) == nil

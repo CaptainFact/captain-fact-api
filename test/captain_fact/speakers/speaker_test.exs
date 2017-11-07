@@ -1,4 +1,4 @@
-defmodule CaptainFact.SpeakerTest do
+defmodule CaptainFact.Speakers.SpeakerTest do
   use CaptainFact.DataCase, async: true
 
   alias CaptainFact.Speakers.Speaker

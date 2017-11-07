@@ -5,33 +5,59 @@ defmodule CaptainFact.Actions.Flagger do
 
   alias CaptainFact.Accounts.{UserPermissions, User}
   alias CaptainFact.Repo
-  alias CaptainFact.Actions.{Recorder, UserAction, Flag}
+  alias CaptainFact.Actions.{UserAction, Flag, Recorder}
   alias CaptainFact.Comments.Comment
 
 
   @doc"""
   Record a new flag on `comment` requested by given user `user_id`
   """
-  def flag!(comment = %Comment{}, reason, source_user_id) do
+  @action_create UserAction.type(:create)
+  @entity_comment UserAction.entity(:comment)
+  def flag!(source_user_id, %Comment{id: comment_id}, reason),
+    do: flag!(source_user_id, comment_id, reason)
+  def flag!(source_user_id, comment_id, reason) do
     user = Repo.get!(User, source_user_id)
     UserPermissions.check!(user, :flag, :comment)
-    Ecto.build_assoc(user, :flags_posted)
-    |> Flag.changeset_comment(comment, %{reason: reason})
-    |> Repo.insert!()
-    Recorder.record!(user, :flag, :comment, %{target_user_id: comment.user_id, entity_id: comment.id})
+    action_id = get_action_id!(@action_create, @entity_comment, comment_id)
+    try do
+      Ecto.build_assoc(user, :flags_posted)
+      |> Flag.changeset(%{reason: reason, action_id: action_id})
+      |> Repo.insert!()
+    rescue
+      # Ignore if flag already exist
+      Ecto.ConstraintError -> :ok
+    else
+      _ -> Recorder.record!(user, :flag, :comment, %{entity_id: comment_id})
+    end
   end
 
-  def get_nb_flags(%Comment{id: id}), do: get_nb_flags(:comment, id)
 
   @doc"""
   Get the total number of flags for given entity.
   `entity` can be passed as an integer or an atom (converted with UserAction.entity)
   """
-  def get_nb_flags(entity, id) when is_atom(entity), do: get_nb_flags(UserAction.entity(entity), id)
-  def get_nb_flags(entity, id) when is_integer(entity) do
+  def get_nb_flags(%Comment{id: id}),
+    do: get_nb_flags(:create, :comment, id)
+  def get_nb_flags(action_type, entity, id) when is_atom(action_type),
+    do: get_nb_flags(UserAction.type(action_type), entity, id)
+  def get_nb_flags(action_type, entity, id) when is_atom(entity),
+    do: get_nb_flags(action_type, UserAction.entity(entity), id)
+  def get_nb_flags(action_type, entity, id) when is_integer(entity) do
     Flag
-    |> where([f], f.entity == ^entity)
-    |> where([f], f.entity_id == ^id)
+    |> join(:inner, [f], a in assoc(f, :action))
+    |> where([_, a], a.type == ^action_type)
+    |> where([_, a], a.entity == ^entity)
+    |> where([_, a], a.entity_id == ^id)
     |> Repo.aggregate(:count, :id)
+  end
+
+  defp get_action_id!(action_type, entity, id) do
+    UserAction
+    |> where([a], a.type == ^action_type)
+    |> where([a], a.entity == ^entity)
+    |> where([a], a.entity_id == ^id)
+    |> select([a], a.id)
+    |> Repo.one!()
   end
 end

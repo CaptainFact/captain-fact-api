@@ -1,4 +1,4 @@
-defmodule CaptainFact.SourceTest do
+defmodule CaptainFact.Sources.SourceTest do
   use CaptainFact.DataCase, async: true
 
   alias CaptainFact.Sources.Source
