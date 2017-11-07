@@ -64,8 +64,9 @@ defmodule CaptainFact.Actions.Analysers.Flags do
     |> Enum.sum()
   end
 
-  @comment_entity UserAction.entity(:comment)
-  defp update_entity_flags(@comment_entity, %UserAction{entity_id: comment_id}) do
+  # Check for flags on comments
+  @entity_comment UserAction.entity(:comment)
+  defp update_entity_flags(@entity_comment, %UserAction{entity_id: comment_id}) do
     nb_flags = Flagger.get_nb_flags(:create, :comment, comment_id)
     if nb_flags >= @comments_nb_flags_to_ban do
       # Ban comment
@@ -84,6 +85,8 @@ defmodule CaptainFact.Actions.Analysers.Flags do
       0
     end
   end
+  # Ignore other flags
+  defp update_entity_flags(_, _), do: 0
 
   def broadcast_ban(:comment, comment_id) do
     comment_context = Repo.one!(

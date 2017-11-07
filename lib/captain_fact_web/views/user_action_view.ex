@@ -1,27 +1,28 @@
 defmodule CaptainFactWeb.UserActionView do
   use CaptainFactWeb, :view
 
-  alias CaptainFactWeb.{UserActionView, UserView}
+  alias CaptainFactWeb.UserView
+  alias CaptainFactWeb.UserActionView
 
-  def render("index.json", %{user_actions: actions}) do
-    render_many(actions, UserActionView, "action.json")
+
+  def render("index.json", %{users_actions: actions}) do
+    render_many(actions, UserActionView, "user_action.json")
   end
 
-  def render("show.json", %{user_actions: action}) do
-    render_one(action, UserActionView, "action.json")
+  def render("show.json", %{user_action: action}) do
+    render_one(action, UserActionView, "user_action.json")
   end
 
-  def render("action.json", %{user_action: action}) do
+  def render("user_action.json", %{user_action: action}) do
     %{
       id: action.id,
       user: UserView.render("show_public.json", %{user: action.user}),
-      # TODO target_user: ???,
-      context: action.context,
       type: action.type,
+      context: action.context,
       entity: action.entity,
       entity_id: action.entity_id,
       changes: action.changes,
-      time: action.inserted_at,
+      time: action.inserted_at
     }
   end
 end

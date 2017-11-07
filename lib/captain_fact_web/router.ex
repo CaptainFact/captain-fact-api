@@ -53,11 +53,17 @@ defmodule CaptainFactWeb.Router do
           delete "/", UserController, :delete
           get    "/available_flags", UserController, :available_flags
           put    "/confirm_email/:token", UserController, :confirm_email
+          put    "/achievements/:achievement", UserController, :unlock_achievement
         end
       end
 
       # Videos
       post  "/videos", VideoController, :get_or_create
+
+      # Moderation
+      get   "/moderation/random", CollectiveModerationController, :random
+      get   "/moderation/videos/:id", CollectiveModerationController, :video
+      # TODO post  "/moderation/feedback", CollectiveModerationController, :post_feedback
     end
   end
 

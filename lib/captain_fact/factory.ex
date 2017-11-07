@@ -70,6 +70,7 @@ defmodule CaptainFact.Factory do
     insert(:user_action, %{
       user: comment.user,
       type: UserAction.type(:create),
+      context: UserAction.video_debate_context(comment.statement.video_id),
       entity: UserAction.entity(:comment),
       entity_id: comment.id
     })
