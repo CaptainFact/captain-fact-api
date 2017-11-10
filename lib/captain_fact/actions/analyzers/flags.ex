@@ -1,4 +1,4 @@
-defmodule CaptainFact.Actions.Analysers.Flags do
+defmodule CaptainFact.Actions.Analyzers.Flags do
   @moduledoc """
   Analyse flags periodically to ban innapropriate content
   """

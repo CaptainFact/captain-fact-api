@@ -1,4 +1,4 @@
-defmodule CaptainFact.Actions.Analysers.Reputation do
+defmodule CaptainFact.Actions.Analyzers.Reputation do
   @moduledoc """
   Updates a user reputation periodically, verifying at the same time that the maximum reputation
   gain per day quota is respected.
@@ -88,7 +88,7 @@ defmodule CaptainFact.Actions.Analysers.Reputation do
 
   defp start_analysis([]), do: {:noreply, :ok}
   defp start_analysis(actions) do
-    Logger.info("[Analysers.Reputation] Update reputations")
+    Logger.info("[Analyzers.Reputation] Update reputations")
     report = ReportManager.create_report!(@analyser_id, :running, actions)
     nb_users_updated = do_update_reputations(actions)
     ReportManager.set_success!(report, nb_users_updated)

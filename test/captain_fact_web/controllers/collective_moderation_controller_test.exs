@@ -1,6 +1,7 @@
 defmodule CaptainFactWeb.CollectiveModerationControllerTest do
   use CaptainFactWeb.ConnCase
   import CaptainFact.Factory
+  import CaptainFact.TestHelpers, only: [flag_comments: 2]
 
   alias CaptainFact.Moderation
   alias CaptainFact.Videos.VideoHashId
@@ -43,15 +44,6 @@ defmodule CaptainFactWeb.CollectiveModerationControllerTest do
       assert_raise CaptainFact.Accounts.UserPermissions.PermissionsError, fn ->
         method.(authed_conn, "/moderation/" <> path, args)
       end
-    end)
-  end
-
-  defp flag_comments(comments, nb_flags, reason \\ 1) do
-    users = insert_list(nb_flags, :user, %{reputation: 1000})
-    Enum.map(comments, fn comment ->
-      Enum.map(users, fn user ->
-        CaptainFact.Actions.Flagger.flag!(user.id, comment, reason)
-      end)
     end)
   end
 end

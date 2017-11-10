@@ -30,11 +30,11 @@ config :captain_fact, CaptainFact.Repo,
 # Configure scheduler
 config :captain_fact, CaptainFact.Scheduler,
   jobs: [
-    {{:extended, "*/5 * * * * *"}, {CaptainFact.Actions.Analysers.Votes, :update, []}}, # Every 5 seconds
-    {            "*/1 * * * *",    {CaptainFact.Actions.Analysers.Reputation, :update, []}}, # Every minute
-    {            "@daily",         {CaptainFact.Actions.Analysers.Reputation, :reset_daily_limits, []}}, # Every day
-    {            "*/1 * * * *",    {CaptainFact.Actions.Analysers.Flags, :update, []}}, # Every minute
-    {            "*/3 * * * *",    {CaptainFact.Actions.Analysers.Achievements, :update, []}}, # Every 3 minutes
+    {{:extended, "*/5 * * * * *"}, {CaptainFact.Actions.Analyzers.Votes, :update, []}}, # Every 5 seconds
+    {            "*/1 * * * *",    {CaptainFact.Actions.Analyzers.Reputation, :update, []}}, # Every minute
+    {            "@daily",         {CaptainFact.Actions.Analyzers.Reputation, :reset_daily_limits, []}}, # Every day
+    {            "*/1 * * * *",    {CaptainFact.Actions.Analyzers.Flags, :update, []}}, # Every minute
+    {            "*/3 * * * *",    {CaptainFact.Actions.Analyzers.Achievements, :update, []}}, # Every 3 minutes
   ]
 
 # Configure mailer

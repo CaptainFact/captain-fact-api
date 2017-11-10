@@ -45,16 +45,16 @@ defmodule CaptainFact.Comments.CommentsChannel do
 
   def handle_in_authenticated!("delete_comment", %{"id" => id}, socket) do
     comment = Repo.get!(Comment, id)
-    if socket.assigns.user_id === comment.user_id do
-      Repo.delete!(comment)
-      broadcast!(socket, "comment_removed", %{
-        id: id,
-        statement_id: comment.statement_id,
-        reply_to_id: comment.reply_to_id
-      })
-      {:reply, :ok, socket}
-    else
-      {:reply, :error, socket} # Not authorized
+    user = Repo.get!(User, socket.assigns.user_id)
+    case Comments.delete_comment(user, comment, context(socket)) do
+      nil -> {:reply, :ok, socket}
+      _ ->
+        broadcast!(socket, "comment_removed", %{
+          id: id,
+          statement_id: comment.statement_id,
+          reply_to_id: comment.reply_to_id
+        })
+        {:reply, :ok, socket}
     end
   end
 

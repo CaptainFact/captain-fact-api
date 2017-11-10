@@ -26,6 +26,21 @@ defmodule CaptainFact.Actions.UserAction do
     |> validate_required([:user_id, :type])
     |> cast_assoc(:user)
     |> cast_assoc(:target_user)
+    |> update_change(:entity, &entity/1)
+    |> update_change(:type, &type/1)
+  end
+
+  @doc"""
+  ⚠️ Admin-only function
+  """
+  def admin_changeset(%UserAction{} = user_action, attrs) do
+    user_action
+    |> cast(attrs, [:context, :type, :entity, :entity_id, :changes, :target_user_id])
+    |> validate_required([:type])
+    |> validate_inclusion(:user, [nil])
+    |> cast_assoc(:target_user)
+    |> update_change(:entity, &entity/1)
+    |> update_change(:type, &type/1)
   end
 
   # Common actions

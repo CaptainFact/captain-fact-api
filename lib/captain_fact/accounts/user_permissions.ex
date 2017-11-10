@@ -39,6 +39,8 @@ defmodule CaptainFact.Accounts.UserPermissions do
       video:                { 0  ,  0 ,  0 ,  0 , 0  ,  5  ,  8  ,  10 , 20  },
     },
     delete: %{
+      # Not much risk here, as user can only delete own comments
+      comment:              { 10  , 20, 30 , 50 , 75 , 300 , 300 , 300 , 300 },
     },
     remove: %{
       statement:            { 0  ,  0 ,  0 ,  0 ,  3 ,  10 ,  10 ,  10 ,  10 },

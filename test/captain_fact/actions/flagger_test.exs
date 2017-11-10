@@ -2,7 +2,7 @@ defmodule CaptainFact.Actions.FlaggerTest do
   use CaptainFact.DataCase
 
   alias CaptainFact.Actions.{Flagger, Flag}
-  alias CaptainFact.Actions.Analysers.{Flags, Reputation}
+  alias CaptainFact.Actions.Analyzers.{Flags, Reputation}
   alias CaptainFact.Accounts.User
   alias CaptainFact.Comments.Comment
 

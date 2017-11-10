@@ -6,7 +6,7 @@ defmodule CaptainFact.Comments do
   alias CaptainFact.Comments.{Comment, Vote}
   alias CaptainFact.Accounts.{UserPermissions, User}
   alias CaptainFact.Sources.{Fetcher, Source}
-  alias CaptainFact.Actions.Recorder
+  alias CaptainFact.Actions.{Recorder, UserAction}
 
 
   # ---- Public API ----
@@ -39,6 +39,44 @@ defmodule CaptainFact.Comments do
       do: fetch_source_metadata_and_update_comment(full_comment, source_fetch_callback)
     full_comment
   end
+
+  # Delete
+
+  @doc"""
+  ⚠️ Admin-only function. Delete a comment as admin.
+
+  Returns delete action or nil if comment doesn't exist
+  """
+  def delete_comment(user = %{id: user_id}, comment = %{user_id: user_id, is_banned: false}, context \\ nil) do
+    UserPermissions.check!(user, :delete, :comment)
+    if do_delete_comment(comment) != false,
+      do: Recorder.record!(user, :delete, :comment, %{entity_id: comment.id, context: context})
+  end
+
+  @doc"""
+  ⚠️ Admin-only function. Delete a comment as admin.
+
+  Returns delete action or nil if comment doesn't exist
+  """
+  def admin_delete_comment(comment, context \\ nil) do
+    if do_delete_comment(comment) != false,
+      do: Recorder.admin_record!(:delete, :comment, %{entity_id: comment.id, context: context})
+  end
+
+  defp do_delete_comment(comment) do
+    # Delete comment
+    case Repo.delete_all(from(c in Comment, where: c.id == ^comment.id)) do
+      {0, nil} -> false
+      {1, nil} ->
+        # Delete all actions linked to this comment
+        UserAction
+        |> where([a], a.entity == ^UserAction.entity(:comment))
+        |> where([a], a.entity_id == ^comment.id)
+        |> Repo.delete_all()
+    end
+  end
+
+  # ---- Comments voting ----
 
   def vote(user, context, comment_id, 0),
     do: delete_vote(user, context, Repo.get!(Comment, comment_id))

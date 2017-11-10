@@ -32,6 +32,14 @@ defmodule CaptainFact.Actions.Recorder do
   end
 
   @doc"""
+  ⚠️ Admin-only function. Record action as done by the system or an admin
+  """
+  def admin_record!(action_type, entity, params \\ %{}) do
+    params = Map.merge(params, %{type: type(action_type), entity: entity(entity)})
+    Repo.insert!(UserAction.admin_changeset(%UserAction{}, params))
+  end
+
+  @doc"""
   Same as record/4 but act on an Ecto.Multi object. Action is recorded under `:action_record` key
   """
   def multi_record(multi, user, action_type, entity, params \\ %{}) do

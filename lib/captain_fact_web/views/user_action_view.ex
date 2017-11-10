@@ -18,11 +18,11 @@ defmodule CaptainFactWeb.UserActionView do
       id: action.id,
       user: UserView.render("show_public.json", %{user: action.user}),
       type: action.type,
-      context: action.context,
       entity: action.entity,
       entity_id: action.entity_id,
       changes: action.changes,
-      time: action.inserted_at
+      time: action.inserted_at,
+      # context: action.context, TODO We need to convert "VD:42" to "VD:xxx" if we want to send this value
     }
   end
 end

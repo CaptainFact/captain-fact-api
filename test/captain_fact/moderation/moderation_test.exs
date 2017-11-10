@@ -1,5 +1,6 @@
 defmodule CaptainFact.ModerationTest do
   use CaptainFact.DataCase
+  import CaptainFact.TestHelpers, only: [flag_comments: 2]
   doctest CaptainFact.Moderation
 
   alias CaptainFact.Actions.UserAction
@@ -45,14 +46,5 @@ defmodule CaptainFact.ModerationTest do
 
     actions_needing_feedback = Moderation.video(user, statement.video_id)
     assert Enum.count(actions_needing_feedback) == 0
-  end
-
-  defp flag_comments(comments, nb_flags, reason \\ 1) do
-    users = insert_list(nb_flags, :user, %{reputation: 1000})
-    Enum.map(comments, fn comment ->
-      Enum.map(users, fn user ->
-        CaptainFact.Actions.Flagger.flag!(user.id, comment, reason)
-      end)
-    end)
   end
 end

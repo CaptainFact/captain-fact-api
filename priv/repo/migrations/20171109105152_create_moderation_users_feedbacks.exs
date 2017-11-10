@@ -4,8 +4,8 @@ defmodule CaptainFact.Repo.Migrations.CreateModerationUsersFeedbacks do
   def change do
     create table(:moderation_users_feedbacks) do
       add :feedback, :integer
-      add :user_id, references(:users, on_delete: :nothing)
-      add :action_id, references(:users_actions, on_delete: :nothing)
+      add :user_id, references(:users, on_delete: :delete_all)
+      add :action_id, references(:users_actions, on_delete: :delete_all)
 
       timestamps()
     end
