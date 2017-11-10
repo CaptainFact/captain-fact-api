@@ -46,7 +46,8 @@ defmodule CaptainFact.Actions.UserAction do
   def type(:revert_vote_down),  do: 13
   def type(:revert_self_vote),  do: 14
   # Special actions
-  def type(:email_confirmed), do: 100
+  def type(:email_confirmed),       do: 100
+  def type(:collective_moderation), do: 101
 
   # Entities
   def entity(value) when is_integer(value), do: value

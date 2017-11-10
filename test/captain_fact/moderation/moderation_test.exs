@@ -2,6 +2,7 @@ defmodule CaptainFact.ModerationTest do
   use CaptainFact.DataCase
   doctest CaptainFact.Moderation
 
+  alias CaptainFact.Actions.UserAction
   alias CaptainFact.Moderation
 
 
@@ -14,7 +15,7 @@ defmodule CaptainFact.ModerationTest do
       |> Enum.take(5)
 
     flag_comments(comments, limit)
-    actions = Moderation.video(statement.video_id)
+    actions = Moderation.video(insert(:user, %{reputation: 10000}), statement.video_id)
     assert Enum.count(actions) == Enum.count(comments)
     assert hd(actions).changes.text == comment_text
   end
@@ -26,8 +27,24 @@ defmodule CaptainFact.ModerationTest do
     |> Enum.take(5)
     |> flag_comments(limit)
 
-    actions = Moderation.video(statement.video_id)
+    actions = Moderation.video(insert(:user, %{reputation: 10000}), statement.video_id)
     assert Enum.count(actions) == 0
+  end
+
+  test "do not return actions for which user already gave a feedback" do
+    action_type = UserAction.type(:create)
+    action_entity = UserAction.entity(:comment)
+    limit = Moderation.nb_flags_to_ban(action_type, action_entity)
+    statement = insert(:statement)
+    comment = insert(:comment, %{statement: statement}) |> with_action()
+    flag_comments([comment], limit)
+
+    action = CaptainFact.Repo.get_by(UserAction, type: action_type, entity: action_entity, entity_id: comment.id)
+    user = insert(:user, %{reputation: 10000})
+    Moderation.feedback!(user, action.id, 1)
+
+    actions_needing_feedback = Moderation.video(user, statement.video_id)
+    assert Enum.count(actions_needing_feedback) == 0
   end
 
   defp flag_comments(comments, nb_flags, reason \\ 1) do

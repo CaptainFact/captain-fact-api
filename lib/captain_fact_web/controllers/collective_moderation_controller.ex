@@ -5,19 +5,25 @@ defmodule CaptainFactWeb.CollectiveModerationController do
   alias CaptainFactWeb.UserActionView
 
   action_fallback CaptainFactWeb.FallbackController
-  # TODO Auth
+
+  # All methods here require authentication
+  plug Guardian.Plug.EnsureAuthenticated, handler: CaptainFactWeb.AuthController
 
   @nb_random_actions 5
 
   def random(conn, _params) do
-    # TODO check permissions
-    actions = Moderation.random(@nb_random_actions)
+    actions = Moderation.random(Guardian.Plug.current_resource(conn), @nb_random_actions)
     render(conn, UserActionView, :index, users_actions: actions)
   end
 
   def video(conn, %{"id" => video_hash_id}) do
-    # TODO check permissions
-    actions = Moderation.video(VideoHashId.decode!(video_hash_id))
+    actions = Moderation.video(Guardian.Plug.current_resource(conn), VideoHashId.decode!(video_hash_id))
     render(conn, UserActionView, :index, users_actions: actions)
+  end
+
+  def post_feedback(conn, %{"action_id" => action_id, "value" => value}) when is_integer(value) do
+    user = Guardian.Plug.current_resource(conn)
+    Moderation.feedback!(user, action_id, value)
+    send_resp(conn, 204, "")
   end
 end
