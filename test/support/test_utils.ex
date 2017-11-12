@@ -14,7 +14,7 @@ defmodule CaptainFact.TestUtils do
       Enum.map(users, fn user ->
         CaptainFact.Actions.Flagger.flag!(user.id, comment, reason)
       end)
-    end)
+    end) |> List.flatten()
   end
 
   def assert_deleted(%Comment{id: id}, check_actions \\ true) do

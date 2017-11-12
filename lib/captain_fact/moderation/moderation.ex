@@ -81,7 +81,7 @@ defmodule CaptainFact.Moderation do
   Record user feedback for a flagged action
   Will raise if `user` doesn't have permission to moderate
   """
-  def feedback!(user, action_id, feedback) do
+  def feedback!(user, action_id, value) do
     UserPermissions.check!(user, :collective_moderation)
 
     action =
@@ -97,7 +97,7 @@ defmodule CaptainFact.Moderation do
 
     # Will fail if there's already a feedback for this user / action
     %UserFeedback{user_id: user.id, action_id: action.id}
-    |> UserFeedback.changeset(%{feedback: feedback})
+    |> UserFeedback.changeset(%{value: value})
     |> Repo.insert!()
 
     # TODO record action

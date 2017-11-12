@@ -21,9 +21,9 @@ defmodule CaptainFactWeb.CollectiveModerationController do
     render(conn, UserActionView, :index, users_actions: actions)
   end
 
-  def post_feedback(conn, %{"action_id" => action_id, "value" => value}) when is_integer(value) do
+  def post_feedback(conn, %{"action_id" => id, "value" => value}) when is_integer(id) and is_integer(value) do
     user = Guardian.Plug.current_resource(conn)
-    Moderation.feedback!(user, action_id, value)
+    Moderation.feedback!(user, id, value)
     send_resp(conn, 204, "")
   end
 end

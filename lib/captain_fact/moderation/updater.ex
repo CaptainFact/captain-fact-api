@@ -104,7 +104,7 @@ defmodule CaptainFact.Moderation.Updater do
          entity: a.entity,
          entity_id: a.entity_id,
          nb_feedbacks: count(uf.id),
-         feedbacks_sum: sum(uf.feedback)
+         feedbacks_sum: sum(uf.value)
        })
     |> having([_, uf], count(uf.id) >= @min_nb_feedbacks_to_take_action)
     |> group_by([a, _], a.id)

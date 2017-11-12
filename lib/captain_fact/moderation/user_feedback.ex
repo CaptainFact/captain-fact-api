@@ -5,7 +5,7 @@ defmodule CaptainFact.Moderation.UserFeedback do
 
 
   schema "moderation_users_feedbacks" do
-    field :feedback, :integer
+    field :value, :integer
     field :user_id, :id
     field :action_id, :id
 
@@ -15,8 +15,8 @@ defmodule CaptainFact.Moderation.UserFeedback do
   @doc false
   def changeset(%UserFeedback{} = user_feedback, attrs) do
     user_feedback
-    |> cast(attrs, [:feedback])
-    |> validate_required([:feedback, :action_id, :user_id])
-    |> validate_number(:feedback, greater_than_or_equal_to: -1, less_than_or_equal_to: 1)
+    |> cast(attrs, [:value])
+    |> validate_required([:value, :action_id, :user_id])
+    |> validate_number(:value, greater_than_or_equal_to: -1, less_than_or_equal_to: 1)
   end
 end

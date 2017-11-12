@@ -5,6 +5,8 @@ defmodule CaptainFactWeb.CollectiveModerationControllerTest do
 
   alias CaptainFact.Moderation
   alias CaptainFact.Videos.VideoHashId
+  alias CaptainFact.Actions.UserAction
+
 
   test "GET all reported actions for video" do
     limit = Moderation.nb_flags_report(:create, :comment)
@@ -23,6 +25,40 @@ defmodule CaptainFactWeb.CollectiveModerationControllerTest do
 
     assert Enum.count(actions) == Enum.count(comments)
     assert hd(actions)["changes"]["text"] == comment_text
+  end
+
+  test "GET random actions to verify" do
+    Repo.delete_all(Moderation.UserFeedback)
+    limit = Moderation.nb_flags_report(:create, :comment)
+    comments = [
+      insert(:comment, %{text: "I like to move it...."}) |> with_action(),
+      insert(:comment, %{text: "Jouje is the best jouje"}) |> with_action(),
+      insert(:comment, %{text: "No problemo, he said"}) |> with_action(),
+    ]
+    flag_comments(comments, limit)
+
+    actions =
+      build_authenticated_conn(insert(:user, %{reputation: 10000}))
+      |> get("/moderation/random")
+      |> json_response(200)
+
+    assert Enum.count(actions) == Enum.count(comments)
+  end
+
+  test "POST feedback" do
+    Repo.delete_all(Moderation.UserFeedback)
+    limit = Moderation.nb_flags_report(:create, :comment)
+    comment = insert(:comment) |> with_action()
+    flag_comments([comment], limit)
+    action = Repo.get_by! UserAction,
+      entity: UserAction.entity(:comment), type: UserAction.type(:create), entity_id: comment.id
+    value = 1
+
+    build_authenticated_conn(insert(:user, %{reputation: 10000}))
+    |> post("/moderation/feedback", %{"action_id" => action.id, "value" => value})
+    |> response(204)
+
+    assert Repo.get_by(Moderation.UserFeedback, action_id: action.id).value == value
   end
 
   test "need to be authenticated and have enough reputation for all collective moderation actions", %{conn: conn} do

@@ -47,4 +47,15 @@ defmodule CaptainFact.ModerationTest do
     actions_needing_feedback = Moderation.video(user, statement.video_id)
     assert Enum.count(actions_needing_feedback) == 0
   end
+
+  test "cannot give feedback on an action which is not reported" do
+    statement = insert(:statement)
+    comment = insert(:comment, %{statement: statement}) |> with_action()
+    flag_comments([comment], 1)
+
+    actions_needing_feedback = Moderation.video(insert(:user, %{reputation: 10000}), statement.video_id)
+    assert Enum.count(actions_needing_feedback) == 0
+  end
+
+  # TODO Make sure user doesn't get and cannot give feedback on its own actions or actions he's targeted by
 end
