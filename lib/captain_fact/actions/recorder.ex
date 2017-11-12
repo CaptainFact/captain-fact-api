@@ -32,6 +32,25 @@ defmodule CaptainFact.Actions.Recorder do
   end
 
   @doc"""
+  ⚠️ Admin-only function. Record action as done by the system or an admin
+  """
+  def admin_record!(action_type, entity, params \\ %{}) do
+    params = Map.merge(params, %{type: type(action_type), entity: entity(entity)})
+    Repo.insert!(UserAction.admin_changeset(%UserAction{}, params))
+  end
+
+  @doc"""
+  ⚠️ Admin-only function. Record multiples actions as done by the system or an admin as a single query.
+  This is useful to log actions on multiple users at the same time
+  """
+  def admin_record_all!(action_type, entity, actions_params) do
+    datetime = Ecto.DateTime.utc
+    Repo.insert_all(UserAction, Enum.map(actions_params, fn params ->
+      Map.merge params, %{user_id: nil, type: type(action_type), entity: entity(entity), inserted_at: datetime}
+    end))
+  end
+
+  @doc"""
   Same as record/4 but act on an Ecto.Multi object. Action is recorded under `:action_record` key
   """
   def multi_record(multi, user, action_type, entity, params \\ %{}) do

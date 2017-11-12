@@ -2,38 +2,34 @@ defmodule CaptainFact.Actions.Flag do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias CaptainFact.Comments.Comment
+  alias CaptainFact.Accounts.User
+  alias CaptainFact.Actions.UserAction
 
   @reasons [:spam, :bad_language, :harassment]
   @nb_reasons Enum.count(@reasons)
 
   schema "flags" do
-    field :entity, :integer
-    field :entity_id, :integer
+    belongs_to :source_user, User # Source user
+    belongs_to :action, UserAction
     field :reason, :integer
-    belongs_to :source_user, CaptainFact.Accounts.User
-    belongs_to :target_user, CaptainFact.Accounts.User
     timestamps()
   end
 
-  @required_fields ~w(entity reason entity_id source_user_id target_user_id)a
+  @required_fields ~w(source_user_id action_id reason)a
 
-  @doc """
-  Builds a changeset based on a `comment`
+  @doc"""
+  Convert reason to a string (usefull for dev)
   """
-  def changeset_comment(struct, comment = %Comment{}, otherParams = %{}) do
-    params = Map.merge(%{
-      entity_id: comment.id,
-      entity: CaptainFact.Actions.UserAction.entity(:comment),
-      target_user_id: comment.user_id
-    }, otherParams)
-    cast(struct, params, [:entity_id, :entity, :reason, :target_user_id])
+  def reason_str(reason_id), do: Atom.to_string(Enum.at(@reasons, reason_id - 1))
+
+  @doc"""
+  Builds a changeset based on an `UserAction`
+  """
+  def changeset(struct, params) do
+    cast(struct, params, [:action_id, :reason])
     |> validate_required(@required_fields)
     |> validate_reason()
   end
-
-  def reason_str(reason_id),
-    do: Atom.to_string(Enum.at(@reasons, reason_id - 1))
 
   defp validate_reason(changeset) do
     validate_change changeset, :reason, fn :reason, reason ->

@@ -12,19 +12,19 @@ defmodule CaptainFactWeb.Router do
     plug Guardian.Plug.LoadResource
   end
 
-  # ---- Routes ----
+  # -------- Routes --------
 
   scope "/", CaptainFactWeb do
     pipe_through [:api]
 
-    # Public endpoints
+    # ---- Public endpoints ----
     get "/", ApiInfoController, :get
     get "/videos", VideoController, :index
     get "/videos/index", VideoController, :index_ids
     get "/videos/:video_id/statements", StatementController, :get
     post "/search/video", VideoController, :search
 
-    # Authenticathed endpoints
+    # ---- Authenticathed endpoints ----
     scope "/" do
       pipe_through [:api_auth]
 
@@ -53,15 +53,21 @@ defmodule CaptainFactWeb.Router do
           delete "/", UserController, :delete
           get    "/available_flags", UserController, :available_flags
           put    "/confirm_email/:token", UserController, :confirm_email
+          put    "/achievements/:achievement", UserController, :unlock_achievement
         end
       end
 
       # Videos
       post  "/videos", VideoController, :get_or_create
+
+      # Moderation
+      get   "/moderation/random", CollectiveModerationController, :random
+      get   "/moderation/videos/:id", CollectiveModerationController, :video
+      post  "/moderation/feedback", CollectiveModerationController, :post_feedback
     end
   end
 
-  # Dev only : mailer. We can use Mix.env here cause file is interpreted at compile time
+  # ---- Dev only: mailer. We can use Mix.env here cause file is interpreted at compile time ----
   if Mix.env == :dev do
     pipeline :browser do
       plug :accepts, ["html"]

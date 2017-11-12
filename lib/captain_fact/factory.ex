@@ -65,6 +65,18 @@ defmodule CaptainFact.Factory do
     }
   end
 
+  def with_action(comment = %Comment{}) do
+    comment = CaptainFact.Repo.preload(comment, :user)
+    insert(:user_action, %{
+      user: comment.user,
+      type: UserAction.type(:create),
+      context: UserAction.video_debate_context(comment.statement.video_id),
+      entity: UserAction.entity(:comment),
+      entity_id: comment.id
+    })
+    comment
+  end
+
   def invitation_request_factory do
     %InvitationRequest{
       email: Faker.Internet.email,
@@ -94,7 +106,7 @@ defmodule CaptainFact.Factory do
     %UserAction{
       user: build(:user),
       target_user: build(:user),
-      context: nil,
+      context: "FACTORY",
       type: UserAction.type(:create),
       entity: UserAction.entity(:comment),
       entity_id: nil,

@@ -6,7 +6,7 @@ defmodule CaptainFact.Comments do
   alias CaptainFact.Comments.{Comment, Vote}
   alias CaptainFact.Accounts.{UserPermissions, User}
   alias CaptainFact.Sources.{Fetcher, Source}
-  alias CaptainFact.Actions.Recorder
+  alias CaptainFact.Actions.{Recorder, UserAction}
 
 
   # ---- Public API ----
@@ -39,6 +39,65 @@ defmodule CaptainFact.Comments do
       do: fetch_source_metadata_and_update_comment(full_comment, source_fetch_callback)
     full_comment
   end
+
+  # Delete
+
+  @doc"""
+  ⚠️ Admin-only function. Delete a comment as admin.
+
+  Returns delete action or nil if comment doesn't exist
+  """
+  def delete_comment(user = %{id: user_id}, comment = %{user_id: user_id, is_reported: false}, context \\ nil) do
+    UserPermissions.check!(user, :delete, :comment)
+    if do_delete_comment(comment) != false,
+      do: Recorder.record!(user, :delete, :comment, %{entity_id: comment.id, context: context})
+  end
+
+  @doc"""
+  ⚠️ Admin-only function. Delete a comment as admin.
+
+  Returns delete action or nil if comment doesn't exist
+  """
+  def admin_delete_comment(comment_id, context \\ nil)
+  def admin_delete_comment(comment_id, context) when is_integer(comment_id),
+    do: admin_delete_comment(%Comment{id: comment_id}, context)
+  def admin_delete_comment(comment = %Comment{}, context) do
+    if do_delete_comment(comment) != false,
+      do: Recorder.admin_record!(:delete, :comment, %{entity_id: comment.id, context: context})
+  end
+
+  defp do_delete_comment(comment) do
+    # Delete replies actions (replies deletion is handle by db)
+    replies_ids = get_all_replies_ids(comment.id)
+
+    # Delete comment
+    case Repo.delete_all(from(c in Comment, where: c.id == ^comment.id)) do
+      {0, nil} -> false
+      {1, nil} -> delete_comments_actions([comment.id | replies_ids])
+    end
+  end
+
+  defp delete_comments_actions(comments_ids) do
+    # Delete all actions linked to this comment
+    UserAction
+    |> where([a], a.entity == ^UserAction.entity(:comment))
+    |> where([a], a.entity_id in ^comments_ids)
+    |> Repo.delete_all()
+  end
+
+  # Recursively get replies ids. We should probably use a recursive query here
+  @max_deepness 30
+  defp get_all_replies_ids(comment_id, deepness \\ 0)
+  defp get_all_replies_ids(_, @max_deepness), do: []
+  defp get_all_replies_ids(comment_id, deepness) do
+    base_return = if deepness == 0, do: [], else: [comment_id]
+    case Repo.all(from(c in Comment, where: c.reply_to_id == ^comment_id, select: c.id)) do
+      [] -> base_return
+      replies -> base_return ++ List.flatten(Enum.map(replies, &(get_all_replies_ids(&1, deepness + 1))))
+    end
+  end
+
+  # ---- Comments voting ----
 
   def vote(user, context, comment_id, 0),
     do: delete_vote(user, context, Repo.get!(Comment, comment_id))

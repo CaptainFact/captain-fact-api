@@ -18,7 +18,7 @@ defmodule CaptainFact.Comments.CommentsChannel do
       |> Map.put(:comments, CommentView.render("index.json", comments:
           Comment.full(Comment)
           |> where([c, s], s.video_id == ^video_id)
-          |> where([c, _], c.is_banned == false)
+          |> where([c, _], c.is_reported == false)
           |> Repo.all()
         ))
       |> load_user_data(user, video_id)
@@ -45,16 +45,16 @@ defmodule CaptainFact.Comments.CommentsChannel do
 
   def handle_in_authenticated!("delete_comment", %{"id" => id}, socket) do
     comment = Repo.get!(Comment, id)
-    if socket.assigns.user_id === comment.user_id do
-      Repo.delete!(comment)
-      broadcast!(socket, "comment_removed", %{
-        id: id,
-        statement_id: comment.statement_id,
-        reply_to_id: comment.reply_to_id
-      })
-      {:reply, :ok, socket}
-    else
-      {:reply, :error, socket} # Not authorized
+    user = Repo.get!(User, socket.assigns.user_id)
+    case Comments.delete_comment(user, comment, context(socket)) do
+      nil -> {:reply, :ok, socket}
+      _ ->
+        broadcast!(socket, "comment_removed", %{
+          id: id,
+          statement_id: comment.statement_id,
+          reply_to_id: comment.reply_to_id
+        })
+        {:reply, :ok, socket}
     end
   end
 
@@ -64,23 +64,8 @@ defmodule CaptainFact.Comments.CommentsChannel do
   end
 
   def handle_in_authenticated!("flag_comment", %{"id" => comment_id, "reason" => reason}, socket) do
-    try do
-      Comment
-      |> select([:id, :user_id])
-      |> preload([:user])
-      |> where(id: ^comment_id)
-      |> where(is_banned: false)
-      |> Repo.one!()
-      |> Flagger.flag!(reason, socket.assigns.user_id)
-      {:reply, :ok, socket}
-    rescue e in Ecto.ConstraintError ->
-      # TODO migrate to user_socket rescue_channel_errors with other constraints violations
-      if e.constraint == "flags_source_user_id_entity_entity_id_index" do
-        {:reply, {:error, %{message: "action_already_done"}}, socket}
-      else
-        throw e
-      end
-    end
+    Flagger.flag!(socket.assigns.user_id, comment_id, reason)
+    {:reply, :ok, socket}
   end
 
   defp context(socket), do: UserAction.video_debate_context(socket.assigns.video_id)
@@ -100,11 +85,11 @@ defmodule CaptainFact.Comments.CommentsChannel do
     |> Map.put(:my_flags,
         Flag
         |> where([f], f.source_user_id == ^user.id)
-        |> where([f], f.entity == 1) #TODO Use method
-        |> where([f], f.entity_id in ^comments_ids)
-        |> select([:entity_id])
+        |> join(:inner, [f], a in assoc(f, :action))
+        |> where([_, a], a.entity == ^UserAction.entity(:comment))
+        |> where([_, a], a.entity_id in ^comments_ids)
+        |> select([_, a], a.entity_id)
         |> Repo.all()
-        |> Enum.map(&(&1.entity_id))
       )
   end
 end

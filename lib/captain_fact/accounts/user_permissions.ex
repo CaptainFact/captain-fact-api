@@ -39,6 +39,8 @@ defmodule CaptainFact.Accounts.UserPermissions do
       video:                { 0  ,  0 ,  0 ,  0 , 0  ,  5  ,  8  ,  10 , 20  },
     },
     delete: %{
+      # Not much risk here, as user can only delete own comments
+      comment:              { 10  , 20, 30 , 50 , 75 , 300 , 300 , 300 , 300 },
     },
     remove: %{
       statement:            { 0  ,  0 ,  0 ,  0 ,  3 ,  10 ,  10 ,  10 ,  10 },
@@ -49,10 +51,10 @@ defmodule CaptainFact.Accounts.UserPermissions do
       speaker:              { 0  ,  0 ,  0 ,  0 , 10 ,  30 ,  50 , 100 , 100 }
     },
     approve: %{
-      history_action:       { 0  ,  0 ,  0 ,  0 ,  0 ,   3 ,  10 ,  20 ,  30 },
+      video_debate_action:  { 0  ,  0 ,  0 ,  0 ,  0 ,   3 ,  10 ,  20 ,  30 },
     },
     flag: %{
-      history_action:       { 0  ,  0 ,  0 ,  5 ,  5 ,   5 ,   5 ,   5 ,   5 },
+      video_debate_action:  { 0  ,  0 ,  0 ,  5 ,  5 ,   5 ,   5 ,   5 ,   5 },
       comment:              { 0  ,  0 ,  1 ,  3 ,  3 ,   5 ,  10 ,  10 ,  10 },
     },
     vote_up:                { 0  ,  3 , 10 , 15 , 30 , 50  ,  65 ,  80 , 100 },
@@ -61,6 +63,7 @@ defmodule CaptainFact.Accounts.UserPermissions do
     revert_vote_up:         { 10  , 20, 30 , 50 , 75 , 150 , 300 , 500 , 500 },
     revert_vote_down:       { 10  , 20, 30 , 50 , 75 , 150 , 300 , 500 , 500 },
     revert_self_vote:       { 10  , 20, 30 , 50 , 75 , 150 , 300 , 500 , 500 },
+    collective_moderation:  { 0  ,  0 ,  0 ,  0 ,  0 ,   0  ,  0 ,   0 , 500 }
   }
   @error_not_enough_reputation "not_enough_reputation"
   @error_limit_reached "limit_reached"
@@ -68,7 +71,10 @@ defmodule CaptainFact.Accounts.UserPermissions do
   # --- API ---
 
   @doc """
-  Check if user can execute action. Return {:ok, nb_available} if yes, {:error, reason} otherwise
+  Check if user can execute action. Return {:ok, nb_available} if yes, {:error, reason} otherwise.
+
+  `entity` may be nil **only if** we're checking for a wildcard limitation (ex: collective_moderation)
+
   ## Examples
       iex> alias CaptainFact.Accounts.UserPermissions
       iex> alias CaptainFact.Actions.Recorder
@@ -100,16 +106,17 @@ defmodule CaptainFact.Accounts.UserPermissions do
     end
   end
   def check(nil, _, _), do: {:error, "unauthorized"}
+  def check!(user, action_type, entity \\ nil)
   def check!(user = %User{}, action_type, entity) do
     case check(user, action_type, entity) do
       {:error, message} -> raise %PermissionsError{message: message}
       {:ok, nb_available} -> nb_available
     end
   end
-  def check!(user_id, action_type, entity) when is_integer(user_id)  do
-     check!(do_load_user!(user_id), action_type, entity)
-  end
-  def check!(nil, _, _), do: raise %PermissionsError{message: "unauthorized"}
+  def check!(user_id, action_type, entity) when is_integer(user_id),
+     do: check!(do_load_user!(user_id), action_type, entity)
+  def check!(nil, _, _),
+    do: raise %PermissionsError{message: "unauthorized"}
 
   def limitation(user = %User{}, action_type, entity) do
     case level(user) do
