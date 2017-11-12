@@ -1,6 +1,6 @@
 defmodule CaptainFact.Actions.Analyzers.Flags do
   @moduledoc """
-  Analyse flags periodically to ban innapropriate content
+  Analyse flags periodically to report innapropriate content
   """
 
   use GenServer
@@ -11,10 +11,11 @@ defmodule CaptainFact.Actions.Analyzers.Flags do
   alias CaptainFact.Repo
   alias CaptainFact.Comments.Comment
   alias CaptainFact.Actions.{UserAction, UsersActionsReport, ReportManager, Flagger}
+  alias CaptainFact.Moderation
 
   @name __MODULE__
   @analyser_id UsersActionsReport.analyser_id(__MODULE__)
-  @comments_nb_flags_to_ban 5
+
 
   # --- Client API ---
 
@@ -26,8 +27,6 @@ defmodule CaptainFact.Actions.Analyzers.Flags do
   def update() do
     GenServer.call(@name, :update_flags, @timeout)
   end
-
-  def comments_nb_flags_to_ban(), do: @comments_nb_flags_to_ban
 
   # --- Server callbacks ---
 
@@ -47,8 +46,8 @@ defmodule CaptainFact.Actions.Analyzers.Flags do
   defp start_analysis(actions) do
     Logger.info("[Analyser.Flags] Update flags")
     report = ReportManager.create_report!(@analyser_id, :running, actions)
-    nb_entities_banned = do_update_flags(actions)
-    ReportManager.set_success!(report, nb_entities_banned)
+    nb_entities_reported = do_update_flags(actions)
+    ReportManager.set_success!(report, nb_entities_reported)
   end
 
   # Update flags, return the number of updated users
@@ -68,17 +67,16 @@ defmodule CaptainFact.Actions.Analyzers.Flags do
   @entity_comment UserAction.entity(:comment)
   defp update_entity_flags(@entity_comment, %UserAction{entity_id: comment_id}) do
     nb_flags = Flagger.get_nb_flags(:create, :comment, comment_id)
-    if nb_flags >= @comments_nb_flags_to_ban do
+    if nb_flags >= Moderation.nb_flags_report(:create, :comment) do
       # Ban comment
       {nb_updated, _} = Repo.update_all((
         from c in Comment,
              where: c.id == ^comment_id,
-             where: c.is_banned == false
-        ), [set: [is_banned: true]]
+             where: c.is_reported == false
+        ), [set: [is_reported: true]]
       )
       if nb_updated == 1 do
-        broadcast_ban(:comment, comment_id)
-        # TODO Record comment banned action
+        broadcast_report(:comment, comment_id)
       end
       nb_updated
     else
@@ -88,7 +86,7 @@ defmodule CaptainFact.Actions.Analyzers.Flags do
   # Ignore other flags
   defp update_entity_flags(_, _), do: 0
 
-  def broadcast_ban(:comment, comment_id) do
+  def broadcast_report(:comment, comment_id) do
     comment_context = Repo.one!(
       from c in Comment,
       join: s in CaptainFact.Speakers.Statement, on: c.statement_id == s.id,

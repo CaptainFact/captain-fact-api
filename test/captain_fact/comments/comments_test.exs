@@ -1,7 +1,7 @@
 defmodule CaptainFact.Comments.CommentsTest do
   use CaptainFact.DataCase
 
-  import CaptainFact.TestHelpers, only: [flag_comments: 2]
+  import CaptainFact.TestUtils
 
   import CaptainFact.Support.MetaPage
   import CaptainFact.Actions.UserAction, only: [video_debate_context: 1]
@@ -154,21 +154,35 @@ defmodule CaptainFact.Comments.CommentsTest do
       assert Comments.delete_comment(comment.user, comment) == nil
     end
 
-    test "a user cannot delete a banned comment waiting for moderation" do
-      comment = insert_banned_comment()
+    test "a user cannot delete a reported comment waiting for moderation" do
+      comment = insert_reported_comment()
       assert_raise FunctionClauseError, fn -> Comments.delete_comment(comment.user, comment) end
       refute_deleted comment
     end
 
     test "but an admin can" do
-      comment = insert_banned_comment()
+      comment = insert_reported_comment()
       assert Comments.admin_delete_comment(comment) != nil
       assert_deleted comment
     end
+
+    test "deleting a comment deletes its replies and their actions" do
+      comment = insert(:comment) |> with_action()
+      replies = insert_comments_list_with_action(5, %{reply_to: comment})
+      replies_replies = List.flatten(Enum.map(replies, fn c -> insert_comments_list_with_action(2, %{reply_to: c}) end))
+      Comments.delete_comment(comment.user, comment)
+      assert_deleted comment
+      Enum.map(replies, &(assert_deleted(&1, false)))
+      Enum.map(replies_replies, &(assert_deleted(&1, false)))
+    end
   end
 
-  defp insert_banned_comment() do
-    limit = CaptainFact.Moderation.nb_flags_to_ban(UserAction.type(:create), UserAction.entity(:comment))
+  defp insert_comments_list_with_action(size, params) do
+    Enum.map(insert_list(size, :comment, params), &with_action/1)
+  end
+
+  defp insert_reported_comment() do
+    limit = CaptainFact.Moderation.nb_flags_report(UserAction.type(:create), UserAction.entity(:comment))
     comment = insert(:comment) |> with_action()
     flag_comments([comment], limit)
     CaptainFact.Actions.Analyzers.Flags.update()
@@ -179,29 +193,8 @@ defmodule CaptainFact.Comments.CommentsTest do
       |> preload([:user])
       |> Repo.get(comment.id)
 
-    assert comment.is_banned == true
+    assert comment.is_reported == true
     comment
-  end
-
-  defp assert_deleted(%Comment{id: id}) do
-    {comment, actions} = get_comment_and_actions(id)
-    assert is_nil(comment)
-    assert Enum.count(actions) == 1
-    assert hd(actions).type == UserAction.type(:delete)
-  end
-
-  defp refute_deleted(%Comment{id: id}) do
-    {comment, _} = get_comment_and_actions(id)
-    assert comment != nil
-  end
-
-  defp get_comment_and_actions(id) do
-    actions =
-      UserAction
-      |> where([a], a.entity == ^UserAction.entity(:comment) and a.entity_id == ^id)
-      |> Repo.all()
-
-    {Repo.get(Comment, id), actions}
   end
 
   defp unique_url(), do: "/#{TokenGenerator.generate(32)}"

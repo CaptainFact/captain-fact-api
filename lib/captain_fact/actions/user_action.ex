@@ -63,6 +63,9 @@ defmodule CaptainFact.Actions.UserAction do
   # Special actions
   def type(:email_confirmed),       do: 100
   def type(:collective_moderation), do: 101
+  def type(:action_banned),         do: 102
+  def type(:abused_flag),           do: 103
+  def type(:confirmed_flag),        do: 104
 
   # Entities
   def entity(value) when is_integer(value), do: value
@@ -76,4 +79,6 @@ defmodule CaptainFact.Actions.UserAction do
 
   # Context helpers
   def video_debate_context(video_id), do: "VD:#{video_id}"
+  def moderation_context(nil), do: "MD"
+  def moderation_context(old_context) when is_binary(old_context), do: "MD:#{old_context}"
 end

@@ -23,6 +23,8 @@ defmodule CaptainFact do
       worker(CaptainFact.Actions.Analyzers.Flags, []),
       worker(CaptainFact.Actions.Analyzers.Achievements, []),
       worker(CaptainFact.Actions.Analyzers.Votes, []),
+      # Other CRON tasks
+      worker(CaptainFact.Moderation.Updater, []),
       # Misc workers
       worker(CaptainFact.Videos.VideoHashId, []),
       worker(CaptainFact.Accounts.UsernameGenerator, [])

@@ -1,13 +1,13 @@
 defmodule CaptainFactWeb.CollectiveModerationControllerTest do
   use CaptainFactWeb.ConnCase
   import CaptainFact.Factory
-  import CaptainFact.TestHelpers, only: [flag_comments: 2]
+  import CaptainFact.TestUtils, only: [flag_comments: 2]
 
   alias CaptainFact.Moderation
   alias CaptainFact.Videos.VideoHashId
 
   test "GET all reported actions for video" do
-    limit = Moderation.nb_flags_to_ban(:create, :comment)
+    limit = Moderation.nb_flags_report(:create, :comment)
     statement = insert(:statement)
     comment_text = "I like to move it"
     comments =

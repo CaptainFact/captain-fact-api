@@ -33,11 +33,16 @@ defmodule CaptainFact.Actions.Analyzers.Reputation do
       UserAction.entity(:comment) =>  {  +1 , +2   },
       UserAction.entity(:fact) =>     {  +1 , +3   }
     },
+    UserAction.type(:delete) => %{
+      UserAction.entity(:comment) =>  {  -1 ,  0   },
+    },
 
     # Special actions
-    UserAction.type(:email_confirmed) => {  +15,  0 }
-    # TODO
-    # comment_banned:                 {  0  , -20   },
+    UserAction.type(:email_confirmed) => {  +15,  0 },
+    # For reference and query. See `reputation_changes/1` for real implementation
+    UserAction.type(:action_banned) => nil,
+    UserAction.type(:abused_flag) => nil,
+    UserAction.type(:confirmed_flag) => nil,
   }
   @actions_types Map.keys(@actions)
 
@@ -73,13 +78,16 @@ defmodule CaptainFact.Actions.Analyzers.Reputation do
 
   def handle_call(:update_reputations, _from, _state) do
     last_action_id = ReportManager.get_last_action_id(@analyser_id)
-
-    unless last_action_id == -1,
-      do: start_analysis(Repo.all(from(a in UserAction, where: a.id > ^last_action_id, where: a.type in @actions_types), log: false))
+    unless last_action_id == -1 do
+      from(a in UserAction, where: a.id > ^last_action_id, where: a.type in @actions_types)
+      |> Repo.all(log: false)
+      |> start_analysis()
+    end
     {:reply, :ok , :ok}
   end
 
   def handle_call(:reset_daily_limits, _from, _state) do
+    Logger.info("[Analyzers.Reputation] Reset daily limits")
     User
     |> where([u], u.today_reputation_gain != 0)
     |> Repo.update_all(set: [today_reputation_gain: 0])
@@ -131,9 +139,17 @@ defmodule CaptainFact.Actions.Analyzers.Reputation do
     end
   end
 
+  defp changes_updater(changes, nil, _), do: changes
   defp changes_updater(changes, _, 0), do: changes
   defp changes_updater(changes, key, diff), do: Map.update(changes, key, diff, &(&1 + diff))
 
+  @collective_moderation_actions [
+    UserAction.type(:action_banned),
+    UserAction.type(:abused_flag),
+    UserAction.type(:confirmed_flag)
+  ]
+  defp reputation_changes(%{type: type, entity: entity, changes: changes}) when type in @collective_moderation_actions,
+    do: {0, CaptainFact.Moderation.Updater.reputation_change(type, entity, changes)}
   defp reputation_changes(%{type: type, entity: entity}) do
     case Map.get(@actions, type) do
       nil -> {0, 0}

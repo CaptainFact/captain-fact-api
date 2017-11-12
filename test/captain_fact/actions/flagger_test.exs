@@ -5,6 +5,7 @@ defmodule CaptainFact.Actions.FlaggerTest do
   alias CaptainFact.Actions.Analyzers.{Flags, Reputation}
   alias CaptainFact.Accounts.User
   alias CaptainFact.Comments.Comment
+  alias CaptainFact.Moderation
 
 
   setup do
@@ -12,7 +13,7 @@ defmodule CaptainFact.Actions.FlaggerTest do
     Repo.delete_all(User)
     target_user = insert(:user, %{reputation: 10000})
     comment = insert(:comment, %{user: target_user}) |> with_action
-    source_users = insert_list(Flags.comments_nb_flags_to_ban, :user, %{reputation: 10000})
+    source_users = insert_list(Moderation.nb_flags_report(:create, :comment), :user, %{reputation: 10000})
     {:ok, [source_users: source_users, target_user: target_user, comment: comment]}
   end
 
@@ -26,12 +27,12 @@ defmodule CaptainFact.Actions.FlaggerTest do
     assert Flagger.get_nb_flags(comment) == 1
   end
 
-  test "comment banned after x flags", context do
+  test "comment reported after x flags", context do
     comment = context[:comment]
 
     for source <- context[:source_users], do: Flagger.flag!(source.id, comment, 1)
     Reputation.update()
     Flags.update()
-    assert Repo.get(Comment, comment.id).is_banned == true
+    assert Repo.get(Comment, comment.id).is_reported == true
   end
 end

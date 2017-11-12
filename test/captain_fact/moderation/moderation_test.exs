@@ -1,6 +1,6 @@
 defmodule CaptainFact.ModerationTest do
   use CaptainFact.DataCase
-  import CaptainFact.TestHelpers, only: [flag_comments: 2]
+  import CaptainFact.TestUtils, only: [flag_comments: 2]
   doctest CaptainFact.Moderation
 
   alias CaptainFact.Actions.UserAction
@@ -8,7 +8,7 @@ defmodule CaptainFact.ModerationTest do
 
 
   test "returns all actions with number of flags above the limit for given video" do
-    limit = Moderation.nb_flags_to_ban(:create, :comment)
+    limit = Moderation.nb_flags_report(:create, :comment)
     statement = insert(:statement)
     comment_text = "I like to move it"
     comments =
@@ -22,7 +22,7 @@ defmodule CaptainFact.ModerationTest do
   end
 
   test "do not return if number of flags is above the default limit but under specific limit for action / entity" do
-    limit = Moderation.nb_flags_to_ban(:update, :statement)
+    limit = Moderation.nb_flags_report(:update, :statement)
     statement = insert(:statement)
     Stream.repeatedly(fn -> insert(:comment, %{statement: statement}) |> with_action() end)
     |> Enum.take(5)
@@ -35,7 +35,7 @@ defmodule CaptainFact.ModerationTest do
   test "do not return actions for which user already gave a feedback" do
     action_type = UserAction.type(:create)
     action_entity = UserAction.entity(:comment)
-    limit = Moderation.nb_flags_to_ban(action_type, action_entity)
+    limit = Moderation.nb_flags_report(action_type, action_entity)
     statement = insert(:statement)
     comment = insert(:comment, %{statement: statement}) |> with_action()
     flag_comments([comment], limit)

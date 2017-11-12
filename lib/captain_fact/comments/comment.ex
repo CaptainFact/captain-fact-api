@@ -10,7 +10,7 @@ defmodule CaptainFact.Comments.Comment do
   schema "comments" do
     field :text, :string
     field :approve, :boolean
-    field :is_banned, :boolean, default: false
+    field :is_reported, :boolean, default: false
 
     field :score, :integer, virtual: true, default: 0
 
@@ -77,10 +77,6 @@ defmodule CaptainFact.Comments.Comment do
     |> validate_required(@required_fields)
     |> validate_source_or_text()
     |> validate_length(:text, min: 1, max: 240)
-  end
-
-  def ban_changeset(struct, params = %{}) do
-    cast(struct, params, [:is_banned])
   end
 
   defp format_text(struct = %{changes: %{text: text}}) do

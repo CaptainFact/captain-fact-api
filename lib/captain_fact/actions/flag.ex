@@ -2,6 +2,7 @@ defmodule CaptainFact.Actions.Flag do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias CaptainFact.Accounts.User
   alias CaptainFact.Actions.UserAction
 
   @reasons [:spam, :bad_language, :harassment]

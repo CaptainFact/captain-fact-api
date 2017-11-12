@@ -48,7 +48,8 @@ defmodule CaptainFact.Videos.Video do
     |> parse_url()
     |> validate_required([:provider, :provider_id])
     |> validate_length(:title, min: 5, max: 120)
-    |> unique_constraint(:videos_provider_provider_id_index) # TODO Verify name
+    |> unique_constraint(:videos_provider_provider_id_index)
+    |> update_change(:language, &(hd(String.split(&1, "-")))) # Change "en-US" to "en"
   end
 
   def parse_url(changeset = %Ecto.Changeset{}) do

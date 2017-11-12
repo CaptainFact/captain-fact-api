@@ -1,4 +1,11 @@
 defmodule CaptainFact.Moderation do
+  @moduledoc"""
+  Collective moderation methods. A few concepts are necessary to understand what happens here:
+
+  * An action can be flagged
+  * When an action have a certain number of flags, it is considered as "reported". Collective moderation begins
+  * Depending on this moderation, updater will either revert the action or delete flags and restore the reported entity
+  """
   import Ecto.Query
 
   alias CaptainFact.Repo
@@ -7,27 +14,27 @@ defmodule CaptainFact.Moderation do
   alias CaptainFact.Actions.{UserAction, Flag}
 
 
-  @default_nb_flags_to_ban 3
-  @nb_flags_to_ban %{
-    {UserAction.type(:create), UserAction.entity(:comment)} => 5
+  @default_nb_flags_report 1
+  @nb_flags_report %{
+    {UserAction.type(:create), UserAction.entity(:comment)} => 2
   }
-  @defined_actions Enum.map(Map.keys(@nb_flags_to_ban), &Tuple.to_list/1)
+  @defined_actions Enum.map(Map.keys(@nb_flags_report), &Tuple.to_list/1)
 
 
   @doc"""
-  Get the number of flags necessary to ban action.
+  Get the number of flags necessary for action to be considered as "reported"
 
   ## Examples
 
-    iex> CaptainFact.Moderation.nb_flags_to_ban(:create, :comment)
-    5
-    iex> CaptainFact.Moderation.nb_flags_to_ban(:update, :statement)
-    3
+    iex> CaptainFact.Moderation.nb_flags_report(:create, :comment)
+    2
+    iex> CaptainFact.Moderation.nb_flags_report(:update, :statement)
+    1
   """
-  def nb_flags_to_ban(action, entity) when is_atom(action) and is_atom(entity),
-    do: nb_flags_to_ban(UserAction.type(action), UserAction.entity(entity))
-  def nb_flags_to_ban(action, entity),
-    do: Map.get(@nb_flags_to_ban, {action, entity}, @default_nb_flags_to_ban)
+  def nb_flags_report(action, entity) when is_atom(action) and is_atom(entity),
+    do: nb_flags_report(UserAction.type(action), UserAction.entity(entity))
+  def nb_flags_report(action, entity),
+    do: Map.get(@nb_flags_report, {action, entity}, @default_nb_flags_report)
 
   @doc"""
   Get all actions for which number of flags is above the limit in given `video_id` and for which user hasn't voted yet
@@ -40,8 +47,8 @@ defmodule CaptainFact.Moderation do
     |> join(:inner, [a, _], f in Flag, f.action_id == a.id)
     |> where([a, _, _], a.context == ^UserAction.video_debate_context(video_id))
     |> group_by([a, _, _], a.id)
-    |> having_default_ban()
-    |> or_having_ban_defined()
+    |> having_default_reported()
+    |> or_having_reported()
     |> preload([a, _, _], [:user])
     |> select([a, _, _], a)
     |> Repo.all()
@@ -59,8 +66,8 @@ defmodule CaptainFact.Moderation do
     |> without_user_feedback(user)
     |> join(:inner, [a, _], f in Flag, f.action_id == a.id)
     |> group_by([a, _, _], a.id)
-    |> having_default_ban()
-    |> or_having_ban_defined()
+    |> having_default_reported()
+    |> or_having_reported()
     |> preload([a, _, _], [:user])
     |> select([a, _, _], a)
     |> order_by(fragment("RANDOM()"))
@@ -83,9 +90,9 @@ defmodule CaptainFact.Moderation do
       |> where([a, _], a.id == ^action_id)
       |> join(:inner, [a, _], f in Flag, f.action_id == a.id)
       |> group_by([a, _, _], a.id)
-      # Following conditions will fail if target action is not banned. This is on purpose
-      |> having_default_ban()
-      |> or_having_ban_defined()
+      # Following conditions will fail if target action is not reported. This is on purpose
+      |> having_default_reported()
+      |> or_having_reported()
       |> Repo.one!()
 
     # Will fail if there's already a feedback for this user / action
@@ -109,12 +116,12 @@ defmodule CaptainFact.Moderation do
     where(UserFeedback, [f], f.user_id == ^user_id)
   end
 
-  defp having_default_ban(query),
-    do: having(query, [a, _, f], count(f.id) >= @default_nb_flags_to_ban and not [a.type, a.entity] in @defined_actions)
+  defp having_default_reported(query),
+    do: having(query, [a, _, f], count(f.id) >= @default_nb_flags_report and not [a.type, a.entity] in @defined_actions)
 
-  defp or_having_ban_defined(base_query) do
-    Enum.reduce(@nb_flags_to_ban, base_query, fn {{action_type, entity}, nb_flags_to_ban}, query ->
-      or_having(query, [a, _, f], a.type == ^action_type and a.entity == ^entity and count(f.id) >= ^nb_flags_to_ban)
+  defp or_having_reported(base_query) do
+    Enum.reduce(@nb_flags_report, base_query, fn {{action_type, entity}, nb_flags_report}, query ->
+      or_having(query, [a, _, f], a.type == ^action_type and a.entity == ^entity and count(f.id) >= ^nb_flags_report)
     end)
   end
 

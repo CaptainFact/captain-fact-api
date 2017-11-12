@@ -18,7 +18,7 @@ defmodule CaptainFact.Comments.CommentsChannel do
       |> Map.put(:comments, CommentView.render("index.json", comments:
           Comment.full(Comment)
           |> where([c, s], s.video_id == ^video_id)
-          |> where([c, _], c.is_banned == false)
+          |> where([c, _], c.is_reported == false)
           |> Repo.all()
         ))
       |> load_user_data(user, video_id)
