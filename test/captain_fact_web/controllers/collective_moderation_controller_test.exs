@@ -45,11 +45,22 @@ defmodule CaptainFactWeb.CollectiveModerationControllerTest do
     assert Enum.count(actions) == Enum.count(comments)
   end
 
+  test "GET random actions can take a count parameter and returns the number of actions specified" do
+    limit = Moderation.nb_flags_report(:create, :comment)
+    comments = Stream.repeatedly(fn -> insert(:comment) |> with_action() end) |> Enum.take(10)
+    flag_comments(comments, limit)
+    actions =
+      build_authenticated_conn(insert(:user, %{reputation: 10000}))
+      |> get("/moderation/random?count=3")
+      |> json_response(200)
+
+    assert Enum.count(actions) == 3
+  end
+
   test "POST feedback" do
     Repo.delete_all(Moderation.UserFeedback)
     limit = Moderation.nb_flags_report(:create, :comment)
-    comment = insert(:comment) |> with_action()
-    flag_comments([comment], limit)
+    comment = insert(:comment) |> with_action() |> flag(limit)
     action = Repo.get_by! UserAction,
       entity: UserAction.entity(:comment), type: UserAction.type(:create), entity_id: comment.id
     value = 1

@@ -97,8 +97,7 @@ defmodule CaptainFact.Moderation.UpdaterTest do
 
   defp insert_reported_comment() do
     limit = CaptainFact.Moderation.nb_flags_report(UserAction.type(:create), UserAction.entity(:comment))
-    comment = insert(:comment) |> with_action()
-    flag_comments([comment], limit)
+    comment = insert(:comment) |> with_action() |> flag(limit)
     CaptainFact.Actions.Analyzers.Flags.update()
 
     # Reload comment

@@ -11,8 +11,9 @@ defmodule CaptainFactWeb.CollectiveModerationController do
 
   @nb_random_actions 5
 
-  def random(conn, _params) do
-    actions = Moderation.random(Guardian.Plug.current_resource(conn), @nb_random_actions)
+  def random(conn, params) do
+    nb_actions = Map.get(params, "count", @nb_random_actions)
+    actions = Moderation.random(Guardian.Plug.current_resource(conn), nb_actions)
     render(conn, UserActionView, :index, users_actions: actions)
   end
 

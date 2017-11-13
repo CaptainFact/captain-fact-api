@@ -37,8 +37,7 @@ defmodule CaptainFact.ModerationTest do
     action_entity = UserAction.entity(:comment)
     limit = Moderation.nb_flags_report(action_type, action_entity)
     statement = insert(:statement)
-    comment = insert(:comment, %{statement: statement}) |> with_action()
-    flag_comments([comment], limit)
+    comment = insert(:comment, %{statement: statement}) |> with_action() |> flag(limit)
 
     action = CaptainFact.Repo.get_by(UserAction, type: action_type, entity: action_entity, entity_id: comment.id)
     user = insert(:user, %{reputation: 10000})
@@ -50,8 +49,7 @@ defmodule CaptainFact.ModerationTest do
 
   test "cannot give feedback on an action which is not reported" do
     statement = insert(:statement)
-    comment = insert(:comment, %{statement: statement}) |> with_action()
-    flag_comments([comment], 1)
+    insert(:comment, %{statement: statement}) |> with_action() |> flag(1)
 
     actions_needing_feedback = Moderation.video(insert(:user, %{reputation: 10000}), statement.video_id)
     assert Enum.count(actions_needing_feedback) == 0
