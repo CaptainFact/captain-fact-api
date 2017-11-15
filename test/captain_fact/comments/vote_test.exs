@@ -1,4 +1,4 @@
-defmodule CaptainFact.VoteTest do
+defmodule CaptainFact.Comments.VoteTest do
   use CaptainFact.DataCase, async: true
   doctest CaptainFact.Comments.Vote
 

@@ -22,14 +22,14 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
       video_id
       |> UserAction.video_debate_context()
       |> History.context_history()
-      |> View.render_many(UserActionView, "action.json")
+      |> View.render_many(UserActionView, "user_action.json")
 
     {:ok, %{actions: actions}, assign(socket, :video_id, video_id)}
   end
 
   def join("statement_history:" <> statement_id, _payload, socket) do
     statement = Repo.get!(Statement, statement_id)
-    actions = View.render_many(History.statement_history(statement_id), UserActionView, "action.json")
+    actions = View.render_many(History.statement_history(statement_id), UserActionView, "user_action.json")
     socket =
       socket
       |> assign(:statement_id, statement_id)
@@ -58,7 +58,7 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
           rendered_action =
             action
             |> Map.put(:user, Repo.one!(Ecto.assoc(action, :user)))
-            |> View.render_one(UserActionView, "action.json")
+            |> View.render_one(UserActionView, "user_action.json")
           broadcast!(socket, "action_added", rendered_action)
 
           # Broadcast statement
@@ -90,7 +90,7 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
         rendered_action =
           action
           |> Map.put(:user, Repo.one!(Ecto.assoc(action, :user)))
-          |> View.render_one(UserActionView, "action.json")
+          |> View.render_one(UserActionView, "user_action.json")
         broadcast!(socket, "action_added", rendered_action)
         # Broadcast the speaker
         CaptainFactWeb.Endpoint.broadcast(

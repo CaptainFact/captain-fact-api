@@ -3,7 +3,7 @@ defmodule CaptainFact.AccountsTest do
   use Bamboo.Test
 
   alias CaptainFact.Accounts
-  alias CaptainFact.Actions.Analysers.{Reputation, Achievements}
+  alias CaptainFact.Actions.Analyzers.{Reputation, Achievements}
 
   describe "reset_password_requests" do
     alias CaptainFact.Accounts.ResetPasswordRequest
@@ -227,5 +227,4 @@ defmodule CaptainFact.AccountsTest do
       assert achievement.id in updated.achievements
     end
   end
-
 end

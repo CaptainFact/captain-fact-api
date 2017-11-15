@@ -1,3 +1,5 @@
+# Start everything
+
 ExUnit.start
 Faker.start
 

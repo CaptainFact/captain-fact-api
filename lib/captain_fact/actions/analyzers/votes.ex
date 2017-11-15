@@ -1,4 +1,4 @@
-defmodule CaptainFact.Actions.Analysers.Votes do
+defmodule CaptainFact.Actions.Analyzers.Votes do
   @moduledoc """
   Update votes at a certain interval
   """
@@ -47,7 +47,7 @@ defmodule CaptainFact.Actions.Analysers.Votes do
 
   defp start_analysis([]), do: nil
   defp start_analysis(actions) do
-    Logger.info("[Analysers.Votes] Update votes scores")
+    Logger.info("[Analyzers.Votes] Update votes scores")
     report = ReportManager.create_report!(@analyser_id, :running, actions)
     nb_entities_updated =
       actions

@@ -1,6 +1,5 @@
 defmodule CaptainFact.Accounts.ForbiddenEmailProviders do
   @moduledoc """
-  TODO: Move this to DB
   Temporary / spammy email providers. Use `is_forbidden/1` to check if provider is forbidden
   List from https://github.com/wesbos/burner-email-providers/blob/master/emails.txt
   """
@@ -3570,7 +3569,12 @@ defmodule CaptainFact.Accounts.ForbiddenEmailProviders do
   )
 
   def is_forbidden?(email) do
-    Enum.any?(@temporary_email_providers, &String.ends_with?(email, &1))
+    case String.split(email, "@") do
+      [_ | [provider]] ->
+        Enum.any?(@temporary_email_providers, &Kernel.==(provider, &1))
+      _ ->
+        true # Bad email format
+    end
   end
 
   def get_temporary_providers() do

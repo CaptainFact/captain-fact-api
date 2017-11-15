@@ -26,6 +26,21 @@ defmodule CaptainFact.Actions.UserAction do
     |> validate_required([:user_id, :type])
     |> cast_assoc(:user)
     |> cast_assoc(:target_user)
+    |> update_change(:entity, &entity/1)
+    |> update_change(:type, &type/1)
+  end
+
+  @doc"""
+  ⚠️ Admin-only function
+  """
+  def admin_changeset(%UserAction{} = user_action, attrs) do
+    user_action
+    |> cast(attrs, [:context, :type, :entity, :entity_id, :changes, :target_user_id])
+    |> validate_required([:type])
+    |> validate_inclusion(:user, [nil])
+    |> cast_assoc(:target_user)
+    |> update_change(:entity, &entity/1)
+    |> update_change(:type, &type/1)
   end
 
   # Common actions
@@ -46,18 +61,24 @@ defmodule CaptainFact.Actions.UserAction do
   def type(:revert_vote_down),  do: 13
   def type(:revert_self_vote),  do: 14
   # Special actions
-  def type(:email_confirmed), do: 100
+  def type(:email_confirmed),       do: 100
+  def type(:collective_moderation), do: 101
+  def type(:action_banned),         do: 102
+  def type(:abused_flag),           do: 103
+  def type(:confirmed_flag),        do: 104
 
   # Entities
   def entity(value) when is_integer(value), do: value
-  def entity(:video),           do: 1
-  def entity(:speaker),         do: 2
-  def entity(:statement),       do: 3
-  def entity(:comment),         do: 4
-  def entity(:fact),            do: 5
-  def entity(:history_action),  do: 6
-  def entity(:user),            do: 7
+  def entity(:video),                 do: 1
+  def entity(:speaker),               do: 2
+  def entity(:statement),             do: 3
+  def entity(:comment),               do: 4
+  def entity(:fact),                  do: 5
+  def entity(:video_debate_action),   do: 6
+  def entity(:user),                  do: 7
 
   # Context helpers
   def video_debate_context(video_id), do: "VD:#{video_id}"
+  def moderation_context(nil), do: "MD"
+  def moderation_context(old_context) when is_binary(old_context), do: "MD:#{old_context}"
 end
