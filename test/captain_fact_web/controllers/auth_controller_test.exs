@@ -88,6 +88,19 @@ defmodule CaptainFactWeb.AuthControllerTest do
       assert @social_network_achievement in response["user"]["achievements"], "should unlock social-network achievement"
     end
 
+    test "user must accept to share email when authenticathing with third party" do
+      invit = insert(:invitation_request)
+      user = build(:user)
+      auth = %{ueberauth_auth: build_auth(:facebook, user.fb_user_id, nil, user.name)}
+      response =
+        build_conn()
+        |> Map.put(:assigns, auth)
+        |> AuthController.callback(%{"invitation_token" => invit.token})
+        |> json_response(400)
+
+      assert response == %{"error" => "invalid_email"}
+    end
+
     test "if user changed its email and has 2 accounts, always prefer facebook auth account" do
       nb_accounts_before = Repo.aggregate(User, :count, :id)
       nb_to_create = 10
@@ -133,17 +146,9 @@ defmodule CaptainFactWeb.AuthControllerTest do
 
   defp provider_specific_auth_infos(auth = %{provider: :facebook}) do
     Map.merge(auth, %{
-      extra: %{
-        raw_info: %{
-          user: %{
-            "picture" => %{
-              "data" => %{
-                "is_silhouette" => false
-              }
-            }
-          }
-        }
-      }
+      extra: %{ raw_info: %{ user: %{
+        "picture" => %{ "data" => %{ "is_silhouette" => false } }
+      }}}
     })
   end
   defp provider_specific_auth_infos(auth), do: auth

@@ -33,6 +33,7 @@ defmodule CaptainFact.Accounts.Authenticator do
 
   Return user or nil if no account exist for this email or fb_user_id
   """
+  def get_user_by_third_party(_, _, nil), do: nil
   def get_user_by_third_party(:facebook, fb_user_id, email) do
     User
     |> where([u], u.fb_user_id == ^fb_user_id)

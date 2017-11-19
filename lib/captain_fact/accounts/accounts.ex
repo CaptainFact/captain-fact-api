@@ -42,14 +42,16 @@ defmodule CaptainFact.Accounts do
     provider_params = Keyword.get(opts, :provider_params, %{})
 
     # Do create user
-    case Map.get(user_params, "username") || Map.get(user_params, :username) do
-      username when allow_empty_username and (is_nil(username) or username == "") ->
-        Map.get(user_params, "email") || Map.get(user_params, :email)
-        |> create_account_without_username(user_params, provider_params)
-      _ ->
-        do_create_account(user_params, provider_params)
-    end
-    |> after_create(invitation_token)
+    create_user_result =
+      case Map.get(user_params, "username") || Map.get(user_params, :username) do
+        username when allow_empty_username and (is_nil(username) or username == "") ->
+          email = Map.get(user_params, "email") || Map.get(user_params, :email)
+          create_account_without_username(email, user_params, provider_params)
+        _ ->
+          do_create_account(user_params, provider_params)
+      end
+
+    after_create(create_user_result, invitation_token)
   end
 
   defp after_create(error = {:error, _}, _), do: error
@@ -80,6 +82,7 @@ defmodule CaptainFact.Accounts do
     |> Repo.insert()
   end
 
+  defp create_account_without_username(nil, _, _), do: {:error, "invalid_email"}
   defp create_account_without_username(email, params, provider_params) do
     Multi.new
     |> Multi.insert(:base_user,
