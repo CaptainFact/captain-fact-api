@@ -74,9 +74,9 @@ defmodule CaptainFactWeb.Router do
       plug :accepts, ["html"]
     end
 
-    scope "/jouge42/mail" do
+    scope "/jouge42" do
       pipe_through [:browser]
-      forward "/sent_emails", Bamboo.SentEmailViewerPlug
+      forward "/mail", Bamboo.SentEmailViewerPlug
     end
   end
 end

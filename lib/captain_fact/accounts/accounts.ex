@@ -153,7 +153,7 @@ defmodule CaptainFact.Accounts do
       |> where([r], r.source_ip == ^source_ip_address)
       |> Repo.aggregate(:count, :token)
     if nb_ip_requests > @max_ip_reset_requests do
-      throw UserPermissions.PermissionsError
+      raise %UserPermissions.PermissionsError{message: "limit_reached"}
     end
 
     # Generate request
