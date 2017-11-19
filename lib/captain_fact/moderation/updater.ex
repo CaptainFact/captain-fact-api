@@ -93,7 +93,6 @@ defmodule CaptainFact.Moderation.Updater do
   # --- Internal API ---
 
   def handle_call(:update, _, _) do
-    Logger.info("[ModerationUpdater] Update")
     UserAction
     |> join(:inner, [a], uf in UserFeedback, uf.action_id == a.id)
     |> select([a, uf], %{

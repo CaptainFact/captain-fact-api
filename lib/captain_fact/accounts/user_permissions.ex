@@ -24,13 +24,13 @@ defmodule CaptainFact.Accounts.UserPermissions do
     # reputation            {-30 , -5 , 15 , 30 , 75 , 125 , 200 , 500 , 1000}
     #-------------------------------------------------------------------------
     create: %{
-      comment:              { 2  ,  7 , 10 , 20 , 30 , 200 , 200 , 200 , 200 },
-      statement:            { 0  ,  5 , 10 , 15 , 30 ,  50 , 100 , 100 , 100 },
-      speaker:              { 0  ,  3 , 10 , 15 , 20 ,  30 ,  50 , 100 , 100 },
+      comment:              { 2  ,  5 , 7  , 20 , 30 , 200 , 200 , 200 , 200 },
+      statement:            { 0  ,  2 , 6  , 10 , 30 ,  50 , 100 , 100 , 100 },
+      speaker:              { 0  ,  0 , 0  , 3  , 8  ,  30 ,  50 , 100 , 100 },
     },
     add: %{
       video:                { 0  ,  0 ,  0 , 0  , 0  ,  0  ,  2  ,  5  ,  10 },
-      speaker:              { 0  ,  3 ,  5 , 10 , 20 ,  30 ,  50 , 100 , 100 },
+      speaker:              { 0  ,  0 ,  0 , 3  , 8  ,  30 ,  50 , 100 , 100 },
     },
     update: %{
       comment:              { 3  , 10 , 15 , 30 , 30 , 100 , 100 , 100 , 100 },
@@ -57,13 +57,13 @@ defmodule CaptainFact.Accounts.UserPermissions do
       video_debate_action:  { 0  ,  0 ,  0 ,  5 ,  5 ,   5 ,   5 ,   5 ,   5 },
       comment:              { 0  ,  0 ,  1 ,  3 ,  3 ,   5 ,  10 ,  10 ,  10 },
     },
-    vote_up:                { 0  ,  3 , 10 , 15 , 30 , 50  ,  65 ,  80 , 100 },
+    vote_up:                { 0  ,  3 ,  7 , 10 , 15 ,  30 ,  50 ,  75 , 100 },
     vote_down:              { 0  ,  0 ,  2 ,  5 , 10 ,  20 ,  40 ,  80 , 100 },
     self_vote:              { 10  , 20, 30 , 50 , 75 , 250 , 300 , 500 , 500 },
     revert_vote_up:         { 10  , 20, 30 , 50 , 75 , 150 , 300 , 500 , 500 },
     revert_vote_down:       { 10  , 20, 30 , 50 , 75 , 150 , 300 , 500 , 500 },
     revert_self_vote:       { 10  , 20, 30 , 50 , 75 , 150 , 300 , 500 , 500 },
-    collective_moderation:  { 0  ,  0 ,  0 ,  0 ,  0 ,   0  ,  0 ,   0 , 500 }
+    collective_moderation:  { 0  ,  0 ,  0 ,  0 ,  0 ,   0  ,  0 ,   0 , 200 }
   }
   @error_not_enough_reputation "not_enough_reputation"
   @error_limit_reached "limit_reached"
