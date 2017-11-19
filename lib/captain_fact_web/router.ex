@@ -54,7 +54,7 @@ defmodule CaptainFactWeb.Router do
           delete "/", UserController, :delete
           get    "/available_flags", UserController, :available_flags
           put    "/confirm_email/:token", UserController, :confirm_email
-          put    "/achievements/:achievement", UserController, :unlock_achievement
+          # TODO put    "/achievements/:achievement", UserController, :unlock_achievement
         end
       end
 

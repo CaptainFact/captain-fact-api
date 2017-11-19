@@ -4,7 +4,7 @@ defmodule CaptainFact.Accounts.User do
   import Ecto.Changeset
 
   alias CaptainFact.TokenGenerator
-  alias CaptainFact.Accounts.ForbiddenEmailProviders
+  alias CaptainFact.Accounts.{ForbiddenEmailProviders, Achievement}
 
 
   schema "users" do
@@ -73,7 +73,7 @@ defmodule CaptainFact.Accounts.User do
     |> common_changeset(params)
     |> password_changeset(params)
     |> generate_email_verification_token(false)
-    |> put_change(:achievements, [1]) # Default to "welcome" achievement
+    |> put_change(:achievements, [Achievement.get(:welcome)]) # Default to "welcome" achievement
   end
 
   def changeset_confirm_email(model, is_confirmed) do

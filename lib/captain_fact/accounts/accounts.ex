@@ -11,7 +11,7 @@ defmodule CaptainFact.Accounts do
   alias CaptainFact.Email
 
   alias CaptainFact.Accounts.{User, ResetPasswordRequest, UserPermissions, InvitationRequest, Achievement}
-  alias CaptainFact.Accounts.{UsernameGenerator, ForbiddenEmailProviders}
+  alias CaptainFact.Accounts.{UsernameGenerator, ForbiddenEmailProviders, Achievement}
   alias CaptainFact.Actions.Recorder
   alias CaptainFact.TokenGenerator
 
@@ -75,7 +75,6 @@ defmodule CaptainFact.Accounts do
     CaptainFact.Mailer.deliver_later(CaptainFact.Email.welcome_email(user))
   end
 
-  @social_network_achievement 6
   defp do_create_account(user_params, provider_params) do
     User.registration_changeset(%User{}, user_params)
     |> User.provider_changeset(provider_params)
@@ -90,7 +89,7 @@ defmodule CaptainFact.Accounts do
          |> User.registration_changeset(Map.drop(params, [:username, "username"]))
          |> Ecto.Changeset.update_change(:achievements, fn list ->
               if Map.has_key?(provider_params, :fb_user_id),
-                do: Enum.uniq([@social_network_achievement | list]), else: list
+                do: Enum.uniq([Achievement.get(:social_networks) | list]), else: list
             end)
          |> User.provider_changeset(provider_params)
        )
@@ -125,9 +124,10 @@ defmodule CaptainFact.Accounts do
 
   # ---- Achievements -----
 
-  def unlock_achievement(user = %User{id: user_id}, slug) when is_binary(slug) do
-    achievement = Repo.get_by!(Achievement, slug: slug)
-    if achievement.id in user.achievements do
+  def unlock_achievement(user, achievement) when is_atom(achievement),
+    do: unlock_achievement(user, Achievement.get(achievement))
+  def unlock_achievement(user = %User{id: user_id}, achievement) when is_integer(achievement) do
+    if achievement in user.achievements do
       {:ok, user} # Don't update user if achievement is already unlocked
     else
       Repo.transaction(fn ->
@@ -137,7 +137,7 @@ defmodule CaptainFact.Accounts do
           |> lock("FOR UPDATE")
           |> Repo.one!()
 
-        Repo.update!(Ecto.Changeset.change(user, achievements: Enum.uniq([achievement.id | user.achievements])))
+        Repo.update!(Ecto.Changeset.change(user, achievements: Enum.uniq([achievement | user.achievements])))
       end)
     end
   end

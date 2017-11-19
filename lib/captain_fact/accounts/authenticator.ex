@@ -52,7 +52,7 @@ defmodule CaptainFact.Accounts.Authenticator do
       user
       |> User.provider_changeset(provider_infos)
       |> Repo.update!()
-      |> CaptainFact.Accounts.unlock_achievement("social-network")
+      |> CaptainFact.Accounts.unlock_achievement(:social_networks)
 
     case store_user_picture(updated_user, Map.get(provider_infos, :picture_url)) do
       {:ok, final_user} -> final_user

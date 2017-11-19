@@ -66,6 +66,7 @@ defmodule CaptainFact.Actions.UserAction do
   def type(:action_banned),         do: 102
   def type(:abused_flag),           do: 103
   def type(:confirmed_flag),        do: 104
+  def type(:social_network_linked), do: 105
 
   # Entities
   def entity(value) when is_integer(value), do: value
