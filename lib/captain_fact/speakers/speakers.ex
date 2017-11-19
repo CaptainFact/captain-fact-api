@@ -3,8 +3,10 @@ defmodule CaptainFact.Speakers do
   Speakers utils
   """
 
+  import Ecto.Query
+
   alias CaptainFact.Repo
-  alias CaptainFact.Speakers.Picture
+  alias CaptainFact.Speakers.{Speaker, Picture}
 
 
   @doc"""
@@ -19,5 +21,25 @@ defmodule CaptainFact.Speakers do
         |> Repo.update()
       error -> error
     end
+  end
+
+  @doc"""
+  Set given speaker `is_user_defined` field to false which will prevent modifications. Also generates a slug.
+  """
+  def validate_speaker(speaker) do
+    speaker
+    |> Speaker.changeset_validate_speaker()
+    |> Repo.update()
+  end
+
+  @doc"""
+  Generate slugs for all speakers with `is_user_defined` set to false
+  """
+  def generate_slugs() do
+    Speaker
+    |> where([s], s.is_user_defined == false and is_nil(s.slug))
+    |> Repo.all()
+    |> Enum.map(&Speaker.changeset_validate_speaker/1)
+    |> Enum.map(&Repo.update/1)
   end
 end

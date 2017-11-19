@@ -21,8 +21,9 @@ defmodule CaptainFactWeb.Router do
     get "/", ApiInfoController, :get
     get "/videos", VideoController, :index
     get "/videos/index", VideoController, :index_ids
-    get "/videos/:video_id/statements", StatementController, :get
+    get "/speakers/:slug_or_id", SpeakerController, :show
     post "/search/video", VideoController, :search
+    get "/videos/:video_id/statements", StatementController, :get
 
     # ---- Authenticathed endpoints ----
     scope "/" do

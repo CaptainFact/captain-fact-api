@@ -80,11 +80,21 @@ defmodule CaptainFact.Videos do
   defp videos_query(filters) do
     Video
     |> Video.with_speakers
-    |> language_filter(Keyword.get(filters, :language))
     |> order_by([v], desc: v.id)
+    |> language_filter(Keyword.get(filters, :language))
+    |> speaker_filter(Keyword.get(filters, :speaker))
   end
 
   defp language_filter(query, nil), do: query
   defp language_filter(query, "unknown"), do: where(query, [v], is_nil(v.language))
   defp language_filter(query, language), do: where(query, [v], language: ^language)
+
+  defp speaker_filter(query, nil), do: query
+  defp speaker_filter(query, slug_or_id) do
+    query = join(query, :inner, [v], s in assoc(v, :speakers))
+    cond do
+      is_integer(slug_or_id) -> where(query, [_, s], s.id == ^slug_or_id)
+      is_binary(slug_or_id) -> where(query, [_, s], s.slug == ^slug_or_id)
+    end
+  end
 end

@@ -18,7 +18,7 @@ defmodule CaptainFactWeb.VideoDebateChannelTest do
     # Init
     topic = "video_debate:#{VideoHashId.encode(insert(:video).id)}"
     {:ok, _, authed_socket} =
-      subscribe_and_join(socket("", %{user_id: insert(:user).id}), VideoDebateChannel, topic)
+      subscribe_and_join(socket("", %{user_id: insert(:user, %{reputation: 5000}).id}), VideoDebateChannel, topic)
 
     # Test
     @endpoint.subscribe("video_debate:#{VideoHashId.encode(insert(:video).id)}")
