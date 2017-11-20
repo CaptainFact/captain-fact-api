@@ -14,11 +14,12 @@ defmodule CaptainFact.Comments do
   def add_comment(user, context, params, source_url, source_fetch_callback \\ nil) do
     # TODO [Security] What if reply_to_id refer to a comment that is on a different statement ?
     UserPermissions.check!(user, :create, :comment)
-    source = source_url && (Repo.get_by(Source, url: source_url) || %{url: source_url})
+    source_url = source_url && Source.prepare_url(source_url)
+    source = source_url && (Repo.get_by(Source, url: source_url) || Source.changeset(%Source{}, %{url: source_url}))
     comment_changeset =
       user
       |> Ecto.build_assoc(:comments)
-      |> Ecto.Changeset.change(%{})
+      |> Ecto.Changeset.change()
       |> Ecto.Changeset.put_assoc(:source, source)
       |> Comment.changeset(params)
 

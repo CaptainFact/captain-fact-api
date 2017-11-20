@@ -22,6 +22,14 @@ defmodule CaptainFact.Sources.Source do
     |> cast(params, [:url, :title, :language, :site_name])
     |> validate_required([:url])
     |> unique_constraint(:url)
+    |> update_change(:url, &prepare_url/1)
     |> validate_format(:url, @url_regex)
+  end
+
+  @regex_contains_http ~r/^https?:\/\//
+  def prepare_url(str) do
+    str = String.trim(str)
+    if Regex.match?(@regex_contains_http, str),
+      do: str, else: "https://" <>  str
   end
 end

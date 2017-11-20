@@ -9,7 +9,7 @@ use Mix.Config
 # General application configuration
 config :captain_fact,
   ecto_repos: [CaptainFact.Repo],
-  source_url_regex: ~r/[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/,
+  source_url_regex: ~r/^https?:\/\/[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/,
   cors_origins: []
 
 # Configures the endpoint

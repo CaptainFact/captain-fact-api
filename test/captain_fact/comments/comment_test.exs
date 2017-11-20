@@ -6,13 +6,14 @@ defmodule CaptainFact.Comments.CommentTest do
   @valid_attrs %{
     statement_id: 1,
     user_id: 42,
-    source: %{url: Faker.Internet.url},
     text: Faker.Lorem.sentence,
     source_title: Faker.Lorem.sentence
   }
 
+  @valid_source %{id: 42, url: Faker.Internet.url}
+
   test "can post with a source and no text (fact)" do
-    changeset = Comment.changeset(%Comment{}, Map.delete(@valid_attrs, :text))
+    changeset = Comment.changeset(Map.merge(%Comment{}, %{source: @valid_source}), Map.delete(@valid_attrs, :text))
     assert changeset.valid?
   end
 
@@ -31,15 +32,14 @@ defmodule CaptainFact.Comments.CommentTest do
     refute changeset.valid?
   end
 
-  test "source url must be a valid URL" do
-    attrs = put_in(@valid_attrs, [:source, :url], "INVALID URL")
-    changeset = Comment.changeset(%Comment{}, attrs)
-    refute changeset.valid?
-  end
-
   test "comment text length must be less than 240 characters" do
     attrs = %{text: String.duplicate("x", 241)}
     assert {:text, "should be at most 240 character(s)"} in
       errors_on(%Comment{}, attrs)
+  end
+
+  test "comment text cannot contains urls" do
+    attrs = %{text: "Hey check this out https://website.com/article it's awesome!"}
+    assert {:text, "Cannot include URL. Use source field instead"} in errors_on(%Comment{}, attrs)
   end
 end

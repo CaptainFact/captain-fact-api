@@ -71,38 +71,40 @@ defmodule CaptainFact.Comments.Comment do
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(params, @required_fields ++ @optional_fields)
-    |> cast_assoc(:source)
-    |> format_text()
-    |> put_source()
+    |> update_change(:text, &prepare_text/1)
     |> validate_required(@required_fields)
     |> validate_source_or_text()
+    |> validate_text()
     |> validate_length(:text, min: 1, max: 240)
   end
 
-  defp format_text(struct = %{changes: %{text: text}}) do
-    put_change(struct, :text, String.trim(text))
+  def prepare_text(str) do
+    str = String.trim(str)
+    if String.length(str) > 0, do: str, else: nil
   end
-  defp format_text(struct), do: struct
-
-  defp put_source(struct = %{changes: %{source: %{changes: %{url: url}}}}) do
-    case CaptainFact.Repo.get_by(CaptainFact.Sources.Source, url: url) do
-      nil -> struct
-      source -> put_assoc(struct, :source, source)
-    end
-  end
-  defp put_source(struct), do: struct
 
   defp validate_source_or_text(changeset) do
     source = get_field(changeset, :source)
     text = get_field(changeset, :text)
-    has_source = (source && source.url && String.length(source.url)) || false
-    has_text = (text && String.length(text)) || false
-    case has_text || has_source do
-      false ->
-        changeset
-        |> add_error(:text, "You must set at least a source or a text")
-        |> add_error(:source, "You must set at least a source or a text")
-      _ -> changeset
+    has_source = (source && source.url && String.length(source.url) > 0) || false
+    has_text = text || false
+    if has_text || has_source do
+      changeset
+    else
+      changeset
+      |> add_error(:text, "You must set at least a source or a text")
+      |> add_error(:source, "You must set at least a source or a text")
+    end
+  end
+
+  @url_regex ~r/https?:\/\/[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/
+  defp validate_text(changeset) do
+    text = get_field(changeset, :text)
+    # Text cannot contains URLs
+    if text && Regex.match?(@url_regex, text) do
+      add_error(changeset, :text, "Cannot include URL. Use source field instead")
+    else
+      changeset
     end
   end
 
