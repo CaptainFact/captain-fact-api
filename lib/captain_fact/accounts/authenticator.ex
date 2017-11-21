@@ -33,6 +33,7 @@ defmodule CaptainFact.Accounts.Authenticator do
 
   Return user or nil if no account exist for this email or fb_user_id
   """
+  def get_user_by_third_party(_, _, nil), do: nil
   def get_user_by_third_party(:facebook, fb_user_id, email) do
     User
     |> where([u], u.fb_user_id == ^fb_user_id)
@@ -51,7 +52,7 @@ defmodule CaptainFact.Accounts.Authenticator do
       user
       |> User.provider_changeset(provider_infos)
       |> Repo.update!()
-      |> CaptainFact.Accounts.unlock_achievement("social-network")
+      |> CaptainFact.Accounts.unlock_achievement(:social_networks)
 
     case store_user_picture(updated_user, Map.get(provider_infos, :picture_url)) do
       {:ok, final_user} -> final_user

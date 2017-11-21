@@ -37,4 +37,12 @@ defmodule CaptainFact.Speakers.SpeakerTest do
     attrs = %{title: String.duplicate("x", 61)}
     assert {:title, "should be at most 60 character(s)"} in errors_on(%Speaker{}, attrs)
   end
+
+  test "name and title are trimmed" do
+    changeset = Speaker.changeset(%Speaker{}, Map.put(@valid_attrs, :full_name, "   Hector    "))
+    assert changeset.changes.full_name == "Hector"
+
+    changeset = Speaker.changeset(%Speaker{}, Map.put(@valid_attrs, :title, "   King     of the world    "))
+    assert changeset.changes.title == "King of the world"
+  end
 end

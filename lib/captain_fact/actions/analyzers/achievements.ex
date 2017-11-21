@@ -53,5 +53,5 @@ defmodule CaptainFact.Actions.Analyzers.Achievements do
 
   defp check_action(nil), do: nil
   defp check_action(%{type: @action_email_confirmed, user_id: id}),
-    do: unlock_achievement(Repo.get!(User, id), "not-a-robot")
+    do: unlock_achievement(Repo.get!(User, id), :not_a_robot)
 end

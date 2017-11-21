@@ -166,13 +166,13 @@ defmodule CaptainFactWeb.AuthController do
 
   defp user_from_auth(auth = %{provider: :facebook}) do
     case Authenticator.get_user_by_third_party(auth.provider, auth.uid, auth.info.email) do
-      nil -> {:error, %{"email" => ["Invalid email"]}}
+      nil -> {:error, %{"email" => ["invalid_email"]}}
       user -> {:ok, user}
     end
   end
   defp user_from_auth(auth) do
     case Repo.get_by(User, email: auth.info.email) do
-      nil -> {:error, %{"email" => ["Invalid email"]}}
+      nil -> {:error, %{"email" => ["invalid_email"]}}
       user -> {:ok, user}
     end
   end

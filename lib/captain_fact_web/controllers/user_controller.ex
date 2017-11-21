@@ -6,6 +6,8 @@ defmodule CaptainFactWeb.UserController do
   alias CaptainFactWeb.UserView
 
 
+  action_fallback CaptainFactWeb.FallbackController
+
   plug Guardian.Plug.EnsureAuthenticated, [handler: CaptainFactWeb.AuthController]
   when action in [:update, :delete, :available_flags, :show_me]
 

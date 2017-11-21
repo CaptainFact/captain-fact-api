@@ -3,7 +3,7 @@ defmodule CaptainFactWeb.AuthControllerTest do
   import CaptainFact.Factory
 
   alias CaptainFactWeb.AuthController
-  alias CaptainFact.Accounts.User
+  alias CaptainFact.Accounts.{User, Achievement}
   alias CaptainFact.Repo
 
   @facebook_default_picture "http://graph.facebook.com/10154431272431347/picture?width=96&height=96"
@@ -30,8 +30,6 @@ defmodule CaptainFactWeb.AuthControllerTest do
   end
 
   describe "facebook auth" do
-    @social_network_achievement 6
-
     test "can login" do
       user = insert(:user)
       auth = %{ueberauth_auth: build_auth(:facebook, user.fb_user_id, user.email, user.name)}
@@ -42,7 +40,7 @@ defmodule CaptainFactWeb.AuthControllerTest do
         |> json_response(:ok)
 
       assert response["user"]["id"] == user.id, "should use existing account if exists"
-      assert @social_network_achievement in response["user"]["achievements"], "should unlock social-network achievement"
+      assert Achievement.get(:social_networks) in response["user"]["achievements"], "should unlock social-network achievement"
     end
 
     test "link profile if same email" do
@@ -59,7 +57,7 @@ defmodule CaptainFactWeb.AuthControllerTest do
         |> json_response(:ok)
 
       assert response["user"]["id"] == user.id, "should use existing account if email exists"
-      assert @social_network_achievement in response["user"]["achievements"], "should unlock social-network achievement"
+      assert Achievement.get(:social_networks) in response["user"]["achievements"], "should unlock social-network achievement"
     end
 
     test "show an error if not invited" do
@@ -85,7 +83,20 @@ defmodule CaptainFactWeb.AuthControllerTest do
         |> json_response(:ok)
 
       Guardian.decode_and_verify!(response["token"])
-      assert @social_network_achievement in response["user"]["achievements"], "should unlock social-network achievement"
+      assert Achievement.get(:social_networks) in response["user"]["achievements"], "should unlock social-network achievement"
+    end
+
+    test "user must accept to share email when authenticathing with third party" do
+      invit = insert(:invitation_request)
+      user = build(:user)
+      auth = %{ueberauth_auth: build_auth(:facebook, user.fb_user_id, nil, user.name)}
+      response =
+        build_conn()
+        |> Map.put(:assigns, auth)
+        |> AuthController.callback(%{"invitation_token" => invit.token})
+        |> json_response(400)
+
+      assert response == %{"error" => "invalid_email"}
     end
 
     test "if user changed its email and has 2 accounts, always prefer facebook auth account" do
@@ -133,17 +144,9 @@ defmodule CaptainFactWeb.AuthControllerTest do
 
   defp provider_specific_auth_infos(auth = %{provider: :facebook}) do
     Map.merge(auth, %{
-      extra: %{
-        raw_info: %{
-          user: %{
-            "picture" => %{
-              "data" => %{
-                "is_silhouette" => false
-              }
-            }
-          }
-        }
-      }
+      extra: %{ raw_info: %{ user: %{
+        "picture" => %{ "data" => %{ "is_silhouette" => false } }
+      }}}
     })
   end
   defp provider_specific_auth_infos(auth), do: auth

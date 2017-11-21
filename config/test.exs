@@ -5,7 +5,7 @@ use Mix.Config
 config :captain_fact,
   frontend_url: "https://TEST_FRONTEND",
   # Allow fetching sources from localhost for tests
-  source_url_regex: ~r/([-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*))|localhost/
+  source_url_regex: ~r/(^https?:\/\/[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*))|localhost/
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.

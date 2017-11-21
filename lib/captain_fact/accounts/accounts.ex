@@ -11,7 +11,7 @@ defmodule CaptainFact.Accounts do
   alias CaptainFact.Email
 
   alias CaptainFact.Accounts.{User, ResetPasswordRequest, UserPermissions, InvitationRequest, Achievement}
-  alias CaptainFact.Accounts.{UsernameGenerator, ForbiddenEmailProviders}
+  alias CaptainFact.Accounts.{UsernameGenerator, ForbiddenEmailProviders, Achievement}
   alias CaptainFact.Actions.Recorder
   alias CaptainFact.TokenGenerator
 
@@ -42,14 +42,16 @@ defmodule CaptainFact.Accounts do
     provider_params = Keyword.get(opts, :provider_params, %{})
 
     # Do create user
-    case Map.get(user_params, "username") || Map.get(user_params, :username) do
-      username when allow_empty_username and (is_nil(username) or username == "") ->
-        Map.get(user_params, "email") || Map.get(user_params, :email)
-        |> create_account_without_username(user_params, provider_params)
-      _ ->
-        do_create_account(user_params, provider_params)
-    end
-    |> after_create(invitation_token)
+    create_user_result =
+      case Map.get(user_params, "username") || Map.get(user_params, :username) do
+        username when allow_empty_username and (is_nil(username) or username == "") ->
+          email = Map.get(user_params, "email") || Map.get(user_params, :email)
+          create_account_without_username(email, user_params, provider_params)
+        _ ->
+          do_create_account(user_params, provider_params)
+      end
+
+    after_create(create_user_result, invitation_token)
   end
 
   defp after_create(error = {:error, _}, _), do: error
@@ -73,13 +75,13 @@ defmodule CaptainFact.Accounts do
     CaptainFact.Mailer.deliver_later(CaptainFact.Email.welcome_email(user))
   end
 
-  @social_network_achievement 6
   defp do_create_account(user_params, provider_params) do
     User.registration_changeset(%User{}, user_params)
     |> User.provider_changeset(provider_params)
     |> Repo.insert()
   end
 
+  defp create_account_without_username(nil, _, _), do: {:error, "invalid_email"}
   defp create_account_without_username(email, params, provider_params) do
     Multi.new
     |> Multi.insert(:base_user,
@@ -87,7 +89,7 @@ defmodule CaptainFact.Accounts do
          |> User.registration_changeset(Map.drop(params, [:username, "username"]))
          |> Ecto.Changeset.update_change(:achievements, fn list ->
               if Map.has_key?(provider_params, :fb_user_id),
-                do: Enum.uniq([@social_network_achievement | list]), else: list
+                do: Enum.uniq([Achievement.get(:social_networks) | list]), else: list
             end)
          |> User.provider_changeset(provider_params)
        )
@@ -122,9 +124,10 @@ defmodule CaptainFact.Accounts do
 
   # ---- Achievements -----
 
-  def unlock_achievement(user = %User{id: user_id}, slug) when is_binary(slug) do
-    achievement = Repo.get_by!(Achievement, slug: slug)
-    if achievement.id in user.achievements do
+  def unlock_achievement(user, achievement) when is_atom(achievement),
+    do: unlock_achievement(user, Achievement.get(achievement))
+  def unlock_achievement(user = %User{id: user_id}, achievement) when is_integer(achievement) do
+    if achievement in user.achievements do
       {:ok, user} # Don't update user if achievement is already unlocked
     else
       Repo.transaction(fn ->
@@ -134,7 +137,7 @@ defmodule CaptainFact.Accounts do
           |> lock("FOR UPDATE")
           |> Repo.one!()
 
-        Repo.update!(Ecto.Changeset.change(user, achievements: Enum.uniq([achievement.id | user.achievements])))
+        Repo.update!(Ecto.Changeset.change(user, achievements: Enum.uniq([achievement | user.achievements])))
       end)
     end
   end
@@ -153,7 +156,7 @@ defmodule CaptainFact.Accounts do
       |> where([r], r.source_ip == ^source_ip_address)
       |> Repo.aggregate(:count, :token)
     if nb_ip_requests > @max_ip_reset_requests do
-      throw UserPermissions.PermissionsError
+      raise %UserPermissions.PermissionsError{message: "limit_reached"}
     end
 
     # Generate request

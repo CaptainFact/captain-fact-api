@@ -1,5 +1,4 @@
 defmodule CaptainFact.Sources.Fetcher do
-
   require Logger
   alias CaptainFact.Sources.Fetcher
 
@@ -89,7 +88,7 @@ defmodule CaptainFact.Sources.Fetcher do
   # Select the best title between meta abstract and og:title then truncate it if needed
   defp select_best_title(attrs) do
     cond do
-      Keyword.has_key?(attrs, :title) -> Keyword.update!(attrs, :title, &format_title/1)
+      Keyword.has_key?(attrs, :title) -> attrs
       Keyword.has_key?(attrs, :title_alt) -> extract_alt_title(attrs, :title_alt)
       Keyword.has_key?(attrs, :title_alt2) -> extract_alt_title(attrs, :title_alt2)
       true -> attrs
@@ -98,14 +97,8 @@ defmodule CaptainFact.Sources.Fetcher do
 
   defp extract_alt_title(attrs, key) do
     attrs
-    |> Keyword.put(:title, format_title(Keyword.get(attrs, key)))
+    |> Keyword.put(:title, Keyword.get(attrs, key))
     |> Keyword.delete(key)
-  end
-
-  defp format_title(title) do
-    if String.length(title) > 250,
-      do: String.slice(title, 0, 250) <> "...",
-      else: title
   end
 
   # Link checker

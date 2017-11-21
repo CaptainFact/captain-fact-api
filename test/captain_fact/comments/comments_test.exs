@@ -24,9 +24,7 @@ defmodule CaptainFact.Comments.CommentsTest do
     test "returns comment and call callback once updated" do
       # Start a server to provide a valid page
       attributes = Map.put(@valid_source_attributes, :url, unique_url())
-      url =
-        serve(attributes.url, 200, attributes)
-        |> endpoint_url(attributes.url)
+      url = endpoint_url(serve(attributes.url, 200, attributes), attributes.url)
 
       # Add comment
       user = insert(:user)
@@ -125,7 +123,7 @@ defmodule CaptainFact.Comments.CommentsTest do
       wait_fetcher()
     end
 
-#    test "if redirected, store redirect url"
+    #    test "if redirected, store redirect url"
   end
 
   describe "Delete comment" do

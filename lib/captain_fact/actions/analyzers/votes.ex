@@ -92,11 +92,16 @@ defmodule CaptainFact.Actions.Analyzers.Votes do
           score: fragment("coalesce(score, ?)", 0)
          })
       |> Repo.all()
-    CaptainFactWeb.Endpoint.broadcast(comments_channel(context), "comments_scores_updated", %{comments: scores})
+
+    case broadcast_channel(context) do
+      nil -> nil
+      channel -> CaptainFactWeb.Endpoint.broadcast(channel, "comments_scores_updated", %{comments: scores})
+    end
     Enum.count(scores)
   end
 
-  defp comments_channel("VD:" <> video_id) do
+  defp broadcast_channel("VD:" <> video_id) do
     "comments:video:#{CaptainFact.Videos.VideoHashId.encode(String.to_integer(video_id))}"
   end
+  defp broadcast_channel(_), do: nil
 end

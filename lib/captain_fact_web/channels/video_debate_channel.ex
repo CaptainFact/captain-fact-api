@@ -47,7 +47,10 @@ defmodule CaptainFactWeb.VideoDebateChannel do
         rendered_speaker = SpeakerView.render("show.json", speaker: speaker)
         broadcast!(socket, "speaker_added", rendered_speaker)
         {:reply, :ok, socket}
-      {:error, _, _reason, _} -> {:reply, :error, socket}
+      {:error, _, %{errors: errors}, _} ->
+        if errors[:video] == {"has already been taken", []},
+          do: {:reply, {:error, %{error: "action_already_done"}}, socket},
+          else: {:reply, :error, socket}
     end
   end
 
@@ -122,10 +125,9 @@ defmodule CaptainFactWeb.VideoDebateChannel do
     query = "%#{params["query"]}%"
     speakers_query =
       from s in Speaker,
-      left_join: vs in VideoSpeaker, on: vs.speaker_id == s.id,
-      where: is_nil(vs.video_id) or vs.video_id != ^socket.assigns.video_id,
       where: s.is_user_defined == false,
       where: fragment("unaccent(?) ILIKE unaccent(?)", s.full_name, ^query),
+      group_by: s.id,
       select: %{id: s.id, full_name: s.full_name},
       limit: @max_speakers_search_results
     {:reply, {:ok, %{speakers: Repo.all(speakers_query)}}, socket}

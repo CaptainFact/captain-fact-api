@@ -21,8 +21,9 @@ defmodule CaptainFactWeb.Router do
     get "/", ApiInfoController, :get
     get "/videos", VideoController, :index
     get "/videos/index", VideoController, :index_ids
-    get "/videos/:video_id/statements", StatementController, :get
+    get "/speakers/:slug_or_id", SpeakerController, :show
     post "/search/video", VideoController, :search
+    get "/videos/:video_id/statements", StatementController, :get
 
     # ---- Authenticathed endpoints ----
     scope "/" do
@@ -53,7 +54,7 @@ defmodule CaptainFactWeb.Router do
           delete "/", UserController, :delete
           get    "/available_flags", UserController, :available_flags
           put    "/confirm_email/:token", UserController, :confirm_email
-          put    "/achievements/:achievement", UserController, :unlock_achievement
+          # TODO put    "/achievements/:achievement", UserController, :unlock_achievement
         end
       end
 
@@ -73,9 +74,9 @@ defmodule CaptainFactWeb.Router do
       plug :accepts, ["html"]
     end
 
-    scope "/jouge42/mail" do
+    scope "/jouge42" do
       pipe_through [:browser]
-      forward "/sent_emails", Bamboo.SentEmailViewerPlug
+      forward "/mail", Bamboo.SentEmailViewerPlug
     end
   end
 end

@@ -1,18 +1,21 @@
 ExUnit.start
 Faker.start
 
-# Based on:
-#   * https://www.lesdecryptages.fr/fact-checking-grand-debat-18-declarations-decryptees/
-#   * http://www.lemonde.fr/les-decodeurs/article/2017/03/21/presidentielle-les-petites-et-grosses-intox-du-debat-a-cinq-candidats-sur-tf1_5097892_4355770.html
-#   * http://www.lefigaro.fr/elections/presidentielles/2017/03/21/35003-20170321ARTFIG00023-debat-les-six-erreurs-des-candidats.php
 
 defmodule CaptainFact.DemoFr do
+  @moduledoc"""
+  Run a demo in real-time. To use it from iex console:
+
+    iex> c "scripts/demos/demo_fr.ex"
+    iex> CaptainFact.DemoFr.init_and_run
+  """
+
   use CaptainFactWeb.ChannelCase
-  alias CaptainFact.Videos.Video
+  alias CaptainFact.Videos.{Video, VideoHashId}
   alias CaptainFact.Speakers.{Speaker, Statement, VideoSpeaker}
   alias CaptainFact.Accounts.User
   alias CaptainFact.Comments
-  alias CaptainFact.{Repo, VideoHashId}
+  alias CaptainFact.{Repo}
 
   @video_url "https://www.youtube.com/watch?v=OhWRT3PhMJs"
   @video_youtube_id "OhWRT3PhMJs"
@@ -20,7 +23,7 @@ defmodule CaptainFact.DemoFr do
   @min_sleep 0
   @max_sleep 10 # 0.0-1.0
   @users [
-    %{username: "killozor",       name: "Frank Zappa", picture_url: "http://images.wolfgangsvault.com/images/catalog/thumb/JRM02019-VL.jpg"},
+    %{username: "killozor",       name: "Frank Zappa"},
     %{username: "patrick",        name: "Patrick"},
     %{username: "herbiVor",       name: "Mélissa"},
     %{username: "sarah56",        name: "Sarah Fréchit"},
@@ -41,15 +44,15 @@ defmodule CaptainFact.DemoFr do
         text: "Ça n’a jamais créé de l’emploi de réduire le temps de travail",
         comments: [
           %{user_idx: 3, text: "Un rapport du sénat affirme pourtant l'inverse", approve: false, async: true, source: "https://www.senat.fr/rap/r00-414/r00-4146.html", replies: [
-            %{user_idx: 1, text: "Le rapport dit aussi que \"cet effet n'est, en réalité, guère « très significatif » puisque les 35 heures sont à l'origine de moins de 30% des créations d'emploi en 2000 !\"", replies: [
+            %{user_idx: 1, approve: true, text: "Le rapport dit aussi que \"cet effet n'est, en réalité, guère « très significatif » puisque les 35 heures sont à l'origine de moins de 30% des créations d'emploi en 2000 !\"", replies: [
               %{user_idx: 2, text: "En même temps c'est dur de mesurer ça avec précision, entre la hausse naturelle du chomage et tout le reste!"}
             ]},
           ]},
           %{user_idx: 1, text: "A lire cette tribute du Figaro qui montre bien l'incohérence de la mesure", approve: true, source: "http://www.lefigaro.fr/social/2015/01/30/09010-20150130ARTFIG00002-la-france-paie-toujours-la-facture-des-35heures.php"},
           %{user_idx: 4, text: "Y'en a mare de remettre à chaque fois cette question sur la table", replies: [
             %{user_idx: 5, text: "C'est clair, comme si avec la robotisation et tout le tralala travailler + d'heures avait un sens :/"},
-            %{user_idx: 1, text: "Heuresement qu'on la remet en question, avec une dette publique de 50000 milliards d'euros!!!", replies: [
-              %{user_idx: 3, text: "Je sais pas où t'as trouvé tes chiffres mais ça tourne plus autour des 60 milliards", source: "http://www.lepoint.fr/economie/la-dette-publique-de-la-france-se-rapproche-des-100-du-pib-30-06-2017-2139426_28.php"}
+            %{user_idx: 1, approve: false, text: "Heuresement qu'on la remet en question, avec une dette publique de 50000 milliards d'euros!!!", replies: [
+              %{user_idx: 3, approve: false, text: "Je sais pas où t'as trouvé tes chiffres mais ça tourne plus autour des 60 milliards", source: "http://www.lepoint.fr/economie/la-dette-publique-de-la-france-se-rapproche-des-100-du-pib-30-06-2017-2139426_28.php"}
             ]}
           ]},
           %{user_idx: 0, text: "Moi j'ai pas d'avis"},

@@ -15,4 +15,9 @@ defmodule CaptainFact.Sources.SourceTest do
     changeset = Source.changeset(%Source{}, @invalid_attrs)
     refute changeset.valid?
   end
+
+  test "must add https:// if url doesn't start with http:// or https://" do
+    changeset = Source.changeset(%Source{}, Map.put(@valid_attrs, :url, "amazing.com/article"))
+    assert changeset.changes.url == "https://amazing.com/article"
+  end
 end

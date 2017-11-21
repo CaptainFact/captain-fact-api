@@ -7,6 +7,7 @@ defmodule CaptainFact.Speakers.Speaker do
   schema "speakers" do
     field :full_name, :string
     field :title, :string
+    field :slug, :string
     field :country, :string
     field :wikidata_item_id, :integer
     field :is_user_defined, :boolean, default: true
@@ -30,6 +31,8 @@ defmodule CaptainFact.Speakers.Speaker do
     struct
     |> cast(params, @required_fields ++ @optional_fields)
     |> cast_attachments(params, @optional_file_fields)
+    |> update_change(:full_name, &StringUtils.trim_all_whitespaces/1)
+    |> update_change(:title, &StringUtils.trim_all_whitespaces/1)
     |> validate_length(:full_name, min: 3, max: 60)
     |> validate_length(:title, min: 3, max: 60)
     |> validate_required(:full_name)
@@ -48,5 +51,15 @@ defmodule CaptainFact.Speakers.Speaker do
   """
   def changeset_restore(struct) do
     cast(struct, %{is_removed: false}, [:is_removed])
+  end
+
+  @doc """
+  Builds a changeset to validate speaker, setting user_defined to false and generate a slug
+  """
+  def changeset_validate_speaker(struct = %{full_name: name}) do
+    struct
+    |> Ecto.Changeset.change(is_user_defined: false)
+    |> Ecto.Changeset.put_change(:slug, Slugger.slugify(name))
+    |> unique_constraint(:slug)
   end
 end

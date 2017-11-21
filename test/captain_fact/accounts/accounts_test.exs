@@ -27,18 +27,15 @@ defmodule CaptainFact.AccountsTest do
       # With a single user
       Repo.delete_all(ResetPasswordRequest)
       user = insert(:user)
-      assert catch_throw(
+      assert_raise PermissionsError, fn ->
         for _ <- 0..10, do: Accounts.reset_password!(user.email, "127.0.0.1")
-      ) == PermissionsError
+      end
 
       # With changing users
       Repo.delete_all(ResetPasswordRequest)
-      assert catch_throw(
-        for _ <- 0..10 do
-          user = insert(:user)
-          Accounts.reset_password!(user.email, "127.0.0.1")
-        end
-      ) == PermissionsError
+      assert_raise PermissionsError, fn ->
+        for _ <- 0..10, do: Accounts.reset_password!(insert(:user).email, "127.0.0.1")
+      end
     end
 
     # Verify
@@ -221,10 +218,10 @@ defmodule CaptainFact.AccountsTest do
   describe "achievements" do
     test "unlock achievements" do
       user = insert(:user)
-      achievement = Repo.get_by!(Accounts.Achievement, slug: "bulletproof")
-      Accounts.unlock_achievement(user, achievement.slug)
+      achievement = Accounts.Achievement.get(:bulletproof)
+      Accounts.unlock_achievement(user, achievement)
       updated = Repo.get(Accounts.User, user.id)
-      assert achievement.id in updated.achievements
+      assert achievement in updated.achievements
     end
   end
 end
