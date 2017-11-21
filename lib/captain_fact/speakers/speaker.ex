@@ -31,16 +31,13 @@ defmodule CaptainFact.Speakers.Speaker do
     struct
     |> cast(params, @required_fields ++ @optional_fields)
     |> cast_attachments(params, @optional_file_fields)
-    |> update_change(:full_name, &trim_all_whitespaces/1)
-    |> update_change(:title, &trim_all_whitespaces/1)
+    |> update_change(:full_name, &StringUtils.trim_all_whitespaces/1)
+    |> update_change(:title, &StringUtils.trim_all_whitespaces/1)
     |> validate_length(:full_name, min: 3, max: 60)
     |> validate_length(:title, min: 3, max: 60)
     |> validate_required(:full_name)
     |> unique_constraint(:wikidata_item_id)
   end
-
-  # Convert a string like "     aaa     bbb ccc  " to "aaa bbb ccc"
-  defp trim_all_whitespaces(str), do: String.replace(String.trim(str), ~r/\s+/, " ")
 
   @doc """
   Builds a deletion changeset for `struct`

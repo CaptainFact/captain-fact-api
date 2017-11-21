@@ -20,9 +20,12 @@ defmodule CaptainFact.Sources.Source do
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(params, [:url, :title, :language, :site_name])
+    |> update_change(:url, &prepare_url/1)
+    |> update_change(:title, &clean_and_truncate/1)
+    |> update_change(:language, &String.trim/1)
+    |> update_change(:site_name, &clean_and_truncate/1)
     |> validate_required([:url])
     |> unique_constraint(:url)
-    |> update_change(:url, &prepare_url/1)
     |> validate_format(:url, @url_regex)
   end
 
@@ -31,5 +34,16 @@ defmodule CaptainFact.Sources.Source do
     str = String.trim(str)
     if Regex.match?(@regex_contains_http, str),
       do: str, else: "https://" <>  str
+  end
+
+  defp clean_and_truncate(str) do
+    if !String.valid?(str) do
+      nil
+    else
+      str = StringUtils.trim_all_whitespaces(str)
+      if String.length(str) > 250,
+         do: String.slice(str, 0, 250) <> "...",
+         else: str
+    end
   end
 end
