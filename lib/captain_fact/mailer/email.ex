@@ -29,6 +29,7 @@ defmodule CaptainFact.Email do
        """)
   end
 
+  def newsletter(%{newsletter: false}, _, _), do: nil
   def newsletter(user, subject, html_message) do
     new_email(from: @cf_no_reply)
     |> to(user)
