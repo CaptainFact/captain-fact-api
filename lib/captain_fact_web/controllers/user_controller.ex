@@ -110,4 +110,16 @@ defmodule CaptainFactWeb.UserController do
         send_resp(conn, :bad_request, "")
     end
   end
+
+  # ---- Newsletter ----
+
+  def newsletter_unsubscribe(conn, %{"token" => token}) do
+    case Repo.get_by(User, newsletter_subscription_token: token) do
+      nil ->
+        json(put_status(conn, :bad_request), %{error: "invalid_token"})
+      user ->
+        Repo.update Ecto.Changeset.change(user, newsletter: false)
+        send_resp(conn, 204, "")
+    end
+  end
 end
