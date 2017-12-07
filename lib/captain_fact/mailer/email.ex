@@ -34,11 +34,14 @@ defmodule CaptainFact.Email do
     new_email(from: @cf_no_reply)
     |> to(user)
     |> subject(subject)
-    |> build_html_body(html_message, """
-         <a href="#{frontend_url()}/newsletter/unsubscribe/#{user.email_confirmation_token}" style="font-size: 15px;text-align: center;font-family: #{@main_font_family};background: aliceblue;padding: 1em;display: block;">
-           Unsubscribe from this newsletter
-         </a>
-       """)
+    |> build_html_body(
+         html_message,
+         """
+           <a href="#{frontend_url()}/newsletter/unsubscribe/#{user.newsletter_subscription_token}" style="font-size: 15px;text-align: center;font-family: #{@main_font_family};background: aliceblue;padding: 1em;display: block;">
+             Unsubscribe from this newsletter
+           </a>
+         """
+       )
   end
 
   # Reset password
