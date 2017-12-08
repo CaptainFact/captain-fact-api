@@ -28,13 +28,10 @@ defmodule CaptainFact.Comments do
       Repo.insert!(comment_changeset)
       |> Map.put(:user, user)
       |> Repo.preload(:source)
-      |> Map.put(:score, 1)
+      |> Map.put(:score, 0)
 
     # Record action
     Recorder.record!(user, :create, :comment, action_params(context, full_comment))
-
-    # Self vote
-    Task.start(fn() -> vote(user, context, full_comment.id, 1) end)
 
     # If new source, fetch metadata
     unless is_nil(source) || !is_nil(Map.get(source, :id)),

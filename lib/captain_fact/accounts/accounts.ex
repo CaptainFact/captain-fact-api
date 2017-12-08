@@ -283,4 +283,18 @@ defmodule CaptainFact.Accounts do
         Logger.debug("Invitation #{invit.id} for token #{invit.token} has been consumed")
     end
   end
+
+  # ---- Newsletter ----
+  # TODO Once most users locale will be defined, we should require locale_filter
+  def send_newsletter(subject, html_body, locale_filter \\ nil) do
+    User
+    |> filter_newsletter_targets(locale_filter)
+    |> Repo.all()
+    |> Enum.map(&(CaptainFact.Email.newsletter(&1, subject, html_body)))
+    |> Enum.map(&CaptainFact.Mailer.deliver_later/1)
+    |> Enum.count()
+  end
+
+  defp filter_newsletter_targets(query, nil), do: where(query, [u], u.newsletter == true)
+  defp filter_newsletter_targets(query, locale), do: where(query, [u], u.newsletter == true and u.locale == ^locale)
 end

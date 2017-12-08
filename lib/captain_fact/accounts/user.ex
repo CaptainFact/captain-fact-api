@@ -17,6 +17,8 @@ defmodule CaptainFact.Accounts.User do
     field :today_reputation_gain, :integer, default: 0
     field :locale, :string
     field :achievements, {:array, :integer}, default: []
+    field :newsletter, :boolean, default: true
+    field :newsletter_subscription_token, :string
 
     # Social networks profiles
     field :fb_user_id, :string

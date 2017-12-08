@@ -10,6 +10,7 @@ defmodule CaptainFact.Email do
 
   @cf_no_reply {"CaptainFact", "no-reply@captainfact.io"}
   @confirm_email_reputation elem(Reputation.action_reputation_change(:email_confirmed), 0)
+  @main_font_family "Ubuntu, Lato, Tahoma, sans-serif"
 
 
   # Welcome + verify email
@@ -19,13 +20,28 @@ defmodule CaptainFact.Email do
     |> to(user)
     |> subject("Welcome to CaptainFact.io !")
     |> build_html_body("""
-       We're glad having you joining us on CaptainFact.io ! To confirm your email and gain a bonus of
+       Welcome to CaptainFact.io ! To confirm your email and gain a bonus of
        +#{@confirm_email_reputation} reputation, click on this link :
        <a href="#{frontend_url()}/confirm_email/#{user.email_confirmation_token}">Confirm email</a>
        <br/><br/>
        You can learn more about how the system works, what you can do and the rules you should follow by checking
        <a href="#{frontend_url()}/help">the help pages</a>.
        """)
+  end
+
+  def newsletter(%{newsletter: false}, _, _), do: nil
+  def newsletter(user, subject, html_message) do
+    new_email(from: @cf_no_reply)
+    |> to(user)
+    |> subject(subject)
+    |> build_html_body(
+         html_message,
+         """
+           <a href="#{frontend_url()}/newsletter/unsubscribe/#{user.newsletter_subscription_token}" style="font-size: 15px;text-align: center;font-family: #{@main_font_family};background: aliceblue;padding: 1em;display: block;">
+             Unsubscribe from this newsletter
+           </a>
+         """
+       )
   end
 
   # Reset password
@@ -63,7 +79,7 @@ defmodule CaptainFact.Email do
   @doc"""
   Prepare an email with a default template
   """
-  def build_html_body(mail, content) do
+  def build_html_body(mail, content, content_footer \\ "") do
     html_body(mail, """
     <!DOCTYPE html>
     <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -131,7 +147,7 @@ defmodule CaptainFact.Email do
                                           </tr>
                                           <tr>
                                             <td style="word-wrap:break-word;font-size:0px;padding:0px 20px 0px 20px;" align="center">
-                                              <div style="cursor:auto;color:#FFFFFF;font-family:Ubuntu, Lato, Tahoma, sans-serif;font-size:14px;line-height:22px;text-align:center;">
+                                              <div style="cursor:auto;color:#FFFFFF;font-family:#{@main_font_family};font-size:14px;line-height:22px;text-align:center;">
                                                 <h1 style="font-family: &apos;Cabin&apos;, sans-serif; color: #FFFFFF; font-size: 32px; line-height: 100%;"><span style="font-size:48px;">CaptainFact</span></h1>
                                               </div>
                                             </td>
@@ -187,7 +203,7 @@ defmodule CaptainFact.Email do
                                           </tr>
                                           <tr>
                                             <td style="word-wrap:break-word;font-size:0px;padding:0px 20px 0px 20px;" align="left">
-                                              <div style="cursor:auto;color:#000000;font-family:Ubuntu, Lato, Tahoma, sans-serif;font-size:11px;line-height:22px;text-align:left;">
+                                              <div style="cursor:auto;color:#000000;font-family:#{@main_font_family};font-size:11px;line-height:22px;text-align:left;">
                                                 <p style="font-size:14px;">
                                                   #{content}
                                                 </p>
@@ -196,7 +212,7 @@ defmodule CaptainFact.Email do
                                           </tr>
                                           <tr>
                                             <td style="word-wrap:break-word;font-size:0px;">
-                                              <div style="font-size:1px;line-height:15px;white-space:nowrap;">&#xA0;</div>
+                                              #{content_footer}
                                             </td>
                                           </tr>
                                           <tr>
@@ -256,7 +272,7 @@ defmodule CaptainFact.Email do
                                         <tbody>
                                           <tr>
                                             <td style="word-wrap:break-word;font-size:0px;padding:0px 20px 0px 20px;" align="left">
-                                              <div style="cursor:auto;color:#949494;font-family:Ubuntu, Lato, Tahoma, sans-serif;font-size:14px;line-height:22px;text-align:left;">
+                                              <div style="cursor:auto;color:#949494;font-family:#{@main_font_family};font-size:14px;line-height:22px;text-align:left;">
                                                 <p>CaptainFact is a free and open source project. If you like it, please share the word!<br><span style="font-size:12px;">&#xA0;</span></p>
                                               </div>
                                             </td>
@@ -270,7 +286,7 @@ defmodule CaptainFact.Email do
                                     <![endif]-->
                                     <div class="mj-column-per-50 outlook-group-fix" style="vertical-align:top;display:inline-block;direction:ltr;font-size:13px;text-align:left;width:100%;">
                                       <span style="font-size: 14px;">
-                                        <ul style="font-family: Ubuntu, Lato, Tahoma, sans-serif;">
+                                        <ul style="font-family: #{@main_font_family};">
                                           <li><a href="https://github.com/CaptainFact">Github</a></li>
                                           <li><a href="https://www.facebook.com/CaptainFact.io/">Facebook</a></li>
                                           <li><a href="https://twitter.com/CaptainFact_io">Twitter</a></li>

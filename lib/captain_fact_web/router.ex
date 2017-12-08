@@ -24,6 +24,7 @@ defmodule CaptainFactWeb.Router do
     get "/speakers/:slug_or_id", SpeakerController, :show
     post "/search/video", VideoController, :search
     get "/videos/:video_id/statements", StatementController, :get
+    get "/newsletter/unsubscribe/:token", UserController, :newsletter_unsubscribe
 
     # ---- Authenticathed endpoints ----
     scope "/" do

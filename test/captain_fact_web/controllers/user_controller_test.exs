@@ -135,6 +135,31 @@ defmodule CaptainFactWeb.UserControllerTest do
     end
   end
 
+  describe "newsletter" do
+    test "unsubscribe with invalid token returns an error" do
+      user = insert(:user)
+      assert user.newsletter == true
+      build_conn()
+      |> get("/newsletter/unsubscribe/NotAValidToken")
+      |> response(:bad_request)
+    end
+
+    test "unsubscribe with a valid token returns 204" do
+      user = insert(:user)
+      assert user.newsletter == true
+      build_conn()
+      |> get("/newsletter/unsubscribe/#{user.newsletter_subscription_token}")
+      |> response(204)
+
+      assert Repo.get(User, user.id).newsletter == false
+
+      # Return ok even if already unsubscribed
+      build_conn()
+      |> get("/newsletter/unsubscribe/#{user.newsletter_subscription_token}")
+      |> response(204)
+    end
+  end
+
   test "confirm email" do
     user = insert(:user)
     refute user.email_confirmed

@@ -59,10 +59,10 @@ defmodule CaptainFact.Accounts.UserPermissions do
     },
     vote_up:                { 0  ,  3 ,  7 , 10 , 15 ,  30 ,  50 ,  75 , 100 },
     vote_down:              { 0  ,  0 ,  2 ,  5 , 10 ,  20 ,  40 ,  80 , 100 },
-    self_vote:              { 10  , 20, 30 , 50 , 75 , 250 , 300 , 500 , 500 },
+    self_vote:              { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   3 ,   5 },
     revert_vote_up:         { 10  , 20, 30 , 50 , 75 , 150 , 300 , 500 , 500 },
     revert_vote_down:       { 10  , 20, 30 , 50 , 75 , 150 , 300 , 500 , 500 },
-    revert_self_vote:       { 10  , 20, 30 , 50 , 75 , 150 , 300 , 500 , 500 },
+    revert_self_vote:       { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   3 ,   5 },
     collective_moderation:  { 0  ,  0 ,  0 ,  0 ,  0 ,   0  ,  0 ,   0 , 200 }
   }
   @error_not_enough_reputation "not_enough_reputation"
