@@ -42,6 +42,8 @@ defmodule CaptainFact.Videos do
     end
   end
 
+  def get_video_by_id(id), do: Repo.get(Video, id)
+
   @doc"""
   Add a new video.
   Returns video if success or {:error, reason} if something bad append. Can also throw if bad permissions

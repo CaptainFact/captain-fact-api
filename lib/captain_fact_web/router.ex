@@ -79,5 +79,14 @@ defmodule CaptainFactWeb.Router do
       pipe_through [:browser]
       forward "/mail", Bamboo.SentEmailViewerPlug
     end
+
+    scope "/" do
+      pipe_through :api
+
+      forward "/graphiql", Absinthe.Plug.GraphiQL,
+        schema: CaptainFactWeb.Schema,
+        interface: :simple,
+        context: %{pubsub: CaptainFactWeb.Endpoint}
+    end
   end
 end
