@@ -5,7 +5,7 @@ defmodule CaptainFactWeb.Schema.ContentTypes do
 
   alias CaptainFact.Videos
   alias CaptainFact.Speakers.Statement
-  alias CaptainFactWeb.Resolvers.{VideosResolver, StatementsResolver, SpeakersResolver}
+  alias CaptainFactWeb.Resolvers.{VideosResolver, StatementsResolver, SpeakersResolver, CommentsResolver}
 
 
   scalar :video_hash_id do
@@ -24,9 +24,9 @@ defmodule CaptainFactWeb.Schema.ContentTypes do
 
   @desc "A video"
   object :video do
-    @desc "Unique identifier"
+    @desc "Unique identifier as a hash (min length: 4)"
     field :id, non_null(:video_hash_id)
-    @desc "Video title extracted from provider"
+    @desc "Video title as extracted from provider"
     field :title, non_null(:string)
     @desc "Video URL"
     field :url, non_null(:string), do: resolve &VideosResolver.url/3
@@ -50,7 +50,31 @@ defmodule CaptainFactWeb.Schema.ContentTypes do
 
     field :video, non_null(:video), do: resolve dataloader(Videos, :video)
     field :speaker, :speaker, do: resolve dataloader(Videos, :speaker)
-#    field :comments, list_of(:comment), resolve dataloader(Videos, :comments)
+    field :comments, list_of(:comment), do: resolve dataloader(Videos, :comments)
+  end
+
+  object :comment do
+    field :id, non_null(:id)
+    field :statement, non_null(:statement)
+    field :user, non_null(:user), do: resolve dataloader(Videos, :user)
+    field :reply_to_id, :id
+    field :reply_to, :comment, do: resolve dataloader(Videos, :reply_to)
+    field :text, :string
+    field :approve, :boolean
+    field :source, :string
+    field :score, :integer, do: resolve &CommentsResolver.score/3
+    #    field :inserted_at,
+  end
+
+  object :user do
+    field :id, non_null(:id)
+    field :username, non_null(:string)
+    field :name, :string
+    field :reputation, :integer
+#    field :picture_url, :string, &UsersResolver.picture/3
+#    field :mini_picture_url, :string, &UsersResolver.mini_picture/3
+    field :achievements, list_of(:integer)
+    # registered_at
   end
 
   object :speaker do

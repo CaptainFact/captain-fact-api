@@ -10,13 +10,13 @@ defmodule CaptainFact.Videos do
   alias CaptainFact.Repo
   alias CaptainFact.Actions.Recorder
   alias CaptainFact.Accounts.UserPermissions
-  alias CaptainFact.Speakers.Statement
+  alias CaptainFact.Speakers.{Statement, Speaker, VideoSpeaker}
   alias CaptainFact.Videos.Video
 
 
 
   def data(), do: Dataloader.Ecto.new(Repo, query: &query/2)
-  def query(Video, args), do: videos_query(args)
+  def query(Video, filters), do: videos_query(Video, filters)
   def query(Statement = query, _), do: from(s in query, where: s.is_removed == false)
   def query(queryable, _), do: queryable
 
@@ -24,7 +24,7 @@ defmodule CaptainFact.Videos do
   List videos. `filters` may contain the following entries:
     * language: two characters identifier string (fr,en,es...etc) or "unknown" to list videos with unknown language
   """
-  def videos_list(filters \\ []), do: Repo.all(videos_query(filters))
+  def videos_list(filters \\ []), do: Repo.all(videos_query(Video.with_speakers(Video), filters))
 
   @doc"""
   Index videos, returning only their id, provider_id and provider.
@@ -85,9 +85,24 @@ defmodule CaptainFact.Videos do
        end
   end
 
-  defp videos_query(filters) do
-    Video
-    |> Video.with_speakers()
+  @doc"""
+  Takes as list of video id as `Integer` and returns a map like:
+  %{
+    video_id_1 => [%Speaker{...}, %Speaker{...}],
+    video_id_2 => [%Speaker{...}]
+  }
+  """
+  def videos_speakers(videos_ids) do
+    Repo.all(from(
+      s in Speaker,
+      join: vs in VideoSpeaker, on: vs.speaker_id == s.id,
+      where: vs.video_id in ^videos_ids,
+      select: {vs.video_id, s}
+    )) |> Enum.group_by(&(elem(&1, 0)), &(elem(&1, 1)))
+  end
+
+  defp videos_query(query, filters) do
+    query
     |> order_by([v], desc: v.id)
     |> filter_with(filters)
   end

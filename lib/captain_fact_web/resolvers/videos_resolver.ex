@@ -1,7 +1,6 @@
 defmodule CaptainFactWeb.Resolvers.VideosResolver do
-  import Absinthe.Resolution.Helpers, only: [on_load: 2]
+  import Absinthe.Resolution.Helpers, only: [batch: 3]
 
-  alias CaptainFact.Repo
   alias CaptainFact.Videos
 
 
@@ -32,11 +31,12 @@ defmodule CaptainFactWeb.Resolvers.VideosResolver do
   end
 
   def speakers(video, _, _) do
-    # As speakers use a many-to-many association with "through" and DataLoader doesn't really
-    # [support it at the moment](https://github.com/absinthe-graphql/dataloader/issues/5), they're preloaded in Videos
-    # to avoid over-complexity with the code.
-    # Code below force loading them if not already but would result in n+1 request if listing videos without preloading
-    # first
-    {:ok, Repo.preload(video, :speakers).speakers}
+    batch({__MODULE__, :videos_speakers}, video.id, fn results ->
+      {:ok, Map.get(results, video.id)}
+    end)
+  end
+
+  def videos_speakers(_, videos_ids) do
+    Videos.videos_speakers(videos_ids)
   end
 end
