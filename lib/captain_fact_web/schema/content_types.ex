@@ -1,7 +1,11 @@
 defmodule CaptainFactWeb.Schema.ContentTypes do
   use Absinthe.Schema.Notation
+  import Absinthe.Resolution.Helpers
+  import Ecto.Query
 
-  alias CaptainFactWeb.Resolvers.{VideosResolver, StatementsResolver}
+  alias CaptainFact.Videos
+  alias CaptainFact.Speakers.Statement
+  alias CaptainFactWeb.Resolvers.{VideosResolver, StatementsResolver, SpeakersResolver}
 
 
   scalar :video_hash_id do
@@ -32,11 +36,10 @@ defmodule CaptainFactWeb.Schema.ContentTypes do
     field :provider_id, non_null(:string)
     @desc "Language of the video represented as a two letters locale"
     field :language, :string
-    @desc "List all statements for this video"
-    field :statements, list_of(:statement) do
-      arg :include_banned, :boolean
-      resolve &VideosResolver.statements/3
-    end
+    @desc "List all non-removed statements for this video"
+    field :statements, list_of(:statement), do: resolve dataloader(Videos, :statements)
+    @desc "List all non-removed speakers for this video"
+    field :speakers, list_of(:speaker), do: resolve &VideosResolver.speakers/3
   end
 
   object :statement do
@@ -45,9 +48,22 @@ defmodule CaptainFactWeb.Schema.ContentTypes do
     field :time, non_null(:integer)
     field :is_removed, non_null(:boolean)
 
-    field :video, non_null(:video), do: resolve &StatementsResolver.video/3
-#    belongs_to :speaker, CaptainFact.Speakers.Speaker
-#
-#    has_many :comments, CaptainFact.Comments.Comment, on_delete: :delete_all
+    field :video, non_null(:video), do: resolve dataloader(Videos, :video)
+    field :speaker, :speaker, do: resolve dataloader(Videos, :speaker)
+#    field :comments, list_of(:comment), resolve dataloader(Videos, :comments)
+  end
+
+  object :speaker do
+    field :id, non_null(:id)
+    field :full_name, non_null(:string)
+    field :title, :string
+    field :slug, :string
+    field :country, :string
+    field :wikidata_item_id, :integer
+    field :is_user_defined, non_null(:boolean)
+    field :is_removed, non_null(:boolean)
+
+    field :picture, :string, do: resolve &SpeakersResolver.picture/3
+    field :videos, list_of(:video), do: resolve &SpeakersResolver.videos/3
   end
 end

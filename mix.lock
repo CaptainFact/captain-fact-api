@@ -19,6 +19,7 @@
   "crontab": {:hex, :crontab, "1.1.2", "4784a50987b4a19af07a908f98e8a308b00f9c93efc5a7892155dc10cd8fc7d9", [:mix], [{:ecto, "~> 1.0 or ~> 2.0 or ~> 2.1", [hex: :ecto, repo: "hexpm", optional: true]}], "hexpm"},
   "csv": {:hex, :csv, "1.4.4", "992f2e1418849a326fd1d9287801fa2d86091db4f9611f60781da6d236f64cd4", [:mix], [{:parallel_stream, "~> 1.0.4", [hex: :parallel_stream, optional: false]}]},
   "csvlixir": {:hex, :csvlixir, "1.0.0", "e9fd30abfca2d312390060e86bb7ec52487c813824dcccad45bb13e85ecad6b1", [:mix], []},
+  "dataloader": {:hex, :dataloader, "1.0.0", "d461598ddaa822d32bd7aca59f4b592fb6c8b21d74723d9ce9a5b8e32c301a4d", [], [{:ecto, ">= 0.0.0", [hex: :ecto, repo: "hexpm", optional: true]}], "hexpm"},
   "db_connection": {:hex, :db_connection, "1.1.2", "2865c2a4bae0714e2213a0ce60a1b12d76a6efba0c51fbda59c9ab8d1accc7a8", [:mix], [{:connection, "~> 1.0.2", [hex: :connection, optional: false]}, {:poolboy, "~> 1.5", [hex: :poolboy, optional: true]}, {:sbroker, "~> 1.0", [hex: :sbroker, optional: true]}]},
   "decimal": {:hex, :decimal, "1.4.0", "fac965ce71a46aab53d3a6ce45662806bdd708a4a95a65cde8a12eb0124a1333", [:mix], [], "hexpm"},
   "distillery": {:hex, :distillery, "1.5.1", "7ad7354214959c0f65f57ddd49478c81c3b2733ca2e5ccfb9eb55351108466aa", [:mix], [], "hexpm"},

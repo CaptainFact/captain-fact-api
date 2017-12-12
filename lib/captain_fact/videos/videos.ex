@@ -14,6 +14,12 @@ defmodule CaptainFact.Videos do
   alias CaptainFact.Videos.Video
 
 
+
+  def data(), do: Dataloader.Ecto.new(Repo, query: &query/2)
+  def query(Video, args), do: videos_query(args)
+  def query(Statement = query, _), do: from(s in query, where: s.is_removed == false)
+  def query(queryable, _), do: queryable
+
   @doc"""
   List videos. `filters` may contain the following entries:
     * language: two characters identifier string (fr,en,es...etc) or "unknown" to list videos with unknown language
@@ -81,22 +87,23 @@ defmodule CaptainFact.Videos do
 
   defp videos_query(filters) do
     Video
-    |> Video.with_speakers
+    |> Video.with_speakers()
     |> order_by([v], desc: v.id)
-    |> language_filter(Keyword.get(filters, :language))
-    |> speaker_filter(Keyword.get(filters, :speaker))
+    |> filter_with(filters)
   end
 
-  defp language_filter(query, nil), do: query
-  defp language_filter(query, "unknown"), do: where(query, [v], is_nil(v.language))
-  defp language_filter(query, language), do: where(query, [v], language: ^language)
-
-  defp speaker_filter(query, nil), do: query
-  defp speaker_filter(query, slug_or_id) do
-    query = join(query, :inner, [v], s in assoc(v, :speakers))
-    cond do
-      is_integer(slug_or_id) -> where(query, [_, s], s.id == ^slug_or_id)
-      is_binary(slug_or_id) -> where(query, [_, s], s.slug == ^slug_or_id)
-    end
+  defp filter_with(query, filters) do
+    Enum.reduce(filters, query, fn
+      {:language, "unknown"}, query ->
+        from v in query, where: is_nil(v.language)
+      {:language, language}, query ->
+        from v in query, where: v.language == ^language
+      {:speaker_id, id}, query ->
+        from v in query, join: s in assoc(v, :speakers), where: s.id == ^id
+      {:speaker_slug, slug}, query ->
+        from v in query, join: s in assoc(v, :speakers), where: s.slug == ^slug
+      {:min_id, id}, query ->
+        from v in query, where: v.id > ^id
+    end)
   end
 end

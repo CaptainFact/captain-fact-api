@@ -1,24 +1,11 @@
 defmodule CaptainFactWeb.Resolvers.VideosResolver do
-  import Ecto.Query
+  import Absinthe.Resolution.Helpers, only: [on_load: 2]
 
   alias CaptainFact.Repo
   alias CaptainFact.Videos
 
 
-  def url(video, _, _) do
-    {:ok, Videos.Video.build_url(video)}
-  end
-
-  def hash_id(video, _, _) do
-    {:ok, Videos.VideoHashId.encode(video.id)}
-  end
-
-  def statements(video, %{include_banned: true}, _) do
-    {:ok, Repo.preload(video, :statements).statements}
-  end
-  def statements(video, _, _) do
-    {:ok, Repo.all(from s in CaptainFact.Speakers.Statement, where: s.video_id == ^video.id and s.is_removed == false)}
-  end
+  # Queries
 
   def get(_root, %{id: id}, _info) do
     case Videos.get_video_by_id(id) do
@@ -34,8 +21,22 @@ defmodule CaptainFactWeb.Resolvers.VideosResolver do
     end
   end
 
-  def list(_root, %{language: language}, _info),
-    do: {:ok, Videos.videos_list(language: language)}
-  def list(_root, _args, _info),
-    do: {:ok, Videos.videos_list()}
+  def list(_root, args, _info) do
+    {:ok, Videos.videos_list(args[:filters] || [])}
+  end
+
+  # Fields
+
+  def url(video, _, _) do
+    {:ok, Videos.Video.build_url(video)}
+  end
+
+  def speakers(video, _, _) do
+    # As speakers use a many-to-many association with "through" and DataLoader doesn't really
+    # [support it at the moment](https://github.com/absinthe-graphql/dataloader/issues/5), they're preloaded in Videos
+    # to avoid over-complexity with the code.
+    # Code below force loading them if not already but would result in n+1 request if listing videos without preloading
+    # first
+    {:ok, Repo.preload(video, :speakers).speakers}
+  end
 end
