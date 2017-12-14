@@ -1,11 +1,8 @@
 defmodule CaptainFactWeb.Schema.ContentTypes do
   use Absinthe.Schema.Notation
   import Absinthe.Resolution.Helpers
-  import Ecto.Query
 
-  alias CaptainFact.Videos
-  alias CaptainFact.Speakers.Statement
-  alias CaptainFactWeb.Resolvers.{VideosResolver, StatementsResolver, SpeakersResolver, CommentsResolver}
+  alias CaptainFactWeb.{Resolvers, DataloaderDB}
 
 
   scalar :video_hash_id do
@@ -29,7 +26,7 @@ defmodule CaptainFactWeb.Schema.ContentTypes do
     @desc "Video title as extracted from provider"
     field :title, non_null(:string)
     @desc "Video URL"
-    field :url, non_null(:string), do: resolve &VideosResolver.url/3
+    field :url, non_null(:string), do: resolve &Resolvers.Videos.url/3
     @desc "Video provider (Youtube, Vimeo...etc)"
     field :provider, non_null(:string)
     @desc "Unique ID used to identify video with provider"
@@ -37,9 +34,9 @@ defmodule CaptainFactWeb.Schema.ContentTypes do
     @desc "Language of the video represented as a two letters locale"
     field :language, :string
     @desc "List all non-removed statements for this video"
-    field :statements, list_of(:statement), do: resolve dataloader(Videos, :statements)
+    field :statements, list_of(:statement), do: resolve dataloader(DataloaderDB, :statements)
     @desc "List all non-removed speakers for this video"
-    field :speakers, list_of(:speaker), do: resolve &VideosResolver.speakers/3
+    field :speakers, list_of(:speaker), do: resolve &Resolvers.Videos.speakers/3
   end
 
   object :statement do
@@ -48,22 +45,22 @@ defmodule CaptainFactWeb.Schema.ContentTypes do
     field :time, non_null(:integer)
     field :is_removed, non_null(:boolean)
 
-    field :video, non_null(:video), do: resolve dataloader(Videos, :video)
-    field :speaker, :speaker, do: resolve dataloader(Videos, :speaker)
-    field :comments, list_of(:comment), do: resolve dataloader(Videos, :comments)
+    field :video, non_null(:video), do: resolve dataloader(DataloaderDB, :video)
+    field :speaker, :speaker, do: resolve dataloader(DataloaderDB, :speaker)
+    field :comments, list_of(:comment), do: resolve dataloader(DataloaderDB, :comments)
   end
 
   object :comment do
     field :id, non_null(:id)
     field :statement, non_null(:statement)
-    field :user, non_null(:user), do: resolve dataloader(Videos, :user)
+    field :user, non_null(:user), do: resolve dataloader(DataloaderDB, :user)
     field :reply_to_id, :id
-    field :reply_to, :comment, do: resolve dataloader(Videos, :reply_to)
+    field :reply_to, :comment, do: resolve dataloader(DataloaderDB, :reply_to)
     field :text, :string
     field :approve, :boolean
     field :source, :string
-    field :score, :integer, do: resolve &CommentsResolver.score/3
-    #    field :inserted_at,
+    field :score, non_null(:integer), do: resolve &Resolvers.Comments.score/3
+    field :inserted_at, :string
   end
 
   object :user do
@@ -71,10 +68,10 @@ defmodule CaptainFactWeb.Schema.ContentTypes do
     field :username, non_null(:string)
     field :name, :string
     field :reputation, :integer
-#    field :picture_url, :string, &UsersResolver.picture/3
-#    field :mini_picture_url, :string, &UsersResolver.mini_picture/3
+    field :picture_url, :string, do: &Resolvers.Users.picture/3
+    field :mini_picture_url, :string, do: &Resolvers.Users.mini_picture/3
     field :achievements, list_of(:integer)
-    # registered_at
+    field :registered_at, :string, do: resolve fn u, _, _ -> {:ok, u.inserted_at} end
   end
 
   object :speaker do
@@ -87,7 +84,7 @@ defmodule CaptainFactWeb.Schema.ContentTypes do
     field :is_user_defined, non_null(:boolean)
     field :is_removed, non_null(:boolean)
 
-    field :picture, :string, do: resolve &SpeakersResolver.picture/3
-    field :videos, list_of(:video), do: resolve &SpeakersResolver.videos/3
+    field :picture, :string, do: resolve &Resolvers.Speakers.picture/3
+    field :videos, list_of(:video), do: resolve &Resolvers.Speakers.videos/3
   end
 end

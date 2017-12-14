@@ -14,17 +14,14 @@ defmodule CaptainFact.Videos do
   alias CaptainFact.Videos.Video
 
 
-
-  def data(), do: Dataloader.Ecto.new(Repo, query: &query/2)
-  def query(Video, filters), do: videos_query(Video, filters)
-  def query(Statement = query, _), do: from(s in query, where: s.is_removed == false)
-  def query(queryable, _), do: queryable
-
   @doc"""
+  TODO with_speakers param is only required by REST API
   List videos. `filters` may contain the following entries:
     * language: two characters identifier string (fr,en,es...etc) or "unknown" to list videos with unknown language
   """
-  def videos_list(filters \\ []), do: Repo.all(videos_query(Video.with_speakers(Video), filters))
+  def videos_list(filters \\ [], with_speakers \\ true)
+  def videos_list(filters, true), do: Repo.all(videos_query(Video.with_speakers(Video), filters))
+  def videos_list(filters, false), do: Repo.all(videos_query(Video, filters))
 
   @doc"""
   Index videos, returning only their id, provider_id and provider.

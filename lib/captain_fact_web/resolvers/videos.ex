@@ -1,4 +1,4 @@
-defmodule CaptainFactWeb.Resolvers.VideosResolver do
+defmodule CaptainFactWeb.Resolvers.Videos do
   import Absinthe.Resolution.Helpers, only: [batch: 3]
 
   alias CaptainFact.Videos
@@ -21,7 +21,7 @@ defmodule CaptainFactWeb.Resolvers.VideosResolver do
   end
 
   def list(_root, args, _info) do
-    {:ok, Videos.videos_list(args[:filters] || [])}
+    {:ok, Videos.videos_list(args[:filters] || [], false)}
   end
 
   # Fields
