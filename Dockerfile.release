@@ -6,6 +6,6 @@ WORKDIR /opt/app
 COPY captain-fact-api_release.tar .
 RUN tar x -f captain-fact-api_release.tar && rm captain-fact-api_release.tar
 
-EXPOSE 80 443
-HEALTHCHECK CMD curl --fail http://localhost:80 || exit 1
+EXPOSE 80
+HEALTHCHECK --start-period=10s CMD curl --fail http://localhost || exit 1
 ENTRYPOINT ["bin/captain_fact"]

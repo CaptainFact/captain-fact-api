@@ -7,11 +7,7 @@ use Mix.Config
 config :captain_fact, CaptainFactWeb.Endpoint,
   url: [port: 80],
   http: [port: 80],
-  https: [
-    port: 443,
-    keyfile: "/run/secrets/privkey.pem",
-    certfile: "/run/secrets/fullchain.pem"
-  ]
+  force_ssl: false
 
 # Do not print debug messages in production
 config :logger, level: :info
