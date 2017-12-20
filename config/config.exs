@@ -17,10 +17,7 @@ config :captain_fact, CaptainFactWeb.Endpoint,
   url: [host: "localhost"],
   render_errors: [view: CaptainFactWeb.ErrorView, accepts: ~w(json), default_format: "json"],
   pubsub: [name: CaptainFact.PubSub, adapter: Phoenix.PubSub.PG2],
-  check_origin: [],
-  server: true,
-  http: [],
-  https: [otp_app: :captain_fact]
+  server: true
 
 # Database: use postgres
 config :captain_fact, CaptainFact.Repo,
