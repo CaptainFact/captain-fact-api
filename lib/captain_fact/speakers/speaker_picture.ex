@@ -18,7 +18,7 @@ defmodule CaptainFact.Speakers.Picture do
 
   # Override the persisted filenames:
   def filename(version, {_, speaker}) do
-    "#{speaker.id}_#{speaker.wikidata_item_id || "no-wiki"}_#{version}"
+    "#{speaker.id}_#{version}"
   end
 
   # Override the storage directory:
