@@ -1,8 +1,9 @@
 defmodule CaptainFactWeb.Schema.ContentTypes do
   use Absinthe.Schema.Notation
-  import Absinthe.Resolution.Helpers
+  use Absinthe.Ecto, repo: CaptainFact.Repo
 
-  alias CaptainFactWeb.{Resolvers, DataloaderDB}
+  alias CaptainFactWeb.Resolvers
+
 
 
   scalar :video_hash_id do
@@ -34,7 +35,7 @@ defmodule CaptainFactWeb.Schema.ContentTypes do
     @desc "Language of the video represented as a two letters locale"
     field :language, :string
     @desc "List all non-removed statements for this video"
-    field :statements, list_of(:statement), do: resolve dataloader(DataloaderDB, :statements)
+    field :statements, list_of(:statement), do: resolve assoc(:statements)
     @desc "List all non-removed speakers for this video"
     field :speakers, list_of(:speaker), do: resolve &Resolvers.Videos.speakers/3
   end
@@ -45,17 +46,17 @@ defmodule CaptainFactWeb.Schema.ContentTypes do
     field :time, non_null(:integer)
     field :is_removed, non_null(:boolean)
 
-    field :video, non_null(:video), do: resolve dataloader(DataloaderDB, :video)
-    field :speaker, :speaker, do: resolve dataloader(DataloaderDB, :speaker)
-    field :comments, list_of(:comment), do: resolve dataloader(DataloaderDB, :comments)
+    field :video, non_null(:video), do: resolve assoc(:video)
+    field :speaker, :speaker, do: resolve assoc(:speaker)
+    field :comments, list_of(:comment), do: resolve assoc(:comments)
   end
 
   object :comment do
     field :id, non_null(:id)
     field :statement, non_null(:statement)
-    field :user, non_null(:user), do: resolve dataloader(DataloaderDB, :user)
+    field :user, non_null(:user), do: resolve assoc(:user)
     field :reply_to_id, :id
-    field :reply_to, :comment, do: resolve dataloader(DataloaderDB, :reply_to)
+    field :reply_to, :comment, do: resolve assoc(:reply_to)
     field :text, :string
     field :approve, :boolean
     field :source, :string

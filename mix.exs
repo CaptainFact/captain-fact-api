@@ -70,7 +70,6 @@ defmodule CaptainFact.Mixfile do
       {:slugger, "~> 0.2"},
       {:absinthe_ecto, "~> 0.1.3"},
       {:absinthe_plug, "~> 1.4.1"},
-      {:dataloader, "~> 1.0.0"},
       {:ex_machina, "~> 2.0"}, # When opensourced, this should only be included in dev and test
       {:faker, "~> 0.7"}, # When opensourced, this should only be included in dev and test
       {:bypass, "~> 0.8", only: :test},

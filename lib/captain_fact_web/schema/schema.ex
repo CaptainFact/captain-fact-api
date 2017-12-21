@@ -3,16 +3,6 @@ defmodule CaptainFactWeb.Schema do
   import_types CaptainFactWeb.Schema.ContentTypes
   alias CaptainFactWeb.Resolvers
 
-  # Build context
-
-  def context(ctx) do
-    Map.put(ctx, :loader, CaptainFactWeb.DataloaderDB.dataloader())
-  end
-
-  def plugins() do
-    [Absinthe.Middleware.Dataloader | Absinthe.Plugin.defaults]
-  end
-
   # Actual API
 
   input_object :video_filter do
