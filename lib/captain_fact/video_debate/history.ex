@@ -4,11 +4,18 @@ defmodule CaptainFact.VideoDebate.History do
   alias CaptainFact.Repo
   alias CaptainFact.Actions.UserAction
 
+  @allowed_entities [
+    UserAction.entity(:statement),
+    UserAction.entity(:speaker),
+    UserAction.entity(:video),
+  ]
+
 
   def context_history(context) do
     UserAction
     |> preload(:user)
     |> where([a], a.context == ^context)
+    |> where([a], a.entity in ^@allowed_entities)
     |> Repo.all()
   end
 
