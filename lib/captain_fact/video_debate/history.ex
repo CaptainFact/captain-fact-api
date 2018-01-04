@@ -6,7 +6,8 @@ defmodule CaptainFact.VideoDebate.History do
 
   @allowed_entities [
     UserAction.entity(:statement),
-    UserAction.entity(:speaker)
+    UserAction.entity(:speaker),
+    UserAction.entity(:video),
   ]
 
 

@@ -8,7 +8,7 @@ defmodule CaptainFact.Videos do
 
   alias Ecto.Multi
   alias CaptainFact.Repo
-  alias CaptainFact.Actions.Recorder
+  alias CaptainFact.Actions.{Recorder, UserAction}
   alias CaptainFact.Accounts.UserPermissions
   alias CaptainFact.Speakers.Statement
   alias CaptainFact.Videos.Video
@@ -69,7 +69,11 @@ defmodule CaptainFact.Videos do
     statements_query = where(Statement, [s], s.video_id == ^video_id)
     Multi.new
     |> Multi.update_all(:statements_update, statements_query, [inc: [time: offset]], returning: [:id, :time])
-    |> Recorder.multi_record(user, :update, :video, %{entity_id: video_id, changes: %{"statements_time" => offset}})
+    |> Recorder.multi_record(user, :update, :video, %{
+      entity_id: video_id,
+      changes: %{"statements_time" => offset},
+      context: UserAction.video_debate_context(video_id)
+    })
     |> Repo.transaction()
     |> case do
          {:ok, %{statements_update: {_, statements}}} -> {:ok, Enum.map(statements, &(%{id: &1.id, time: &1.time}))}
