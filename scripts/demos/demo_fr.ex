@@ -11,17 +11,22 @@ defmodule CaptainFact.DemoFr do
   """
 
   use CaptainFactWeb.ChannelCase
+
+  import CaptainFact.VideoDebate.ActionCreator, only: [action_add: 3, action_create: 3]
+
+  alias Ecto.Multi
   alias CaptainFact.Videos.{Video, VideoHashId}
   alias CaptainFact.Speakers.{Speaker, Statement, VideoSpeaker}
   alias CaptainFact.Accounts.User
   alias CaptainFact.Comments
-  alias CaptainFact.{Repo}
+  alias CaptainFact.Repo
 
   @video_url "https://www.youtube.com/watch?v=OhWRT3PhMJs"
   @video_youtube_id "OhWRT3PhMJs"
   @video_title "Le replay du grand débat de la présidentielle"
   @min_sleep 0
-  @max_sleep 10 # 0.0-1.0
+  @max_sleep 10 # 0-10
+  @admin_user_id 1
   @users [
     %{username: "killozor",       name: "Frank Zappa"},
     %{username: "patrick",        name: "Patrick"},
@@ -150,14 +155,22 @@ defmodule CaptainFact.DemoFr do
       "../captain-fact-data/Wikidata/data/politicians_born_after_1945_having_a_picture.csv",
       true, Map.keys(@statements)
     )
-    speakers = Enum.map(@statements, fn {speaker, statements} ->
-      speaker = Repo.get_by!(Speaker, full_name: speaker)
-      Repo.insert(VideoSpeaker.changeset(%VideoSpeaker{speaker_id: speaker.id, video_id: video.id}))
+    speakers = Enum.map(@statements, fn {speaker_name, statements} ->
+      speaker = Repo.get_by!(Speaker, full_name: speaker_name)
+      video_speaker_changeset = VideoSpeaker.changeset(%VideoSpeaker{speaker_id: speaker.id, video_id: video.id})
+      Multi.new
+      |> Multi.insert(:video_speaker, video_speaker_changeset)
+      |> Multi.insert(:action_add, action_add(@admin_user_id, video.id, speaker))
+      |> Repo.transaction()
+
       {speaker, Enum.map(statements, fn statement ->
-        %Statement{speaker_id: speaker.id, video_id: video.id, time: statement.time, text: statement.text}
-        |> Statement.changeset()
-        |> Repo.insert!()
-        |> Map.put(:comments, statement[:comments])
+        statement =
+          %Statement{speaker_id: speaker.id, video_id: video.id, time: statement.time, text: statement.text}
+          |> Statement.changeset()
+          |> Repo.insert!()
+          |> Map.put(:comments, statement[:comments])
+        Repo.insert(action_create(@admin_user_id, video.id, statement))
+        statement
       end)}
     end)
 

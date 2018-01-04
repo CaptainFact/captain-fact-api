@@ -75,7 +75,7 @@ defmodule CaptainFact.Actions.UserAction do
   def entity(:statement),             do: 3
   def entity(:comment),               do: 4
   def entity(:fact),                  do: 5
-  def entity(:video_debate_action),   do: 6
+  def entity(:video_debate_action),   do: 6 # Deprecated. Can safelly be re-used
   def entity(:user),                  do: 7
 
   # Context helpers
