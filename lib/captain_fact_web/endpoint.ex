@@ -8,19 +8,16 @@ defmodule CaptainFactWeb.Endpoint do
 
   plug Plug.RequestId
   plug Plug.Logger
-
+  plug CaptainFactWeb.SecurityHeaders
+  plug Corsica,
+    max_age: 3600,
+    allow_headers: ~w(Accept Content-Type Authorization),
+    origins: {CaptainFactWeb.CORS, :check_origin}
   plug Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],
     pass: ["*/*"],
     json_decoder: Poison
-
   plug Plug.MethodOverride
   plug Plug.Head
-
-  plug Corsica,
-       max_age: 3600,
-       allow_headers: ~w(Accept Content-Type Authorization),
-       origins: {CaptainFactWeb.CORS, :check_origin}
-
   plug CaptainFactWeb.Router
 end
