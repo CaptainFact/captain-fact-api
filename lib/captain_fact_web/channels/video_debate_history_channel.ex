@@ -49,7 +49,7 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
     Multi.new
     |> Multi.update(:statement, Statement.changeset_restore(statement))
     |> Multi.run(:action_restore, fn %{statement: statement} ->
-         Recorder.record(action_restore(user_id, video_debate_channel(video_id), statement))
+         Recorder.record(action_restore(user_id, video_id, statement))
        end)
     |> Repo.transaction()
     |> case do
@@ -82,7 +82,7 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
     Multi.new
     |> multi_undelete_speaker(speaker)
     |> Multi.insert(:video_speaker, video_speaker)
-    |> Multi.insert(:action_restore, action_restore(user_id, video_debate_channel(video_id), speaker))
+    |> Multi.insert(:action_restore, action_restore(user_id, video_id, speaker))
     |> Repo.transaction()
     |> case do
       {:ok, %{action_restore: action}} ->
@@ -109,6 +109,4 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
   defp multi_undelete_speaker(multi, speaker) do
     Multi.update(multi, :speaker, Speaker.changeset_restore(speaker))
   end
-
-  defp video_debate_channel(video_id), do: "video_debate:#{VideoHashId.encode(video_id)}"
 end
