@@ -11,7 +11,7 @@ defmodule CaptainFactWeb.Endpoint do
   plug CaptainFactWeb.SecurityHeaders
   plug Corsica,
     max_age: 3600,
-    allow_headers: ~w(Accept Content-Type Authorization),
+    allow_headers: ~w(Accept Content-Type Authorization Origin),
     origins: {CaptainFactWeb.CORS, :check_origin}
   plug Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],
