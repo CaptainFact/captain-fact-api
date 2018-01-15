@@ -33,6 +33,15 @@ defmodule CaptainFact.Accounts.UserPicture do
     "#{user_id}_#{Atom.to_string(version)}"
   end
 
+  # Use adorable.io as default profile picture provider
+  def default_url(:thumb, %{id: id}) do
+    "https://api.adorable.io/avatars/96/#{id}.png"
+  end
+
+  def default_url(:mini_thumb, %{id: id}) do
+    "https://api.adorable.io/avatars/48/#{id}.png"
+  end
+
   # Override the storage directory:
   def storage_dir(_, {_, _}) do
     "resources/users"
