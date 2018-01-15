@@ -7,10 +7,14 @@ dev_secret = "8C6FsJwjV11d+1WPUIbkEH6gB/VavJrcXWoPLujgpclfxjkLkoNFSjVU9XfeNm6s"
 config :captain_fact,
   frontend_url: "http://localhost:3333",
   cors_origins: [
-    "http://localhost:3333",
-    "https://localhost:3333",
-    "https://localhost",
-    "http://localhost",
+    # Frontend Dev
+    "http://localhost:3333", "https://localhost:3333",
+    "http://192.168.20.6:3333",
+    # Overlay injector tester
+    "http://localhost:3342",
+    # Misc
+    "http://localhost", "https://localhost",
+    # Extension
     "chrome-extension://fnnhlmbnlbgomamcolcpgncflofhjckm",
   ]
 
