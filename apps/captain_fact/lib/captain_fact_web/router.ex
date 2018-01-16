@@ -79,5 +79,18 @@ defmodule CaptainFactWeb.Router do
       pipe_through [:browser]
       forward "/mail", Bamboo.SentEmailViewerPlug
     end
+
+    scope "/" do
+      pipe_through :api
+
+      forward "/graphiql", Absinthe.Plug.GraphiQL,
+        schema: CaptainFactWeb.Schema,
+        context: %{pubsub: CaptainFactWeb.Endpoint}
+
+      forward "/", Absinthe.Plug,
+        schema: CaptainFactWeb.Schema,
+        analyze_complexity: true,
+        max_complexity: 280 # (5 joins = 250) + 30 fields
+    end
   end
 end

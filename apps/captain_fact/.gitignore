@@ -9,7 +9,11 @@ captain-fact-api_release.tar
 erl_crash.dump
 
 # Uploads
-/resources
+resources
+
+# Local secrets
+priv/secrets/*
+!priv/secrets/.keep
 
 # Release build
 /captain_fact.tar.gz

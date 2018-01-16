@@ -44,12 +44,11 @@ defmodule CaptainFactWeb.VideoController do
   defp prepare_filters(filters) do
     filters_list = Enum.map(filters, fn {key, value} -> {Map.get(@accepted_filters, key), value} end)
     if Keyword.has_key?(filters_list, :speaker) do
-      Keyword.update!(filters_list, :speaker, fn slug_or_id ->
-        case Integer.parse(slug_or_id) do
-          {id, ""} -> id # It's an ID (string has only number)
-          _ -> slug_or_id # It's a slug (string has at least one alpha character)
-        end
-      end)
+      speaker_identifier = Keyword.get(filters_list, :speaker)
+      case Integer.parse(speaker_identifier) do
+        {id, ""} -> Keyword.put(filters_list, :speaker_id, id) # It's an ID (string has only number)
+        _ -> Keyword.put(filters_list, :speaker_slug, speaker_identifier) # It's a slug (string has at least one alpha character)
+      end |> Keyword.delete(:speaker)
     else
       filters_list
     end

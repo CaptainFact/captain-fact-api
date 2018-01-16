@@ -10,15 +10,18 @@ defmodule CaptainFact.Videos do
   alias CaptainFact.Repo
   alias CaptainFact.Actions.{Recorder, UserAction}
   alias CaptainFact.Accounts.UserPermissions
-  alias CaptainFact.Speakers.Statement
+  alias CaptainFact.Speakers.{Statement, Speaker, VideoSpeaker}
   alias CaptainFact.Videos.Video
 
 
   @doc"""
+  TODO with_speakers param is only required by REST API
   List videos. `filters` may contain the following entries:
     * language: two characters identifier string (fr,en,es...etc) or "unknown" to list videos with unknown language
   """
-  def videos_list(filters \\ []), do: Repo.all(videos_query(filters))
+  def videos_list(filters \\ [], with_speakers \\ true)
+  def videos_list(filters, true), do: Repo.all(videos_query(Video.with_speakers(Video), filters))
+  def videos_list(filters, false), do: Repo.all(videos_query(Video, filters))
 
   @doc"""
   Index videos, returning only their id, provider_id and provider.
@@ -41,6 +44,8 @@ defmodule CaptainFact.Videos do
       nil -> nil
     end
   end
+
+  def get_video_by_id(id), do: Repo.get(Video, id)
 
   @doc"""
   Add a new video.
@@ -81,24 +86,40 @@ defmodule CaptainFact.Videos do
        end
   end
 
-  defp videos_query(filters) do
-    Video
-    |> Video.with_speakers
-    |> order_by([v], desc: v.id)
-    |> language_filter(Keyword.get(filters, :language))
-    |> speaker_filter(Keyword.get(filters, :speaker))
+  @doc"""
+  Takes as list of video id as `Integer` and returns a map like:
+  %{
+    video_id_1 => [%Speaker{...}, %Speaker{...}],
+    video_id_2 => [%Speaker{...}]
+  }
+  """
+  def videos_speakers(videos_ids) do
+    Repo.all(from(
+      s in Speaker,
+      join: vs in VideoSpeaker, on: vs.speaker_id == s.id,
+      where: vs.video_id in ^videos_ids,
+      select: {vs.video_id, s}
+    )) |> Enum.group_by(&(elem(&1, 0)), &(elem(&1, 1)))
   end
 
-  defp language_filter(query, nil), do: query
-  defp language_filter(query, "unknown"), do: where(query, [v], is_nil(v.language))
-  defp language_filter(query, language), do: where(query, [v], language: ^language)
+  defp videos_query(query, filters) do
+    query
+    |> order_by([v], desc: v.id)
+    |> filter_with(filters)
+  end
 
-  defp speaker_filter(query, nil), do: query
-  defp speaker_filter(query, slug_or_id) do
-    query = join(query, :inner, [v], s in assoc(v, :speakers))
-    cond do
-      is_integer(slug_or_id) -> where(query, [_, s], s.id == ^slug_or_id)
-      is_binary(slug_or_id) -> where(query, [_, s], s.slug == ^slug_or_id)
-    end
+  defp filter_with(query, filters) do
+    Enum.reduce(filters, query, fn
+      {:language, "unknown"}, query ->
+        from v in query, where: is_nil(v.language)
+      {:language, language}, query ->
+        from v in query, where: v.language == ^language
+      {:speaker_id, id}, query ->
+        from v in query, join: s in assoc(v, :speakers), where: s.id == ^id
+      {:speaker_slug, slug}, query ->
+        from v in query, join: s in assoc(v, :speakers), where: s.slug == ^slug
+      {:min_id, id}, query ->
+        from v in query, where: v.id > ^id
+    end)
   end
 end

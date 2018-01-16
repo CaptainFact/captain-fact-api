@@ -7,6 +7,8 @@ dev_secret = "8C6FsJwjV11d+1WPUIbkEH6gB/VavJrcXWoPLujgpclfxjkLkoNFSjVU9XfeNm6s"
 config :captain_fact,
   frontend_url: "http://localhost:3333",
   cors_origins: [
+    # Self (used by GraphiQL)
+    "http://localhost:4000",
     # Frontend Dev
     "http://localhost:3333", "https://localhost:3333",
     "http://192.168.20.6:3333",
