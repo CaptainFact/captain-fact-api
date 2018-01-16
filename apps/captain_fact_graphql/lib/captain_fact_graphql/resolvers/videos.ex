@@ -1,4 +1,4 @@
-defmodule CaptainFactWeb.Resolvers.Videos do
+defmodule CaptainFactGraphql.Resolvers.Videos do
   import Absinthe.Resolution.Helpers, only: [batch: 3]
 
   alias CaptainFact.Videos

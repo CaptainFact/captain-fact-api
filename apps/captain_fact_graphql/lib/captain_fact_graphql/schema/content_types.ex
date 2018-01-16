@@ -1,8 +1,8 @@
-defmodule CaptainFactWeb.Schema.ContentTypes do
+defmodule CaptainFactGraphql.Schema.ContentTypes do
   use Absinthe.Schema.Notation
   use Absinthe.Ecto, repo: CaptainFact.Repo
 
-  alias CaptainFactWeb.Resolvers
+  alias CaptainFactGraphql.Resolvers
 
 
   scalar :video_hash_id do

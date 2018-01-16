@@ -1,4 +1,4 @@
-defmodule CaptainFactWeb.Resolvers.Users do
+defmodule CaptainFactGraphql.Resolvers.Users do
   def picture_url(user, _, _) do
     {:ok, CaptainFact.Accounts.UserPicture.url({user.picture_url, user}, :thumb)}
   end

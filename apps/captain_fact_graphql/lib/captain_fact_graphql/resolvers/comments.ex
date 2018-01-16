@@ -1,4 +1,4 @@
-defmodule CaptainFactWeb.Resolvers.Comments do
+defmodule CaptainFactGraphql.Resolvers.Comments do
   import Absinthe.Resolution.Helpers, only: [batch: 3]
   import Ecto.Query
   alias CaptainFact.Comments.Vote

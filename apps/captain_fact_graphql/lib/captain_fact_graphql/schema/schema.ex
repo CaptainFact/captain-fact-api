@@ -1,7 +1,7 @@
-defmodule CaptainFactWeb.Schema do
+defmodule CaptainFactGraphql.Schema do
   use Absinthe.Schema
-  import_types CaptainFactWeb.Schema.ContentTypes
-  alias CaptainFactWeb.Resolvers
+  import_types CaptainFactGraphql.Schema.ContentTypes
+  alias CaptainFactGraphql.Resolvers
 
   # Actual API
 

@@ -5,6 +5,10 @@ defmodule CaptainFact.Mixfile do
     [
       app: :captain_fact,
       version: "0.7.7",
+      build_path: "../../_build",
+      config_path: "../../config/config.exs",
+      deps_path: "../../deps",
+      lockfile: "../../mix.lock",
       elixir: "~> 1.5",
       elixirc_paths: elixirc_paths(Mix.env),
       compilers: [:phoenix, :gettext] ++ Mix.compilers,
@@ -17,9 +21,6 @@ defmodule CaptainFact.Mixfile do
     ]
   end
 
-  # Configuration for the OTP application.
-  #
-  # Type `mix help compile.app` for more information.
   def application do
     [
       mod: {CaptainFact, []},
@@ -68,8 +69,6 @@ defmodule CaptainFact.Mixfile do
       {:sweet_xml, "~> 0.6"},
       {:weave, "~> 3.0"},
       {:slugger, "~> 0.2"},
-      {:absinthe_ecto, "~> 0.1.3"},
-      {:absinthe_plug, "~> 1.4.1"},
       {:ex_machina, "~> 2.0"}, # When opensourced, this should only be included in dev and test
       {:faker, "~> 0.7"}, # When opensourced, this should only be included in dev and test
       {:bypass, "~> 0.8", only: :test},
