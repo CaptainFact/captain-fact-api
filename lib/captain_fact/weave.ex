@@ -49,6 +49,12 @@ defmodule CaptainFact.Weave do
   # Youtube API key
   weave "youtube_api_key", handler: {:captain_fact, :youtube_api_key}
 
+  # Erlang cookie
+  weave "erlang_cookie", handler: fn v ->
+    if Node.alive?, do: Node.set_cookie(String.to_atom(v))
+    []
+  end
+
   # ----- Configuration utils -----
 
   defp put_in_env(app, [head | keys], value) do
@@ -62,11 +68,11 @@ defmodule CaptainFact.Weave do
   end
 
   defp put_in_endpoint(keys, value),
-       do: put_in_env(:captain_fact, [CaptainFactWeb.Endpoint] ++ keys, value)
+    do: put_in_env(:captain_fact, [CaptainFactWeb.Endpoint] ++ keys, value)
   defp put_in_mailer(keys, value),
-       do: put_in_env(:captain_fact, [CaptainFact.Mailer] ++ keys, value)
+    do: put_in_env(:captain_fact, [CaptainFact.Mailer] ++ keys, value)
   defp put_in_repo(keys, value),
-       do: put_in_env(:captain_fact, [CaptainFact.Repo] ++ keys, value)
+    do: put_in_env(:captain_fact, [CaptainFact.Repo] ++ keys, value)
   defp put_in_oauth_fb(keys, value),
-       do: put_in_env(:ueberauth, [Ueberauth.Strategy.Facebook.OAuth] ++ keys, value)
+    do: put_in_env(:ueberauth, [Ueberauth.Strategy.Facebook.OAuth] ++ keys, value)
 end
