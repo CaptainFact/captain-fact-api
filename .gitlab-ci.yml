@@ -16,6 +16,7 @@ build_api:
   only: [tags, triggers, schedules, /^(master|staging)$/]
   tags: [docker, captainfact, api]
   script:
+    - cd ./apps/captain_fact
     - docker build -t $CF_API_BUILD_IMAGE -f Dockerfile.build .
     - BUILD_CONTAINER=$(docker run -d ${CF_API_BUILD_IMAGE})
     - docker cp ${BUILD_CONTAINER}:/opt/app/captain-fact-api_release.tar captain-fact-api_release.tar

@@ -1,0 +1,15 @@
+# App artifacts
+/_build
+/db
+/deps
+/*.ez
+captain-fact-api_release.tar
+
+# Generated on crash by the VM
+erl_crash.dump
+
+# Uploads
+/resources
+
+# Release build
+/captain_fact.tar.gz
