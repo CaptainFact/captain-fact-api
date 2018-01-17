@@ -7,7 +7,8 @@ stages:
 
 variables:
   CF_API_BUILD_IMAGE: captain-fact-api-build:$CI_COMMIT_REF_SLUG
-  CF_API_IMAGE: registry.gitlab.com/captainfact/captain-fact-api:$CI_COMMIT_REF_SLUG
+  CF_API_REST_IMAGE: registry.gitlab.com/captainfact/captain-fact-api/rest:$CI_COMMIT_REF_SLUG
+  CF_API_GRAPHQL_IMAGE: registry.gitlab.com/captainfact/captain-fact-api/graphql:$CI_COMMIT_REF_SLUG
 
 # ---- Jobs ----
 
@@ -16,12 +17,8 @@ build_api:
   only: [tags, triggers, schedules, /^(master|staging)$/]
   tags: [docker, captainfact, api]
   script:
-    - cd ./apps/captain_fact
-    - docker build -t $CF_API_BUILD_IMAGE -f Dockerfile.build .
-    - BUILD_CONTAINER=$(docker run -d ${CF_API_BUILD_IMAGE})
-    - docker cp ${BUILD_CONTAINER}:/opt/app/captain-fact-api_release.tar captain-fact-api_release.tar
-    - docker stop ${BUILD_CONTAINER} && docker rm ${BUILD_CONTAINER}
-    - docker build -t $CF_API_IMAGE -f Dockerfile.release .
+    - docker build -t ${CF_API_BUILD_IMAGE} -f ./rel/docker/Dockerfile.build .
+    - ./rel/docker/build_release.sh ${CF_API_BUILD_IMAGE} ${CF_API_REST_IMAGE} ${CF_API_GRAPHQL_IMAGE}
 
 test_api:
   stage: test
@@ -47,6 +44,6 @@ release_api:
   only: [tags, triggers, schedules, /^(master|staging)$/]
   tags: [docker, captainfact, api]
   script:
-    - echo "Release $CF_API_IMAGE"
+    - echo "Release $CF_API_REST_IMAGE"
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
-    - docker push $CF_API_IMAGE
+    - docker push $CF_API_REST_IMAGE

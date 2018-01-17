@@ -1,10 +1,12 @@
 _build
-deps
+_deps
 
 # Local secrets
 priv/secrets/*
 !priv/secrets/.keep
 
-
 # Local uploads
 resources
+
+# Release binaries
+rel/docker/*.tar

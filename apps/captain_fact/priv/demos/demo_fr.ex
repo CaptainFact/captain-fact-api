@@ -6,7 +6,7 @@ defmodule CaptainFact.DemoFr do
   @moduledoc"""
   Run a demo in real-time. To use it from iex console:
 
-    iex> c "scripts/demos/demo_fr.ex"
+    iex> c "priv/demos/demo_fr.ex"
     iex> CaptainFact.DemoFr.init_and_run
   """
 

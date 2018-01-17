@@ -6,21 +6,18 @@
 # /!\ Obviously database must be started
 #---------------------------------------------------------------------------------------------------
 
+CF_REST_API_IMAGE=captain-fact-api:dev-test
+CF_GRAPHQL_API_IMAGE=captain-fact-api-graphql:dev-test
 
-cd -- "$(dirname $0)/.."
-
-CF_API_BUILD_IMAGE=captain-fact-api-build:dev-check
-CF_API_IMAGE=captain-fact-api:dev-check
+# If any command fails, exit
+set -e
 
 # Build
-docker build -t ${CF_API_BUILD_IMAGE} -f Dockerfile.build .
-BUILD_CONTAINER=$(docker run -d ${CF_API_BUILD_IMAGE})
-docker cp ${BUILD_CONTAINER}:/opt/app/captain-fact-api_release.tar ./captain-fact-api_release.tar
-docker stop ${BUILD_CONTAINER} && docker rm ${BUILD_CONTAINER}
-docker build -t ${CF_API_IMAGE} -f Dockerfile.release .
-rm ./captain-fact-api_release.tar
+cd -- "$(dirname $0)"
+./build_release.sh dev $CF_REST_API_IMAGE $CF_GRAPHQL_API_IMAGE
 
 # Run server
+echo "Let's test REST API =>"
 docker run -it \
   -p 4000:80 \
   -p 4001:443 \
@@ -36,7 +33,10 @@ docker run -it \
   -e "CF_CHROME_EXTENSION_ID=chrome-extension://lpdmcoikcclagelhlmibniibjilfifac" \
   -v "$(pwd)/priv/keys:/run/secrets:ro" \
   --network host \
-  --rm ${CF_API_IMAGE} console
+  --rm ${CF_REST_API_IMAGE} console
+
+echo "Let's test GraphQL API =>"
+echo "[TODO]"
 
 # Cleanup
-#docker rmi -f ${CF_API_IMAGE}
+docker rmi -f ${CF_REST_API_IMAGE}

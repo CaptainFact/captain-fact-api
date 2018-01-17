@@ -1,0 +1,14 @@
+.git
+.gitignore
+.gitlab-ci.yml
+.idea
+
+tmp
+erl_crash.dump
+*.ez
+
+_build
+_deps
+
+rel/docker
+resources

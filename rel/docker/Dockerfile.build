@@ -8,8 +8,10 @@ ENV HOME=/opt/app/ MIX_ENV=prod
 WORKDIR /opt/app
 
 # Cache dependencies
+RUN mkdir -p apps/captain_fact apps/captain_fact_graphql
 COPY mix.exs mix.lock ./
-RUN mix local.hex --force && mix local.rebar --force
+COPY apps/captain_fact/mix.exs apps/captain_fact/
+COPY apps/captain_fact_graphql/mix.exs apps/captain_fact_graphql/
 RUN mix deps.get
 
 # Copy main project and build release

@@ -7,7 +7,7 @@ defmodule CaptainFact.Mixfile do
       version: "0.7.7",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
-      deps_path: "../../deps",
+      deps_path: "../../_deps",
       lockfile: "../../mix.lock",
       elixir: "~> 1.5",
       elixirc_paths: elixirc_paths(Mix.env),
@@ -73,7 +73,6 @@ defmodule CaptainFact.Mixfile do
       {:faker, "~> 0.7"}, # When opensourced, this should only be included in dev and test
       {:bypass, "~> 0.8", only: :test},
       {:excoveralls, "~> 0.7", only: :test},
-      {:distillery, "~> 1.5", runtime: false},
       {:credo, "~> 0.8", only: [:dev, :test], runtime: false}
    ]
   end
