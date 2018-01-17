@@ -21,6 +21,10 @@ config :captain_fact_graphql, CaptainFactGraphqlWeb.Endpoint,
 # Do not print debug messages in production
 config :logger, level: :info
 
+config :weave,
+  file_directories: ["/run/secrets"],
+  loaders: [Weave.Loaders.File, Weave.Loaders.Environment]
+
 #
 # If you are doing OTP releases, you need to instruct Phoenix
 # to start the server for all endpoints:

@@ -17,12 +17,13 @@ CF_GRAPHQL_API_IMAGE=$3
 
 # Copy releases archive locally and cleanup
 BUILD_CONTAINER=$(docker run -d ${CF_API_BUILD_IMAGE})
-docker cp ${BUILD_CONTAINER}:/opt/app/captain-fact-api_release.tar ./captain-fact-api_release.tar
-# TODO docker cp GraphQL release
+docker cp ${BUILD_CONTAINER}:/opt/app/rest-api_release.tar ./rest-api_release.tar
+docker cp ${BUILD_CONTAINER}:/opt/app/graphql-api_release.tar ./graphql-api_release.tar
 docker stop ${BUILD_CONTAINER} && docker rm ${BUILD_CONTAINER}
 
 # Create released docker images
-docker build -t ${CF_REST_API_IMAGE} -f Dockerfile.release .
+docker build -t ${CF_REST_API_IMAGE} -f Dockerfile.rest-api.release .
+docker build -t ${CF_GRAPHQL_API_IMAGE} -f Dockerfile.graphql-api.release .
 
 # Cleanup
-rm ./captain-fact-api_release.tar
+#rm ./rest-api_release.tar ./graphql-api_release.tar

@@ -3,9 +3,9 @@ RUN apk add bash imagemagick curl && rm -rf /var/cache/apk/*
 
 ENV HOME=/opt/app/ SHELL=/bin/bash MIX_ENV=prod
 WORKDIR /opt/app
-COPY captain-fact-api_release.tar .
-RUN tar x -f captain-fact-api_release.tar && rm captain-fact-api_release.tar
+
+COPY rest-api_release.tar .
+RUN tar x -f rest-api_release.tar && rm rest-api_release.tar
 
 EXPOSE 80
-HEALTHCHECK --start-period=10s CMD curl --fail http://localhost || exit 1
 ENTRYPOINT ["bin/captain_fact"]

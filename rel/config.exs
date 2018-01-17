@@ -49,3 +49,13 @@ release :captain_fact do
   ]
 end
 
+release :captain_fact_graphql do
+  set version: current_version(:captain_fact_graphql)
+  set applications: [:runtime_tools]
+  set post_start_hook: "rel/hooks/post_start.sh"
+  set commands: [
+    "migrate": "rel/commands/migrate.sh",
+    "seed": "rel/commands/seed.sh",
+    "seed_politicians": "rel/commands/seed_politicians.sh"
+  ]
+end

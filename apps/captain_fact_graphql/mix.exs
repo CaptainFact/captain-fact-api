@@ -38,6 +38,7 @@ defmodule CaptainFactGraphql.Mixfile do
       {:cowboy, "~> 1.0"},
       {:absinthe_ecto, "~> 0.1.3"},
       {:absinthe_plug, "~> 1.4.1"},
+      {:weave, "~> 3.0"},
       {:captain_fact, in_umbrella: true}
     ]
   end
