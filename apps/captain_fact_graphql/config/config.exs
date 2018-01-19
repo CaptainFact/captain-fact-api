@@ -16,7 +16,7 @@ config :captain_fact_graphql,
   ]
 
 # Configures the endpoint
-config :captain_fact_graphql, CaptainFactGraphql.Endpoint,
+config :captain_fact_graphql, CaptainFactGraphqlWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "Nl5lfMlBMvQpY3n74G9iNTxH4okMpbMWArWst9Vhj75tl+m2PuV+KPwjX0fNMaa8",
   pubsub: [name: CaptainFactGraphql.PubSub, adapter: Phoenix.PubSub.PG2],

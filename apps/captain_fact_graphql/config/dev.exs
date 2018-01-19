@@ -1,7 +1,7 @@
 use Mix.Config
 
 
-config :captain_fact_graphql, CaptainFactGraphql.Endpoint,
+config :captain_fact_graphql, CaptainFactGraphqlWeb.Endpoint,
   http: [port: 5000],
   debug_errors: true,
   code_reloader: true,

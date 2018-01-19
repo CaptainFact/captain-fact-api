@@ -27,7 +27,7 @@ end
 # Releases
 
 release :captain_fact_rest do
-  set version: current_version(:captain_fact_rest)
+  set version: current_version(:captain_fact)
   set applications: [:runtime_tools]
   set post_start_hook: "rel/hooks/post_start.sh"
   set commands: [

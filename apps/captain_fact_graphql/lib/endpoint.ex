@@ -1,4 +1,4 @@
-defmodule CaptainFactGraphql.Endpoint do
+defmodule CaptainFactGraphqlWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :captain_fact_graphql
 
   plug Plug.RequestId
@@ -11,5 +11,5 @@ defmodule CaptainFactGraphql.Endpoint do
 
   plug Plug.MethodOverride
   plug Plug.Head
-  plug CaptainFactGraphql.Router
+  plug CaptainFactGraphqlWeb.Router
 end

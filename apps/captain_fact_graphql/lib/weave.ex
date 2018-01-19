@@ -36,5 +36,5 @@ defmodule CaptainFactGraphql.Weave do
   end
 
   defp put_in_endpoint(keys, value),
-    do: put_in_env(:captain_fact_graphql, [CaptainFactGraphql.Endpoint] ++ keys, value)
+    do: put_in_env(:captain_fact_graphql, [CaptainFactGraphqlWeb.Endpoint] ++ keys, value)
 end

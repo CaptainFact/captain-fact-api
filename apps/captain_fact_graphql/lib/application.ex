@@ -6,12 +6,10 @@ defmodule CaptainFactGraphql.Application do
   def start(_type, _args) do
     import Supervisor.Spec
 
-    CaptainFactGraphql.Weave.configure()
-
     # Define workers and child supervisors to be supervised
     children = [
       # Start the endpoint when the application starts
-      supervisor(CaptainFactGraphql.Endpoint, []),
+      supervisor(CaptainFactGraphqlWeb.Endpoint, []),
       # Start your own worker by calling: CaptainFactGraphql.Worker.start_link(arg1, arg2, arg3)
       # worker(CaptainFactGraphql.Worker, [arg1, arg2, arg3]),
     ]
@@ -25,7 +23,7 @@ defmodule CaptainFactGraphql.Application do
   # Tell Phoenix to update the endpoint configuration
   # whenever the application is updated.
   def config_change(changed, _new, removed) do
-    CaptainFactGraphql.Endpoint.config_change(changed, removed)
+    CaptainFactGraphqlWeb.Endpoint.config_change(changed, removed)
     :ok
   end
 end

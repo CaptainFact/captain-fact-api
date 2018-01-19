@@ -19,10 +19,10 @@ defmodule CaptainFactGraphql.ConnCase do
     quote do
       # Import conveniences for testing with connections
       use Phoenix.ConnTest
-      import CaptainFactGraphql.Router.Helpers
+      import CaptainFactGraphqlWeb.Router.Helpers
 
       # The default endpoint for testing
-      @endpoint CaptainFactGraphql.Endpoint
+      @endpoint CaptainFactGraphqlWeb.Endpoint
     end
   end
 

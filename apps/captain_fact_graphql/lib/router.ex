@@ -1,4 +1,4 @@
-defmodule CaptainFactGraphql.Router do
+defmodule CaptainFactGraphqlWeb.Router do
   use CaptainFactGraphql, :router
 
   @graphiql_route "/graphiql"
@@ -19,7 +19,7 @@ defmodule CaptainFactGraphql.Router do
 
       forward "/", Absinthe.Plug.GraphiQL,
         schema: CaptainFactGraphql.Schema,
-        context: %{pubsub: CaptainFactGraphql.Endpoint}
+        context: %{pubsub: CaptainFactGraphqlWeb.Endpoint}
     end
 
     forward "/", Absinthe.Plug,
