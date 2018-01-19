@@ -1,8 +1,6 @@
-defmodule CaptainFact.Sources.Source do
+defmodule DB.Schema.Source do
   use Ecto.Schema
   import Ecto.Changeset
-
-  # TODO [Refactor] Remove
 
   schema "sources" do
     field :url, :string
@@ -13,8 +11,10 @@ defmodule CaptainFact.Sources.Source do
     timestamps()
   end
 
-  @url_regex Application.get_env(:captain_fact, :source_url_regex)
-
+  # Allow to add localhost urls as sources during tests
+  @url_regex if Application.get_env(:db, :env) == :test,
+    do: ~r/(^https?:\/\/[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*))|localhost/,
+    else: ~r/^https?:\/\/[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/
 
   @doc """
   Builds a changeset based on the `struct` and `params`.
@@ -42,7 +42,7 @@ defmodule CaptainFact.Sources.Source do
     if !String.valid?(str) do
       nil
     else
-      str = StringUtils.trim_all_whitespaces(str)
+      str = DB.Utils.String.trim_all_whitespaces(str)
       if String.length(str) > 250,
          do: String.slice(str, 0, 250) <> "...",
          else: str

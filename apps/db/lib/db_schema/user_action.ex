@@ -1,11 +1,10 @@
-defmodule CaptainFact.Actions.UserAction do
+defmodule DB.Schema.UserAction do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias CaptainFact.Actions.UserAction
-  alias CaptainFact.Accounts.User
+  alias DB.Schema.{UserAction, User}
 
-  # TODO [Refactor] Remove
+
   schema "users_actions" do
     belongs_to :user, User
     belongs_to :target_user, User

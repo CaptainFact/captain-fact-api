@@ -1,8 +1,8 @@
-defmodule CaptainFact.Comments.VoteTest do
-  use CaptainFact.DataCase, async: true
-  doctest CaptainFact.Comments.Vote
-  # TODO [Refactor] Remove
-  alias CaptainFact.Comments.Vote
+defmodule DB.Schema.VoteTest do
+  use DB.DataCase, async: true
+  doctest DB.Schema.Vote
+
+  alias DB.Schema.Vote
 
   @valid_attrs %{user_id: 1, comment_id: 1, value: 1}
   @invalid_attrs %{}

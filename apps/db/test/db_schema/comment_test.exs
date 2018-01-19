@@ -1,8 +1,8 @@
-defmodule CaptainFact.Comments.CommentTest do
-  use CaptainFact.DataCase, async: true
+defmodule DB.Schema.CommentTest do
+  use DB.DataCase, async: true
 
-  alias CaptainFact.Comments.Comment
-  # TODO [Refactor] Remove
+  alias DB.Schema.Comment
+
   @valid_attrs %{
     statement_id: 1,
     user_id: 42,

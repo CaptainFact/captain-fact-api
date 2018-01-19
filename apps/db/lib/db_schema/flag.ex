@@ -1,10 +1,10 @@
-defmodule CaptainFact.Actions.Flag do
+defmodule DB.Schema.Flag do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias CaptainFact.Accounts.User
-  alias CaptainFact.Actions.UserAction
-  # TODO [Refactor] Remove
+  alias DB.Schema.{User, UserAction}
+
+
   @reasons [:spam, :bad_language, :harassment]
   @nb_reasons Enum.count(@reasons)
 

@@ -1,8 +1,7 @@
-defmodule CaptainFact.Accounts.UserTest do
-  use CaptainFact.DataCase, async: true
-  # TODO [Refactor] Remove
-  alias CaptainFact.Accounts.User
-  alias CaptainFact.Accounts.ForbiddenEmailProviders
+defmodule DB.Schema.UserTest do
+  use DB.DataCase, async: true
+
+  alias DB.Schema.User
 
   @valid_attrs %{
     name: "Jouje BigBrother",
@@ -60,7 +59,7 @@ defmodule CaptainFact.Accounts.UserTest do
   end
 
   test "email must not be a temporary email (yopmail, jetable.org...etc)" do
-    provider = Enum.random(ForbiddenEmailProviders.get_temporary_providers)
+    provider = Enum.random(Burnex.providers)
     attrs = %{email: "xxxxx@#{provider}"}
     assert {:email, "forbidden_provider"} in errors_on(%User{}, attrs), "didn't reject #{provider}'"
   end

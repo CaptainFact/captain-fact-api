@@ -67,7 +67,7 @@ defmodule CaptainFact.Mixfile do
       {:hackney, "~> 1.6"},
       {:sweet_xml, "~> 0.6"},
       {:weave, "~> 3.0"},
-      {:slugger, "~> 0.2"},
+      {:slugger, "~> 0.2"}, # TODO [Refactor] Remove
       {:ex_machina, "~> 2.0"}, # When opensourced, this should only be included in dev and test
       {:faker, "~> 0.7"}, # When opensourced, this should only be included in dev and test
       {:bypass, "~> 0.8", only: :test},

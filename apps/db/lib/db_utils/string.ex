@@ -1,6 +1,4 @@
-defmodule StringUtils do
-  # TODO [Refactor] Remove
-
+defmodule DB.Utils.String do
   @doc"""
   Convert a string like "     aaa     bbb ccc  " into "aaa bbb ccc"
 

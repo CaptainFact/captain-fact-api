@@ -1,9 +1,9 @@
-defmodule CaptainFact.Moderation.UserFeedback do
+defmodule DB.Schema.UserFeedback do
   use Ecto.Schema
   import Ecto.Changeset
-  alias CaptainFact.Moderation.UserFeedback
+  alias DB.Schema.UserFeedback
 
-  # TODO [Refactor] Remove
+
   schema "moderation_users_feedbacks" do
     field :value, :integer
     field :user_id, :id

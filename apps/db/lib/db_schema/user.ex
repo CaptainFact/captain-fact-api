@@ -1,10 +1,10 @@
-defmodule CaptainFact.Accounts.User do
+defmodule DB.Schema.User do
   use Ecto.Schema
   use Arc.Ecto.Schema
   import Ecto.Changeset
-  # TODO [Refactor] Remove
-  alias CaptainFact.TokenGenerator
-  alias CaptainFact.Accounts.{ForbiddenEmailProviders, Achievement}
+
+  alias DB.Type.{Achievement, UserPicture}
+  alias DB.Schema.{UserAction, Comment, Vote, Flag}
 
 
   schema "users" do
@@ -12,7 +12,7 @@ defmodule CaptainFact.Accounts.User do
     field :email, :string
     field :encrypted_password, :string
     field :name, :string
-    field :picture_url, CaptainFact.Accounts.UserPicture.Type
+    field :picture_url, UserPicture.Type
     field :reputation, :integer, default: 0
     field :today_reputation_gain, :integer, default: 0
     field :locale, :string
@@ -31,11 +31,11 @@ defmodule CaptainFact.Accounts.User do
     field :password, :string, virtual: true
 
     # Assocs
-    has_many :actions, CaptainFact.Actions.UserAction, on_delete: :delete_all
-    has_many :comments, CaptainFact.Comments.Comment, on_delete: :delete_all
-    has_many :votes, CaptainFact.Comments.Vote, on_delete: :delete_all
+    has_many :actions, UserAction, on_delete: :delete_all
+    has_many :comments, Comment, on_delete: :delete_all
+    has_many :votes, Vote, on_delete: :delete_all
 
-    has_many :flags_posted, CaptainFact.Actions.Flag, foreign_key: :source_user_id, on_delete: :delete_all
+    has_many :flags_posted, Flag, foreign_key: :source_user_id, on_delete: :delete_all
 
     timestamps()
   end
@@ -98,7 +98,7 @@ defmodule CaptainFact.Accounts.User do
 
   @token_length 32
   defp generate_email_verification_token(changeset, false),
-    do: put_change(changeset, :email_confirmation_token, TokenGenerator.generate(@token_length))
+    do: put_change(changeset, :email_confirmation_token, DB.TokenGenerator.generate(@token_length))
   defp generate_email_verification_token(changeset, true),
     do: put_change(changeset, :email_confirmation_token, nil)
 
@@ -129,7 +129,7 @@ defmodule CaptainFact.Accounts.User do
   def validate_email(%{changes: %{email: email}} = changeset) do
     case Regex.match?(@email_regex, email) do
       true ->
-        case ForbiddenEmailProviders.is_forbidden?(email) do
+        case Burnex.is_burner?(email) do
           true -> add_error(changeset, :email, "forbidden_provider")
           false -> changeset
         end

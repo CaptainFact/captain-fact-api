@@ -1,7 +1,7 @@
-defmodule CaptainFact.Speakers.SpeakerTest do
-  use CaptainFact.DataCase, async: true
+defmodule DB.Schema.SpeakerTest do
+  use DB.DataCase, async: true
 
-  alias CaptainFact.Speakers.Speaker
+  alias DB.Schema.Speaker
 
   @valid_attrs %{
     full_name: "#{Faker.Name.first_name} #{Faker.Name.last_name}"

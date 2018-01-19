@@ -1,7 +1,7 @@
-defmodule CaptainFact.Videos.VideoTest do
-  use CaptainFact.DataCase, async: true
+defmodule DB.Schema.VideoTest do
+  use DB.DataCase, async: true
 
-  alias CaptainFact.Videos.Video
+  alias DB.Schema.Video
 
   @valid_attrs %{
     title: Faker.Lorem.sentence,

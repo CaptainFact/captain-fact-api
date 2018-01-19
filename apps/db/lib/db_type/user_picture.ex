@@ -1,7 +1,7 @@
-defmodule CaptainFact.Accounts.UserPicture do
+defmodule DB.Type.UserPicture do
   use Arc.Definition
   use Arc.Ecto.Definition
-  # TODO [Refactor] Remove
+
   @versions [:thumb, :mini_thumb]
   # TODO  @extension_whitelist ~w(.jpg .jpeg .png)
 

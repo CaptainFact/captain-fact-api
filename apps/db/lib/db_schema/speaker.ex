@@ -1,9 +1,9 @@
-defmodule CaptainFact.Speakers.Speaker do
+defmodule DB.Schema.Speaker do
   use Ecto.Schema
   use Arc.Ecto.Schema
   import Ecto.Changeset
 
-  # TODO [Refactor] Remove
+
   schema "speakers" do
     field :full_name, :string
     field :title, :string
@@ -11,11 +11,11 @@ defmodule CaptainFact.Speakers.Speaker do
     field :country, :string
     field :wikidata_item_id, :integer
     field :is_user_defined, :boolean, default: true
-    field :picture, CaptainFact.Speakers.Picture.Type
+    field :picture, DB.Type.SpeakerPicture.Type
     field :is_removed, :boolean, default: false
 
-    has_many :statements, CaptainFact.Speakers.Statement, on_delete: :nilify_all
-    many_to_many :videos, CaptainFact.Videos.Video, join_through: "videos_speakers", on_delete: :delete_all
+    has_many :statements, DB.Schema.Statement, on_delete: :nilify_all
+    many_to_many :videos, DB.Schema.Video, join_through: "videos_speakers", on_delete: :delete_all
 
     timestamps()
   end
@@ -31,8 +31,8 @@ defmodule CaptainFact.Speakers.Speaker do
     struct
     |> cast(params, @required_fields ++ @optional_fields)
     |> cast_attachments(params, @optional_file_fields)
-    |> update_change(:full_name, &StringUtils.trim_all_whitespaces/1)
-    |> update_change(:title, &StringUtils.trim_all_whitespaces/1)
+    |> update_change(:full_name, &DB.Utils.String.trim_all_whitespaces/1)
+    |> update_change(:title, &DB.Utils.String.trim_all_whitespaces/1)
     |> validate_length(:full_name, min: 3, max: 60)
     |> validate_length(:title, min: 3, max: 60)
     |> validate_required(:full_name)

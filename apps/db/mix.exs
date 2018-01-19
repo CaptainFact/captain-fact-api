@@ -11,7 +11,7 @@ defmodule DB.Mixfile do
       lockfile: "../../mix.lock",
       elixir: "~> 1.5",
       elixirc_paths: elixirc_paths(Mix.env),
-      compilers: [:phoenix, :gettext] ++ Mix.compilers,
+      compilers: Mix.compilers,
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
       aliases: aliases(),
@@ -37,7 +37,13 @@ defmodule DB.Mixfile do
     [
       {:ecto, "~> 2.2.8"},
       {:postgrex, "~> 0.13.3"},
+      {:arc, "~> 0.8.0"},
+      {:arc_ecto, "~> 0.7.0"},
       {:weave, "~> 3.0"},
+      {:slugger, "~> 0.2"},
+      {:comeonin, "~> 3.0"},
+      {:faker, "~> 0.7", only: :test},
+      {:burnex, github: "Betree/burnex"}
     ]
   end
 

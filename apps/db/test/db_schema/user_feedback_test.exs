@@ -1,10 +1,10 @@
-defmodule CaptainFact.Moderation.UserFeedbackTest do
-  use CaptainFact.DataCase, async: true
-  alias CaptainFact.Moderation.UserFeedback
+defmodule DB.Schema.UserFeedbackTest do
+  use DB.DataCase, async: true
+  alias DB.Schema.UserFeedback
 
   @valid_attrs %{value: 1}
   @invalid_attrs %{}
-  # TODO [Refactor] Remove
+
   test "changeset with valid attributes" do
     assert UserFeedback.changeset(%UserFeedback{user_id: 1, action_id: 1}, @valid_attrs).valid?
   end

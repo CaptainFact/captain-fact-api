@@ -1,8 +1,8 @@
-defmodule CaptainFact.Actions.UserActionTest do
-  use CaptainFact.DataCase, async: true
+defmodule DB.Schema.UserActionTest do
+  use DB.DataCase, async: true
 
-  alias CaptainFact.Actions.UserAction
-  # TODO [Refactor] Remove
+  alias DB.Schema.UserAction
+
   @valid_attrs %{
     user_id: 1,
     context: "VD:1",

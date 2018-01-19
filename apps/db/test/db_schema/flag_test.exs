@@ -1,9 +1,9 @@
-defmodule CaptainFact.Actions.FlagTest do
-  use CaptainFact.DataCase, async: true
+defmodule DB.Schema.FlagTest do
+  use DB.DataCase, async: true
 
-  alias CaptainFact.Actions.Flag
+  alias DB.Schema.Flag
 
-  # TODO [Refactor] Remove
+
   test "changeset with valid attributes" do
     changeset = Flag.changeset(%Flag{source_user_id: 42}, %{reason: 1, action_id: 42})
     assert changeset.valid?

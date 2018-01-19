@@ -1,9 +1,7 @@
-defmodule CaptainFact.Sources.SourceTest do
-  use CaptainFact.DataCase, async: true
+defmodule DB.Schema.SourceTest do
+  use DB.DataCase, async: true
 
-  # TODO [Refactor] Remove
-
-  alias CaptainFact.Sources.Source
+  alias DB.Schema.Source
 
   @valid_attrs %{title: "some content", url: "http://www.lemonde.fr/idees/article/2017/04/24/les-risques-d-une-explosion_5116380_3232.html"}
   @invalid_attrs %{}

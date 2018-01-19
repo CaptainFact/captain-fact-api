@@ -1,12 +1,10 @@
-defmodule CaptainFact.Comments.Comment do
+defmodule DB.Schema.Comment do
   use Ecto.Schema
-  import Ecto.{Changeset, Query} # TODO move queries to comments
+  import Ecto.{Changeset, Query}
 
-  alias CaptainFact.Accounts.User
-  alias CaptainFact.Speakers.Statement
-  alias CaptainFact.Sources.Source
-  alias CaptainFact.Comments.Comment
-  # TODO [Refactor] Remove
+  alias DB.Schema.{Comment, User, Statement, Source}
+
+
   schema "comments" do
     field :text, :string
     field :approve, :boolean

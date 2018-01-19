@@ -1,9 +1,9 @@
-defmodule CaptainFact.Videos.Video do
+defmodule DB.Schema.Video do
   use Ecto.Schema
-  import Ecto.{Changeset, Query} # TODO Move query functions to CaptainFact.Videos
+  import Ecto.{Changeset, Query}
 
-  alias CaptainFact.Speakers.{Speaker, Statement, VideoSpeaker}
-  # TODO [Refactor] Remove
+  alias DB.Schema.{Speaker, Statement, VideoSpeaker}
+
   schema "videos" do
     field :title, :string
     field :url, :string, virtual: true
@@ -26,7 +26,7 @@ defmodule CaptainFact.Videos.Video do
   end
 
   @providers_urls %{
-    # Map a provider name to its regex, using named_captures to get the id -------------------↘️
+    # Map a provider name to its regex, using named_captures to get the id --------------------↘️
     "youtube" => ~r/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)(?<id>[^"&?\/ ]{11})/i
   }
 

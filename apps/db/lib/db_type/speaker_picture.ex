@@ -1,7 +1,7 @@
-defmodule CaptainFact.Speakers.Picture do
+defmodule DB.Type.SpeakerPicture do
   use Arc.Definition
   use Arc.Ecto.Definition
-  # TODO [Refactor] Remove
+
   @versions [:thumb]
   @extension_whitelist ~w(.jpg .jpeg .png)
 
