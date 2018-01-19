@@ -52,7 +52,6 @@ defmodule CaptainFact.Mixfile do
       {:ueberauth_identity, "~> 0.2"},
       {:ueberauth_facebook, "~> 0.6"},
       {:guardian, "~> 0.10"},
-      {:ecto_enum, "~> 1.0"},
       {:arc, "~> 0.8.0"},
       {:arc_ecto, "~> 0.7.0"},
       {:floki, "~> 0.17.0"},

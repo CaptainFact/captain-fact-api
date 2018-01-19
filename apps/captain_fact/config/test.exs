@@ -26,7 +26,6 @@ config :logger, level: :warn
 config :arc, storage: Arc.Storage.Local
 
 # Configure your database
-# Dirty fix : if CONTINUOUS_INTEGRATION is present, it means we are on CI and postgres is linked to us
 config :captain_fact, CaptainFact.Repo,
   adapter: Ecto.Adapters.Postgres,
   username: "postgres",

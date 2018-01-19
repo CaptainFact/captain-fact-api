@@ -65,6 +65,7 @@ config :guardian, Guardian,
   serializer: CaptainFact.Accounts.GuardianSerializer,
   permissions: %{default: [:read, :write]}
 
+# TODO [REFACTOR] Move weave configuration to main config file
 config :weave,
   environment_prefix: "CF_",
   loaders: [Weave.Loaders.Environment]
