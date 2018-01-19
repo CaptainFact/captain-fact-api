@@ -1,4 +1,4 @@
-defmodule CaptainFactGraphqlWeb.ConnCase do
+defmodule CaptainFactGraphql.ConnCase do
   @moduledoc """
   This module defines the test case to be used by
   tests that require setting up a connection.
@@ -19,10 +19,10 @@ defmodule CaptainFactGraphqlWeb.ConnCase do
     quote do
       # Import conveniences for testing with connections
       use Phoenix.ConnTest
-      import CaptainFactGraphqlWeb.Router.Helpers
+      import CaptainFactGraphql.Router.Helpers
 
       # The default endpoint for testing
-      @endpoint CaptainFactGraphqlWeb.Endpoint
+      @endpoint CaptainFactGraphql.Endpoint
     end
   end
 

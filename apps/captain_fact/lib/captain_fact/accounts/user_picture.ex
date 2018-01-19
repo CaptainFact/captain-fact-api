@@ -25,7 +25,7 @@ defmodule CaptainFact.Accounts.UserPicture do
   end
 
   def transform(:mini_thumb, _) do
-    {:convert, "-thumbnail 48x48^ -gravity center -extent 48x48 -format jpg", :jpg}
+    {:convert, "-thumbnail 24x24^ -gravity center -extent 48x48 -format jpg", :jpg}
   end
 
   # Override the persisted filenames:
@@ -39,7 +39,7 @@ defmodule CaptainFact.Accounts.UserPicture do
   end
 
   def default_url(:mini_thumb, %{id: id}) do
-    "https://api.adorable.io/avatars/48/#{id}.png"
+    "https://api.adorable.io/avatars/24/#{id}.png"
   end
 
   # Override the storage directory:

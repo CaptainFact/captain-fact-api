@@ -95,7 +95,7 @@ defmodule CaptainFact.Actions.Analyzers.Votes do
 
     case broadcast_channel(context) do
       nil -> nil
-      channel -> CaptainFactWeb.Endpoint.broadcast(channel, "comments_scores_updated", %{comments: scores})
+      channel -> CaptainFactREST.Endpoint.broadcast(channel, "comments_scores_updated", %{comments: scores})
     end
     Enum.count(scores)
   end

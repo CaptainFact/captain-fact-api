@@ -14,7 +14,7 @@ defmodule CaptainFact.Weave do
   weave "frontend_url", handler: fn url -> [
     {:captain_fact, :cors_origins, [url]},
     {:captain_fact, :frontend_url, url},
-    {:captain_fact, CaptainFactWeb.Endpoint, [check_origin: [url]]}
+    {:captain_fact, CaptainFactREST.Endpoint, [check_origin: [url]]}
   ]
   end
   weave "chrome_extension_id", handler: fn extension_id -> {:captain_fact, :cors_origins, [extension_id]} end
@@ -68,7 +68,7 @@ defmodule CaptainFact.Weave do
   end
 
   defp put_in_endpoint(keys, value),
-    do: put_in_env(:captain_fact, [CaptainFactWeb.Endpoint] ++ keys, value)
+    do: put_in_env(:captain_fact, [CaptainFactREST.Endpoint] ++ keys, value)
   defp put_in_mailer(keys, value),
     do: put_in_env(:captain_fact, [CaptainFact.Mailer] ++ keys, value)
   defp put_in_repo(keys, value),

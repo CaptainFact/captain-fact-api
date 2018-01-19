@@ -8,20 +8,19 @@ use Mix.Config
 # General application configuration
 config :captain_fact_graphql,
   namespace: CaptainFactGraphql,
-  ecto_repos: [CaptainFactGraphql.Repo]
+  ecto_repos: [CaptainFact.Repo],
+  basic_auth: [
+    username: "captain",
+    password: "Will be replaced by config runtime, see weave.ex",
+    realm: "GraphiQL Public Endpoint"
+  ]
 
 # Configures the endpoint
-config :captain_fact_graphql, CaptainFactGraphqlWeb.Endpoint,
+config :captain_fact_graphql, CaptainFactGraphql.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "Nl5lfMlBMvQpY3n74G9iNTxH4okMpbMWArWst9Vhj75tl+m2PuV+KPwjX0fNMaa8",
-  render_errors: [view: CaptainFactGraphqlWeb.ErrorView, accepts: ~w(json)],
-  pubsub: [name: CaptainFactGraphql.PubSub,
-           adapter: Phoenix.PubSub.PG2]
-
-# Configure GraphQL
-config :captain_fact_graphql, CaptainFactGraphql.Repo,
-  adapter: Ecto.Adapters.Postgres,
-  pool_size: 20
+  pubsub: [name: CaptainFactGraphql.PubSub, adapter: Phoenix.PubSub.PG2],
+  server: true
 
 # Configures Elixir's Logger
 config :logger, :console,

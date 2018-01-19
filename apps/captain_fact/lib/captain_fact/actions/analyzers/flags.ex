@@ -94,7 +94,7 @@ defmodule CaptainFact.Actions.Analyzers.Flags do
       select: %{video_id: s.video_id, statement_id: s.id}
     )
     # TODO Use a event bus here
-    CaptainFactWeb.Endpoint.broadcast(
+    CaptainFactREST.Endpoint.broadcast(
       "comments:video:#{CaptainFact.Videos.VideoHashId.encode(comment_context.video_id)}", "comment_removed",
       %{id: comment_id, statement_id: comment_context.statement_id}
     )

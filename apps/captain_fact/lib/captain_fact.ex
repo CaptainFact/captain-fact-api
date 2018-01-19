@@ -12,8 +12,6 @@ defmodule CaptainFact do
     children = [
       # Start the Ecto repository
       supervisor(CaptainFact.Repo, []),
-      # Start the endpoint when the application starts
-      supervisor(CaptainFactWeb.Endpoint, []),
       # Other custom supervisors
       supervisor(CaptainFact.Sources.Fetcher, []),
       # Scheduler for all CRON jobs (like action analyzers below)
