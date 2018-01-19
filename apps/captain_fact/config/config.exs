@@ -14,6 +14,13 @@ config :captain_fact,
   cors_origins: [],
   erlang_cookie: :default_config_cookie # Set secrets/erlang_node if running in distributed mode
 
+# Configures the endpoint
+config :captain_fact, CaptainFactWeb.Endpoint,
+  url: [host: "localhost"],
+  render_errors: [view: CaptainFactWeb.ErrorView, accepts: ~w(json), default_format: "json"],
+  pubsub: [name: CaptainFact.PubSub, adapter: Phoenix.PubSub.PG2],
+  server: true
+
 # Database: use postgres
 config :captain_fact, CaptainFact.Repo,
   adapter: Ecto.Adapters.Postgres,

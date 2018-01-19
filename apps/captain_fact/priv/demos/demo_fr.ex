@@ -10,7 +10,7 @@ defmodule CaptainFact.DemoFr do
     iex> CaptainFact.DemoFr.init_and_run
   """
 
-#  use CaptainFactREST.ChannelCase
+  use CaptainFactWeb.ChannelCase
 
   import CaptainFact.VideoDebate.ActionCreator, only: [action_add: 3, action_create: 3]
 
@@ -196,17 +196,17 @@ defmodule CaptainFact.DemoFr do
     comment =
       Comments.add_comment(Enum.at(users, comment_base.user_idx), "DEMO", params, comment_base[:source], fn comment ->
         comment = Repo.preload(comment, :source) |> Repo.preload(:user)
-#        CaptainFactREST.Endpoint.broadcast(
-#          "comments:video:#{VideoHashId.encode(video_id)}", "comment_updated",
-#          CaptainFactREST.CommentView.render("comment.json", comment: comment)
-#        )
+        CaptainFactWeb.Endpoint.broadcast(
+          "comments:video:#{VideoHashId.encode(video_id)}", "comment_updated",
+          CaptainFactWeb.CommentView.render("comment.json", comment: comment)
+        )
       end)
       |> update_score(comment_base[:score])
 
-#    CaptainFactREST.Endpoint.broadcast(
-#      "comments:video:#{VideoHashId.encode(video_id)}", "comment_added",
-#      CaptainFactREST.CommentView.render("comment.json", comment: comment)
-#    )
+    CaptainFactWeb.Endpoint.broadcast(
+      "comments:video:#{VideoHashId.encode(video_id)}", "comment_added",
+      CaptainFactWeb.CommentView.render("comment.json", comment: comment)
+    )
 
     # Add replies
     add_replies_task = Task.async(fn ->

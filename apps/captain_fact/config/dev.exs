@@ -20,6 +20,22 @@ config :captain_fact,
     "chrome-extension://fnnhlmbnlbgomamcolcpgncflofhjckm",
   ]
 
+# For development, we disable any cache and enable
+# debugging and code reloading.
+config :captain_fact, CaptainFactWeb.Endpoint,
+  secret_key_base: dev_secret,
+  debug_errors: false,
+  code_reloader: true,
+  check_origin: false,
+  http: [port: 4000],
+  force_ssl: false,
+  https: [
+    port: 4001,
+    otp_app: :captain_fact,
+    keyfile: "priv/keys/privkey.pem",
+    certfile: "priv/keys/fullchain.pem"
+  ]
+
 # Guardian + Ueberauth
 
 config :guardian, Guardian,
