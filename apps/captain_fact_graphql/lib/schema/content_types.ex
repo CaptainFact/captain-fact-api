@@ -1,6 +1,6 @@
 defmodule CaptainFactGraphql.Schema.ContentTypes do
   use Absinthe.Schema.Notation
-  use Absinthe.Ecto, repo: CaptainFact.Repo
+  use Absinthe.Ecto, repo: DB.Repo
 
   alias CaptainFactGraphql.Resolvers
 

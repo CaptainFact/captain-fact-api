@@ -40,7 +40,8 @@ defmodule CaptainFactGraphql.Mixfile do
       {:absinthe_plug, "~> 1.4.1"},
       {:basic_auth, "~> 2.2.2"},
       {:weave, "~> 3.0"},
-      {:captain_fact, in_umbrella: true}
+      {:captain_fact, in_umbrella: true},
+      {:db, in_umbrella: true}
     ]
   end
 
