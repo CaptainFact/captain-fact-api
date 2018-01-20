@@ -19,6 +19,8 @@ defmodule CaptainFactGraphqlWeb.Router do
 
       forward "/", Absinthe.Plug.GraphiQL,
         schema: CaptainFactGraphql.Schema,
+        analyze_complexity: true,
+        max_complexity: 280, # (5 joins = 250) + 30 fields
         context: %{pubsub: CaptainFactGraphqlWeb.Endpoint}
     end
 
