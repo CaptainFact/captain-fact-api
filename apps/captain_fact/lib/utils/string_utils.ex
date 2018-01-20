@@ -1,4 +1,6 @@
 defmodule StringUtils do
+  # TODO [Refactor] Remove
+
   @doc"""
   Convert a string like "     aaa     bbb ccc  " into "aaa bbb ccc"
 

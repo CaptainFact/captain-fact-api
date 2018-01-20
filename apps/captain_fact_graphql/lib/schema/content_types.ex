@@ -1,6 +1,6 @@
 defmodule CaptainFactGraphql.Schema.ContentTypes do
   use Absinthe.Schema.Notation
-  use Absinthe.Ecto, repo: CaptainFact.Repo
+  use Absinthe.Ecto, repo: DB.Repo
 
   alias CaptainFactGraphql.Resolvers
 
@@ -8,14 +8,14 @@ defmodule CaptainFactGraphql.Schema.ContentTypes do
   scalar :video_hash_id do
     parse fn input ->
       with %Absinthe.Blueprint.Input.String{value: value} <- input do
-        CaptainFact.Videos.VideoHashId.decode(value)
+        DB.Type.VideoHashId.decode(value)
       else
         _ -> :error
       end
     end
 
     serialize fn id ->
-      CaptainFact.Videos.VideoHashId.encode(id)
+      DB.Type.VideoHashId.encode(id)
     end
   end
 
@@ -43,7 +43,7 @@ defmodule CaptainFactGraphql.Schema.ContentTypes do
     field :language, :string
     @desc "List all non-removed speakers for this video"
     field :speakers, list_of(:speaker) do
-      resolve &Resolvers.Videos.speakers/3
+      resolve assoc(:speakers)
       complexity join_complexity()
     end
     @desc "List all non-removed statements for this video"
@@ -148,9 +148,9 @@ defmodule CaptainFactGraphql.Schema.ContentTypes do
     @desc "Reputation of the user. See https://captainfact.io/help/reputation"
     field :reputation, :integer
     @desc "User picture url (96x96)"
-    field :picture_url, non_null(:string), do: &Resolvers.Users.picture_url/3
+    field :picture_url, non_null(:string), do: resolve &Resolvers.Users.picture_url/3
     @desc "Small version of the user picture (48x48)"
-    field :mini_picture_url, non_null(:string), do: &Resolvers.Users.mini_picture_url/3
+    field :mini_picture_url, non_null(:string), do: resolve &Resolvers.Users.mini_picture_url/3
     @desc "A list of user's achievements as a list of integers"
     field :achievements, list_of(:integer)
     @desc "User's registration datetime"

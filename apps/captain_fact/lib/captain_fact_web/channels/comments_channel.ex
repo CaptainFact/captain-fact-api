@@ -3,11 +3,16 @@ defmodule CaptainFact.Comments.CommentsChannel do
 
   import CaptainFactWeb.UserSocket, only: [handle_in_authenticated: 4]
   alias CaptainFactWeb.{ CommentView, VoteView }
-  alias CaptainFact.Accounts.User
-  alias CaptainFact.Videos.VideoHashId
-  alias CaptainFact.Actions.{Flagger, UserAction, Flag}
+
+  alias DB.Type.VideoHashId
+  alias DB.Schema.User
+  alias DB.Schema.UserAction
+  alias DB.Schema.Flag
+  alias DB.Schema.Comment
+  alias DB.Schema.Vote
+
+  alias CaptainFact.Actions.Flagger
   alias CaptainFact.Comments
-  alias CaptainFact.Comments.{Comment, Vote}
 
 
   def join("comments:video:" <> video_id_hash, _payload, socket) do

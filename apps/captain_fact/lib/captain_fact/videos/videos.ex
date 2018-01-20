@@ -7,11 +7,15 @@ defmodule CaptainFact.Videos do
   import CaptainFact.Videos.MetadataFetcher
 
   alias Ecto.Multi
-  alias CaptainFact.Repo
-  alias CaptainFact.Actions.{Recorder, UserAction}
+  alias DB.Repo
+  alias DB.Schema.Video
+  alias DB.Schema.UserAction
+  alias DB.Schema.Statement
+  alias DB.Schema.Speaker
+  alias DB.Schema.VideoSpeaker
+
+  alias CaptainFact.Actions.Recorder
   alias CaptainFact.Accounts.UserPermissions
-  alias CaptainFact.Speakers.{Statement, Speaker, VideoSpeaker}
-  alias CaptainFact.Videos.Video
 
 
   @doc"""

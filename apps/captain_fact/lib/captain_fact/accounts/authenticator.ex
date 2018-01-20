@@ -6,8 +6,8 @@ defmodule CaptainFact.Accounts.Authenticator do
 
   import Ecto.Query
 
-  alias CaptainFact.Repo
-  alias CaptainFact.Accounts.User
+  alias DB.Repo
+  alias DB.Schema.User
 
 
   # ---- Identity ----
@@ -63,7 +63,7 @@ defmodule CaptainFact.Accounts.Authenticator do
   def store_user_picture(user, picture_url) when picture_url in [nil, ""], do: {:ok, user}
   def store_user_picture(user, picture_url) do
     if CaptainFact.env != :test do
-      case CaptainFact.Accounts.UserPicture.store({picture_url, user}) do
+      case DB.Type.UserPicture.store({picture_url, user}) do
         {:ok, picture} -> update_user_picture(user, picture)
         error -> error
       end

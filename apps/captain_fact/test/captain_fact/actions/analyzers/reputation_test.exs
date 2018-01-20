@@ -1,8 +1,8 @@
 defmodule CaptainFact.Actions.Analyzers.ReputationTest do
   use CaptainFact.DataCase
 
-  alias CaptainFact.Accounts.User
-  alias CaptainFact.Actions.UserAction
+  alias DB.Schema.User
+  alias DB.Schema.UserAction
   alias CaptainFact.Actions.Analyzers.Reputation
 
 

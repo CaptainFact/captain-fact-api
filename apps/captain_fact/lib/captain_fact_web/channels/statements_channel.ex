@@ -7,10 +7,10 @@ defmodule CaptainFactWeb.StatementsChannel do
 
   alias Ecto.Multi
   alias CaptainFact.Videos
-  alias CaptainFact.Videos.VideoHashId
+  alias DB.Type.VideoHashId
   alias CaptainFact.Accounts.UserPermissions
   alias CaptainFact.Actions.Recorder
-  alias CaptainFact.Speakers.Statement
+  alias DB.Schema.Statement
   alias CaptainFactWeb.{StatementView, ErrorView}
 
 

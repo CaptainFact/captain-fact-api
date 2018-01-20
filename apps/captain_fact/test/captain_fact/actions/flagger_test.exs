@@ -1,10 +1,12 @@
 defmodule CaptainFact.Actions.FlaggerTest do
   use CaptainFact.DataCase
 
-  alias CaptainFact.Actions.{Flagger, Flag}
+  alias DB.Schema.User
+  alias DB.Schema.Comment
+  alias DB.Schema.Flag
+
+  alias CaptainFact.Actions.Flagger
   alias CaptainFact.Actions.Analyzers.{Flags, Reputation}
-  alias CaptainFact.Accounts.User
-  alias CaptainFact.Comments.Comment
   alias CaptainFact.Moderation
 
 

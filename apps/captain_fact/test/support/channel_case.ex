@@ -27,9 +27,9 @@ defmodule CaptainFactWeb.ChannelCase do
   end
 
   setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(CaptainFact.Repo)
+    :ok = Ecto.Adapters.SQL.Sandbox.checkout(DB.Repo)
     unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(CaptainFact.Repo, {:shared, self()})
+      Ecto.Adapters.SQL.Sandbox.mode(DB.Repo, {:shared, self()})
     end
     :ok
   end

@@ -1,6 +1,6 @@
 defmodule CaptainFactWeb.SpeakerController do
   use CaptainFactWeb, :controller
-  alias CaptainFact.Speakers.Speaker
+  alias DB.Schema.Speaker
 
   action_fallback CaptainFactWeb.FallbackController
 

@@ -3,9 +3,9 @@ defmodule CaptainFact.TestUtils do
   import Ecto.Query
   import ExUnit.Assertions
 
-  alias CaptainFact.Repo
-  alias CaptainFact.Comments.Comment
-  alias CaptainFact.Actions.UserAction
+  alias DB.Repo
+  alias DB.Schema.Comment
+  alias DB.Schema.UserAction
 
 
   def flag_comments(comments, nb_flags, reason \\ 1) do

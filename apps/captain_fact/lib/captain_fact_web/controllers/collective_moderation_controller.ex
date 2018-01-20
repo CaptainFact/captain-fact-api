@@ -1,6 +1,6 @@
 defmodule CaptainFactWeb.CollectiveModerationController do
   use CaptainFactWeb, :controller
-  alias CaptainFact.Videos.VideoHashId
+  alias DB.Type.VideoHashId
   alias CaptainFact.Moderation
   alias CaptainFactWeb.UserActionView
 

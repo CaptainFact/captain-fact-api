@@ -37,7 +37,6 @@ config :captain_fact, CaptainFactWeb.Endpoint,
   ]
 
 # Guardian + Ueberauth
-
 config :guardian, Guardian,
   secret_key: dev_secret
 
@@ -51,17 +50,6 @@ config :logger, :console, format: "[$level] $message\n"
 # Set a higher stacktrace during development. Avoid configuring such
 # in production as building large stacktraces may be expensive.
 config :phoenix, :stacktrace_depth, 20
-
-# Configure file upload
-config :arc, storage: Arc.Storage.Local
-
-# Configure your database
-config :captain_fact, CaptainFact.Repo,
-  username: "postgres",
-  password: "postgres",
-  database: "captain_fact_dev",
-  hostname: "localhost",
-  pool_size: 10
 
 # Mails
 config :captain_fact, CaptainFact.Mailer, adapter: Bamboo.LocalAdapter

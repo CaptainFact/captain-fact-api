@@ -3,11 +3,15 @@ defmodule CaptainFact.Moderation.Updater do
   require Logger
   import Ecto.Query
 
-  alias CaptainFact.Repo
-  alias CaptainFact.Actions.{UserAction, Flag, Recorder}
-  alias CaptainFact.Moderation.UserFeedback
+  alias DB.Repo
+  alias DB.Schema.UserFeedback
+  alias DB.Schema.UserAction
+  alias DB.Schema.Comment
+  alias DB.Schema.Flag
+
+  alias CaptainFact.Actions.Recorder
   alias CaptainFact.Comments
-  alias CaptainFact.Comments.Comment
+
 
   @name __MODULE__
   @min_nb_feedbacks_to_take_action 3
@@ -41,7 +45,7 @@ defmodule CaptainFact.Moderation.Updater do
   ## Examples
 
     iex> alias CaptainFact.Moderation.Updater
-    iex> alias CaptainFact.Actions.UserAction
+    iex> alias DB.Schema.UserAction
     iex> Updater.reputation_change(UserAction.type(:action_banned), nil, %{"score" => 1})
     -25
     iex> Updater.reputation_change(UserAction.type(:action_banned), nil, %{"score" => 0.66})

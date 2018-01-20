@@ -8,13 +8,18 @@ defmodule CaptainFact.Actions.Analyzers.Flags do
   require Logger
   import Ecto.Query
 
-  alias CaptainFact.Repo
-  alias CaptainFact.Comments.Comment
-  alias CaptainFact.Actions.{UserAction, UsersActionsReport, ReportManager, Flagger}
+  alias DB.Repo
+  alias DB.Schema.Comment
+  alias DB.Schema.UserAction
+  alias DB.Schema.UsersActionsReport
+  alias DB.Schema.Comment
+  alias DB.Schema.Comment
+
+  alias CaptainFact.Actions.{ReportManager, Flagger}
   alias CaptainFact.Moderation
 
   @name __MODULE__
-  @analyser_id UsersActionsReport.analyser_id(__MODULE__)
+  @analyser_id UsersActionsReport.analyser_id(:flags)
 
 
   # --- Client API ---
@@ -89,13 +94,13 @@ defmodule CaptainFact.Actions.Analyzers.Flags do
   def broadcast_report(:comment, comment_id) do
     comment_context = Repo.one!(
       from c in Comment,
-      join: s in CaptainFact.Speakers.Statement, on: c.statement_id == s.id,
+      join: s in DB.Schema.Statement, on: c.statement_id == s.id,
       where: c.id == ^comment_id,
       select: %{video_id: s.video_id, statement_id: s.id}
     )
     # TODO Use a event bus here
     CaptainFactWeb.Endpoint.broadcast(
-      "comments:video:#{CaptainFact.Videos.VideoHashId.encode(comment_context.video_id)}", "comment_removed",
+      "comments:video:#{DB.Type.VideoHashId.encode(comment_context.video_id)}", "comment_removed",
       %{id: comment_id, statement_id: comment_context.statement_id}
     )
   end

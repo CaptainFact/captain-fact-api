@@ -4,13 +4,14 @@ defmodule CaptainFact.Comments.CommentsTest do
   import CaptainFact.TestUtils
 
   import CaptainFact.Support.MetaPage
-  import CaptainFact.Actions.UserAction, only: [video_debate_context: 1]
+  import DB.Schema.UserAction, only: [video_debate_context: 1]
+  alias DB.Schema.UserAction
+  alias DB.Schema.Comment
+  alias DB.Schema.Source
 
   alias CaptainFact.Comments
-  alias CaptainFact.Comments.Comment
   alias CaptainFact.TokenGenerator
-  alias CaptainFact.Sources.{Source, Fetcher}
-  alias CaptainFact.Actions.UserAction
+  alias CaptainFact.Sources.Fetcher
 
 
   @valid_source_attributes %{

@@ -1,8 +1,9 @@
 defmodule CaptainFact.Accounts.GuardianSerializer do
   @behaviour Guardian.Serializer
 
-  alias CaptainFact.Repo
-  alias CaptainFact.Accounts.User
+  alias DB.Repo
+  alias DB.Schema.User
+
   def for_token(%User{id: id}), do: {:ok, "User:#{id}"}
   def for_token(_), do: {:error, "Unknown resource type"}
 

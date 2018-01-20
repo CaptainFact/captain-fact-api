@@ -3,10 +3,14 @@ defmodule CaptainFact.Actions.Flagger do
   require Logger
   import Ecto.Query
 
-  alias CaptainFact.Accounts.{UserPermissions, User}
-  alias CaptainFact.Repo
-  alias CaptainFact.Actions.{UserAction, Flag, Recorder}
-  alias CaptainFact.Comments.Comment
+  alias DB.Repo
+  alias DB.Schema.User
+  alias DB.Schema.Comment
+  alias DB.Schema.UserAction
+  alias DB.Schema.Flag
+
+  alias CaptainFact.Accounts.UserPermissions
+  alias CaptainFact.Actions.Recorder
 
 
   @doc"""

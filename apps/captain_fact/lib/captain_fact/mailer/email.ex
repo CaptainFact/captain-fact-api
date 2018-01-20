@@ -2,8 +2,11 @@ defmodule CaptainFact.Email do
   import Bamboo.Email
   require CaptainFact.Actions.Analyzers.Reputation
 
-  alias CaptainFact.Repo
-  alias CaptainFact.Accounts.{ResetPasswordRequest, InvitationRequest, User}
+  alias DB.Repo
+  alias DB.Schema.ResetPasswordRequest
+  alias DB.Schema.InvitationRequest
+  alias DB.Schema.User
+
   alias CaptainFact.Actions.Analyzers.Reputation
 
   # TODO GetText i18n
@@ -71,6 +74,8 @@ defmodule CaptainFact.Email do
     |> to(email)
     |> subject(invitation_subject(invited_by))
     |> build_html_body("""
+       Your invitation to try CaptainFact is ready !
+       <br/><br/>
        Please follow this link to create your account:
        <a href="#{frontend_url()}/signup?invitation_token=#{token}">Create account</a>
        """)

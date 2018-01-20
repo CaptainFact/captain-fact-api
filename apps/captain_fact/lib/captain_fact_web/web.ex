@@ -30,7 +30,7 @@ defmodule CaptainFactWeb do
     quote do
       use Phoenix.Controller, namespace: CaptainFactWeb
 
-      alias CaptainFact.Repo
+      alias DB.Repo
       import Ecto
       import Ecto.Query
 
@@ -66,7 +66,7 @@ defmodule CaptainFactWeb do
     quote do
       use Phoenix.Channel
 
-      alias CaptainFact.Repo
+      alias DB.Repo
       import Ecto
       import Ecto.Query
       import CaptainFactWeb.Gettext

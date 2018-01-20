@@ -3,9 +3,11 @@ defmodule CaptainFact.Moderation.UpdaterTest do
   import CaptainFact.TestUtils
   doctest CaptainFact.Moderation.Updater
 
-  alias CaptainFact.Comments.Comment
-  alias CaptainFact.Accounts.User
-  alias CaptainFact.Actions.{UserAction, Flag}
+  alias DB.Schema.Comment
+  alias DB.Schema.User
+  alias DB.Schema.Flag
+  alias DB.Schema.UserAction
+
   alias CaptainFact.Moderation
   alias CaptainFact.Moderation.Updater
 

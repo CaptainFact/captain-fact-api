@@ -9,12 +9,16 @@ defmodule CaptainFact.Actions.Analyzers.Reputation do
   require Logger
   import Ecto.Query
 
-  alias CaptainFact.Repo
-  alias CaptainFact.Accounts.{User}
-  alias CaptainFact.Actions.{UserAction, UsersActionsReport, ReportManager}
+  alias DB.Repo
+  alias DB.Schema.User
+  alias DB.Schema.UserAction
+  alias DB.Schema.UsersActionsReport
+
+  alias CaptainFact.Actions.ReportManager
+
 
   @name __MODULE__
-  @analyser_id UsersActionsReport.analyser_id(__MODULE__)
+  @analyser_id UsersActionsReport.analyser_id(:reputation)
   @daily_gain_limit 25
   @actions %{
     UserAction.type(:vote_up) => %{

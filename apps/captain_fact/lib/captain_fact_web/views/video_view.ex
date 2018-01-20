@@ -11,11 +11,11 @@ defmodule CaptainFactWeb.VideoView do
 
   def render("video.json", %{video: video}) do
     %{
-      id: CaptainFact.Videos.VideoHashId.encode(video.id),
+      id: DB.Type.VideoHashId.encode(video.id),
       title: video.title,
       provider: video.provider,
       provider_id: video.provider_id,
-      url: CaptainFact.Videos.Video.build_url(video),
+      url: DB.Schema.Video.build_url(video),
       posted_at: video.inserted_at,
       speakers: render_many(video.speakers, CaptainFactWeb.SpeakerView, "speaker.json"),
       language: video.language

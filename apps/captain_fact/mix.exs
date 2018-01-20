@@ -40,10 +40,7 @@ defmodule CaptainFact.Mixfile do
     [
       {:phoenix, "~> 1.3.0", override: true},
       {:phoenix_pubsub, "~> 1.0"},
-      {:phoenix_ecto, "~> 3.2"},
       {:phoenix_html, "~> 2.6"},
-      {:phoenix_live_reload, "~> 1.0", only: :dev},
-      {:postgrex, ">= 0.0.0"},
       {:gettext, "~> 0.13.1"},
       {:cowboy, "~> 1.0"},
       {:corsica, "~> 0.5"},
@@ -52,11 +49,7 @@ defmodule CaptainFact.Mixfile do
       {:ueberauth_identity, "~> 0.2"},
       {:ueberauth_facebook, "~> 0.6"},
       {:guardian, "~> 0.10"},
-      {:ecto_enum, "~> 1.0"},
-      {:arc, "~> 0.8.0"},
-      {:arc_ecto, "~> 0.7.0"},
       {:floki, "~> 0.17.0"},
-      {:hashids, "~> 2.0"},
       {:html_entities, "~> 0.3"},
       {:httpoison, "~> 0.11.2"},
       {:poison, "~> 2.2.0"},
@@ -68,20 +61,17 @@ defmodule CaptainFact.Mixfile do
       {:hackney, "~> 1.6"},
       {:sweet_xml, "~> 0.6"},
       {:weave, "~> 3.0"},
-      {:slugger, "~> 0.2"},
+      {:burnex, "~> 1.0"},
       {:ex_machina, "~> 2.0"}, # When opensourced, this should only be included in dev and test
       {:faker, "~> 0.7"}, # When opensourced, this should only be included in dev and test
       {:bypass, "~> 0.8", only: :test},
       {:excoveralls, "~> 0.7", only: :test},
-      {:credo, "~> 0.8", only: [:dev, :test], runtime: false}
+      {:credo, "~> 0.8", only: [:dev, :test], runtime: false},
+      {:db, in_umbrella: true}
    ]
   end
 
   defp aliases do
-    [
-      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
-      "ecto.reset": ["ecto.drop", "ecto.setup"],
-      "test": ["ecto.create --quiet", "ecto.migrate", "test"]
-    ]
+    []
   end
 end

@@ -1,8 +1,8 @@
 defmodule CaptainFactGraphql.Resolvers.Comments do
   import Absinthe.Resolution.Helpers, only: [batch: 3]
   import Ecto.Query
-  alias CaptainFact.Comments.Vote
-  alias CaptainFact.Repo
+  alias DB.Repo
+  alias DB.Schema.Vote
 
 
   def score(comment, _args, _info) do

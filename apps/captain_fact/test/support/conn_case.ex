@@ -24,7 +24,7 @@ defmodule CaptainFactWeb.ConnCase do
       # The default endpoint for testing
       @endpoint CaptainFactWeb.Endpoint
 
-      alias CaptainFact.Repo
+      alias DB.Repo
 
       def build_authenticated_conn(user) do
         { :ok, token, _ } = Guardian.encode_and_sign(user)
@@ -35,9 +35,9 @@ defmodule CaptainFactWeb.ConnCase do
   end
 
   setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(CaptainFact.Repo)
+    :ok = Ecto.Adapters.SQL.Sandbox.checkout(DB.Repo)
     unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(CaptainFact.Repo, {:shared, self()})
+      Ecto.Adapters.SQL.Sandbox.mode(DB.Repo, {:shared, self()})
     end
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end

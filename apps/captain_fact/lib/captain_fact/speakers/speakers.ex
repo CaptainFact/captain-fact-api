@@ -5,8 +5,9 @@ defmodule CaptainFact.Speakers do
 
   import Ecto.Query
 
-  alias CaptainFact.Repo
-  alias CaptainFact.Speakers.{Speaker, Picture}
+  alias DB.Repo
+  alias DB.Schema.Speaker
+  alias DB.Type.SpeakerPicture
 
 
   @doc"""
@@ -14,7 +15,7 @@ defmodule CaptainFact.Speakers do
   Returns {:ok, speaker} if success, {:error, reason} otherwise
   """
   def fetch_picture(speaker, picture_url) do
-    case Picture.store({picture_url, speaker}) do
+    case SpeakerPicture.store({picture_url, speaker}) do
       {:ok, picture} ->
         speaker
         |> Ecto.Changeset.change(picture: %{file_name: picture, updated_at: Ecto.DateTime.utc})

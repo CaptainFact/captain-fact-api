@@ -6,7 +6,7 @@ defmodule CaptainFact.AccountsTest do
   alias CaptainFact.Actions.Analyzers.{Reputation, Achievements}
 
   describe "reset_password_requests" do
-    alias CaptainFact.Accounts.ResetPasswordRequest
+    alias DB.Schema.ResetPasswordRequest
     alias CaptainFact.Accounts.UserPermissions.PermissionsError
 
     # Request
@@ -180,11 +180,11 @@ defmodule CaptainFact.AccountsTest do
     end
 
     test "delete invitation request after creating the user" do
-      Repo.delete_all(Accounts.InvitationRequest)
+      Repo.delete_all(DB.Schema.InvitationRequest)
       invit = insert(:invitation_request)
       user_params = build_user_params()
       Accounts.create_account(user_params, invit.token)
-      assert Repo.get(Accounts.InvitationRequest, invit.id) == nil
+      assert Repo.get(DB.Schema.InvitationRequest, invit.id) == nil
     end
 
     test "sends an email to welcome the user" do
@@ -207,7 +207,7 @@ defmodule CaptainFact.AccountsTest do
       Accounts.confirm_email!(user.email_confirmation_token)
       Reputation.update()
       Achievements.update()
-      updated_user = Repo.get(Accounts.User, user.id)
+      updated_user = Repo.get(DB.Schema.User, user.id)
 
       assert updated_user.email_confirmed
       assert updated_user.email_confirmation_token == nil
@@ -220,7 +220,7 @@ defmodule CaptainFact.AccountsTest do
       user = insert(:user)
       achievement = Accounts.Achievement.get(:bulletproof)
       Accounts.unlock_achievement(user, achievement)
-      updated = Repo.get(Accounts.User, user.id)
+      updated = Repo.get(DB.Schema.User, user.id)
       assert achievement in updated.achievements
     end
   end

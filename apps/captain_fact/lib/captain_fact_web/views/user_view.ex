@@ -21,8 +21,8 @@ defmodule CaptainFactWeb.UserView do
       name: user.name,
       username: user.username,
       reputation: user.reputation,
-      picture_url: CaptainFact.Accounts.UserPicture.url({user.picture_url, user}, :thumb),
-      mini_picture_url: CaptainFact.Accounts.UserPicture.url({user.picture_url, user}, :mini_thumb),
+      picture_url: DB.Type.UserPicture.url({user.picture_url, user}, :thumb),
+      mini_picture_url: DB.Type.UserPicture.url({user.picture_url, user}, :mini_thumb),
       registered_at: user.inserted_at,
       achievements: user.achievements
     }
@@ -36,8 +36,8 @@ defmodule CaptainFactWeb.UserView do
       name: user.name,
       username: user.username,
       reputation: user.reputation,
-      picture_url: CaptainFact.Accounts.UserPicture.url({user.picture_url, user}, :thumb),
-      mini_picture_url: CaptainFact.Accounts.UserPicture.url({user.picture_url, user}, :mini_thumb),
+      picture_url: DB.Type.UserPicture.url({user.picture_url, user}, :thumb),
+      mini_picture_url: DB.Type.UserPicture.url({user.picture_url, user}, :mini_thumb),
       locale: user.locale,
       registered_at: user.inserted_at,
       achievements: user.achievements

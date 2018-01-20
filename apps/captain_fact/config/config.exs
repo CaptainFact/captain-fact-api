@@ -9,8 +9,8 @@ use Mix.Config
 # General application configuration
 config :captain_fact,
   env: Mix.env,
-  ecto_repos: [CaptainFact.Repo],
-  source_url_regex: ~r/^https?:\/\/[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/,
+  ecto_repos: [DB.Repo],
+  source_url_regex: ~r/^https?:\/\/[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/, # TODO [Refactor] Remove
   cors_origins: [],
   erlang_cookie: :default_config_cookie # Set secrets/erlang_node if running in distributed mode
 
@@ -21,13 +21,9 @@ config :captain_fact, CaptainFactWeb.Endpoint,
   pubsub: [name: CaptainFact.PubSub, adapter: Phoenix.PubSub.PG2],
   server: true
 
-# Database: use postgres
-config :captain_fact, CaptainFact.Repo,
-  adapter: Ecto.Adapters.Postgres,
-  pool_size: 20
-
 # Configure scheduler
 config :captain_fact, CaptainFact.Scheduler,
+  global: true,
   jobs: [
     # Actions analysers
     {{:extended, "*/5 * * * * *"}, {CaptainFact.Actions.Analyzers.Votes, :update, []}}, # Every 5 seconds

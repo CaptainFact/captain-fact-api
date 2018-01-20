@@ -1,8 +1,8 @@
 defmodule CaptainFact.VideoDebate.History do
   import Ecto.Query
 
-  alias CaptainFact.Repo
-  alias CaptainFact.Actions.UserAction
+  alias DB.Repo
+  alias DB.Schema.UserAction
 
   @allowed_entities [
     UserAction.entity(:statement),

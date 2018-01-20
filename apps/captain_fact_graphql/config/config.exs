@@ -8,7 +8,7 @@ use Mix.Config
 # General application configuration
 config :captain_fact_graphql,
   namespace: CaptainFactGraphql,
-  ecto_repos: [CaptainFact.Repo],
+  ecto_repos: [DB.Repo],
   basic_auth: [
     username: "captain",
     password: "Will be replaced by config runtime, see weave.ex",
@@ -26,10 +26,6 @@ config :captain_fact_graphql, CaptainFactGraphqlWeb.Endpoint,
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
-
-config :weave,
-  environment_prefix: "CF_",
-  loaders: [Weave.Loaders.Environment]
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

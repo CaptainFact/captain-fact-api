@@ -9,4 +9,6 @@ defmodule CaptainFact.Accounts.Achievement do
   def get(:bulletproof),        do: 4
   def get(:you_are_fake_news),  do: 5
   def get(:social_networks),    do: 6
+
+  # TODO [Refactor] Remove
 end

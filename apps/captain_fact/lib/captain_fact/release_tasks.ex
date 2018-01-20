@@ -8,9 +8,9 @@ defmodule CaptainFact.ReleaseTasks do
     :logger
   ]
 
-  @myapps [:captain_fact]
+  @myapps [:captain_fact, :db]
 
-  @repos [CaptainFact.Repo]
+  @repos [DB.Repo]
 
   def migrate do
     IO.puts "Loading captainfact for migrations.."
@@ -39,7 +39,7 @@ defmodule CaptainFact.ReleaseTasks do
   def seed_politicians_from_github() do
     init()
     Application.ensure_all_started(:httpoison)
-    seed_script = Path.join([priv_dir(:captain_fact), "repo", "seed_politicians.exs"])
+    seed_script = Path.join([priv_dir(:db), "repo", "seed_politicians.exs"])
     [{module, _}] = Code.load_file(seed_script)
 
     url = "https://raw.githubusercontent.com/CaptainFact/captain-fact-data/master/Wikidata/data/politicians_born_after_1945_having_a_picture.csv"
@@ -69,7 +69,7 @@ defmodule CaptainFact.ReleaseTasks do
 
   defp run_migrations_for(app) do
     IO.puts "Running migrations for #{app}"
-    Ecto.Migrator.run(CaptainFact.Repo, migrations_path(app), :up, all: true)
+    Ecto.Migrator.run(DB.Repo, migrations_path(app), :up, all: true)
   end
 
   defp migrations_path(app), do: Path.join([priv_dir(app), "repo", "migrations"])

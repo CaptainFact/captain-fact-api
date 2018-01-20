@@ -6,8 +6,8 @@ defmodule CaptainFact.Accounts.UserPermissions do
   require Logger
   import Ecto.Query
 
-  alias CaptainFact.Repo
-  alias CaptainFact.Accounts.User
+  alias DB.Repo
+  alias DB.Schema.User
   alias CaptainFact.Actions.Recorder
   defmodule PermissionsError do
     defexception message: "forbidden", plug_status: 403
