@@ -4,32 +4,39 @@ Staging-[![pipeline status](https://gitlab.com/CaptainFact/captain-fact-api/badg
 &nbsp;&nbsp;
 Master-[![pipeline status](https://gitlab.com/CaptainFact/captain-fact-api/badges/master/pipeline.svg)](https://gitlab.com/CaptainFact/captain-fact-api/commits/master)
 
-## Project structure
+## Project architecture
 
 Elixir offers very nice ways to separate concerns and work with microservices.
 This application is organized as an [umbrella project](https://elixir-lang.org/getting-started/mix-otp/dependencies-and-umbrella-apps.html)
 which allows us to divide CaptainFact API into small apps.
 
-It currently looks like this:
+* Current architecture (blue = deployed releases, others = libraries)
 
 ```mermaid
 graph BT;
     CaptainFact[Core, REST API and Jobs] --> DB[DB - Repositroty and schemas];
     GraphQL[GraphQL API] --> DB;
+    
+    style CaptainFact fill:#BBF;
+    style GraphQL fill:#BBF;
 ```
 
-Future refactors will make it look like this:
+* Future architecture (blue = deployed releases, others = libraries)
+
 ```mermaid
 graph BT;
     Core --> DB[DB - Repositroty and schemas];
     GraphQL[GraphQL API] --> Core;
     Jobs --> Core;
     REST_API[REST API] --> Core;
+    
+    style GraphQL fill:#BBF;
+    style REST_API fill:#BBF;
+    style Jobs fill:#BBF;
+    style Core fill:#BBF;
 ```
 
 ### File structure
-
-Here is a glimpse of the file structure:
 
 
 ```
