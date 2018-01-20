@@ -9,9 +9,11 @@ defmodule CaptainFact.Moderation do
   import Ecto.Query
 
   alias DB.Repo
-  alias CaptainFact.Moderation.UserFeedback
+  alias DB.Schema.UserFeedback
+  alias DB.Schema.UserAction
+  alias DB.Schema.Flag
+
   alias CaptainFact.Accounts.UserPermissions
-  alias CaptainFact.Actions.{UserAction, Flag}
 
 
   @default_nb_flags_report 1
@@ -131,7 +133,7 @@ defmodule CaptainFact.Moderation do
     # This ugly thing load data associated with comments creating actions, 1 query per action
     # It is acceptable as this is only used by a few priviledged users but in the future
     # we may want to store comments texts changes directly in :changes to avoid doing this
-    CaptainFact.Comments.Comment
+    DB.Schema.Comment
     |> where(id: ^action.entity_id)
     |> preload(:source)
     |> Repo.one()

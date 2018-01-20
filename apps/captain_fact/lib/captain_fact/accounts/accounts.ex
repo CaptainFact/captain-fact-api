@@ -8,10 +8,13 @@ defmodule CaptainFact.Accounts do
 
   alias Ecto.Multi
   alias DB.Repo
-  alias CaptainFact.Email
+  alias DB.Type.Achievement
+  alias DB.Schema.User
+  alias DB.Schema.ResetPasswordRequest
+  alias DB.Schema.InvitationRequest
 
-  alias CaptainFact.Accounts.{User, ResetPasswordRequest, UserPermissions, InvitationRequest, Achievement}
-  alias CaptainFact.Accounts.{UsernameGenerator, ForbiddenEmailProviders, Achievement}
+  alias CaptainFact.Email
+  alias CaptainFact.Accounts.{UsernameGenerator, UserPermissions}
   alias CaptainFact.Actions.Recorder
   alias CaptainFact.TokenGenerator
 
@@ -209,7 +212,7 @@ defmodule CaptainFact.Accounts do
   def request_invitation(email, invited_by_id)
   when is_nil(invited_by_id) or is_integer(invited_by_id) do
     with true <- Regex.match?(User.email_regex, email),
-         false <- ForbiddenEmailProviders.is_forbidden?(email)
+         false <- Burnex.is_burner?(email)
     do
       case Repo.get_by(InvitationRequest, email: email) do
         nil ->

@@ -4,8 +4,8 @@ defmodule CaptainFact.TestUtils do
   import ExUnit.Assertions
 
   alias DB.Repo
-  alias CaptainFact.Comments.Comment
-  alias CaptainFact.Actions.UserAction
+  alias DB.Schema.Comment
+  alias DB.Schema.UserAction
 
 
   def flag_comments(comments, nb_flags, reason \\ 1) do

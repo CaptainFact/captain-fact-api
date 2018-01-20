@@ -4,9 +4,10 @@ defmodule CaptainFactWeb.UserControllerTest do
   import Ecto.Query
 
   alias DB.Repo
-  alias CaptainFact.Accounts.User
-  alias CaptainFact.Actions.UserAction
-  alias CaptainFact.Comments.Comment
+  alias DB.Schema.User
+  alias DB.Schema.UserAction
+  alias DB.Schema.Comment
+  alias DB.Schema.ResetPasswordRequest
 
 
   describe "Get user" do
@@ -74,7 +75,7 @@ defmodule CaptainFactWeb.UserControllerTest do
       |> response(204)
 
       # Verify token
-      req = Repo.get_by!(CaptainFact.Accounts.ResetPasswordRequest, user_id: user.id)
+      req = Repo.get_by!(ResetPasswordRequest, user_id: user.id)
       resp =
         get(build_conn(), "/users/reset_password/verify/#{req.token}")
         |> json_response(200)

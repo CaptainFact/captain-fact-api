@@ -8,10 +8,14 @@ defmodule CaptainFact.Videos do
 
   alias Ecto.Multi
   alias DB.Repo
-  alias CaptainFact.Actions.{Recorder, UserAction}
+  alias DB.Schema.Video
+  alias DB.Schema.UserAction
+  alias DB.Schema.Statement
+  alias DB.Schema.Speaker
+  alias DB.Schema.VideoSpeaker
+
+  alias CaptainFact.Actions.Recorder
   alias CaptainFact.Accounts.UserPermissions
-  alias CaptainFact.Speakers.{Statement, Speaker, VideoSpeaker}
-  alias CaptainFact.Videos.Video
 
 
   @doc"""

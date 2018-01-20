@@ -2,9 +2,11 @@ defmodule CaptainFactWeb.AuthControllerTest do
   use CaptainFactWeb.ConnCase
   import CaptainFact.Factory
 
-  alias CaptainFactWeb.AuthController
-  alias CaptainFact.Accounts.{User, Achievement}
   alias DB.Repo
+  alias DB.Type.Achievement
+  alias DB.Schema.User
+
+  alias CaptainFactWeb.AuthController
 
   @facebook_default_picture "http://graph.facebook.com/10154431272431347/picture?width=96&height=96"
 

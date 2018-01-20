@@ -10,11 +10,14 @@ defmodule CaptainFact.Actions.Analyzers.Achievements do
   import CaptainFact.Accounts, only: [unlock_achievement: 2]
 
   alias DB.Repo
-  alias CaptainFact.Accounts.User
-  alias CaptainFact.Actions.{UserAction, UsersActionsReport, ReportManager}
+  alias DB.Schema.User
+  alias DB.Schema.UserAction
+  alias DB.Schema.UsersActionsReport
+
+  alias CaptainFact.Actions.ReportManager
 
   @name __MODULE__
-  @analyser_id UsersActionsReport.analyser_id(__MODULE__)
+  @analyser_id UsersActionsReport.analyser_id(:achievements)
   @action_email_confirmed UserAction.type(:email_confirmed)
   @watched_action_types [@action_email_confirmed]
 

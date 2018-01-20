@@ -1,4 +1,4 @@
-defmodule DB.TokenGenerator do
+defmodule DB.Utils.TokenGenerator do
   @doc """
   Generate a strong unique token
   """

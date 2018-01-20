@@ -3,11 +3,15 @@ defmodule CaptainFact.Comments do
   require Logger
 
   alias DB.Repo
-  alias CaptainFact.Comments.{Comment, Vote}
-  alias CaptainFact.Accounts.{UserPermissions, User}
-  alias CaptainFact.Actions.{Recorder, UserAction}
+  alias DB.Schema.Source
+  alias DB.Schema.Comment
+  alias DB.Schema.Vote
+  alias DB.Schema.User
+  alias DB.Schema.UserAction
+
+  alias CaptainFact.Accounts.UserPermissions
+  alias CaptainFact.Actions.Recorder
   alias CaptainFact.Sources
-  alias CaptainFact.Sources.Source
 
 
   # ---- Public API ----

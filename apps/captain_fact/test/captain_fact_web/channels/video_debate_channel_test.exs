@@ -1,7 +1,7 @@
 defmodule CaptainFactWeb.VideoDebateChannelTest do
   use CaptainFactWeb.ChannelCase
   alias CaptainFactWeb.VideoDebateChannel
-  alias CaptainFact.Videos.VideoHashId
+  alias DB.Type.VideoHashId
 
   test "Get video info when connecting" do
     video = insert(:video)

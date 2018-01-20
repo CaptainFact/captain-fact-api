@@ -3,9 +3,11 @@ defmodule CaptainFactWeb.CollectiveModerationControllerTest do
   import CaptainFact.Factory
   import CaptainFact.TestUtils, only: [flag_comments: 2]
 
+  alias DB.Type.VideoHashId
+  alias DB.Schema.UserAction
+  alias DB.Schema.UserFeedback
+
   alias CaptainFact.Moderation
-  alias CaptainFact.Videos.VideoHashId
-  alias CaptainFact.Actions.UserAction
 
 
   test "GET all reported actions for video" do
@@ -28,7 +30,7 @@ defmodule CaptainFactWeb.CollectiveModerationControllerTest do
   end
 
   test "GET random actions to verify" do
-    Repo.delete_all(Moderation.UserFeedback)
+    Repo.delete_all(UserFeedback)
     limit = Moderation.nb_flags_report(:create, :comment)
     comments = [
       insert(:comment, %{text: "I like to move it...."}) |> with_action(),
@@ -58,7 +60,7 @@ defmodule CaptainFactWeb.CollectiveModerationControllerTest do
   end
 
   test "POST feedback" do
-    Repo.delete_all(Moderation.UserFeedback)
+    Repo.delete_all(UserFeedback)
     limit = Moderation.nb_flags_report(:create, :comment)
     comment = insert(:comment) |> with_action() |> flag(limit)
     action = Repo.get_by! UserAction,
@@ -69,7 +71,7 @@ defmodule CaptainFactWeb.CollectiveModerationControllerTest do
     |> post("/moderation/feedback", %{"action_id" => action.id, "value" => value})
     |> response(204)
 
-    assert Repo.get_by(Moderation.UserFeedback, action_id: action.id).value == value
+    assert Repo.get_by(UserFeedback, action_id: action.id).value == value
   end
 
   test "need to be authenticated and have enough reputation for all collective moderation actions", %{conn: conn} do

@@ -35,8 +35,10 @@ defmodule CaptainFactWeb.AuthController do
   use CaptainFactWeb, :controller
   require Logger
 
+  alias DB.Schema.User
+
   alias CaptainFact.Accounts
-  alias CaptainFact.Accounts.{User, Authenticator}
+  alias CaptainFact.Accounts.Authenticator
   alias CaptainFactWeb.{ErrorView, UserView, AuthController }
 
   plug UeberauthWithRedirectUriFixer

@@ -1,7 +1,9 @@
-defmodule CaptainFact.Accounts.InvitationRequest do
+defmodule DB.Schema.InvitationRequest do
   use Ecto.Schema
   import Ecto.Changeset
-  alias CaptainFact.Accounts.{User, InvitationRequest}
+
+  alias DB.Schema.User
+  alias DB.Schema.InvitationRequest
 
 
   schema "invitation_requests" do

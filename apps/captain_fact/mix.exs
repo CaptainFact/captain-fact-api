@@ -61,6 +61,7 @@ defmodule CaptainFact.Mixfile do
       {:hackney, "~> 1.6"},
       {:sweet_xml, "~> 0.6"},
       {:weave, "~> 3.0"},
+      {:burnex, "~> 1.0"},
       {:ex_machina, "~> 2.0"}, # When opensourced, this should only be included in dev and test
       {:faker, "~> 0.7"}, # When opensourced, this should only be included in dev and test
       {:bypass, "~> 0.8", only: :test},
@@ -71,7 +72,6 @@ defmodule CaptainFact.Mixfile do
   end
 
   defp aliases do
-    [
-    ]
+    []
   end
 end

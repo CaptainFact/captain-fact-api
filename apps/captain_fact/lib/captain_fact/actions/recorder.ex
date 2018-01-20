@@ -1,11 +1,11 @@
 defmodule CaptainFact.Actions.Recorder do
   import Ecto.Query, warn: false
-  import CaptainFact.Actions.UserAction, only: [type: 1, entity: 1]
+  import DB.Schema.UserAction, only: [type: 1, entity: 1]
 
   alias Ecto.Multi
   alias DB.Repo
-  alias CaptainFact.Actions.UserAction
-  alias CaptainFact.Accounts.User
+  alias DB.Schema.UserAction
+  alias DB.Schema.User
 
 
   @doc"""

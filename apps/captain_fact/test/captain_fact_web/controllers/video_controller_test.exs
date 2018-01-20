@@ -2,7 +2,7 @@ defmodule CaptainFactWeb.VideoControllerTest do
   use CaptainFactWeb.ConnCase
   import CaptainFact.Factory
 
-  alias CaptainFact.Videos.Video
+  alias DB.Schema.Video
 
   test "GET /videos", %{conn: conn} do
     DB.Repo.delete_all(Video)

@@ -3,8 +3,8 @@ require Logger
 require Arc.Ecto.Schema
 
 alias DB.Repo
-alias DB.Speakers
-alias DB.Speakers.Speaker
+alias DB.Schema.Speaker
+alias CaptainFact.Speakers
 
 
 defmodule SeedPoliticians do
@@ -67,13 +67,4 @@ defmodule SeedPoliticians do
     end
   end
   defp fetch_picture(speaker, _), do: Logger.info("Speaker #{speaker.full_name} already have a picture")
-end
-
-# Allow usage from shell on dev / test environments - when Mix is installed
-if Kernel.function_exported?(Mix, :env, 0) && Application.get_env(:db, :manual_seed) != true do
-  {keywords, args, invalids} = OptionParser.parse(System.argv, strict: [fetch_pictures: :boolean])
-
-  if Enum.count(invalids) == 0 && Enum.count(args) >= 1,
-    do: SeedPoliticians.seed(List.first(args), Keyword.get(keywords, :fetch_pictures), Enum.drop(args, 1)),
-    else: Logger.error "Usage: mix run seed_politicians.exs file.csv [--fetch-pictures] [name_filter] [name_filter2]..."
 end

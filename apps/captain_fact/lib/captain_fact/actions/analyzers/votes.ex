@@ -9,11 +9,15 @@ defmodule CaptainFact.Actions.Analyzers.Votes do
   import Ecto.Query
 
   alias DB.Repo
-  alias CaptainFact.Comments.{Comment}
-  alias CaptainFact.Actions.{UserAction, UsersActionsReport, ReportManager}
+  alias DB.Schema.Comment
+  alias DB.Schema.UserAction
+  alias DB.Schema.UsersActionsReport
+
+  alias CaptainFact.Actions.ReportManager
+
 
   @name __MODULE__
-  @analyser_id UsersActionsReport.analyser_id(__MODULE__)
+  @analyser_id UsersActionsReport.analyser_id(:votes)
   @entity_comment UserAction.entity(:comment)
   @entity_fact UserAction.entity(:fact)
   @watched_actions Enum.map([
@@ -101,7 +105,7 @@ defmodule CaptainFact.Actions.Analyzers.Votes do
   end
 
   defp broadcast_channel("VD:" <> video_id) do
-    "comments:video:#{CaptainFact.Videos.VideoHashId.encode(String.to_integer(video_id))}"
+    "comments:video:#{DB.Type.VideoHashId.encode(String.to_integer(video_id))}"
   end
   defp broadcast_channel(_), do: nil
 end

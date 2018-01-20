@@ -14,7 +14,6 @@ defmodule DB.Mixfile do
       compilers: Mix.compilers,
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
-      aliases: aliases(),
       deps: deps(),
     ]
   end
@@ -45,14 +44,6 @@ defmodule DB.Mixfile do
       {:burnex, "~> 1.0"},
       {:hashids, "~> 2.0"},
       {:faker, "~> 0.7"}, # TODO Only test
-    ]
-  end
-
-  defp aliases do
-    [
-      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
-      "ecto.reset": ["ecto.drop", "ecto.setup"],
-      "test": ["ecto.create --quiet", "ecto.migrate", "test"]
     ]
   end
 end

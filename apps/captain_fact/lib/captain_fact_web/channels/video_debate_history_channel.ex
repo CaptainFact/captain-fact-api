@@ -7,13 +7,18 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
 
   alias Phoenix.View
   alias Ecto.Multi
-  alias CaptainFact.Videos.VideoHashId
+  alias DB.Type.VideoHashId
+  alias DB.Schema.UserAction
+  alias DB.Schema.Statement
+  alias DB.Schema.Speaker
+  alias DB.Schema.VideoSpeaker
+  alias DB.Schema.UserAction
+  alias DB.Schema.UserAction
+
   alias CaptainFact.Accounts.UserPermissions
-  alias CaptainFact.Actions.{Recorder, UserAction}
+  alias CaptainFact.Actions.Recorder
   alias CaptainFact.VideoDebate.History
-  alias CaptainFact.Speakers.{Statement, Speaker, VideoSpeaker}
-  alias CaptainFactWeb.{StatementView, SpeakerView}
-  alias CaptainFactWeb.UserActionView
+  alias CaptainFactWeb.{StatementView, SpeakerView, UserActionView}
 
 
   def join("video_debate_history:" <> video_id_hash, _payload, socket) do

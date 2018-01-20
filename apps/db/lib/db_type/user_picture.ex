@@ -25,7 +25,7 @@ defmodule DB.Type.UserPicture do
   end
 
   def transform(:mini_thumb, _) do
-    {:convert, "-thumbnail 24x24^ -gravity center -extent 48x48 -format jpg", :jpg}
+    {:convert, "-thumbnail 24x24^ -gravity center -extent 24x24 -format jpg", :jpg}
   end
 
   # Override the persisted filenames:

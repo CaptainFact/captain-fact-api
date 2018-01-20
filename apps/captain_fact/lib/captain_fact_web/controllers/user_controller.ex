@@ -1,8 +1,10 @@
 defmodule CaptainFactWeb.UserController do
   use CaptainFactWeb, :controller
 
+  alias DB.Schema.User
+
   alias CaptainFact.Accounts
-  alias CaptainFact.Accounts.{User, UserPermissions}
+  alias CaptainFact.Accounts.UserPermissions
   alias CaptainFactWeb.UserView
 
 

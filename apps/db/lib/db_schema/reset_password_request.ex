@@ -1,4 +1,4 @@
-defmodule CaptainFact.Accounts.ResetPasswordRequest do
+defmodule DB.Schema.ResetPasswordRequest do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -7,7 +7,7 @@ defmodule CaptainFact.Accounts.ResetPasswordRequest do
   @derive {Phoenix.Param, key: :token}
   schema "accounts_reset_password_requests" do
     field :source_ip, :string
-    belongs_to :user, CaptainFact.Accounts.User
+    belongs_to :user, DB.Schema.User
 
     timestamps(updated_at: false)
   end
@@ -17,7 +17,7 @@ defmodule CaptainFact.Accounts.ResetPasswordRequest do
   def changeset(model, attrs) do
     model
     |> cast(attrs, [:source_ip, :user_id])
-    |> change(token: CaptainFact.TokenGenerator.generate(@token_length))
+    |> change(token: DB.Utils.TokenGenerator.generate(@token_length))
     |> validate_required([:source_ip, :user_id, :token])
   end
 end

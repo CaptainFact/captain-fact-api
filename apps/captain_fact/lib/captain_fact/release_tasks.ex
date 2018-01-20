@@ -39,7 +39,7 @@ defmodule CaptainFact.ReleaseTasks do
   def seed_politicians_from_github() do
     init()
     Application.ensure_all_started(:httpoison)
-    seed_script = Path.join([priv_dir(:captain_fact), "repo", "seed_politicians.exs"])
+    seed_script = Path.join([priv_dir(:db), "repo", "seed_politicians.exs"])
     [{module, _}] = Code.load_file(seed_script)
 
     url = "https://raw.githubusercontent.com/CaptainFact/captain-fact-data/master/Wikidata/data/politicians_born_after_1945_having_a_picture.csv"

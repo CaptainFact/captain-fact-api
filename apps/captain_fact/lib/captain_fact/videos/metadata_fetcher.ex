@@ -3,7 +3,7 @@ defmodule CaptainFact.Videos.MetadataFetcher do
   Methods to fetch metadata (title, language) from videos
   """
 
-  alias CaptainFact.Videos.Video
+  alias DB.Schema.Video
 
   @doc """
   Fetch metadata from video. Returns an object containing  :title, :url and :language

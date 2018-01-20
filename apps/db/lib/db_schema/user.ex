@@ -98,7 +98,7 @@ defmodule DB.Schema.User do
 
   @token_length 32
   defp generate_email_verification_token(changeset, false),
-    do: put_change(changeset, :email_confirmation_token, DB.TokenGenerator.generate(@token_length))
+    do: put_change(changeset, :email_confirmation_token, DB.Utils.TokenGenerator.generate(@token_length))
   defp generate_email_verification_token(changeset, true),
     do: put_change(changeset, :email_confirmation_token, nil)
 

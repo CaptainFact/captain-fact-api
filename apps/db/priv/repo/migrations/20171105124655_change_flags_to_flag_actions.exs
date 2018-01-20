@@ -1,5 +1,7 @@
 defmodule DB.Repo.Migrations.ChangeFlagsToFlagActions do
   use Ecto.Migration
+  import Ecto.Query
+
   alias DB.Repo
 
 
@@ -10,7 +12,7 @@ defmodule DB.Repo.Migrations.ChangeFlagsToFlagActions do
   """
   def change do
     # Remove all entries and deprecated indexes
-    Repo.delete_all(DB.Actions.Flag)
+    Repo.delete_all(from(f in "flags"))
     drop unique_index(:flags, [:source_user_id, :entity, :entity_id])
 
     # Alter table

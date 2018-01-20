@@ -1,6 +1,7 @@
 defmodule CaptainFact.VideoDebate.ActionCreator do
-  alias CaptainFact.Speakers.{ Speaker, Statement }
-  alias CaptainFact.Actions.UserAction
+  alias DB.Schema.UserAction
+  alias DB.Schema.Speaker
+  alias DB.Schema.Statement
 
 
   @entity_statement UserAction.entity(:statement)

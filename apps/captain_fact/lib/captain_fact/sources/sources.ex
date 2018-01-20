@@ -2,8 +2,10 @@ defmodule CaptainFact.Sources do
   import Ecto.Query
 
   alias DB.Repo
-  alias CaptainFact.Comments.Comment
-  alias CaptainFact.Sources.{Source, Fetcher}
+  alias DB.Schema.Source
+  alias DB.Schema.Comment
+
+  alias CaptainFact.Sources.Fetcher
 
 
   def update_source_metadata(base_source = %Source{}, callback \\ nil) do

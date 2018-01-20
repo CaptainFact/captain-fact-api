@@ -11,7 +11,7 @@ defmodule CaptainFactWeb.SpeakerView do
       slug: speaker.slug,
       full_name: speaker.full_name,
       title: speaker.title,
-      picture: CaptainFact.Speakers.Picture.url({speaker.picture, speaker}, :thumb),
+      picture: DB.Type.SpeakerPicture.url({speaker.picture, speaker}, :thumb),
       is_user_defined: speaker.is_user_defined,
       country: speaker.country,
       wikidata_item_id: speaker.wikidata_item_id

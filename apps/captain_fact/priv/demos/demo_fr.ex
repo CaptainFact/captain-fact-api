@@ -6,8 +6,8 @@ defmodule CaptainFact.DemoFr do
   @moduledoc"""
   Run a demo in real-time. To use it from iex console:
 
-    iex> c "priv/demos/demo_fr.ex"
-    iex> CaptainFact.DemoFr.init_and_run
+      iex> c "apps/captain_fact/priv/demos/demo_fr.ex"
+      iex> CaptainFact.DemoFr.init_and_run
   """
 
   use CaptainFactWeb.ChannelCase
@@ -15,17 +15,22 @@ defmodule CaptainFact.DemoFr do
   import CaptainFact.VideoDebate.ActionCreator, only: [action_add: 3, action_create: 3]
 
   alias Ecto.Multi
-  alias CaptainFact.Videos.{Video, VideoHashId}
-  alias CaptainFact.Speakers.{Speaker, Statement, VideoSpeaker}
-  alias CaptainFact.Accounts.User
-  alias CaptainFact.Comments
   alias DB.Repo
+  alias DB.Schema.Video
+  alias DB.Schema.Speaker
+  alias DB.Schema.VideoSpeaker
+  alias DB.Schema.Statement
+  alias DB.Schema.User
+  alias DB.Type.VideoHashId
+
+  alias CaptainFact.Comments
+
 
   @video_url "https://www.youtube.com/watch?v=OhWRT3PhMJs"
   @video_youtube_id "OhWRT3PhMJs"
   @video_title "Le replay du grand débat de la présidentielle"
-  @min_sleep 0
-  @max_sleep 10 # 0-10
+  @min_sleep 500 # In milliseconds
+  @max_sleep 3000 # In milliseconds
   @admin_user_id 1
   @users [
     %{username: "killozor",       name: "Frank Zappa"},
@@ -149,8 +154,7 @@ defmodule CaptainFact.DemoFr do
     )
 
     # Add speakers & statements
-    Application.put_env(:captain_fact, :manual_seed, true)
-    Code.require_file("priv/repo/seed_politicians.exs")
+    Code.require_file("apps/db/priv/repo/seed_politicians.exs")
     SeedPoliticians.seed(
       "../captain-fact-data/Wikidata/data/politicians_born_after_1945_having_a_picture.csv",
       true, Map.keys(@statements)
@@ -210,11 +214,19 @@ defmodule CaptainFact.DemoFr do
 
     # Add replies
     add_replies_task = Task.async(fn ->
-      Process.sleep(comment_base[:wait_after] || @min_sleep + :rand.uniform(@max_sleep - @min_sleep))
+      Process.sleep(comment_base[:wait_after] || rand_sleep_time())
       for reply <- Map.get(comment_base, :replies, []),
         do: add_comment(users, video_id, statement_id, reply, comment.id)
     end)
     if comment_base[:async] != true, do: Task.await(add_replies_task, @max_sleep * 10000)
+  end
+
+  def rand_sleep_time do
+    if @min_sleep < 1 do
+      0
+    else
+      @min_sleep + :rand.uniform(@max_sleep - @min_sleep)
+    end
   end
 
   defp update_score(comment, nil), do: comment

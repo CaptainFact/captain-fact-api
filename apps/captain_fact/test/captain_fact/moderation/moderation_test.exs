@@ -3,7 +3,7 @@ defmodule CaptainFact.ModerationTest do
   import CaptainFact.TestUtils, only: [flag_comments: 2]
   doctest CaptainFact.Moderation
 
-  alias CaptainFact.Actions.UserAction
+  alias DB.Schema.UserAction
   alias CaptainFact.Moderation
 
 

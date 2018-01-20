@@ -9,11 +9,14 @@ defmodule CaptainFactWeb.VideoDebateChannel do
 
   alias Phoenix.View
   alias Ecto.Multi
-  alias CaptainFact.Videos.{VideoHashId, Video}
+  alias DB.Schema.Video
+  alias DB.Schema.Speaker
+  alias DB.Schema.VideoSpeaker
+  alias DB.Type.VideoHashId
+
   alias CaptainFact.Accounts.UserPermissions
   alias CaptainFact.Actions.Recorder
-  alias CaptainFact.Speakers.{ Speaker, VideoSpeaker }
-  alias CaptainFactWeb.{ VideoView, SpeakerView, ChangesetView}
+  alias CaptainFactWeb.{VideoView, SpeakerView, ChangesetView}
 
 
   def join("video_debate:" <> video_hash_id, _payload, socket) do

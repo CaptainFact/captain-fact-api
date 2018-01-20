@@ -24,7 +24,6 @@ defmodule CaptainFact do
       # Other CRON tasks
       worker(CaptainFact.Moderation.Updater, []),
       # Misc workers
-      worker(CaptainFact.Videos.VideoHashId, []), # TODO [DbRefactor] Move
       worker(CaptainFact.Accounts.UsernameGenerator, [])
     ]
 
