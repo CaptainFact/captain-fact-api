@@ -10,6 +10,8 @@ defmodule CaptainFact.Videos.VideoHashId do
   Convert a video integer id to hash
   """
 
+  # TODO [Refactor] Remove
+
   @name __MODULE__
 
   def start_link do

@@ -55,7 +55,7 @@ defmodule CaptainFact.Mixfile do
       {:arc, "~> 0.8.0"},
       {:arc_ecto, "~> 0.7.0"},
       {:floki, "~> 0.17.0"},
-      {:hashids, "~> 2.0"},
+      {:hashids, "~> 2.0"}, # TODO [Refactor] Remove
       {:html_entities, "~> 0.3"},
       {:httpoison, "~> 0.11.2"},
       {:poison, "~> 2.2.0"},

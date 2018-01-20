@@ -7,7 +7,7 @@
   "base64url": {:hex, :base64url, "0.0.1", "36a90125f5948e3afd7be97662a1504b934dd5dac78451ca6e9abf85a10286be", [:rebar], [], "hexpm"},
   "basic_auth": {:hex, :basic_auth, "2.2.2", "802748bd581c3ed836c66bd897478c84cd3d51ae16df227ed26a00d25b67a2af", [:mix], [{:cowboy, "~> 1.0", [hex: :cowboy, repo: "hexpm", optional: false]}, {:plug, "~> 0.14 or ~> 1.0", [hex: :plug, repo: "hexpm", optional: false]}], "hexpm"},
   "bunt": {:hex, :bunt, "0.2.0", "951c6e801e8b1d2cbe58ebbd3e616a869061ddadcc4863d0a2182541acae9a38", [:mix], [], "hexpm"},
-  "burnex": {:git, "https://github.com/Betree/burnex.git", "cf924ec1256eb734292aa5037f19af7334d125f7", []},
+  "burnex": {:hex, :burnex, "1.0.1", "72666949cc92c5394e1a55b87cf5336f4e2b59857b150f1b3a55a9f55c442089", [:mix], [], "hexpm"},
   "bypass": {:hex, :bypass, "0.8.1", "16d409e05530ece4a72fabcf021a3e5c7e15dcc77f911423196a0c551f2a15ca", [:mix], [{:cowboy, "~> 1.0", [hex: :cowboy, repo: "hexpm", optional: false]}, {:plug, "~> 1.0", [hex: :plug, repo: "hexpm", optional: false]}], "hexpm"},
   "certifi": {:hex, :certifi, "1.2.1", "c3904f192bd5284e5b13f20db3ceac9626e14eeacfbb492e19583cf0e37b22be", [:rebar3], [], "hexpm"},
   "comeonin": {:hex, :comeonin, "3.2.0", "cb10995a22aed6812667efb3856f548818c85d85394d8132bc116fbd6995c1ef", [:make, :mix], [{:elixir_make, "~> 0.4", [hex: :elixir_make, repo: "hexpm", optional: false]}], "hexpm"},

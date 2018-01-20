@@ -42,8 +42,9 @@ defmodule DB.Mixfile do
       {:weave, "~> 3.0"},
       {:slugger, "~> 0.2"},
       {:comeonin, "~> 3.0"},
-      {:faker, "~> 0.7", only: :test},
-      {:burnex, github: "Betree/burnex"}
+      {:burnex, "~> 1.0"},
+      {:hashids, "~> 2.0"},
+      {:faker, "~> 0.7"}, # TODO Only test
     ]
   end
 
