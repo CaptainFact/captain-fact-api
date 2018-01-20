@@ -8,6 +8,10 @@ Master-[![pipeline status](https://gitlab.com/CaptainFact/captain-fact-api/badge
 
   * Install dependencies with `mix deps.get`
   * Create and migrate your database with `mix ecto.setup`
+  * Run tests with `mix test` (may generate some warnings, only check final results)
+
+
+# WARNING: Recently refactored. Documentation below may not be up-to-date !
   
 ## Configure
 
