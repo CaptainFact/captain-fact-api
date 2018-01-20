@@ -4,6 +4,60 @@ Staging-[![pipeline status](https://gitlab.com/CaptainFact/captain-fact-api/badg
 &nbsp;&nbsp;
 Master-[![pipeline status](https://gitlab.com/CaptainFact/captain-fact-api/badges/master/pipeline.svg)](https://gitlab.com/CaptainFact/captain-fact-api/commits/master)
 
+## Project structure
+
+Elixir offers very nice ways to separate concerns and work with microservices.
+This application is organized as an [umbrella project](https://elixir-lang.org/getting-started/mix-otp/dependencies-and-umbrella-apps.html)
+which allows us to divide CaptainFact API into small apps.
+
+It currently looks like this:
+
+```mermaid
+graph BT;
+    CaptainFact[Core, REST API and Jobs] --> DB[DB - Repositroty and schemas];
+    GraphQL[GraphQL API] --> DB;
+```
+
+Future refactors will make it look like this:
+```mermaid
+graph BT;
+    Core --> DB[DB - Repositroty and schemas];
+    GraphQL[GraphQL API] --> Core;
+    Jobs --> Core;
+    REST_API[REST API] --> Core;
+```
+
+### File structure
+
+Here is a glimpse of the file structure:
+
+
+```
+.
+├── apps
+│   ├── captain_fact => Currently, a monolith containing REST API, jobs and core functions
+│   │   ├── lib
+│   │   │   ├── captain_fact => Core functions + jobs
+│   │   │   ├── captain_fact_web => REST API
+│   ├── captain_fact_graphql => GraphQL API
+│   └── db => DB repository and schemas
+│       ├── lib
+│       │   ├── db
+│       │   ├── db_schema => Contains all the schemas (Video, Speaker, Comment...etc)
+│       │   ├── db_type => Special types (SpeakerPicture...etc)
+│       │   └── db_utils => Some utils functions
+│       ├── priv
+│       │   ├── repo
+│       │   │   ├── migrations => Contains all the migrations
+├── priv
+│   └── secrets => All your dirty little secrets, loaded at runtime
+├── README.md => You're reading it right now. Are you ?
+├── rel => Release configs & tools
+│   ├── commands => Commands that will be available to run on the release (seed DB...etc)
+│   ├── config.exs => Releases configuration
+│   ├── docker => Docker-specific files & configs
+```
+
 ## Install
 
   * Install dependencies with `mix deps.get`
