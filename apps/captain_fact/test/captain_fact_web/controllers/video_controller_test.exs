@@ -5,7 +5,7 @@ defmodule CaptainFactWeb.VideoControllerTest do
   alias CaptainFact.Videos.Video
 
   test "GET /videos", %{conn: conn} do
-    CaptainFact.Repo.delete_all(Video)
+    DB.Repo.delete_all(Video)
     videos = insert_list(5, :video)
     response =
       conn

@@ -8,7 +8,7 @@ defmodule CaptainFact.Moderation do
   """
   import Ecto.Query
 
-  alias CaptainFact.Repo
+  alias DB.Repo
   alias CaptainFact.Moderation.UserFeedback
   alias CaptainFact.Accounts.UserPermissions
   alias CaptainFact.Actions.{UserAction, Flag}

@@ -4,7 +4,7 @@ defmodule CaptainFactWeb.AuthControllerTest do
 
   alias CaptainFactWeb.AuthController
   alias CaptainFact.Accounts.{User, Achievement}
-  alias CaptainFact.Repo
+  alias DB.Repo
 
   @facebook_default_picture "http://graph.facebook.com/10154431272431347/picture?width=96&height=96"
 

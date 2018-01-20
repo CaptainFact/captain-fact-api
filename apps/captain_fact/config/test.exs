@@ -22,18 +22,6 @@ config :guardian, Guardian,
 # Print only warnings and errors during test
 config :logger, level: :warn
 
-# Configure file upload
-config :arc, storage: Arc.Storage.Local
-
-# Configure your database
-config :captain_fact, CaptainFact.Repo,
-  adapter: Ecto.Adapters.Postgres,
-  username: "postgres",
-  password: "postgres",
-  database: "captain_fact_test",
-  hostname: (if is_nil(System.get_env("POSTGRES_HOST")), do: "localhost", else: System.get_env("POSTGRES_HOST")),
-  pool: Ecto.Adapters.SQL.Sandbox
-
 # Disable CRON tasks on test
 config :quantum, :captain_fact, cron: []
 

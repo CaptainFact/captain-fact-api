@@ -7,7 +7,7 @@ defmodule CaptainFact.Videos do
   import CaptainFact.Videos.MetadataFetcher
 
   alias Ecto.Multi
-  alias CaptainFact.Repo
+  alias DB.Repo
   alias CaptainFact.Actions.{Recorder, UserAction}
   alias CaptainFact.Accounts.UserPermissions
   alias CaptainFact.Speakers.{Statement, Speaker, VideoSpeaker}

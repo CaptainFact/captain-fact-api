@@ -39,7 +39,7 @@ defmodule CaptainFact.ModerationTest do
     statement = insert(:statement)
     comment = insert(:comment, %{statement: statement}) |> with_action() |> flag(limit)
 
-    action = CaptainFact.Repo.get_by(UserAction, type: action_type, entity: action_entity, entity_id: comment.id)
+    action = DB.Repo.get_by(UserAction, type: action_type, entity: action_entity, entity_id: comment.id)
     user = insert(:user, %{reputation: 10000})
     Moderation.feedback!(user, action.id, 1)
 

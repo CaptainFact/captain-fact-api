@@ -4,7 +4,7 @@ defmodule CaptainFact.Actions.Flagger do
   import Ecto.Query
 
   alias CaptainFact.Accounts.{UserPermissions, User}
-  alias CaptainFact.Repo
+  alias DB.Repo
   alias CaptainFact.Actions.{UserAction, Flag, Recorder}
   alias CaptainFact.Comments.Comment
 

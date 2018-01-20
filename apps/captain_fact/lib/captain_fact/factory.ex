@@ -4,7 +4,7 @@ defmodule CaptainFact.Factory do
   give frontend developers the ability to easily create new users and other entitites
   """
 
-  use ExMachina.Ecto, repo: CaptainFact.Repo
+  use ExMachina.Ecto, repo: DB.Repo
 
   alias CaptainFact.Accounts.{User, InvitationRequest}
   alias CaptainFact.Actions.UserAction
@@ -67,7 +67,7 @@ defmodule CaptainFact.Factory do
   end
 
   def with_action(comment = %Comment{}) do
-    comment = CaptainFact.Repo.preload(comment, :user)
+    comment = DB.Repo.preload(comment, :user)
     insert(:user_action, %{
       user: comment.user,
       type: UserAction.type(:create),

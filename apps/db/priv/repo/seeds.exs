@@ -1,5 +1,5 @@
 alias DB.Repo
-alias DB.Accounts.User
+alias DB.Schema.User
 require Logger
 
 

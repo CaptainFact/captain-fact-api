@@ -3,7 +3,7 @@ defmodule CaptainFactWeb.UserControllerTest do
   import CaptainFact.Factory
   import Ecto.Query
 
-  alias CaptainFact.Repo
+  alias DB.Repo
   alias CaptainFact.Accounts.User
   alias CaptainFact.Actions.UserAction
   alias CaptainFact.Comments.Comment

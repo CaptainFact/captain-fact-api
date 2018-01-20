@@ -1,6 +1,6 @@
 defmodule CaptainFact.Actions.ReportManager do
   import Ecto.Query
-  alias CaptainFact.Repo
+  alias DB.Repo
   alias CaptainFact.Actions.UsersActionsReport
 
   def get_last_report(analyser_id) do

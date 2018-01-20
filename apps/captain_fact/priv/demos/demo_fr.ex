@@ -19,7 +19,7 @@ defmodule CaptainFact.DemoFr do
   alias CaptainFact.Speakers.{Speaker, Statement, VideoSpeaker}
   alias CaptainFact.Accounts.User
   alias CaptainFact.Comments
-  alias CaptainFact.Repo
+  alias DB.Repo
 
   @video_url "https://www.youtube.com/watch?v=OhWRT3PhMJs"
   @video_youtube_id "OhWRT3PhMJs"

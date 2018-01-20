@@ -3,7 +3,7 @@ defmodule CaptainFact.Moderation.Updater do
   require Logger
   import Ecto.Query
 
-  alias CaptainFact.Repo
+  alias DB.Repo
   alias CaptainFact.Actions.{UserAction, Flag, Recorder}
   alias CaptainFact.Moderation.UserFeedback
   alias CaptainFact.Comments

@@ -10,8 +10,6 @@ defmodule CaptainFact do
 
     # Define workers and child supervisors to be supervised
     children = [
-      # Start the Ecto repository
-      supervisor(CaptainFact.Repo, []), # TODO [DbRefactor] Remove
       # Start the endpoint when the application starts
       supervisor(CaptainFactWeb.Endpoint, []),
       # Other custom supervisors

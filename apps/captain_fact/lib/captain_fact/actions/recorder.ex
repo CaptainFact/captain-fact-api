@@ -3,7 +3,7 @@ defmodule CaptainFact.Actions.Recorder do
   import CaptainFact.Actions.UserAction, only: [type: 1, entity: 1]
 
   alias Ecto.Multi
-  alias CaptainFact.Repo
+  alias DB.Repo
   alias CaptainFact.Actions.UserAction
   alias CaptainFact.Accounts.User
 

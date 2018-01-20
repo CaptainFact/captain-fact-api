@@ -9,7 +9,7 @@ defmodule CaptainFact.Actions.Analyzers.Achievements do
   import Ecto.Query
   import CaptainFact.Accounts, only: [unlock_achievement: 2]
 
-  alias CaptainFact.Repo
+  alias DB.Repo
   alias CaptainFact.Accounts.User
   alias CaptainFact.Actions.{UserAction, UsersActionsReport, ReportManager}
 

@@ -8,7 +8,7 @@ defmodule CaptainFact.Actions.Analyzers.Votes do
   require Logger
   import Ecto.Query
 
-  alias CaptainFact.Repo
+  alias DB.Repo
   alias CaptainFact.Comments.{Comment}
   alias CaptainFact.Actions.{UserAction, UsersActionsReport, ReportManager}
 

@@ -1,7 +1,7 @@
 defmodule CaptainFact.Sources do
   import Ecto.Query
 
-  alias CaptainFact.Repo
+  alias DB.Repo
   alias CaptainFact.Comments.Comment
   alias CaptainFact.Sources.{Source, Fetcher}
 

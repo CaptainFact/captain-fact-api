@@ -5,7 +5,7 @@ defmodule CaptainFact.Speakers do
 
   import Ecto.Query
 
-  alias CaptainFact.Repo
+  alias DB.Repo
   alias CaptainFact.Speakers.{Speaker, Picture}
 
 

@@ -6,7 +6,7 @@ defmodule CaptainFact.Accounts.Authenticator do
 
   import Ecto.Query
 
-  alias CaptainFact.Repo
+  alias DB.Repo
   alias CaptainFact.Accounts.User
 
 

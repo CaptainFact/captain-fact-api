@@ -6,7 +6,7 @@ defmodule CaptainFact.Accounts.UserPermissions do
   require Logger
   import Ecto.Query
 
-  alias CaptainFact.Repo
+  alias DB.Repo
   alias CaptainFact.Accounts.User
   alias CaptainFact.Actions.Recorder
   defmodule PermissionsError do

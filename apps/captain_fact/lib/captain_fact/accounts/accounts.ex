@@ -7,7 +7,7 @@ defmodule CaptainFact.Accounts do
   require Logger
 
   alias Ecto.Multi
-  alias CaptainFact.Repo
+  alias DB.Repo
   alias CaptainFact.Email
 
   alias CaptainFact.Accounts.{User, ResetPasswordRequest, UserPermissions, InvitationRequest, Achievement}

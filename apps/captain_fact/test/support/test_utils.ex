@@ -3,7 +3,7 @@ defmodule CaptainFact.TestUtils do
   import Ecto.Query
   import ExUnit.Assertions
 
-  alias CaptainFact.Repo
+  alias DB.Repo
   alias CaptainFact.Comments.Comment
   alias CaptainFact.Actions.UserAction
 

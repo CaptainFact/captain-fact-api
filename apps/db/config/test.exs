@@ -5,7 +5,7 @@ use Mix.Config
 config :logger, level: :warn
 
 # Configure file upload
-# config :arc, storage: Arc.Storage.Local
+ config :arc, storage: Arc.Storage.Local
 
 # Configure your database
 config :db, DB.Repo,

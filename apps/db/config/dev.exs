@@ -9,4 +9,4 @@ config :db, DB.Repo,
   hostname: "localhost"
 
 # Configure file upload
-#config :arc, storage: Arc.Storage.Local
+config :arc, storage: Arc.Storage.Local

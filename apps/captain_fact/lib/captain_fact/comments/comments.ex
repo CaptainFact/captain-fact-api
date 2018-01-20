@@ -2,7 +2,7 @@ defmodule CaptainFact.Comments do
   import Ecto.{Query}
   require Logger
 
-  alias CaptainFact.Repo
+  alias DB.Repo
   alias CaptainFact.Comments.{Comment, Vote}
   alias CaptainFact.Accounts.{UserPermissions, User}
   alias CaptainFact.Actions.{Recorder, UserAction}
