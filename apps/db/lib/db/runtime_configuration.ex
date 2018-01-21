@@ -24,7 +24,6 @@ defmodule DB.RuntimeConfiguration do
       _ -> put_in(base, keys, value)
     end
     Application.put_env(app, head, modified)
-    []
   end
 
   defp put_in_repo(keys, value),

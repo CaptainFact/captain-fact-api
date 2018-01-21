@@ -23,7 +23,7 @@ defmodule CaptainFact.Mixfile do
 
   def application do
     [
-      mod: {CaptainFact, []},
+      mod: {CaptainFact.Application, []},
       extra_applications: [:logger]
     ]
   end
@@ -60,7 +60,7 @@ defmodule CaptainFact.Mixfile do
       {:ex_aws, "~> 1.1"},
       {:hackney, "~> 1.6"},
       {:sweet_xml, "~> 0.6"},
-      {:weave, "~> 3.0"},
+      {:weave, "~> 3.1"},
       {:burnex, "~> 1.0"},
       {:ex_machina, "~> 2.0"}, # When opensourced, this should only be included in dev and test
       {:faker, "~> 0.7"}, # When opensourced, this should only be included in dev and test

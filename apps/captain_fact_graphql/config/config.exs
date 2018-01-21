@@ -9,6 +9,7 @@ use Mix.Config
 config :captain_fact_graphql,
   namespace: CaptainFactGraphql,
   ecto_repos: [DB.Repo],
+  env: Mix.env,
   basic_auth: [
     username: "captain",
     password: "Will be replaced by config runtime, see weave.ex",

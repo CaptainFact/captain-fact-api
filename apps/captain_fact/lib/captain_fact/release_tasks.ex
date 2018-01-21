@@ -60,7 +60,7 @@ defmodule CaptainFact.ReleaseTasks do
     Enum.each(@start_apps, &Application.ensure_all_started/1)
 
     # Loading runtime configuration
-    CaptainFact.Weave.configure()
+    CaptainFact.RuntimeConfiguration.configure()
 
     # Start the Repo(s) for myapp
     IO.puts "Starting repos.."

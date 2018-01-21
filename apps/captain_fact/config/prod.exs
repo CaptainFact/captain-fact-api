@@ -15,5 +15,5 @@ config :logger, level: :info
 # Env / Secrets are above everything else
 # Weave loads config from env or secret files
 config :weave,
-  file_directories: ["/run/secrets"],
+  file_directory: "/run/secrets",
   loaders: [Weave.Loaders.File, Weave.Loaders.Environment]

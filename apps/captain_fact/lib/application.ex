@@ -1,4 +1,4 @@
-defmodule CaptainFact do
+defmodule CaptainFact.Application do
   use Application
 
   # See http://elixir-lang.org/docs/stable/elixir/Application.html
@@ -6,7 +6,10 @@ defmodule CaptainFact do
   def start(_type, _args) do
     import Supervisor.Spec
 
-    CaptainFact.Weave.configure()
+    # Load runtime configuration
+    secrets_path = if File.exists?("/run/secrets"), do: "/run/secrets", else: Path.join(:code.priv_dir(:captain_fact), "secrets")
+    Application.put_env(:weave, :file_directory, secrets_path)
+    CaptainFact.RuntimeConfiguration.configure()
 
     # Define workers and child supervisors to be supervised
     children = [
@@ -42,6 +45,7 @@ defmodule CaptainFact do
 
   @doc """
   If Mix is available, returns Mix.env(). If not available (in releases) return :prod
+  deprecated, use Application.get_env(:captain_fact, :env)
   """
   def env() do
     (Kernel.function_exported?(Mix, :env, 0) && Mix.env) || :prod

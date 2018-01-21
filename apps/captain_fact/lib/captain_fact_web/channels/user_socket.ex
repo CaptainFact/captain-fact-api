@@ -16,6 +16,7 @@ defmodule CaptainFactWeb.UserSocket do
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket
 
+  # Connect with token
   def connect(%{"token" => token}, socket) do
     case sign_in(socket, token) do
       {:ok, authed_socket, _guardian_params} ->
@@ -25,8 +26,14 @@ defmodule CaptainFactWeb.UserSocket do
         end
         {:ok, assign(authed_socket, :user_id, user_id)}
       _ ->
+        # Fallback on default socket
         {:ok, assign(socket, :user_id, nil)}
     end
+  end
+
+  # Public connect
+  def connect(_, socket) do
+    {:ok, assign(socket, :user_id, nil)}
   end
 
   def multi_assign(socket, assigns_list) do

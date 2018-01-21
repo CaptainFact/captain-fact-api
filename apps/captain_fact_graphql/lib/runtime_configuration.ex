@@ -1,4 +1,4 @@
-defmodule CaptainFactGraphql.Weave do
+defmodule CaptainFactGraphql.RuntimeConfiguration do
   @moduledoc """
   Provides runtime configuration using env + secret files
   """
@@ -7,7 +7,7 @@ defmodule CaptainFactGraphql.Weave do
 
   # ----- Actual configuration -----
 
-  if Mix.env == :prod do
+  if Application.get_env(:captain_fact_graphql, :env) == :prod do
     weave "basic_auth_password", required: true,
       handler: fn v -> put_in_env(:captain_fact_graphql, [:basic_auth, :password], v) end
   else
@@ -19,10 +19,6 @@ defmodule CaptainFactGraphql.Weave do
   weave "host", handler: fn v -> put_in_endpoint([:url, :host], v) end
   weave "secret_key_base", handler: fn v -> put_in_endpoint([:secret_key_base], v) end
 
-  # No warnings for unknown secrets
-  weave "erlang_cookie", handler: fn _ -> [] end
-  weave "youtube_api_key", handler: fn _ -> [] end
-
   # ----- Configuration utils -----
 
   defp put_in_env(app, [head | keys], value) do
@@ -32,7 +28,6 @@ defmodule CaptainFactGraphql.Weave do
       _ -> put_in(base, keys, value)
     end
     Application.put_env(app, head, modified)
-    []
   end
 
   defp put_in_endpoint(keys, value),

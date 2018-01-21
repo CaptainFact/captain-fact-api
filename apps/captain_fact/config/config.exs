@@ -11,8 +11,7 @@ config :captain_fact,
   env: Mix.env,
   ecto_repos: [DB.Repo],
   source_url_regex: ~r/^https?:\/\/[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/, # TODO [Refactor] Remove
-  cors_origins: [],
-  erlang_cookie: :default_config_cookie # Set secrets/erlang_node if running in distributed mode
+  cors_origins: []
 
 # Configures the endpoint
 config :captain_fact, CaptainFactWeb.Endpoint,

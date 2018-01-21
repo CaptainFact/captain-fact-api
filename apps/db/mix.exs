@@ -38,7 +38,7 @@ defmodule DB.Mixfile do
       {:postgrex, "~> 0.13.3"},
       {:arc, "~> 0.8.0"},
       {:arc_ecto, "~> 0.7.0"},
-      {:weave, "~> 3.0"},
+      {:weave, "~> 3.1"},
       {:slugger, "~> 0.2"},
       {:comeonin, "~> 3.0"},
       {:burnex, "~> 1.0"},

@@ -7,6 +7,8 @@ defmodule DB.Application do
     import Supervisor.Spec, warn: false
 
     # Start by configuring the app with runtime configuration (env + secrets)
+    secrets_path = if File.exists?("/run/secrets"), do: "/run/secrets", else: Path.join(:code.priv_dir(:db), "secrets")
+    Application.put_env(:weave, :file_directory, secrets_path)
     DB.RuntimeConfiguration.configure()
 
     # Define workers and child supervisors to be supervised

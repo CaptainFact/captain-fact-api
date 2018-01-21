@@ -7,7 +7,7 @@ Path.join(["rel", "plugins", "*.exs"])
 |> Enum.map(&Code.eval_file(&1))
 
 use Mix.Releases.Config,
-    default_release: :default,
+    default_release: :captain_fact,
     default_environment: Mix.env()
 
 # Environments
@@ -26,7 +26,7 @@ end
 
 # Releases
 
-release :captain_fact_rest do
+release :captain_fact do
   set version: current_version(:captain_fact)
   set applications: [:runtime_tools]
   set post_start_hook: "rel/hooks/post_start.sh"

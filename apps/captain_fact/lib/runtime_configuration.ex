@@ -1,14 +1,11 @@
-defmodule CaptainFact.Weave do
+defmodule CaptainFact.RuntimeConfiguration do
   @moduledoc """
   Provides runtime configuration using env + secret files
   """
   use Weave
+  require Logger
 
   # ----- Actual configuration -----
-
-  # Ignored (loaded directly)
-  weave "privkey.pem", handler: []
-  weave "fullchain.pem", handler: []
 
   # Global stuff
   weave "frontend_url", handler: fn url -> [
@@ -39,8 +36,9 @@ defmodule CaptainFact.Weave do
 
   # Erlang cookie
   weave "erlang_cookie", handler: fn v ->
+    Logger.info("Loaded erlang cookie from secrets")
     if Node.alive?, do: Node.set_cookie(String.to_atom(v))
-    []
+    :ok
   end
 
   # ----- Configuration utils -----
@@ -52,7 +50,6 @@ defmodule CaptainFact.Weave do
       _ -> put_in(base, keys, value)
     end
     Application.put_env(app, head, modified)
-    []
   end
 
   defp put_in_endpoint(keys, value),
