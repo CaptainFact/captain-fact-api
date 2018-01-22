@@ -40,7 +40,7 @@ test_api:
     - docker network rm $TEST_NETWORK || /bin/true
 
 build_api:
-  state: build
+  stage: build
   only: [tags, triggers, schedules, /^(master|staging)$/]
   tags: [docker, captainfact, api]
   script:
