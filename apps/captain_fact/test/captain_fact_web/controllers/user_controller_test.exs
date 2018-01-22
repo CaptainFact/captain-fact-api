@@ -1,6 +1,6 @@
 defmodule CaptainFactWeb.UserControllerTest do
   use CaptainFactWeb.ConnCase
-  import CaptainFact.Factory
+  import DB.Factory
   import Ecto.Query
 
   alias DB.Repo

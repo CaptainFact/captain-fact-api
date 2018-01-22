@@ -1,6 +1,6 @@
 defmodule CaptainFactWeb.VideoControllerTest do
   use CaptainFactWeb.ConnCase
-  import CaptainFact.Factory
+  import DB.Factory
 
   alias DB.Schema.Video
 

@@ -26,8 +26,9 @@ defmodule DB.Mixfile do
   end
 
   # Specifies which paths to compile per environment.
-  defp elixirc_paths(:test), do: ["lib", "test/support"]
-  defp elixirc_paths(_),     do: ["lib"]
+  defp elixirc_paths(:test),  do: ["lib", "test/support"]
+  defp elixirc_paths(:dev),   do: ["lib", "test/support/factory.ex"]
+  defp elixirc_paths(_),      do: ["lib"]
 
   # Specifies your project dependencies.
   #
@@ -43,7 +44,8 @@ defmodule DB.Mixfile do
       {:comeonin, "~> 3.0"},
       {:burnex, "~> 1.0"},
       {:hashids, "~> 2.0"},
-      {:faker, "~> 0.7"}, # TODO Only test
+      {:ex_machina, "~> 2.0", only: [:dev, :test]},
+      {:faker, "~> 0.7", only: [:dev, :test]},
     ]
   end
 end

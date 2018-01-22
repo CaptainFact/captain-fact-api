@@ -1,4 +1,6 @@
 defmodule CaptainFact.ReleaseTasks do
+  require Logger
+
   @start_apps [
     :crypto,
     :ssl,
@@ -13,26 +15,27 @@ defmodule CaptainFact.ReleaseTasks do
   @repos [DB.Repo]
 
   def migrate do
-    IO.puts "Loading captainfact for migrations.."
     init()
+    Logger.info "Loading captainfact for migrations.."
     Enum.each(@myapps, &run_migrations_for/1)
-    IO.puts "Success!"
+    Logger.info "Success!"
     :init.stop()
   end
 
   def seed do
-    IO.puts "Loading captainfact for seeding.."
     init()
 
     # Run the seed script if it exists
-    seed_script = Path.join([priv_dir(:captain_fact), "repo", "seeds.exs"])
+    seed_script = Path.join([priv_dir(:db), "repo", "seeds.exs"])
     if File.exists?(seed_script) do
-      IO.puts "Running seed script.."
+      Logger.info "Running seed script.."
       Code.eval_file(seed_script)
+    else
+      Logger.warn "Seed script not found"
     end
 
     # Signal shutdown
-    IO.puts "Success!"
+    Logger.info "Success!"
     :init.stop()
   end
 
@@ -54,21 +57,26 @@ defmodule CaptainFact.ReleaseTasks do
   defp init do
     # Load the code, but don't start it
     :ok = Application.load(:captain_fact)
+    :ok = Application.load(:db)
 
-    IO.puts "Starting dependencies.."
     # Start apps necessary for executing migrations
     Enum.each(@start_apps, &Application.ensure_all_started/1)
 
+    Logger.info "Dependencies started, loading runtime configuration..."
+
     # Loading runtime configuration
+    CaptainFact.RuntimeConfiguration.setup()
     CaptainFact.RuntimeConfiguration.configure()
+    DB.RuntimeConfiguration.setup()
+    DB.RuntimeConfiguration.configure()
 
     # Start the Repo(s) for myapp
-    IO.puts "Starting repos.."
+    Logger.info "Starting repos.."
     Enum.each(@repos, &(&1.start_link(pool_size: 1)))
   end
 
   defp run_migrations_for(app) do
-    IO.puts "Running migrations for #{app}"
+    Logger.info "Running migrations for #{app}"
     Ecto.Migrator.run(DB.Repo, migrations_path(app), :up, all: true)
   end
 

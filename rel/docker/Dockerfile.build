@@ -4,7 +4,9 @@ FROM bitwalker/alpine-elixir:1.5.1
 RUN apk add gcc make libc-dev libgcc
 
 # Configure
-ENV HOME=/opt/app/ MIX_ENV=prod
+ARG MIX_ENV=prod
+ENV MIX_ENV=${MIX_ENV}
+ENV HOME=/opt/app/
 WORKDIR /opt/app
 
 # Cache dependencies
@@ -18,8 +20,8 @@ RUN mix deps.get
 # Copy main project and build releases
 COPY . .
 
-RUN mix release --name captain_fact --env=prod
-RUN mix release --name captain_fact_graphql --env=prod
+RUN mix release --name captain_fact --env=$MIX_ENV
+RUN mix release --name captain_fact_graphql --env=$MIX_ENV
 
-RUN tar c -C ./_build/prod/rel/captain_fact/ -f rest-api_release.tar bin lib releases
-RUN tar c -C ./_build/prod/rel/captain_fact_graphql/ -f graphql-api_release.tar bin lib releases
+RUN tar c -C ./_build/$MIX_ENV/rel/captain_fact/ -f rest-api_release.tar bin lib releases
+RUN tar c -C ./_build/$MIX_ENV/rel/captain_fact_graphql/ -f graphql-api_release.tar bin lib releases

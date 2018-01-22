@@ -23,7 +23,7 @@ config :guardian, Guardian,
 config :logger, level: :warn
 
 # Disable CRON tasks on test
-config :quantum, :captain_fact, cron: []
+config :captain_fact, CaptainFact.Scheduler, jobs: []
 
 # Mails
 config :captain_fact, CaptainFact.Mailer, adapter: Bamboo.TestAdapter

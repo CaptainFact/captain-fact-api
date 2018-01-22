@@ -1,17 +1,11 @@
-ExUnit.start
-Faker.start
-
-
 defmodule CaptainFact.DemoFr do
   @moduledoc"""
   Run a demo in real-time. To use it from iex console:
 
-      iex> c "apps/captain_fact/priv/demos/demo_fr.ex"
-      iex> CaptainFact.DemoFr.init_and_run
+      iex> List.first(c(Path.join(:code.priv_dir(:captain_fact), "demos/demo_fr.ex"))).init_and_run
   """
 
-  use CaptainFactWeb.ChannelCase
-
+  import DB.Factory
   import CaptainFact.VideoDebate.ActionCreator, only: [action_add: 3, action_create: 3]
 
   alias Ecto.Multi
@@ -154,11 +148,10 @@ defmodule CaptainFact.DemoFr do
     )
 
     # Add speakers & statements
-    Code.require_file("apps/db/priv/repo/seed_politicians.exs")
-    SeedPoliticians.seed(
-      "../captain-fact-data/Wikidata/data/politicians_born_after_1945_having_a_picture.csv",
-      true, Map.keys(@statements)
-    )
+    Code.require_file(Path.join(:code.priv_dir(:db), "repo/seed_politicians.exs"))
+    seed_file = Path.join(:code.priv_dir(:db), "repo/seed_data/politicians_born_after_1945_having_a_picture.csv")
+
+    SeedPoliticians.seed(seed_file, true, Map.keys(@statements))
     speakers = Enum.map(@statements, fn {speaker_name, statements} ->
       speaker = Repo.get_by!(Speaker, full_name: speaker_name)
       video_speaker_changeset = VideoSpeaker.changeset(%VideoSpeaker{speaker_id: speaker.id, video_id: video.id})
@@ -214,18 +207,18 @@ defmodule CaptainFact.DemoFr do
 
     # Add replies
     add_replies_task = Task.async(fn ->
-      Process.sleep(comment_base[:wait_after] || rand_sleep_time())
+      Process.sleep(comment_base[:wait_after] || rand_sleep_time(@min_sleep, @max_sleep))
       for reply <- Map.get(comment_base, :replies, []),
         do: add_comment(users, video_id, statement_id, reply, comment.id)
     end)
     if comment_base[:async] != true, do: Task.await(add_replies_task, @max_sleep * 10000)
   end
 
-  def rand_sleep_time do
-    if @min_sleep < 1 do
+  def rand_sleep_time(min, max) do
+    if min < 1 do
       0
     else
-      @min_sleep + :rand.uniform(@max_sleep - @min_sleep)
+      min + :rand.uniform(max - min)
     end
   end
 

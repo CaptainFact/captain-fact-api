@@ -1,6 +1,15 @@
 defmodule DB.RuntimeConfiguration do
   use Weave
 
+
+  def setup() do
+    secrets_path = if File.exists?("/run/secrets"),
+                      do: "/run/secrets",
+                      else: Path.join(:code.priv_dir(:db), "secrets")
+
+    Application.put_env(:weave, :file_directory, secrets_path)
+  end
+
   # ----- Configuration handlers -----
 
   # Database

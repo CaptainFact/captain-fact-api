@@ -78,7 +78,7 @@ defmodule CaptainFact.Accounts.UserPermissions do
   ## Examples
       iex> alias CaptainFact.Accounts.UserPermissions
       iex> alias CaptainFact.Actions.Recorder
-      iex> user = CaptainFact.Factory.insert(:user, %{reputation: 45})
+      iex> user = DB.Factory.insert(:user, %{reputation: 45})
       iex> UserPermissions.check(user, :create, :comment)
       {:ok, 20}
       iex> UserPermissions.check(%{user | reputation: -42}, :remove, :statement)

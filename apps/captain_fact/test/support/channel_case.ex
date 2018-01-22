@@ -19,7 +19,7 @@ defmodule CaptainFactWeb.ChannelCase do
     quote do
       # Import conveniences for testing with channels
       use Phoenix.ChannelTest
-      import CaptainFact.Factory
+      import DB.Factory
 
       # The default endpoint for testing
       @endpoint CaptainFactWeb.Endpoint

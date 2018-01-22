@@ -7,8 +7,7 @@ defmodule CaptainFactGraphql.Application do
     import Supervisor.Spec
 
     # Start by configuring the app with runtime configuration (env + secrets)
-    secrets_path = if File.exists?("/run/secrets"), do: "/run/secrets", else: Path.join(:code.priv_dir(:captain_fact_graphql), "secrets")
-    Application.put_env(:weave, :file_directory, secrets_path)
+    CaptainFactGraphql.RuntimeConfiguration.setup()
     CaptainFactGraphql.RuntimeConfiguration.configure()
 
     # Define workers and child supervisors to be supervised
@@ -30,5 +29,12 @@ defmodule CaptainFactGraphql.Application do
   def config_change(changed, _new, removed) do
     CaptainFactGraphqlWeb.Endpoint.config_change(changed, removed)
     :ok
+  end
+
+  def version() do
+    case :application.get_key(:captain_fact, :vsn) do
+      {:ok, version} -> to_string(version)
+      _ -> "unknown"
+    end
   end
 end

@@ -1,6 +1,6 @@
 defmodule CaptainFactWeb.CollectiveModerationControllerTest do
   use CaptainFactWeb.ConnCase
-  import CaptainFact.Factory
+  import DB.Factory
   import CaptainFact.TestUtils, only: [flag_comments: 2]
 
   alias DB.Type.VideoHashId

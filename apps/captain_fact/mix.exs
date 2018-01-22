@@ -30,7 +30,7 @@ defmodule CaptainFact.Mixfile do
 
   # Specifies which paths to compile per environment.
   defp elixirc_paths(:test), do: ["lib", "test/support"]
-  defp elixirc_paths(:dev), do: ["lib", "test/support/factory.ex", "test/support/channel_case.ex"]
+  defp elixirc_paths(:dev), do: ["lib", "test/support/factory.ex"]
   defp elixirc_paths(_),     do: ["lib"]
 
   # Specifies your project dependencies.
@@ -62,8 +62,6 @@ defmodule CaptainFact.Mixfile do
       {:sweet_xml, "~> 0.6"},
       {:weave, "~> 3.1"},
       {:burnex, "~> 1.0"},
-      {:ex_machina, "~> 2.0"}, # When opensourced, this should only be included in dev and test
-      {:faker, "~> 0.7"}, # When opensourced, this should only be included in dev and test
       {:bypass, "~> 0.8", only: :test},
       {:excoveralls, "~> 0.7", only: :test},
       {:credo, "~> 0.8", only: [:dev, :test], runtime: false},

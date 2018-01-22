@@ -15,7 +15,7 @@ set -e
 
 # Build
 cd -- "$(dirname $0)"
-docker build -t ${CF_BUILD_IMAGE} -f Dockerfile.build ../../
+docker build -t ${CF_BUILD_IMAGE} --build-arg ENV=dev -f Dockerfile.build ../../
 ./build_release.sh ${CF_BUILD_IMAGE} ${CF_REST_API_IMAGE} ${CF_GRAPHQL_API_IMAGE}
 
 # Run server

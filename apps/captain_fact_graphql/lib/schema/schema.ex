@@ -25,5 +25,10 @@ defmodule CaptainFactGraphql.Schema do
       arg :url, :string
       resolve &Resolvers.Videos.get/3
     end
+
+    @desc "Get app info"
+    field :app_info, :app_info do
+      resolve &Resolvers.AppInfo.info/3
+    end
   end
 end

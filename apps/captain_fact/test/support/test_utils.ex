@@ -1,5 +1,5 @@
 defmodule CaptainFact.TestUtils do
-  import CaptainFact.Factory
+  import DB.Factory
   import Ecto.Query
   import ExUnit.Assertions
 

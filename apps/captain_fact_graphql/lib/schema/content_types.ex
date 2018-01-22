@@ -156,4 +156,14 @@ defmodule CaptainFactGraphql.Schema.ContentTypes do
     @desc "User's registration datetime"
     field :registered_at, :string, do: fn u, _, _ -> {:ok, u.inserted_at} end
   end
+
+  @desc "Information about the application"
+  object :app_info do
+    @desc "Indicate if the application is running properly with a checkmark"
+    field :status, non_null(:string)
+    @desc "GraphQL API version"
+    field :version, non_null(:string)
+    @desc "Version of the database app attached to this API"
+    field :db_version, non_null(:string)
+  end
 end

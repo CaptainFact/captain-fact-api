@@ -6,7 +6,8 @@ defmodule CaptainFactWeb.ApiInfoController do
     |> put_status(:ok)
     |> json(%{
          status: "✔",
-         version: CaptainFact.Application.version()
+         version: CaptainFact.Application.version(),
+         db_version: DB.Application.version()
        })
   end
 end

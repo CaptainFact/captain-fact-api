@@ -22,7 +22,7 @@ defmodule CaptainFact.DataCase do
       import Ecto.Changeset
       import Ecto.Query
       import CaptainFact.DataCase
-      import CaptainFact.Factory
+      import DB.Factory
     end
   end
 

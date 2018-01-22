@@ -1,6 +1,6 @@
 defmodule CaptainFactWeb.AuthControllerTest do
   use CaptainFactWeb.ConnCase
-  import CaptainFact.Factory
+  import DB.Factory
 
   alias DB.Repo
   alias DB.Type.Achievement
