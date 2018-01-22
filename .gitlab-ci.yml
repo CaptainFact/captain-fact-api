@@ -1,8 +1,9 @@
 # ---- Config ----
 
 stages:
-  - build
+  - prepare
   - test
+  - build
   - release
 
 variables:
@@ -12,13 +13,12 @@ variables:
 
 # ---- Jobs ----
 
-build_api:
-  stage: build
+prepare_api:
+  stage: prepare
   only: [tags, triggers, schedules, /^(master|staging)$/]
   tags: [docker, captainfact, api]
   script:
     - docker build -t ${CF_API_BUILD_IMAGE} -f ./rel/docker/Dockerfile.build .
-    - ./rel/docker/build_release.sh ${CF_API_BUILD_IMAGE} ${CF_API_REST_IMAGE} ${CF_API_GRAPHQL_IMAGE}
 
 test_api:
   stage: test
@@ -39,11 +39,19 @@ test_api:
     - (docker stop $TEST_DB && docker rm $TEST_DB) || /bin/true
     - docker network rm $TEST_NETWORK || /bin/true
 
+build_api:
+  state: build
+  only: [tags, triggers, schedules, /^(master|staging)$/]
+  tags: [docker, captainfact, api]
+  script:
+    - ./rel/docker/build_release.sh ${CF_API_BUILD_IMAGE} ${CF_API_REST_IMAGE} ${CF_API_GRAPHQL_IMAGE}
+
 release_api:
   stage: release
   only: [tags, triggers, schedules, /^(master|staging)$/]
   tags: [docker, captainfact, api]
   script:
-    - echo "Release $CF_API_REST_IMAGE"
+    - echo "Release $CF_API_REST_IMAGE + $CF_API_GRAPHQL_IMAGE"
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
     - docker push $CF_API_REST_IMAGE
+    - docker push $CF_API_GRAPHQL_IMAGE

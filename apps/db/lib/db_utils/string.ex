@@ -4,10 +4,10 @@ defmodule DB.Utils.String do
 
   ## Examples
 
-    iex> StringUtils.trim_all_whitespaces "     aaa     bbb ccc  "
-    "aaa bbb ccc"
-    iex> StringUtils.trim_all_whitespaces ""
-    ""
+      iex> DB.Utils.String.trim_all_whitespaces "     aaa     bbb ccc  "
+      "aaa bbb ccc"
+      iex> DB.Utils.String.trim_all_whitespaces ""
+      ""
   """
   def trim_all_whitespaces(str),
     do: String.replace(String.trim(str), ~r/\s+/, " ")

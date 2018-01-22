@@ -218,7 +218,7 @@ defmodule CaptainFact.AccountsTest do
   describe "achievements" do
     test "unlock achievements" do
       user = insert(:user)
-      achievement = Accounts.Achievement.get(:bulletproof)
+      achievement = DB.Type.Achievement.get(:bulletproof)
       Accounts.unlock_achievement(user, achievement)
       updated = Repo.get(DB.Schema.User, user.id)
       assert achievement in updated.achievements

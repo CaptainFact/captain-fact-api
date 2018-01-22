@@ -7,6 +7,10 @@
       <sourceFolder url="file://$MODULE_DIR$/apps/rest-api/test" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/apps/db/test" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/apps/db/lib" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/apps/captain_fact_graphql/lib" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/apps/captain_fact/lib" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/apps/captain_fact_graphql/test" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/apps/captain_fact/test" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/_build" />
       <excludeFolder url="file://$MODULE_DIR$/apps/rest-api/resources" />
       <excludeFolder url="file://$MODULE_DIR$/deps" />

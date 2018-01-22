@@ -2,10 +2,7 @@ use Mix.Config
 
 
 # General config
-config :captain_fact,
-  frontend_url: "https://TEST_FRONTEND",
-  # Allow fetching sources from localhost for tests
-  source_url_regex: ~r/(^https?:\/\/[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*))|localhost/ # TODO [Refactor] Remove
+config :captain_fact, frontend_url: "https://TEST_FRONTEND"
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.

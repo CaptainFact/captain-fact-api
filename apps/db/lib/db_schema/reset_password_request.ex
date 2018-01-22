@@ -4,7 +4,6 @@ defmodule DB.Schema.ResetPasswordRequest do
 
 
   @primary_key {:token, :string, []}
-  @derive {Phoenix.Param, key: :token}
   schema "accounts_reset_password_requests" do
     field :source_ip, :string
     belongs_to :user, DB.Schema.User
