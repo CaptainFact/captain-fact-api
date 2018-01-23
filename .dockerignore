@@ -12,3 +12,6 @@ _deps
 
 rel/docker
 resources
+
+apps/*/priv/secrets/*
+!apps/*/priv/secrets/.keep

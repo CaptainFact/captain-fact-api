@@ -1,11 +1,6 @@
 _build
 _deps
 
-# Local secrets
-priv/secrets/*
-# Safe to commit secrets
-!priv/secrets/erlang_cookie
-
 # Local uploads
 resources
 
