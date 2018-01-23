@@ -32,7 +32,7 @@ defmodule CaptainFactGraphql.Application do
   end
 
   def version() do
-    case :application.get_key(:captain_fact, :vsn) do
+    case :application.get_key(:captain_fact_graphql, :vsn) do
       {:ok, version} -> to_string(version)
       _ -> "unknown"
     end

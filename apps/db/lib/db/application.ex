@@ -24,7 +24,7 @@ defmodule DB.Application do
   end
 
   def version() do
-    case :application.get_key(:captain_fact, :vsn) do
+    case :application.get_key(:db, :vsn) do
       {:ok, version} -> to_string(version)
       _ -> "unknown"
     end
