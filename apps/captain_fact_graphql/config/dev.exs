@@ -3,6 +3,12 @@ use Mix.Config
 
 config :captain_fact_graphql, CaptainFactGraphqlWeb.Endpoint,
   http: [port: 5000],
+  https: [
+    port: 5001,
+    otp_app: :captain_fact_graphql,
+    keyfile: "priv/keys/privkey.pem",
+    certfile: "priv/keys/fullchain.pem"
+  ],
   debug_errors: true,
   code_reloader: true,
   check_origin: false,

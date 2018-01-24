@@ -3,19 +3,20 @@ defmodule CaptainFactGraphql.Schema.ContentTypes do
   use Absinthe.Ecto, repo: DB.Repo
 
   alias CaptainFactGraphql.Resolvers
+  alias DB.Type.VideoHashId
 
 
   scalar :video_hash_id do
     parse fn input ->
       with %Absinthe.Blueprint.Input.String{value: value} <- input do
-        DB.Type.VideoHashId.decode(value)
+        VideoHashId.decode(value)
       else
         _ -> :error
       end
     end
 
     serialize fn id ->
-      DB.Type.VideoHashId.encode(id)
+      VideoHashId.encode(id)
     end
   end
 
@@ -29,8 +30,10 @@ defmodule CaptainFactGraphql.Schema.ContentTypes do
 
   @desc "Identifies a video. Only Youtube is supported at the moment"
   object :video do
-    @desc "Unique identifier as a hash (min length: 4)"
-    field :id, non_null(:video_hash_id)
+    @desc "Unique identifier as an integer"
+    field :id, non_null(:id)
+    @desc "Unique identifier as a hash (min length: 4) - used in URL"
+    field :hash_id, non_null(:video_hash_id), do: resolve fn v, _, _ -> {:ok, v.id} end
     @desc "Video title as extracted from provider"
     field :title, non_null(:string)
     @desc "Video URL"

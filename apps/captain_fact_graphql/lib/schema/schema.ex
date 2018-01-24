@@ -7,7 +7,7 @@ defmodule CaptainFactGraphql.Schema do
 
   input_object :video_filter do
     field :language, :string
-    field :min_id, :video_hash_id
+    field :min_id, :id
     field :speaker_id, :id
     field :speaker_slug, :string
   end
@@ -21,7 +21,8 @@ defmodule CaptainFactGraphql.Schema do
 
     @desc "Get a single video"
     field :video, :video do
-      arg :id, :video_hash_id
+      arg :id, :id
+      arg :hash_id, :video_hash_id
       arg :url, :string
       resolve &Resolvers.Videos.get/3
     end

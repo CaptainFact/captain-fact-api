@@ -14,6 +14,13 @@ defmodule CaptainFactGraphql.Resolvers.Videos do
     end
   end
 
+  def get(_root, %{hash_id: id}, _info) do
+    case get_video_by_id(id) do
+      nil -> {:error, "Video #{id} doesn't exist"}
+      video -> {:ok, video}
+    end
+  end
+
   def get(_root, %{url: url}, _info) do
     case get_video_by_url(url) do
       nil -> {:error, "Video with url #{url} doesn't exist"}

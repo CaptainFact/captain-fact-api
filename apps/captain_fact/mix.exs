@@ -43,7 +43,7 @@ defmodule CaptainFact.Mixfile do
       {:phoenix_html, "~> 2.6"},
       {:gettext, "~> 0.13.1"},
       {:cowboy, "~> 1.0"},
-      {:corsica, "~> 0.5"},
+      {:corsica, "~> 1.0"},
       {:comeonin, "~> 3.0"},
       {:ueberauth, "0.4.0"},
       {:ueberauth_identity, "~> 0.2"},
