@@ -16,8 +16,4 @@ set -e
 
 echo "Running migrations"
 bin/captain_fact command Elixir.CaptainFact.ReleaseTasks migrate
-
-echo "Seeding DB"
-bin/captain_fact command Elixir.CaptainFact.ReleaseTasks seed
-
-echo "Migrations + seed success"
+echo "Migrated"

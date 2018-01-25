@@ -1,0 +1,6 @@
+# Start everything
+
+ExUnit.start
+
+Ecto.Adapters.SQL.Sandbox.mode(DB.Repo, {:shared, self()})
+{:ok, _} = Application.ensure_all_started(:bypass)

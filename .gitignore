@@ -1,21 +1,8 @@
-# App artifacts
-/_build
-/db
-/deps
-/*.ez
-captain-fact-api_release.tar
+_build
+_deps
 
-# Generated on crash by the VM
-erl_crash.dump
+# Local uploads
+resources
 
-# Uploads
-/resources
-
-# Release build
-/captain_fact.tar.gz
-
-# Secrets
-priv/secrets/*
-
-# File used for temp commit message
-COMMIT.md
+# Release binaries
+rel/docker/*.tar
