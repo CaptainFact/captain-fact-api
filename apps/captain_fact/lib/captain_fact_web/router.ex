@@ -19,6 +19,7 @@ defmodule CaptainFactWeb.Router do
 
     # ---- Public endpoints ----
     get "/", ApiInfoController, :get
+    get "/rss/comments", RSSFeedController, :all_comments
     get "/videos", VideoController, :index
     get "/videos/index", VideoController, :index_ids
     get "/speakers/:slug_or_id", SpeakerController, :show
@@ -55,7 +56,7 @@ defmodule CaptainFactWeb.Router do
           delete "/", UserController, :delete
           get    "/available_flags", UserController, :available_flags
           put    "/confirm_email/:token", UserController, :confirm_email
-          # TODO put    "/achievements/:achievement", UserController, :unlock_achievement
+          put    "/achievements/:achievement", UserController, :unlock_achievement
         end
       end
 

@@ -2,6 +2,7 @@ defmodule CaptainFactWeb.UserController do
   use CaptainFactWeb, :controller
 
   alias DB.Schema.User
+  alias DB.Type.Achievement
 
   alias CaptainFact.Accounts
   alias CaptainFact.Accounts.UserPermissions
@@ -11,7 +12,7 @@ defmodule CaptainFactWeb.UserController do
   action_fallback CaptainFactWeb.FallbackController
 
   plug Guardian.Plug.EnsureAuthenticated, [handler: CaptainFactWeb.AuthController]
-  when action in [:update, :delete, :available_flags, :show_me]
+  when action in [:update, :delete, :available_flags, :show_me, :unlock_achievement]
 
 
   def create(conn, params = %{"user" => user_params}) do
@@ -58,8 +59,7 @@ defmodule CaptainFactWeb.UserController do
     current_user = Guardian.Plug.current_resource(conn)
     case UserPermissions.check(current_user, :flag, :comment) do
       {:ok, num_available} -> json(conn, %{flags_available: num_available})
-      {:error, _reason} ->
-        json(conn, %{flags_available: 0})
+      {:error, _reason} -> json(conn, %{flags_available: 0})
     end
   end
 
@@ -76,6 +76,17 @@ defmodule CaptainFactWeb.UserController do
     # TODO Soft delete, do the real delete after 1 week to avoid user mistakes
     Repo.delete!(Guardian.Plug.current_resource(conn))
     send_resp(conn, :no_content, "")
+  end
+
+  @user_unlockable_achievements [Achievement.get(:help), Achievement.get(:bulletproof)]
+  def unlock_achievement(conn, %{"achievement" => achievement}) do
+    with {achievement_id, _} <- Integer.parse(achievement),
+         true <- achievement_id in @user_unlockable_achievements,
+         {:ok, user} <- Accounts.unlock_achievement(Guardian.Plug.current_resource(conn), achievement_id) do
+      render(conn, UserView, :show, user: user)
+    else
+      _ -> send_resp(conn, 400, "Invalid achievement id. Must be one of: #{@user_unlockable_achievements}")
+    end
   end
 
   # ---- Reset password ----

@@ -99,6 +99,33 @@ defmodule CaptainFactWeb.UserControllerTest do
     end
   end
 
+  describe "unlock achievement" do
+    @bulletproof_achievement DB.Type.Achievement.get(:bulletproof)
+    @help_achievement DB.Type.Achievement.get(:help)
+    @allowed_achievements [@bulletproof_achievement, @help_achievement]
+
+    test "work for bulletproof / help" do
+      achievement = Enum.random(@allowed_achievements)
+      updated_achievements =
+        build_authenticated_conn(insert(:user))
+        |> put("/users/me/achievements/#{achievement}")
+        |> json_response(200)
+        |> Map.get("achievements")
+
+      assert achievement in updated_achievements
+    end
+
+    test "returns 400 for all the other achievements and invalids" do
+      forbidden = Enum.into(1..20, []) -- @allowed_achievements
+      user = insert(:user)
+      for achievement <- forbidden do
+        build_authenticated_conn(user)
+        |> put("/users/me/achievements/#{achievement}")
+        |> response(400)
+      end
+    end
+  end
+
   describe "invitations" do
     test "should say ok everytime the user request with valid info" do
       email = "test@email.fr"
