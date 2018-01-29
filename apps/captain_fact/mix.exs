@@ -53,7 +53,7 @@ defmodule CaptainFact.Mixfile do
       {:httpoison, "~> 0.11.2"},
       {:poison, "~> 2.2.0"},
       {:csv, "~> 1.4.4"},
-      {:quantum, "~> 2.1.0"},
+      {:quantum, "~> 2.2.1"},
       {:not_qwerty123, "~> 2.2"},
       {:bamboo, "~> 1.0.0-rc.1"},
       {:hackney, "~> 1.6"},

@@ -1,13 +1,13 @@
 defmodule CaptainFact.Email do
   import Bamboo.Email
-  require CaptainFact.Actions.Analyzers.Reputation
+  require CaptainFact.Jobs.Reputation
 
   alias DB.Repo
   alias DB.Schema.ResetPasswordRequest
   alias DB.Schema.InvitationRequest
   alias DB.Schema.User
 
-  alias CaptainFact.Actions.Analyzers.Reputation
+  alias CaptainFact.Jobs.Reputation
 
   # TODO GetText i18n
 

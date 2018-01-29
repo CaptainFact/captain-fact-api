@@ -1,9 +1,9 @@
-defmodule CaptainFact.Actions.Analyzers.ReputationTest do
+defmodule CaptainFact.Jobs.ReputationTest do
   use CaptainFact.DataCase
 
   alias DB.Schema.User
   alias DB.Schema.UserAction
-  alias CaptainFact.Actions.Analyzers.Reputation
+  alias CaptainFact.Jobs.Reputation
 
 
   test "target user gains reputation" do

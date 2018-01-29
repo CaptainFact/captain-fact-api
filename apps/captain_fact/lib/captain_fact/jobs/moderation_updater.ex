@@ -1,4 +1,4 @@
-defmodule CaptainFact.Moderation.Updater do
+defmodule CaptainFact.Jobs.ModerationUpdater do
   use GenServer
   require Logger
   import Ecto.Query
@@ -30,6 +30,10 @@ defmodule CaptainFact.Moderation.Updater do
     GenServer.start_link(@name, :ok, name: @name)
   end
 
+  def init(args) do
+    {:ok, args}
+  end
+
   @timeout 60_000 # 1 minute
   def update() do
     GenServer.call(@name, :update, @timeout)
@@ -44,17 +48,17 @@ defmodule CaptainFact.Moderation.Updater do
 
   ## Examples
 
-    iex> alias CaptainFact.Moderation.Updater
+    iex> alias CaptainFact.Jobs.ModerationUpdater
     iex> alias DB.Schema.UserAction
-    iex> Updater.reputation_change(UserAction.type(:action_banned), nil, %{"score" => 1})
+    iex> ModerationUpdater.reputation_change(UserAction.type(:action_banned), nil, %{"score" => 1})
     -25
-    iex> Updater.reputation_change(UserAction.type(:action_banned), nil, %{"score" => 0.66})
+    iex> ModerationUpdater.reputation_change(UserAction.type(:action_banned), nil, %{"score" => 0.66})
     -15
-    iex> Updater.reputation_change(UserAction.type(:abused_flag), nil, %{"score" => 1})
+    iex> ModerationUpdater.reputation_change(UserAction.type(:abused_flag), nil, %{"score" => 1})
     -20
-    iex> Updater.reputation_change(UserAction.type(:abused_flag), nil, %{"score" => 0.66})
+    iex> ModerationUpdater.reputation_change(UserAction.type(:abused_flag), nil, %{"score" => 0.66})
     -10
-    iex> Updater.reputation_change(UserAction.type(:confirmed_flag), nil, %{"score" => 1})
+    iex> ModerationUpdater.reputation_change(UserAction.type(:confirmed_flag), nil, %{"score" => 1})
     10
   """
   def reputation_change(action_type, _entity, _changes = %{"score" => score}) do
@@ -68,16 +72,16 @@ defmodule CaptainFact.Moderation.Updater do
 
   ## Examples
 
-    iex> alias CaptainFact.Moderation.Updater
-    iex> Updater.get_consensus_strength Updater.confirm_ban_above
+    iex> alias CaptainFact.Jobs.ModerationUpdater
+    iex> ModerationUpdater.get_consensus_strength(ModerationUpdater.confirm_ban_above)
     0.0
-    iex> Updater.get_consensus_strength Updater.refute_ban_under
+    iex> ModerationUpdater.get_consensus_strength(ModerationUpdater.refute_ban_under)
     0.0
-    iex> Updater.get_consensus_strength 1
+    iex> ModerationUpdater.get_consensus_strength 1
     1.0
-    iex> Updater.get_consensus_strength -1.0
+    iex> ModerationUpdater.get_consensus_strength -1.0
     1.0
-    iex> Updater.get_consensus_strength Updater.confirm_ban_above + ((1.0 - Updater.confirm_ban_above) / 2.0)
+    iex> ModerationUpdater.get_consensus_strength ModerationUpdater.confirm_ban_above + ((1.0 - ModerationUpdater.confirm_ban_above) / 2.0)
     0.5
   """
   def get_consensus_strength(score) when score <= @refute_ban_under,

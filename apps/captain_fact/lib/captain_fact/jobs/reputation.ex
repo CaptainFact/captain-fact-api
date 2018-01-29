@@ -1,4 +1,4 @@
-defmodule CaptainFact.Actions.Analyzers.Reputation do
+defmodule CaptainFact.Jobs.Reputation do
   @moduledoc """
   Updates a user reputation periodically, verifying at the same time that the maximum reputation
   gain per day quota is respected.
@@ -56,6 +56,10 @@ defmodule CaptainFact.Actions.Analyzers.Reputation do
     GenServer.start_link(@name, :ok, name: @name)
   end
 
+  def init(args) do
+    {:ok, args}
+  end
+
   @timeout 120_000 # 2 minutes
   def update() do
     GenServer.call(@name, :update_reputations, @timeout)
@@ -91,7 +95,7 @@ defmodule CaptainFact.Actions.Analyzers.Reputation do
   end
 
   def handle_call(:reset_daily_limits, _from, _state) do
-    Logger.info("[Analyzers.Reputation] Reset daily limits")
+    Logger.info("[Jobs.Reputation] Reset daily limits")
     User
     |> where([u], u.today_reputation_gain != 0)
     |> Repo.update_all(set: [today_reputation_gain: 0])
@@ -100,7 +104,7 @@ defmodule CaptainFact.Actions.Analyzers.Reputation do
 
   defp start_analysis([]), do: {:noreply, :ok}
   defp start_analysis(actions) do
-    Logger.info("[Analyzers.Reputation] Update reputations")
+    Logger.info("[Jobs.Reputation] Update reputations")
     report = ReportManager.create_report!(@analyser_id, :running, actions)
     nb_users_updated = do_update_reputations(actions)
     ReportManager.set_success!(report, nb_users_updated)
@@ -153,7 +157,7 @@ defmodule CaptainFact.Actions.Analyzers.Reputation do
     UserAction.type(:confirmed_flag)
   ]
   defp reputation_changes(%{type: type, entity: entity, changes: changes}) when type in @collective_moderation_actions,
-    do: {0, CaptainFact.Moderation.Updater.reputation_change(type, entity, changes)}
+    do: {0, CaptainFact.Jobs.ModerationUpdater.reputation_change(type, entity, changes)}
   defp reputation_changes(%{type: type, entity: entity}) do
     case Map.get(@actions, type) do
       nil -> {0, 0}

@@ -1,4 +1,4 @@
-defmodule CaptainFact.Actions.Analyzers.Votes do
+defmodule CaptainFact.Jobs.Votes do
   @moduledoc """
   Update votes at a certain interval
   """
@@ -30,6 +30,10 @@ defmodule CaptainFact.Actions.Analyzers.Votes do
     GenServer.start_link(@name, :ok, name: @name)
   end
 
+  def init(args) do
+    {:ok, args}
+  end
+
   @timeout 60_000 # 1 minute
   def update() do
     GenServer.call(@name, :update_votes, @timeout)
@@ -51,7 +55,7 @@ defmodule CaptainFact.Actions.Analyzers.Votes do
 
   defp start_analysis([]), do: nil
   defp start_analysis(actions) do
-    Logger.info("[Analyzers.Votes] Update votes scores")
+    Logger.info("[Jobs.Votes] Update votes scores")
     report = ReportManager.create_report!(@analyser_id, :running, actions)
     nb_entities_updated =
       actions

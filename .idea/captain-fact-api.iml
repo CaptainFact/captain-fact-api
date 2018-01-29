@@ -15,6 +15,8 @@
       <sourceFolder url="file://$MODULE_DIR$/apps/captain_fact_atom_feed/test" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/_build" />
       <excludeFolder url="file://$MODULE_DIR$/_deps" />
+      <excludeFolder url="file://$MODULE_DIR$/apps/captain_fact/cover" />
+      <excludeFolder url="file://$MODULE_DIR$/apps/db/cover" />
       <excludeFolder url="file://$MODULE_DIR$/apps/rest-api/resources" />
       <excludeFolder url="file://$MODULE_DIR$/deps" />
       <excludeFolder url="file://$MODULE_DIR$/resources" />

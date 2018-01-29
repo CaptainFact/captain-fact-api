@@ -24,13 +24,13 @@ config :captain_fact, CaptainFact.Scheduler,
   global: true,
   jobs: [
     # Actions analysers
-    {{:extended, "*/5 * * * * *"}, {CaptainFact.Actions.Analyzers.Votes, :update, []}}, # Every 5 seconds
-    {            "*/1 * * * *",    {CaptainFact.Actions.Analyzers.Reputation, :update, []}}, # Every minute
-    {            "@daily",         {CaptainFact.Actions.Analyzers.Reputation, :reset_daily_limits, []}}, # Every day
-    {            "*/1 * * * *",    {CaptainFact.Actions.Analyzers.Flags, :update, []}}, # Every minute
-    {            "*/3 * * * *",    {CaptainFact.Actions.Analyzers.Achievements, :update, []}}, # Every 3 minutes
+    {{:extended, "*/5 * * * * *"}, {CaptainFact.Jobs.Votes, :update, []}}, # Every 5 seconds
+    {            "*/1 * * * *",    {CaptainFact.Jobs.Reputation, :update, []}}, # Every minute
+    {            "@daily",         {CaptainFact.Jobs.Reputation, :reset_daily_limits, []}}, # Every day
+    {            "*/1 * * * *",    {CaptainFact.Jobs.Flags, :update, []}}, # Every minute
+    {            "*/3 * * * *",    {CaptainFact.Jobs.Achievements, :update, []}}, # Every 3 minutes
     # Various updaters
-    {            "*/20 * * * *",   {CaptainFact.Moderation.Updater, :update, []}}, # Every 20 minutes
+    {            "*/20 * * * *",   {CaptainFact.Jobs.ModerationUpdater, :update, []}}, # Every 20 minutes
   ]
 
 # Configure mailer
