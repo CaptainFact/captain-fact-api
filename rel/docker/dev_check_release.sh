@@ -9,6 +9,7 @@
 CF_BUILD_IMAGE=captain-fact-builder:dev-test
 CF_REST_API_IMAGE=captain-fact-api:dev-test
 CF_GRAPHQL_API_IMAGE=captain-fact-api-graphql:dev-test
+CF_ATOM_FEED_IMAGE=captain-fact-atom-feed:dev-test
 
 # If any command fails, exit
 set -e
@@ -16,10 +17,10 @@ set -e
 # Build
 cd -- "$(dirname $0)"
 docker build -t ${CF_BUILD_IMAGE} --build-arg MIX_ENV=dev -f Dockerfile.build ../../
-./build_release.sh ${CF_BUILD_IMAGE} ${CF_REST_API_IMAGE} ${CF_GRAPHQL_API_IMAGE}
+./build_release.sh ${CF_BUILD_IMAGE} ${CF_REST_API_IMAGE} ${CF_GRAPHQL_API_IMAGE} ${CF_ATOM_FEED_IMAGE}
 
 # Run server
-echo "Let's test REST API on port 80 =>"
+echo "Let's test REST API on port 4000 =>"
 docker run -it \
   -e "CF_HOST=localhost" \
   -e "CF_SECRET_KEY_BASE=8C6FsJwjV11d+1WPUIbkEH6gB/VavJrcXWoPLujgpclfxjkLkoNFSjVU9XfeNm6s" \
@@ -38,7 +39,7 @@ docker run -it \
   --network host \
   --rm ${CF_REST_API_IMAGE} console
 
-echo "Let's test GraphQL API on port 80 =>"
+echo "Let's test GraphQL API on port 5000 =>"
 docker run -it \
   -e "CF_HOST=localhost" \
   -e "CF_S3_ACCESS_KEY_ID=test" \
@@ -53,6 +54,20 @@ docker run -it \
   -v "$(pwd)/../priv/secrets:/run/secrets:ro" \
   --network host \
   --rm ${CF_GRAPHQL_API_IMAGE} console
+
+echo "Let's test ATOM feed on port 4003 =>"
+docker run -it \
+  -e "CF_HOST=localhost" \
+  -e "CF_S3_ACCESS_KEY_ID=test" \
+  -e "CF_S3_SECRET_ACCESS_KEY=test" \
+  -e "CF_S3_BUCKET=test" \
+  -e "CF_DB_HOSTNAME=localhost" \
+  -e "CF_DB_USERNAME=postgres" \
+  -e "CF_DB_PASSWORD=postgres" \
+  -e "CF_DB_NAME=captain_fact_dev" \
+  -v "$(pwd)/../priv/secrets:/run/secrets:ro" \
+  --network host \
+  --rm ${CF_ATOM_FEED_IMAGE} console
 
 # Cleanup
 docker rmi -f ${CF_REST_API_IMAGE}

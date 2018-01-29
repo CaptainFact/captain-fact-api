@@ -59,7 +59,7 @@ defmodule DB.Schema.UserTest do
   end
 
   test "email must not be a temporary email (yopmail, jetable.org...etc)" do
-    provider = Enum.random(Burnex.providers)
+    provider = "jetable.org"
     attrs = %{email: "xxxxx@#{provider}"}
     assert {:email, "forbidden_provider"} in errors_on(%User{}, attrs), "didn't reject #{provider}'"
   end

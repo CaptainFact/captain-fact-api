@@ -1,8 +1,10 @@
-%{"absinthe": {:hex, :absinthe, "1.4.6", "6b34e56dc1806cfc1c03cc3f6164ad48e6eeaf8092d7ae0094974b23a190031b", [:mix], [{:dataloader, "~> 1.0.0", [hex: :dataloader, repo: "hexpm", optional: true]}, {:decimal, "~> 1.0", [hex: :decimal, repo: "hexpm", optional: true]}], "hexpm"},
+%{
+  "absinthe": {:hex, :absinthe, "1.4.6", "6b34e56dc1806cfc1c03cc3f6164ad48e6eeaf8092d7ae0094974b23a190031b", [:mix], [{:dataloader, "~> 1.0.0", [hex: :dataloader, repo: "hexpm", optional: true]}, {:decimal, "~> 1.0", [hex: :decimal, repo: "hexpm", optional: true]}], "hexpm"},
   "absinthe_ecto": {:hex, :absinthe_ecto, "0.1.3", "420b68129e79fe4571a4838904ba03e282330d335da47729ad52ffd7b8c5fcb1", [:mix], [{:absinthe, "~> 1.3.0 or ~> 1.4.0", [hex: :absinthe, repo: "hexpm", optional: false]}, {:ecto, ">= 0.0.0", [hex: :ecto, repo: "hexpm", optional: false]}], "hexpm"},
   "absinthe_plug": {:hex, :absinthe_plug, "1.4.2", "01bf16f0a637869bcc0a1919935f08ff853501004e7549ddaa3a7788deb48965", [:mix], [{:absinthe, "~> 1.4", [hex: :absinthe, repo: "hexpm", optional: false]}, {:plug, "~> 1.3.2 or ~> 1.4", [hex: :plug, repo: "hexpm", optional: false]}], "hexpm"},
   "arc": {:hex, :arc, "0.8.0", "bb7cf8ea50f30f9c2bb357270c074def42a7ec6a3b4605be731cc5faf8fde6fd", [:mix], [{:ex_aws, "~> 1.1", [hex: :ex_aws, repo: "hexpm", optional: true]}, {:httpoison, "~> 0.11", [hex: :httpoison, repo: "hexpm", optional: false]}, {:poison, "~> 2.2 or ~> 3.1", [hex: :poison, repo: "hexpm", optional: true]}, {:sweet_xml, "~> 0.6", [hex: :sweet_xml, repo: "hexpm", optional: true]}], "hexpm"},
   "arc_ecto": {:hex, :arc_ecto, "0.7.0", "428ed7ea4ed0be8996d8fc6e9f651d3e26fe9c9063f26cbf6731c865369845d3", [:mix], [{:arc, "~> 0.8.0", [hex: :arc, repo: "hexpm", optional: false]}, {:ecto, "~> 2.0", [hex: :ecto, repo: "hexpm", optional: false]}], "hexpm"},
+  "atomex": {:hex, :atomex, "0.2.0", "cda17e003ea9895577031da7c45796ec6489e901e530f5e242cf7e23495a454c", [:mix], [{:xml_builder, "~> 2.0.0", [hex: :xml_builder, repo: "hexpm", optional: false]}], "hexpm"},
   "bamboo": {:hex, :bamboo, "1.0.0-rc.2", "633ff63faf2a6ad17871a7dca2c75390761c33c7f811d0d09a1827aaa21ce164", [:mix], [{:hackney, "~> 1.7", [hex: :hackney, repo: "hexpm", optional: false]}, {:plug, "~> 1.0", [hex: :plug, repo: "hexpm", optional: false]}, {:poison, ">= 1.5.0", [hex: :poison, repo: "hexpm", optional: false]}], "hexpm"},
   "base64url": {:hex, :base64url, "0.0.1", "36a90125f5948e3afd7be97662a1504b934dd5dac78451ca6e9abf85a10286be", [:rebar], [], "hexpm"},
   "basic_auth": {:hex, :basic_auth, "2.2.2", "802748bd581c3ed836c66bd897478c84cd3d51ae16df227ed26a00d25b67a2af", [:mix], [{:cowboy, "~> 1.0", [hex: :cowboy, repo: "hexpm", optional: false]}, {:plug, "~> 0.14 or ~> 1.0", [hex: :plug, repo: "hexpm", optional: false]}], "hexpm"},
@@ -67,4 +69,6 @@
   "ueberauth_identity": {:hex, :ueberauth_identity, "0.2.3", "216f18ca24347f6b3dd0e5f4342b6fef7a4027fad0d133f1c454d51b7eaac55b", [:mix], [{:plug, "~> 1.0", [hex: :plug, repo: "hexpm", optional: false]}, {:ueberauth, "~> 0.2", [hex: :ueberauth, repo: "hexpm", optional: false]}], "hexpm"},
   "unicode_util_compat": {:hex, :unicode_util_compat, "0.2.0", "dbbccf6781821b1c0701845eaf966c9b6d83d7c3bfc65ca2b78b88b8678bfa35", [:rebar3], [], "hexpm"},
   "uuid": {:hex, :uuid, "1.1.8", "e22fc04499de0de3ed1116b770c7737779f226ceefa0badb3592e64d5cfb4eb9", [:mix], [], "hexpm"},
-  "weave": {:hex, :weave, "3.1.1", "97fd8ed629b4e32fd2e8bf2d5bc397cd743d626c196700feb86012d8dcf553b4", [:mix], [], "hexpm"}}
+  "weave": {:hex, :weave, "3.1.1", "97fd8ed629b4e32fd2e8bf2d5bc397cd743d626c196700feb86012d8dcf553b4", [:mix], [], "hexpm"},
+  "xml_builder": {:hex, :xml_builder, "2.0.0", "371ed27bb63bf0598dbaf3f0c466e5dc7d16cb4ecb68f06a67f953654062e21b", [:mix], [], "hexpm"},
+}

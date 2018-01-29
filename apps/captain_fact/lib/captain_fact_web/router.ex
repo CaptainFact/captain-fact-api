@@ -19,7 +19,6 @@ defmodule CaptainFactWeb.Router do
 
     # ---- Public endpoints ----
     get "/", ApiInfoController, :get
-    get "/rss/comments", RSSFeedController, :all_comments
     get "/videos", VideoController, :index
     get "/videos/index", VideoController, :index_ids
     get "/speakers/:slug_or_id", SpeakerController, :show
