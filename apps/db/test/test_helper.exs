@@ -7,5 +7,5 @@ Faker.start
 DB.RuntimeConfiguration.setup()
 DB.RuntimeConfiguration.configure()
 
-Ecto.Adapters.SQL.Sandbox.mode(DB.Repo, :manual)
+Ecto.Adapters.SQL.Sandbox.mode(DB.Repo, {:shared, self()})
 {:ok, _} = Application.ensure_all_started(:ex_machina)
