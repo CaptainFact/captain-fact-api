@@ -7,9 +7,12 @@ stages:
   - release
 
 variables:
+  # Temporary build image
   CF_API_BUILD_IMAGE: captain-fact-api-build:$CI_COMMIT_REF_NAME
+  # Releases
   CF_API_REST_IMAGE: registry.gitlab.com/captainfact/captain-fact-api/rest:$CI_COMMIT_REF_NAME
   CF_API_GRAPHQL_IMAGE: registry.gitlab.com/captainfact/captain-fact-api/graphql:$CI_COMMIT_REF_NAME
+  CF_API_ATOM_FEED: registry.gitlab.com/captainfact/captain-fact-api/atom-feed:$CI_COMMIT_REF_NAME
 
 # ---- Jobs ----
 
@@ -44,7 +47,7 @@ package_api:
   only: [tags, triggers, schedules, /^(master|staging)$/]
   tags: [docker, captainfact, api]
   script:
-    - ./rel/docker/build_release.sh ${CF_API_BUILD_IMAGE} ${CF_API_REST_IMAGE} ${CF_API_GRAPHQL_IMAGE}
+    - ./rel/docker/build_release.sh ${CF_API_BUILD_IMAGE} ${CF_API_REST_IMAGE} ${CF_API_GRAPHQL_IMAGE} ${CF_API_ATOM_FEED}
 
 release_api:
   stage: release
@@ -55,3 +58,4 @@ release_api:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
     - docker push $CF_API_REST_IMAGE
     - docker push $CF_API_GRAPHQL_IMAGE
+    - docker push $CF_API_ATOM_FEED

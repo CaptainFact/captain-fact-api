@@ -1,8 +1,11 @@
 _build
-_deps
+deps
 
 # Local uploads
 resources
 
 # Release binaries
 rel/docker/*.tar
+
+# Coverage reports
+apps/*/cover

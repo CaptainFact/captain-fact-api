@@ -4,17 +4,20 @@ defmodule CaptainFactAPI.Mixfile do
   def project do
     [
       apps_path: "apps",
-      deps_path: "_deps",
+      deps_path: "deps",
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
       deps: deps(),
       aliases: aliases(),
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: ["coveralls": :test, "coveralls.detail": :test, "coveralls.post": :test, "coveralls.html": :test]
     ]
   end
 
   defp deps do
     [
       {:distillery, "~> 1.5", runtime: false},
+      {:excoveralls, "~> 0.8", only: :test}
     ]
   end
 

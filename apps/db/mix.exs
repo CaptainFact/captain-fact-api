@@ -4,17 +4,18 @@ defmodule DB.Mixfile do
   def project do
     [
       app: :db,
-      version: "0.8.0",
+      version: "0.8.1",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../_deps",
       lockfile: "../../mix.lock",
-      elixir: "~> 1.5",
+      elixir: "~> 1.6",
       elixirc_paths: elixirc_paths(Mix.env),
       compilers: Mix.compilers,
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
       deps: deps(),
+      test_coverage: [tool: ExCoveralls]
     ]
   end
 
@@ -40,6 +41,8 @@ defmodule DB.Mixfile do
       {:arc, "~> 0.8.0"},
       {:arc_ecto, "~> 0.7.0"},
       {:weave, "~> 3.1"},
+      {:ex_aws, "~> 1.1"},
+      {:xml_builder, "~> 2.0", override: true},
       {:slugger, "~> 0.2"},
       {:comeonin, "~> 3.0"},
       {:burnex, "~> 1.0"},

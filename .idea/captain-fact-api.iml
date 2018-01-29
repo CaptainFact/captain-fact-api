@@ -11,7 +11,10 @@
       <sourceFolder url="file://$MODULE_DIR$/apps/captain_fact/lib" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/apps/captain_fact_graphql/test" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/apps/captain_fact/test" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/apps/captain_fact_atom_feed/lib" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/apps/captain_fact_atom_feed/test" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/_build" />
+      <excludeFolder url="file://$MODULE_DIR$/_deps" />
       <excludeFolder url="file://$MODULE_DIR$/apps/rest-api/resources" />
       <excludeFolder url="file://$MODULE_DIR$/deps" />
       <excludeFolder url="file://$MODULE_DIR$/resources" />

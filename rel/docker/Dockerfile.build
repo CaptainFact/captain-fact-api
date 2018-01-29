@@ -1,4 +1,4 @@
-FROM bitwalker/alpine-elixir:1.5.1
+FROM bitwalker/alpine-elixir:1.6.0
 
 # Install build requirements
 RUN apk add gcc make libc-dev libgcc
@@ -10,10 +10,11 @@ ENV HOME=/opt/app/
 WORKDIR /opt/app
 
 # Cache dependencies
-RUN mkdir -p apps/captain_fact apps/captain_fact_graphql apps/db
+RUN mkdir -p apps/captain_fact apps/captain_fact_graphql apps/captain_fact_atom_feed apps/db
 COPY mix.exs mix.lock ./
 COPY apps/captain_fact/mix.exs apps/captain_fact/
 COPY apps/captain_fact_graphql/mix.exs apps/captain_fact_graphql/
+COPY apps/captain_fact_atom_feed/mix.exs apps/captain_fact_atom_feed/
 COPY apps/db/mix.exs apps/db/
 RUN mix deps.get
 
@@ -22,6 +23,8 @@ COPY . .
 
 RUN mix release --name captain_fact --env=$MIX_ENV
 RUN mix release --name captain_fact_graphql --env=$MIX_ENV
+RUN mix release --name captain_fact_atom_feed --env=$MIX_ENV
 
 RUN tar c -C ./_build/$MIX_ENV/rel/captain_fact/ -f rest-api_release.tar bin lib releases
 RUN tar c -C ./_build/$MIX_ENV/rel/captain_fact_graphql/ -f graphql-api_release.tar bin lib releases
+RUN tar c -C ./_build/$MIX_ENV/rel/captain_fact_atom_feed/ -f atom-feed_release.tar bin lib releases
