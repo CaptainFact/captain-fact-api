@@ -16,6 +16,8 @@ defmodule CaptainFact.Application do
       supervisor(CaptainFactWeb.Endpoint, []),
       # Other custom supervisors
       supervisor(CaptainFact.Sources.Fetcher, []),
+      # Presence to track number of connected users to a channel
+      supervisor(CaptainFactWeb.Presence, []),
       # Scheduler for all CRON jobs
       worker(CaptainFact.Scheduler, []),
       # Jobs

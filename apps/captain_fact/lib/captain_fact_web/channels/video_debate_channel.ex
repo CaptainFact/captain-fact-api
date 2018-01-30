@@ -1,5 +1,6 @@
 defmodule CaptainFactWeb.VideoDebateChannel do
   use CaptainFactWeb, :channel
+  alias CaptainFactWeb.Presence
 
   import CaptainFact.VideoDebate.ActionCreator, only: [
     action_add: 3, action_create: 3, action_update: 3, action_delete: 3,
@@ -21,12 +22,32 @@ defmodule CaptainFactWeb.VideoDebateChannel do
 
   def join("video_debate:" <> video_hash_id, _payload, socket) do
     with {:ok, video_id} <- VideoHashId.decode(video_hash_id),
-         video when not is_nil(video) <- Repo.get(Video.with_speakers(Video), video_id)
+         video when not is_nil(video) <- Repo.get(Video.with_speakers(Video), video_id),
+         rendered_video <- View.render_one(video, VideoView, "video.json")
     do
-      {:ok, View.render_one(video, VideoView, "video.json"), assign(socket, :video_id, video_id)}
+      send(self(), :after_join)
+      {:ok, rendered_video, assign(socket, :video_id, video_id)}
     else
       _ -> {:error, "not_found"}
     end
+  end
+
+  @doc"""
+  Register a public connection in presence tracker
+  """
+  def handle_info(:after_join, socket = %{assigns: %{user_id: nil}}) do
+    push socket, "presence_state", Presence.list(socket)
+    {:ok, _} = Presence.track(socket, :viewers, %{})
+    {:noreply, socket}
+  end
+
+  @doc"""
+  Register a user connection in presence tracker
+  """
+  def handle_info(:after_join, socket = %{assigns: %{user_id: user_id}}) do
+    push socket, "presence_state", Presence.list(socket)
+    {:ok, _} = Presence.track(socket, :users, %{user_id: user_id})
+    {:noreply, socket}
   end
 
   def handle_in(command, params, socket) do

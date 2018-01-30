@@ -7,7 +7,7 @@ defmodule DB.Mixfile do
       version: "0.8.1",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
-      deps_path: "../../_deps",
+      deps_path: "../../deps",
       lockfile: "../../mix.lock",
       elixir: "~> 1.6",
       elixirc_paths: elixirc_paths(Mix.env),

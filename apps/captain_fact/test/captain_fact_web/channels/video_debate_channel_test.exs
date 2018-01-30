@@ -7,7 +7,7 @@ defmodule CaptainFactWeb.VideoDebateChannelTest do
     video = insert(:video)
     encoded_id = VideoHashId.encode(video.id)
     {:ok, returned_video, socket} =
-      subscribe_and_join(socket("", %{}), VideoDebateChannel, "video_debate:#{encoded_id}")
+      subscribe_and_join(socket("", %{user_id: nil}), VideoDebateChannel, "video_debate:#{encoded_id}")
 
     assert returned_video.id == encoded_id
     assert returned_video.url == video.url
