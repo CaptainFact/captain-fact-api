@@ -1,4 +1,4 @@
-defmodule CaptainFact.ReleaseTasks do
+defmodule DB.ReleaseTasks do
   require Logger
 
   @start_apps [
@@ -10,7 +10,7 @@ defmodule CaptainFact.ReleaseTasks do
     :logger
   ]
 
-  @myapps [:captain_fact, :db]
+  @myapps [:db]
 
   @repos [DB.Repo]
 
@@ -44,7 +44,6 @@ defmodule CaptainFact.ReleaseTasks do
     Application.ensure_all_started(:httpoison)
     seed_script = Path.join([priv_dir(:db), "repo", "seed_politicians.exs"])
     [{module, _}] = Code.load_file(seed_script)
-
     url = "https://raw.githubusercontent.com/CaptainFact/captain-fact-data/master/Wikidata/data/politicians_born_after_1945_having_a_picture.csv"
     filename = "politicians.csv"
     %HTTPoison.Response{body: csv_content} = HTTPoison.get!(url)
@@ -56,7 +55,6 @@ defmodule CaptainFact.ReleaseTasks do
 
   defp init do
     # Load the code, but don't start it
-    :ok = Application.load(:captain_fact)
     :ok = Application.load(:db)
 
     # Start apps necessary for executing migrations
@@ -65,8 +63,6 @@ defmodule CaptainFact.ReleaseTasks do
     Logger.info "Dependencies started, loading runtime configuration..."
 
     # Loading runtime configuration
-    CaptainFact.RuntimeConfiguration.setup()
-    CaptainFact.RuntimeConfiguration.configure()
     DB.RuntimeConfiguration.setup()
     DB.RuntimeConfiguration.configure()
 

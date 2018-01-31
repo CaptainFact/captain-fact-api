@@ -15,5 +15,5 @@ done
 set -e
 
 echo "Running migrations"
-bin/captain_fact command Elixir.CaptainFact.ReleaseTasks migrate
+bin/captain_fact command Elixir.DB.ReleaseTasks migrate
 echo "Migrated"

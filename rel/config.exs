@@ -30,7 +30,7 @@ end
 
 release :captain_fact do
   set version: current_version(:captain_fact)
-  set applications: [:runtime_tools, :elixir_make, :jsx]
+  set applications: [:captain_fact]
   set post_start_hook: "rel/hooks/post_start.sh"
   set commands: [
     "migrate": "rel/commands/migrate.sh",
@@ -41,10 +41,11 @@ end
 
 release :captain_fact_graphql do
   set version: current_version(:captain_fact_graphql)
-  set applications: [:runtime_tools, :elixir_make, :jsx, :sweet_xml]
+  set applications: [:captain_fact_graphql]
+  set commands: ["migrate": "rel/commands/migrate.sh"]
 end
 
 release :captain_fact_atom_feed do
   set version: current_version(:captain_fact_atom_feed)
-  set applications: [:runtime_tools, :elixir_make, :sweet_xml]
+  set applications: [:captain_fact_atom_feed]
 end
