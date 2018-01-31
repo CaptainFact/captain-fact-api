@@ -4,8 +4,8 @@
 
 CF_BUILD_IMAGE=captain-fact-builder:dev-release
 CF_REST_API_IMAGE=registry.gitlab.com/captainfact/captain-fact-api/rest:dev
-CF_GRAPHQL_API_IMAGE=registry.gitlab.com/captainfact/captain-fact-api/graphql:dev
-CF_ATOM_FEED_IMAGE=registry.gitlab.com/captainfact/captain-fact-api/atom-feed:dev
+CF_GRAPHQL_API_IMAGE=captainfact/graphql-api:dev
+CF_ATOM_FEED_IMAGE=captainfact/atom-feed:dev
 
 function confirm()
 {

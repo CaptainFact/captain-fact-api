@@ -9,3 +9,6 @@ rel/docker/*.tar
 
 # Coverage reports
 apps/*/cover
+
+# Misc
+until_fail.sh

@@ -63,7 +63,12 @@ defmodule CaptainFact.Videos do
           Video.changeset(%Video{}, metadata)
           |> Repo.insert!()
           |> Map.put(:speakers, [])
-        Recorder.record!(user, :add, :video, %{entity_id: video.id})
+
+        Recorder.record!(user, :add, :video, %{
+          entity_id: video.id,
+          context: UserAction.video_debate_context(video),
+          changes: %{"url" => Video.build_url(video)}
+        })
         video
       error -> error
     end

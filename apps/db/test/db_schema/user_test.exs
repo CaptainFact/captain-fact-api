@@ -86,4 +86,9 @@ defmodule DB.Schema.UserTest do
     assert changeset.valid?
     assert changeset2.valid?
   end
+
+  test "default user should not be a publisher" do
+    changeset = User.registration_changeset(%User{}, @valid_attrs)
+    refute changeset.data.is_publisher
+  end
 end

@@ -2,7 +2,7 @@ defmodule DB.Schema.UserAction do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias DB.Schema.{UserAction, User}
+  alias DB.Schema.{UserAction, User, Video}
 
 
   schema "users_actions" do
@@ -78,6 +78,7 @@ defmodule DB.Schema.UserAction do
   def entity(:user),                  do: 7
 
   # Context helpers
+  def video_debate_context(%Video{id: id}), do: "VD:#{id}"
   def video_debate_context(video_id), do: "VD:#{video_id}"
   def moderation_context(nil), do: "MD"
   def moderation_context(old_context) when is_binary(old_context), do: "MD:#{old_context}"
