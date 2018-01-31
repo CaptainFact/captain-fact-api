@@ -39,7 +39,7 @@ docker run -it \
   --network host \
   --rm ${CF_REST_API_IMAGE} console
 
-echo "Let's test GraphQL API on port 5000 =>"
+echo "Let's test GraphQL API on port 4002 =>"
 docker run -it \
   -e "CF_HOST=localhost" \
   -e "CF_S3_ACCESS_KEY_ID=test" \
@@ -55,7 +55,7 @@ docker run -it \
   --network host \
   --rm ${CF_GRAPHQL_API_IMAGE} console
 
-echo "Let's test ATOM feed on port 4003 =>"
+echo "Let's test ATOM feed on port 4004 =>"
 docker run -it \
   -e "CF_HOST=localhost" \
   -e "CF_S3_ACCESS_KEY_ID=test" \
