@@ -12,6 +12,7 @@ defmodule CaptainFactGraphql.RuntimeConfiguration do
                       else: Path.join(:code.priv_dir(:captain_fact_graphql), "secrets")
 
     Application.put_env(:weave, :file_directory, secrets_path)
+    Application.put_env(:weave, :only, ~w(basic_auth_password host secret_key_base))
   end
 
   # ----- Actual configuration -----

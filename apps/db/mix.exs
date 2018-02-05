@@ -40,7 +40,7 @@ defmodule DB.Mixfile do
       {:postgrex, "~> 0.13.3"},
       {:arc, "~> 0.8.0"},
       {:arc_ecto, "~> 0.7.0"},
-      {:weave, "~> 3.1"},
+      {:weave, github: "betree/weave", branch: "8-allow-only-keyword-for-selective-configuration"},
       {:ex_aws, "~> 1.1"},
       {:xml_builder, "~> 2.0", override: true},
       {:slugger, "~> 0.2"},

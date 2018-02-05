@@ -58,7 +58,7 @@ defmodule CaptainFact.Mixfile do
       {:bamboo, "~> 1.0.0-rc.1"},
       {:hackney, "~> 1.6"},
       {:sweet_xml, "~> 0.6"},
-      {:weave, "~> 3.1"},
+      {:weave, github: "betree/weave", branch: "8-allow-only-keyword-for-selective-configuration"},
       {:burnex, "~> 1.0"},
       {:bypass, "~> 0.8", only: :test},
       {:credo, "~> 0.8", only: [:dev, :test], runtime: false},
