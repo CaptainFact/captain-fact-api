@@ -14,6 +14,8 @@ defmodule CaptainFact.RuntimeConfiguration do
     Application.put_env(:weave, :file_directory, secrets_path)
 
     Application.put_env(:weave, :only, [
+      "frontend_url",
+      "chrome_extension_id",
       "host",
       "secret_key_base",
       "mailgun_domain",
