@@ -1,4 +1,4 @@
-defmodule CaptainFact.Actions.Analyzers.Flags do
+defmodule CaptainFact.Jobs.Flags do
   @moduledoc """
   Analyse flags periodically to report innapropriate content
   """
@@ -26,6 +26,10 @@ defmodule CaptainFact.Actions.Analyzers.Flags do
 
   def start_link() do
     GenServer.start_link(@name, :ok, name: @name)
+  end
+
+  def init(args) do
+    {:ok, args}
   end
 
   @timeout 60_000 # 1 minute

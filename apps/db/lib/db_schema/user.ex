@@ -19,6 +19,7 @@ defmodule DB.Schema.User do
     field :achievements, {:array, :integer}, default: []
     field :newsletter, :boolean, default: true
     field :newsletter_subscription_token, :string
+    field :is_publisher, :boolean, default: false
 
     # Social networks profiles
     field :fb_user_id, :string

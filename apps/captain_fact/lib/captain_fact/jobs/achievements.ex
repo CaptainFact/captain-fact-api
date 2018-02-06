@@ -1,4 +1,4 @@
-defmodule CaptainFact.Actions.Analyzers.Achievements do
+defmodule CaptainFact.Jobs.Achievements do
   @moduledoc """
   Checks for special actions or actions combinations that could trigger an achievement
   """
@@ -27,6 +27,10 @@ defmodule CaptainFact.Actions.Analyzers.Achievements do
     GenServer.start_link(@name, :ok, name: @name)
   end
 
+  def init(args) do
+    {:ok, args}
+  end
+
   @timeout 120_000 # 2 minute
   def update() do
     GenServer.call(@name, :update_flags, @timeout)
@@ -48,7 +52,7 @@ defmodule CaptainFact.Actions.Analyzers.Achievements do
 
   defp start_analysis([]), do: :ok
   defp start_analysis(actions) do
-    Logger.info("[Analyzers.Achievements] Updating achievements")
+    Logger.info("[Jobs.Achievements] Updating achievements")
     report = ReportManager.create_report!(@analyser_id, :running, actions)
     nb_achievements_unlocked = Enum.count(Enum.map(actions, &check_action/1), &(&1 != nil))
     ReportManager.set_success!(report, nb_achievements_unlocked)

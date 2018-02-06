@@ -4,18 +4,19 @@ defmodule CaptainFactGraphql.Mixfile do
   def project do
     [
       app: :captain_fact_graphql,
-      version: "0.8.0",
+      version: "0.8.1",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
-      deps_path: "../../_deps",
+      deps_path: "../../deps",
       lockfile: "../../mix.lock",
-      elixir: "~> 1.4",
+      elixir: "~> 1.6",
       elixirc_paths: elixirc_paths(Mix.env),
       compilers: [:phoenix] ++ Mix.compilers,
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      test_coverage: [tool: ExCoveralls]
     ]
   end
 
@@ -39,7 +40,7 @@ defmodule CaptainFactGraphql.Mixfile do
       {:absinthe_ecto, "~> 0.1.3"},
       {:absinthe_plug, "~> 1.4.1"},
       {:basic_auth, "~> 2.2.2"},
-      {:weave, "~> 3.1"},
+      {:weave, github: "betree/weave", branch: "8-allow-only-keyword-for-selective-configuration"},
       {:db, in_umbrella: true}
     ]
   end

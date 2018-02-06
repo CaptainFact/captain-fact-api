@@ -6,7 +6,7 @@ defmodule CaptainFact.Actions.FlaggerTest do
   alias DB.Schema.Flag
 
   alias CaptainFact.Actions.Flagger
-  alias CaptainFact.Actions.Analyzers.{Flags, Reputation}
+  alias CaptainFact.Jobs.{Flags, Reputation}
   alias CaptainFact.Moderation
 
 

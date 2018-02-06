@@ -4,20 +4,19 @@ defmodule CaptainFact.Mixfile do
   def project do
     [
       app: :captain_fact,
-      version: "0.8.0",
+      version: "0.8.1",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
-      deps_path: "../../_deps",
+      deps_path: "../../deps",
       lockfile: "../../mix.lock",
-      elixir: "~> 1.5",
+      elixir: "~> 1.6",
       elixirc_paths: elixirc_paths(Mix.env),
       compilers: [:phoenix, :gettext] ++ Mix.compilers,
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
       aliases: aliases(),
       deps: deps(),
-      test_coverage: [tool: ExCoveralls],
-      preferred_cli_env: ["coveralls": :test, "coveralls.detail": :test, "coveralls.post": :test, "coveralls.html": :test]
+      test_coverage: [tool: ExCoveralls]
     ]
   end
 
@@ -54,16 +53,14 @@ defmodule CaptainFact.Mixfile do
       {:httpoison, "~> 0.11.2"},
       {:poison, "~> 2.2.0"},
       {:csv, "~> 1.4.4"},
-      {:quantum, "~> 2.1.0"},
+      {:quantum, "~> 2.2.1"},
       {:not_qwerty123, "~> 2.2"},
       {:bamboo, "~> 1.0.0-rc.1"},
-      {:ex_aws, "~> 1.1"},
       {:hackney, "~> 1.6"},
       {:sweet_xml, "~> 0.6"},
-      {:weave, "~> 3.1"},
+      {:weave, github: "betree/weave", branch: "8-allow-only-keyword-for-selective-configuration"},
       {:burnex, "~> 1.0"},
       {:bypass, "~> 0.8", only: :test},
-      {:excoveralls, "~> 0.7", only: :test},
       {:credo, "~> 0.8", only: [:dev, :test], runtime: false},
       {:db, in_umbrella: true}
    ]

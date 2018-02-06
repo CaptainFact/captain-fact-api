@@ -59,7 +59,7 @@ defmodule DB.Schema.UserTest do
   end
 
   test "email must not be a temporary email (yopmail, jetable.org...etc)" do
-    provider = Enum.random(Burnex.providers)
+    provider = "jetable.org"
     attrs = %{email: "xxxxx@#{provider}"}
     assert {:email, "forbidden_provider"} in errors_on(%User{}, attrs), "didn't reject #{provider}'"
   end
@@ -85,5 +85,10 @@ defmodule DB.Schema.UserTest do
     changeset2 = User.registration_changeset(%User{}, %{@valid_attrs | username: "xxxxxxx_y"})
     assert changeset.valid?
     assert changeset2.valid?
+  end
+
+  test "default user should not be a publisher" do
+    changeset = User.registration_changeset(%User{}, @valid_attrs)
+    refute changeset.data.is_publisher
   end
 end

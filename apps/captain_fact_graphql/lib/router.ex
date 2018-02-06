@@ -1,5 +1,5 @@
 defmodule CaptainFactGraphqlWeb.Router do
-  use CaptainFactGraphql, :router
+  use CaptainFactGraphqlWeb, :router
 
   @graphiql_route "/graphiql"
 

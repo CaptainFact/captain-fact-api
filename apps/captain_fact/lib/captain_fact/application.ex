@@ -16,15 +16,16 @@ defmodule CaptainFact.Application do
       supervisor(CaptainFactWeb.Endpoint, []),
       # Other custom supervisors
       supervisor(CaptainFact.Sources.Fetcher, []),
-      # Scheduler for all CRON jobs (like action analyzers below)
+      # Presence to track number of connected users to a channel
+      supervisor(CaptainFactWeb.Presence, []),
+      # Scheduler for all CRON jobs
       worker(CaptainFact.Scheduler, []),
-      # Actions analyzers
-      worker(CaptainFact.Actions.Analyzers.Reputation, []),
-      worker(CaptainFact.Actions.Analyzers.Flags, []),
-      worker(CaptainFact.Actions.Analyzers.Achievements, []),
-      worker(CaptainFact.Actions.Analyzers.Votes, []),
-      # Other CRON tasks
-      worker(CaptainFact.Moderation.Updater, []),
+      # Jobs
+      worker(CaptainFact.Jobs.Reputation, []),
+      worker(CaptainFact.Jobs.Flags, []),
+      worker(CaptainFact.Jobs.Achievements, []),
+      worker(CaptainFact.Jobs.Votes, []),
+      worker(CaptainFact.Jobs.ModerationUpdater, []),
       # Misc workers
       worker(CaptainFact.Accounts.UsernameGenerator, [])
     ]

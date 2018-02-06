@@ -1,13 +1,13 @@
 defmodule CaptainFact.Email do
   import Bamboo.Email
-  require CaptainFact.Actions.Analyzers.Reputation
+  require CaptainFact.Jobs.Reputation
 
   alias DB.Repo
   alias DB.Schema.ResetPasswordRequest
   alias DB.Schema.InvitationRequest
   alias DB.Schema.User
 
-  alias CaptainFact.Actions.Analyzers.Reputation
+  alias CaptainFact.Jobs.Reputation
 
   # TODO GetText i18n
 
@@ -25,10 +25,13 @@ defmodule CaptainFact.Email do
     |> build_html_body("""
        Welcome to CaptainFact.io ! To confirm your email and gain a bonus of
        +#{@confirm_email_reputation} reputation, click on this link :
-       <a href="#{frontend_url()}/confirm_email/#{user.email_confirmation_token}">Confirm email</a>
+       <a href="#{frontend_url()}/confirm_email/#{user.email_confirmation_token}">Confirm my email</a>
        <br/><br/>
-       You can learn more about how the system works, what you can do and the rules you should follow by checking
+       You can learn more about how the system works and the whys of CaptainFact by checking
        <a href="#{frontend_url()}/help">the help pages</a>.
+       <br/><br/>
+       Feel free to contact us at contact@captainfact.io if you want to share something with us or if you
+       want to contribute to the project but don't know where to start with!
        """)
   end
 
@@ -208,10 +211,8 @@ defmodule CaptainFact.Email do
                                           </tr>
                                           <tr>
                                             <td style="word-wrap:break-word;font-size:0px;padding:0px 20px 0px 20px;" align="left">
-                                              <div style="cursor:auto;color:#000000;font-family:#{@main_font_family};font-size:11px;line-height:22px;text-align:left;">
-                                                <p style="font-size:14px;">
-                                                  #{content}
-                                                </p>
+                                              <div style="font-size:14px;cursor:auto;color:#000000;font-family:#{@main_font_family};line-height:22px;text-align:left;">
+                                                #{content}
                                               </div>
                                             </td>
                                           </tr>

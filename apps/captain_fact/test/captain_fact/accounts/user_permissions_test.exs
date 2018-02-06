@@ -77,6 +77,11 @@ defmodule CaptainFact.Accounts.UserPermissionsTest do
     assert_raise PermissionsError, fn -> UserPermissions.check!(nil, :add, :video) end
   end
 
+  test "users with is_publisher set to true can always add videos without limits" do
+    user = insert(:user, %{reputation: 0, is_publisher: true})
+    assert UserPermissions.check(user, :add, :video) == {:ok, -1}
+  end
+
   defp each_limitation(func) do
     for {action_type, entities_limitations} <- UserPermissions.limitations do
       case entities_limitations do

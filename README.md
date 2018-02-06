@@ -13,7 +13,7 @@ Master-[![pipeline status](https://gitlab.com/CaptainFact/captain-fact-api/badge
   `docker run -d --name postgres_dev -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=captain_fact_dev postgres:9.6`
   * Create and migrate your database with `mix ecto.setup`
   * Start server with `mix phx.server` or with `iex -S mix phx.server` if you need access to an Elixir console
-  * You can also run tests with `mix test` (may generate some warnings, only check final results)
+  * You can also run tests with `mix test`
 
 ## Project architecture
 

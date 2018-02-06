@@ -8,7 +8,6 @@ erl_crash.dump
 *.ez
 
 _build
-_deps
 
 rel/docker
 resources

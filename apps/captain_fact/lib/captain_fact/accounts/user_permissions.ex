@@ -71,8 +71,9 @@ defmodule CaptainFact.Accounts.UserPermissions do
   # --- API ---
 
   @doc """
-  Check if user can execute action. Return {:ok, nb_available} if yes, {:error, reason} otherwise.
+  Check if user can execute action. Return `{:ok, nb_available}` if yes, `{:error, reason}` otherwise.
 
+  `nb_available` is -1 if there is no limit.
   `entity` may be nil **only if** we're checking for a wildcard limitation (ex: collective_moderation)
 
   ## Examples
@@ -88,6 +89,7 @@ defmodule CaptainFact.Accounts.UserPermissions do
       iex> UserPermissions.check(user, :create, :comment)
       {:error, "limit_reached"}
   """
+  def check(%User{is_publisher: true}, :add, :video), do: {:ok, -1}
   def check(user = %User{}, action_type, entity) do
     limit = limitation(user, action_type, entity)
     if (limit == 0) do

@@ -9,4 +9,7 @@ defmodule DB.Type.Achievement do
   def get(:bulletproof),        do: 4
   def get(:you_are_fake_news),  do: 5
   def get(:social_networks),    do: 6
+  def get(:ambassador),         do: 7
+  def get(:ghostbuster),        do: 8 # Made a bug report
+  def get(:famous),             do: 9 # Made a bug report
 end

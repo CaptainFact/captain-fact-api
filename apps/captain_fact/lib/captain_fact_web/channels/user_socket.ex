@@ -52,10 +52,6 @@ defmodule CaptainFactWeb.UserSocket do
   def rescue_handler(handler, command, params, socket) do
     try do
       handler.(command, params, socket)
-    catch
-      e ->
-        Logger.error("[RescueChannel] Uncatched exception : #{inspect(e)}")
-        reply_error(socket, Phoenix.View.render(ErrorView, "error.json", []))
     rescue
       e in UserPermissions.PermissionsError ->
         reply_error(socket, Phoenix.View.render(ErrorView, "403.json", %{reason: e}))
@@ -66,6 +62,10 @@ defmodule CaptainFactWeb.UserSocket do
       e ->
         Logger.error("[RescueChannel] An unknown error just popped : #{inspect(e)}")
         Logger.debug(fn ->"Stacktrace: #{inspect(System.stacktrace(), pretty: true)}" end)
+        reply_error(socket, Phoenix.View.render(ErrorView, "error.json", []))
+    catch
+      e ->
+        Logger.error("[RescueChannel] Uncatched exception : #{inspect(e)}")
         reply_error(socket, Phoenix.View.render(ErrorView, "error.json", []))
     end
   end
