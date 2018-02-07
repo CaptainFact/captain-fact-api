@@ -12,10 +12,7 @@ defmodule UeberauthWithRedirectUriFixer do
   def call(conn = %{request_path: request_path, params: params}, opts) do
     ueberauth_opts =
       if request_path == @fb_auth_callback do
-        frontend_url = Application.get_env(:captain_fact, :frontend_url)
-        fixed_url = if Map.has_key?(params, "invitation_token"),
-          do: "#{frontend_url}/login/callback/facebook?invitation_token=#{params["invitation_token"]}",
-          else: "#{frontend_url}/login/callback/facebook"
+        fixed_url = "#{Application.get_env(:captain_fact, :frontend_url)}/login/callback/facebook"
 
         Map.update!(opts, @fb_auth_callback, fn {module, :run_callback, callback_opts} ->
           {module, :run_callback, Map.put(callback_opts, :callback_url, fixed_url)}

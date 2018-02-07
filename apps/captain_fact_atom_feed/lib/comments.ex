@@ -73,6 +73,6 @@ defmodule CaptainFactAtomFeed.Comments do
     do: "<a href='#{url}'>[Source] #{site_name}</a>"
 
   defp comment_url(comment) do
-    "https://captainfact.io/v/#{DB.Type.VideoHashId.encode(comment.statement.video_id)}?comment=#{comment.id}"
+    "https://captainfact.io/videos/#{DB.Type.VideoHashId.encode(comment.statement.video_id)}?comment=#{comment.id}"
   end
 end
