@@ -9,7 +9,7 @@ defmodule UeberauthWithRedirectUriFixer do
 
   @fb_auth_callback "/auth/facebook/callback"
 
-  def call(conn = %{request_path: request_path, params: params}, opts) do
+  def call(conn = %{request_path: request_path}, opts) do
     ueberauth_opts =
       if request_path == @fb_auth_callback do
         fixed_url = "#{Application.get_env(:captain_fact, :frontend_url)}/login/callback/facebook"

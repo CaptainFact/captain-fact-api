@@ -45,7 +45,7 @@ defmodule CaptainFactAtomFeed.Comments do
   defp generate_feed(comments, last_update) do
     Feed.new("https://captainfact.io/", last_update, "[CaptainFact] All Comments")
     |> Feed.author("Captain Fact", email: "atom-feed@captainfact.io")
-    |> Feed.link("https://feed.catpainfact.io/comments/", rel: "self")
+    |> Feed.link("https://feed.captainfact.io/comments/", rel: "self")
     |> Feed.entries(Enum.map(comments, &get_entry/1))
     |> Feed.build()
     |> Atomex.generate_document()
