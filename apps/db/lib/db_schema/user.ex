@@ -97,6 +97,14 @@ defmodule DB.Schema.User do
     cast(model, params, [:fb_user_id])
   end
 
+  def changeset_achievement(model, achievement) do
+    updated_achievements = if achievement in model.achievements,
+      do: model.achievements,
+      else: Enum.uniq([achievement | model.achievements])
+
+    Ecto.Changeset.change(model, achievements: updated_achievements)
+  end
+
   @token_length 32
   defp generate_email_verification_token(changeset, false),
     do: put_change(changeset, :email_confirmation_token, DB.Utils.TokenGenerator.generate(@token_length))

@@ -49,6 +49,7 @@ defmodule DB.Mixfile do
       {:hashids, "~> 2.0"},
       {:ex_machina, "~> 2.0", only: [:dev, :test]},
       {:faker, "~> 0.7", only: [:dev, :test]},
+      {:stream_data, "~> 0.1", only: :test}
     ]
   end
 end
