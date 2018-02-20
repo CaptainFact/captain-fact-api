@@ -63,7 +63,7 @@ defmodule CaptainFact.Accounts.UserPermissions do
     revert_vote_up:         { 10  , 20, 30 , 50 , 75 , 150 , 300 , 500 , 500 },
     revert_vote_down:       { 10  , 20, 30 , 50 , 75 , 150 , 300 , 500 , 500 },
     revert_self_vote:       { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   3 ,   5 },
-    collective_moderation:  { 0  ,  0 ,  0 ,  0 ,  0 ,   0  ,  0 ,   0 , 200 }
+    collective_moderation:  { 0  ,  0 ,  0 ,  0 ,  0 ,   0  ,  0 ,   10 , 50 }
   }
   @error_not_enough_reputation "not_enough_reputation"
   @error_limit_reached "limit_reached"

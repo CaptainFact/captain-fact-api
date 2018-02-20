@@ -11,5 +11,5 @@ defmodule DB.Type.Achievement do
   def get(:social_networks),    do: 6
   def get(:ambassador),         do: 7
   def get(:ghostbuster),        do: 8 # Made a bug report
-  def get(:famous),             do: 9 # Made a bug report
+  def get(:famous),             do: 9 # Leaderboard
 end

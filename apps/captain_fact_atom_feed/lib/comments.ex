@@ -6,7 +6,8 @@ defmodule CaptainFactAtomFeed.Comments do
   @nb_items_max 50
 
   @doc"""
-  Get an RSS feed containing all site's comments in reverse chronological order (newest first)
+  Get an RSS feed containing all site's comments in reverse chronological
+  order (newest first)
   """
   def feed_all() do
     comments = fetch_comments()
@@ -39,13 +40,15 @@ defmodule CaptainFactAtomFeed.Comments do
     )
   end
 
-  defp last_update(_comments = [comment | _]), do: DateTime.from_naive!(comment.inserted_at, "Etc/UTC")
-  defp last_update(_), do: DateTime.utc_now()
+  defp last_update(_comments = [comment | _]),
+    do: DateTime.from_naive!(comment.inserted_at, "Etc/UTC")
+  defp last_update(_),
+    do: DateTime.utc_now()
 
   defp generate_feed(comments, last_update) do
     Feed.new("https://captainfact.io/", last_update, "[CaptainFact] All Comments")
     |> Feed.author("Captain Fact", email: "atom-feed@captainfact.io")
-    |> Feed.link("https://feed.catpainfact.io/comments/", rel: "self")
+    |> Feed.link("https://feed.captainfact.io/comments/", rel: "self")
     |> Feed.entries(Enum.map(comments, &get_entry/1))
     |> Feed.build()
     |> Atomex.generate_document()
@@ -68,11 +71,13 @@ defmodule CaptainFactAtomFeed.Comments do
     |> Entry.build()
   end
 
-  defp source(%{source: nil}), do: "None"
+  defp source(%{source: nil}),
+    do: "None"
   defp source(%{source: %{url: url, site_name: site_name}}),
     do: "<a href='#{url}'>[Source] #{site_name}</a>"
 
   defp comment_url(comment) do
-    "https://captainfact.io/v/#{DB.Type.VideoHashId.encode(comment.statement.video_id)}?comment=#{comment.id}"
+    video_hash_id = DB.Type.VideoHashId.encode(comment.statement.video_id)
+    "https://captainfact.io/videos/#{video_hash_id}?comment=#{comment.id}"
   end
 end

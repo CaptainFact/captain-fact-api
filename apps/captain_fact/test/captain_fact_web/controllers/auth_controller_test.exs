@@ -60,6 +60,9 @@ defmodule CaptainFactWeb.AuthControllerTest do
 
       assert response["user"]["id"] == user.id, "should use existing account if email exists"
       assert Achievement.get(:social_networks) in response["user"]["achievements"], "should unlock social-network achievement"
+
+      CaptainFact.Jobs.Reputation.update()
+      assert Repo.get(User, response["user"]["id"]).reputation > response["user"]["reputation"]
     end
 
     test "show an error if not invited" do
@@ -86,6 +89,9 @@ defmodule CaptainFactWeb.AuthControllerTest do
 
       Guardian.decode_and_verify!(response["token"])
       assert Achievement.get(:social_networks) in response["user"]["achievements"], "should unlock social-network achievement"
+
+      CaptainFact.Jobs.Reputation.update()
+      assert Repo.get(User, response["user"]["id"]).reputation > response["user"]["reputation"]
     end
 
     test "user must accept to share email when authenticathing with third party" do

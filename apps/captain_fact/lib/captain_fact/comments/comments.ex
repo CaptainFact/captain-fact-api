@@ -1,5 +1,5 @@
 defmodule CaptainFact.Comments do
-  import Ecto.{Query}
+  import Ecto.Query
   require Logger
 
   alias DB.Repo
@@ -35,7 +35,13 @@ defmodule CaptainFact.Comments do
       |> Map.put(:score, 0)
 
     # Record action
-    Recorder.record!(user, :create, :comment, action_params(context, full_comment))
+    action_params = Map.merge(action_params(context, full_comment), %{
+      changes: %{
+        text: full_comment.text,
+        source: source_url
+      }
+    })
+    Recorder.record!(user, :create, :comment, action_params)
 
     # If new source, fetch metadata
     unless is_nil(source) || !is_nil(Map.get(source, :id)),
@@ -139,7 +145,11 @@ defmodule CaptainFact.Comments do
 
   # ---- Private ----
 
-  defp action_params(context, comment), do: %{context: context, target_user_id: comment.user_id, entity_id: comment.id}
+  defp action_params(context, comment), do: %{
+    context: context,
+    target_user_id: comment.user_id,
+    entity_id: comment.id
+  }
 
   defp reverse_vote_type(:vote_up), do: :revert_vote_up
   defp reverse_vote_type(:vote_down), do: :revert_vote_down

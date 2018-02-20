@@ -45,26 +45,33 @@ defmodule CaptainFact.Accounts do
     provider_params = Keyword.get(opts, :provider_params, %{})
 
     # Do create user
-    create_user_result =
-      case Map.get(user_params, "username") || Map.get(user_params, :username) do
-        username when allow_empty_username and (is_nil(username) or username == "") ->
-          email = Map.get(user_params, "email") || Map.get(user_params, :email)
-          create_account_without_username(email, user_params, provider_params)
-        _ ->
-          do_create_account(user_params, provider_params)
-      end
+    user_params
+    |> create_account_from_params(provider_params, allow_empty_username)
+    |> after_create(invitation_token)
+  end
 
-    after_create(create_user_result, invitation_token)
+  defp create_account_from_params(user_params, provider_params, allow_empty_username) do
+    case Map.get(user_params, "username") || Map.get(user_params, :username) do
+      username when allow_empty_username and (is_nil(username) or username == "") ->
+        email = Map.get(user_params, "email") || Map.get(user_params, :email)
+        create_account_without_username(email, user_params, provider_params)
+      _ ->
+        do_create_account(user_params, provider_params)
+    end
   end
 
   defp after_create(error = {:error, _}, _), do: error
   defp after_create(result = {:ok, user}, invitation_token) do
-    # We willingly delete token using `invitation_token` string because we accept having
-    # multiple invitations with the same token
+    # We willingly delete token using `invitation_token` string because we
+    # accept having multiple invitations with the same token
     if invitation_token, do: delete_invitation(invitation_token)
 
-    # Send welcome mail
-    send_welcome_email(user)
+    # Send welcome mail or directly confirm email if third party provider
+    if user.fb_user_id == nil do
+      send_welcome_email(user)
+    else
+      confirm_email!(user)
+    end
 
     # Return final result
     result
@@ -114,35 +121,82 @@ defmodule CaptainFact.Accounts do
     |> (fn res -> "temporary-#{res}" end).()
   end
 
+  # ---- Picture ----
+
+  @doc"""
+  Fetch a user picture from given URL.
+
+  Returns `{:ok, updated_user}` or `{:error, error}`
+  """
+  def fetch_picture(_, picture_url) when picture_url in [nil, ""],
+    do: {:error, :invalid_path}
+  def fetch_picture(user, picture_url) do
+    if Application.get_env(:captain_fact, :env) != :test do
+      case DB.Type.UserPicture.store({picture_url, user}) do
+        {:ok, picture} -> update_user_picture(user, picture)
+        error -> error
+      end
+    else
+      update_user_picture(user, picture_url) # Don't store files in tests
+    end
+  end
+
+  defp update_user_picture(user, picture) do
+    user
+    |> Ecto.Changeset.change(picture_url: %{file_name: picture, updated_at: Ecto.DateTime.utc})
+    |> Repo.update()
+  end
+
   # ---- Confirm email ----
 
-  def confirm_email!(token) do
-    user =
-      Repo.get_by(User, email_confirmation_token: token)
-      |> User.changeset_confirm_email(true)
-      |> Repo.update!()
-
-    Recorder.record!(user, :email_confirmed, :user)
+  @doc"""
+  Confirm user email. Ignored if already confirmed.
+  """
+  def confirm_email!(token) when is_binary(token),
+    do: confirm_email!(Repo.get_by(User, email_confirmation_token: token))
+  def confirm_email!(%User{email_confirmed: true}),
+    do: nil
+  def confirm_email!(user = %User{email_confirmed: false}) do
+    user
+    |> User.changeset_confirm_email(true)
+    |> Repo.update!()
+    |> Recorder.record!(:email_confirmed, :user)
   end
 
   # ---- Achievements -----
 
+  @doc"""
+  Unlock given achievement. `achievement` can be passed as an integer or as the
+  atom representation. See `DB.Type.Achievement` for more info.
+  """
   def unlock_achievement(user, achievement) when is_atom(achievement),
     do: unlock_achievement(user, Achievement.get(achievement))
-  def unlock_achievement(user = %User{id: user_id}, achievement) when is_integer(achievement) do
+  def unlock_achievement(user, achievement) when is_integer(achievement) do
     if achievement in user.achievements do
       {:ok, user} # Don't update user if achievement is already unlocked
     else
       Repo.transaction(fn ->
-        user =
-          User
-          |> where(id: ^user_id)
-          |> lock("FOR UPDATE")
-          |> Repo.one!()
-
-        Repo.update!(Ecto.Changeset.change(user, achievements: Enum.uniq([achievement | user.achievements])))
+        user
+        |> lock_user()
+        |> User.changeset_achievement(achievement)
+        |> Repo.update!()
       end)
     end
+  end
+
+  # ---- Reputation ----
+
+  @doc"""
+  Update user retutation with `user.reputation + diff`. Properly lock user in DB
+  to ensure no cheating can be made.
+  """
+  def update_reputation(user, diff) when is_integer(diff) do
+    Repo.transaction(fn ->
+      user
+      |> lock_user()
+      |> User.reputation_changeset(diff)
+      |> Repo.update!()
+    end)
   end
 
   # ---- Reset Password ----
@@ -267,6 +321,9 @@ defmodule CaptainFact.Accounts do
     Repo.update!(InvitationRequest.changeset_sent(request, true))
   end
 
+  @doc"""
+  Generate `number` invitations. You can specify a custom `token`
+  """
   def generate_invites(number), do: generate_invites(number, TokenGenerator.generate(@default_token_length))
   def generate_invites(number, token) do
     time = Ecto.DateTime.utc
@@ -275,6 +332,9 @@ defmodule CaptainFact.Accounts do
     Logger.info("Generated #{number} invites for token #{token}. Url: #{frontend_url}/signup?invitation_token=#{token}")
   end
 
+  @doc"""
+  Return an invitation for given token
+  """
   def get_invitation_for_token(token),
     do: InvitationRequest |> where(token: ^token) |> limit(1) |> Repo.one()
 
@@ -288,7 +348,6 @@ defmodule CaptainFact.Accounts do
   end
 
   # ---- Newsletter ----
-  # TODO Once most users locale will be defined, we should require locale_filter
   def send_newsletter(subject, html_body, locale_filter \\ nil) do
     User
     |> filter_newsletter_targets(locale_filter)
@@ -300,4 +359,14 @@ defmodule CaptainFact.Accounts do
 
   defp filter_newsletter_targets(query, nil), do: where(query, [u], u.newsletter == true)
   defp filter_newsletter_targets(query, locale), do: where(query, [u], u.newsletter == true and u.locale == ^locale)
+
+  # ---- Private Utils ----
+
+  defp lock_user(%User{id: id}), do: lock_user(id)
+  defp lock_user(user_id) do
+    User
+    |> where(id: ^user_id)
+    |> lock("FOR UPDATE")
+    |> Repo.one!()
+  end
 end

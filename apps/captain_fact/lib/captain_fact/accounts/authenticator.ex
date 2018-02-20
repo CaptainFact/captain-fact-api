@@ -8,6 +8,7 @@ defmodule CaptainFact.Accounts.Authenticator do
 
   alias DB.Repo
   alias DB.Schema.User
+  alias CaptainFact.Accounts
 
 
   # ---- Identity ----
@@ -47,28 +48,17 @@ defmodule CaptainFact.Accounts.Authenticator do
        end)
   end
 
-  def link_provider!(user, provider_infos) do
+  def link_provider!(user, provider_infos = %{picture_url: picture_url}) do
     {:ok, updated_user} =
       user
       |> User.provider_changeset(provider_infos)
       |> Repo.update!()
-      |> CaptainFact.Accounts.unlock_achievement(:social_networks)
+      |> Accounts.unlock_achievement(:social_networks)
 
-    case store_user_picture(updated_user, Map.get(provider_infos, :picture_url)) do
+    Accounts.confirm_email!(updated_user)
+    case Accounts.fetch_picture(updated_user, picture_url) do
       {:ok, final_user} -> final_user
       _ -> updated_user # Don't fail if we didn't get the picture
-    end
-  end
-
-  def store_user_picture(user, picture_url) when picture_url in [nil, ""], do: {:ok, user}
-  def store_user_picture(user, picture_url) do
-    if Application.get_env(:captain_fact, :env) != :test do
-      case DB.Type.UserPicture.store({picture_url, user}) do
-        {:ok, picture} -> update_user_picture(user, picture)
-        error -> error
-      end
-    else
-      update_user_picture(user, picture_url) # Don't store files in tests
     end
   end
 
@@ -77,11 +67,5 @@ defmodule CaptainFact.Accounts.Authenticator do
     user
     |> User.provider_changeset(%{fb_user_id: nil})
     |> Repo.update!()
-  end
-
-  defp update_user_picture(user, picture) do
-    user
-    |> Ecto.Changeset.change(picture_url: %{file_name: picture, updated_at: Ecto.DateTime.utc})
-    |> Repo.update()
   end
 end
