@@ -13,7 +13,9 @@ defmodule CaptainFact.Accounts.UserPermissions do
     defexception message: "forbidden", plug_status: 403
   end
 
-  @limitations_age 12 * 60 * 60 # 12 hours
+  @daily_limit 24 * 60 * 60 # 24 hours
+  @weekly_limit 7 * 24 * 60 * 60 # 1 week
+
   @limit_warning_threshold 5
   @levels [-30, -5, 15, 30, 75, 125, 200, 500, 1000]
   @reverse_levels Enum.reverse(@levels)
@@ -29,7 +31,7 @@ defmodule CaptainFact.Accounts.UserPermissions do
       speaker:              { 0  ,  0 , 0  , 3  , 8  ,  30 ,  50 , 100 , 100 },
     },
     add: %{
-      video:                { 0  ,  0 ,  0 , 0  , 0  ,  0  ,  2  ,  5  ,  10 },
+      video:                { 0  ,  0 ,  0 , 0  , 0  ,  0  ,  1  ,  5  ,  10 },
       speaker:              { 0  ,  0 ,  0 , 3  , 8  ,  30 ,  50 , 100 , 100 },
     },
     update: %{
@@ -71,10 +73,13 @@ defmodule CaptainFact.Accounts.UserPermissions do
   # --- API ---
 
   @doc """
-  Check if user can execute action. Return `{:ok, nb_available}` if yes, `{:error, reason}` otherwise.
+  Check if user can execute action. Return `{:ok, nb_available}` if yes,
+  `{:error, reason}` otherwise. This method is bypassed and returns {:ok, -1}
+  for :add :video actions if user is publisher.
 
   `nb_available` is -1 if there is no limit.
-  `entity` may be nil **only if** we're checking for a wildcard limitation (ex: collective_moderation)
+  `entity` may be nil **only if** we're checking for a wildcard
+  limitation(ex: collective_moderation)
 
   ## Examples
       iex> alias CaptainFact.Accounts.UserPermissions
@@ -95,9 +100,7 @@ defmodule CaptainFact.Accounts.UserPermissions do
     if (limit == 0) do
       {:error, @error_not_enough_reputation}
     else
-      action_count = if is_wildcard_limitation(action_type),
-        do: Recorder.count_wildcard(user, action_type, @limitations_age),
-        else: Recorder.count(user, action_type, entity, @limitations_age)
+      action_count = action_count(user, action_type, entity)
       if action_count >= limit do
         if action_count >= limit + @limit_warning_threshold,
           do: Logger.warn("User #{user.username} (#{user.id}) overthrown its limit for [#{action_type} #{entity}] (#{action_count}/#{limit})")
@@ -116,9 +119,22 @@ defmodule CaptainFact.Accounts.UserPermissions do
     end
   end
   def check!(user_id, action_type, entity) when is_integer(user_id),
-     do: check!(do_load_user!(user_id), action_type, entity)
+    do: check!(do_load_user!(user_id), action_type, entity)
   def check!(nil, _, _),
     do: raise %PermissionsError{message: "unauthorized"}
+
+  @doc """
+  Count the number of occurences of this user / action type in limited perdiod.
+  """
+  def action_count(user, :add, :video),
+    do: Recorder.count(user, :add, :video, @weekly_limit)
+  def action_count(user, action_type, entity) do
+    if is_wildcard_limitation(action_type) do
+      Recorder.count_wildcard(user, action_type, @daily_limit)
+    else
+      Recorder.count(user, action_type, entity, @daily_limit)
+    end
+  end
 
   def limitation(user = %User{}, action_type, entity) do
     case level(user) do

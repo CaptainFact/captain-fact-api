@@ -18,7 +18,7 @@ defmodule CaptainFact.ModerationTest do
     flag_comments(comments, limit)
     actions = Moderation.video(insert(:user, %{reputation: 10000}), statement.video_id)
     assert Enum.count(actions) == Enum.count(comments)
-    assert hd(actions).changes.text == comment_text
+    assert hd(actions).changes["text"] == comment_text
   end
 
   test "do not return if number of flags is above the default limit but under specific limit for action / entity" do
