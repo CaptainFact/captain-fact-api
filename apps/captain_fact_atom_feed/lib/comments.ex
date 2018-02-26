@@ -58,8 +58,11 @@ defmodule CaptainFactAtomFeed.Comments do
     type = if comment.source.url, do: "Fact", else: "Comment"
     title = "New #{type} from user ##{comment.user_id} on ##{comment.statement.id}"
     link = comment_url(comment)
-    Entry.new(link, DateTime.from_naive!(comment.inserted_at, "Etc/UTC"), title)
+    insert_datetime = DateTime.from_naive!(comment.inserted_at, "Etc/UTC")
+
+    Entry.new(link, insert_datetime, title)
     |> Entry.link(link)
+    |> Entry.published(insert_datetime)
     |> Entry.content("""
           <div>ID: #{comment.id}</div>
           <div>User: #{comment.user_id}</div>
@@ -78,6 +81,6 @@ defmodule CaptainFactAtomFeed.Comments do
 
   defp comment_url(comment) do
     video_hash_id = DB.Type.VideoHashId.encode(comment.statement.video_id)
-    "https://captainfact.io/videos/#{video_hash_id}?comment=#{comment.id}"
+    "https://captainfact.io/videos/#{video_hash_id}?statement=#{comment.statement.id}"
   end
 end
