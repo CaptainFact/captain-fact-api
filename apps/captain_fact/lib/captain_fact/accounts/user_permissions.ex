@@ -86,7 +86,7 @@ defmodule CaptainFact.Accounts.UserPermissions do
       iex> alias CaptainFact.Actions.Recorder
       iex> user = DB.Factory.insert(:user, %{reputation: 45})
       iex> UserPermissions.check(user, :create, :comment)
-      {:ok, 20}
+      {:ok, 10}
       iex> UserPermissions.check(%{user | reputation: -42}, :remove, :statement)
       {:error, "not_enough_reputation"}
       iex> limitation = UserPermissions.limitation(user, :create, :comment)
