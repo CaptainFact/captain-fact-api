@@ -32,7 +32,7 @@ defmodule DB.Schema.User do
     field :password, :string, virtual: true
 
     # Assocs
-    has_many :actions, UserAction, on_delete: :delete_all
+    has_many :actions, UserAction, on_delete: :nilify_all
     has_many :comments, Comment, on_delete: :delete_all
     has_many :votes, Vote, on_delete: :delete_all
 
