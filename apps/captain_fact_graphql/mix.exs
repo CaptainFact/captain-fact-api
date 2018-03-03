@@ -40,7 +40,7 @@ defmodule CaptainFactGraphql.Mixfile do
       {:absinthe_ecto, "~> 0.1.3"},
       {:absinthe_plug, "~> 1.4.1"},
       {:basic_auth, "~> 2.2.2"},
-      {:weave, github: "betree/weave", branch: "8-allow-only-keyword-for-selective-configuration"},
+      {:weave, "3.1.2"},
       {:db, in_umbrella: true}
     ]
   end

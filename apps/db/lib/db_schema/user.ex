@@ -120,6 +120,7 @@ defmodule DB.Schema.User do
     |> validate_length(:username, min: 5, max: 15)
     |> validate_length(:name, min: 2, max: 20)
     |> validate_inclusion(:locale, @valid_locales)
+    |> validate_format(:name, ~r/^[ a-zA-Z]*$/)
     |> validate_email()
     |> validate_username()
   end
