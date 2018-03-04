@@ -10,7 +10,8 @@ use Mix.Config
 config :captain_fact,
   env: Mix.env,
   ecto_repos: [DB.Repo],
-  cors_origins: []
+  cors_origins: [],
+  oauth: [facebook: []]
 
 # Configures the endpoint
 config :captain_fact, CaptainFactWeb.Endpoint,
@@ -40,17 +41,6 @@ config :captain_fact, CaptainFact.Mailer, adapter: Bamboo.MailgunAdapter
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
-
-# Configure ueberauth
-config :ueberauth, Ueberauth,
-  base_path: "/auth",
-  providers: [
-    identity: {Ueberauth.Strategy.Identity, [callback_methods: ["POST"]]},
-    facebook: {Ueberauth.Strategy.Facebook, [
-      callback_methods: ["POST"],
-      profile_fields: "name,email,picture"
-    ]}
-  ]
 
 # Configure Guardian (authentication)
 config :guardian, Guardian,

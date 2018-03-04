@@ -33,6 +33,8 @@ defmodule CaptainFact.RuntimeConfiguration do
   weave(
     "frontend_url",
     handler: fn url ->
+      fb_redirect_uri = Path.join(url, "/login/callback/facebook")
+      put_in_oauth_fb([:redirect_uri], fb_redirect_uri)
       [
         {:captain_fact, :cors_origins, [url]},
         {:captain_fact, :frontend_url, url},
@@ -99,5 +101,5 @@ defmodule CaptainFact.RuntimeConfiguration do
     do: put_in_env(:captain_fact, [CaptainFact.Mailer] ++ keys, value)
 
   defp put_in_oauth_fb(keys, value),
-    do: put_in_env(:ueberauth, [Ueberauth.Strategy.Facebook.OAuth] ++ keys, value)
+    do: put_in_env(:captain_fact, [:oauth, :facebook] ++ keys, value)
 end

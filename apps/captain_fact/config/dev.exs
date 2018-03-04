@@ -16,6 +16,13 @@ config :captain_fact,
     "http://localhost", "https://localhost",
     # Extension
     "chrome-extension://fnnhlmbnlbgomamcolcpgncflofhjckm",
+  ],
+  oauth: [
+    facebook: [
+      client_id: "506726596325615",
+      client_secret: "4b320056746b8e57144c889f3baf0424",
+      redirect_uri: "http://localhost:3333/login/callback/facebook"
+    ]
   ]
 
 # For development, we disable any cache and enable
@@ -34,13 +41,8 @@ config :captain_fact, CaptainFactWeb.Endpoint,
     certfile: "priv/keys/fullchain.pem"
   ]
 
-# Guardian + Ueberauth
-config :guardian, Guardian,
-  secret_key: dev_secret
-
-config :ueberauth, Ueberauth.Strategy.Facebook.OAuth,
-  client_id: "506726596325615",
-  client_secret: "4b320056746b8e57144c889f3baf0424"
+# Guardian
+config :guardian, Guardian, secret_key: dev_secret
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
