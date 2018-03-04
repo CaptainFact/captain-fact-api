@@ -324,7 +324,8 @@ defmodule CaptainFact.Accounts do
   @doc"""
   Generate `number` invitations. You can specify a custom `token`
   """
-  def generate_invites(number), do: generate_invites(number, TokenGenerator.generate(@default_token_length))
+  def generate_invites(number),
+    do: generate_invites(number, TokenGenerator.generate(@default_token_length))
   def generate_invites(number, token) do
     time = Ecto.DateTime.utc
     Repo.insert_all(InvitationRequest, (for _ <- 1..number, do: %{token: token, inserted_at: time, updated_at: time}))
