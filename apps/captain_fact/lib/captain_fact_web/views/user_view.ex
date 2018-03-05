@@ -40,7 +40,8 @@ defmodule CaptainFactWeb.UserView do
       mini_picture_url: DB.Type.UserPicture.url({user.picture_url, user}, :mini_thumb),
       locale: user.locale,
       registered_at: user.inserted_at,
-      achievements: user.achievements
+      achievements: user.achievements,
+      is_publisher: user.is_publisher
     }
   end
 
