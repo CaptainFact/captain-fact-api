@@ -64,7 +64,7 @@ defmodule DB.Schema.UserTest do
     assert {:email, "forbidden_provider"} in errors_on(%User{}, attrs), "didn't reject #{provider}'"
   end
 
-  test "username should not contains forbidden passwords" do
+  test "username should not contains forbidden words" do
     changeset = User.registration_changeset(%User{}, %{@valid_attrs | username: "toto-Admin"})
     refute changeset.valid?
 
@@ -75,9 +75,22 @@ defmodule DB.Schema.UserTest do
   test "username cannot contains illegal characters" do
     ' !*();:@&=+$,/?#[].\'\\'
     |> Enum.map(fn char ->
-         changeset = User.registration_changeset(%User{}, %{@valid_attrs | username: "xxxxxxx#{<<char::utf8>>}"})
+         changeset = User.registration_changeset(%User{}, %{@valid_attrs | username: "x42xxx#{<<char::utf8>>}xx"})
          refute changeset.valid?, "Illegal character '#{<<char::utf8>>}' accepted in username when it should not"
        end)
+  end
+
+  test "name cannot contains illegal characters" do
+    '!*();:@&=+$,/?#[].\'\\0123456789'
+    |> Enum.map(fn char ->
+      changeset = User.registration_changeset(%User{}, %{@valid_attrs | name: "xxxx#{<<char::utf8>>}xx"})
+      refute changeset.valid?, "Illegal character '#{<<char::utf8>>}' accepted in name when it should not"
+    end)
+  end
+
+  test "name can contain a space" do
+    changeset = User.registration_changeset(%User{}, %{@valid_attrs | name: "David Gilmour"})
+    assert changeset.valid?
   end
 
   test "characters _ and - are still allowed in username" do

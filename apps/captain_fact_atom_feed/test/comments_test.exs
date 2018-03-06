@@ -29,7 +29,7 @@ defmodule CaptainFactAtomFeed.CommentsTest do
 
     # Check comment entries
     for comment <- comments do
-      assert feed =~ ~r(<link href="https://captainfact\.io/videos/[a-zA-Z0-9]+\?comment=#{comment.id}"/>)
+      assert feed =~ ~r(<link href="https://captainfact\.io/videos/[a-zA-Z0-9]+\?statement=#{comment.statement_id}"/>)
       assert feed =~ ~r(<title>New Comment from user ##{comment.user_id} on ##{comment.statement_id}</title>)
     end
   end

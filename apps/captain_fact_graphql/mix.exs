@@ -4,7 +4,7 @@ defmodule CaptainFactGraphql.Mixfile do
   def project do
     [
       app: :captain_fact_graphql,
-      version: "0.8.2",
+      version: "0.8.3",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
@@ -40,7 +40,7 @@ defmodule CaptainFactGraphql.Mixfile do
       {:absinthe_ecto, "~> 0.1.3"},
       {:absinthe_plug, "~> 1.4.1"},
       {:basic_auth, "~> 2.2.2"},
-      {:weave, github: "betree/weave", branch: "8-allow-only-keyword-for-selective-configuration"},
+      {:weave, "3.1.2"},
       {:db, in_umbrella: true}
     ]
   end

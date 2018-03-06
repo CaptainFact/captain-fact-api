@@ -32,7 +32,7 @@ defmodule DB.Schema.User do
     field :password, :string, virtual: true
 
     # Assocs
-    has_many :actions, UserAction, on_delete: :delete_all
+    has_many :actions, UserAction, on_delete: :nilify_all
     has_many :comments, Comment, on_delete: :delete_all
     has_many :votes, Vote, on_delete: :delete_all
 
@@ -120,6 +120,7 @@ defmodule DB.Schema.User do
     |> validate_length(:username, min: 5, max: 15)
     |> validate_length(:name, min: 2, max: 20)
     |> validate_inclusion(:locale, @valid_locales)
+    |> validate_format(:name, ~r/^[ a-zA-Z]*$/)
     |> validate_email()
     |> validate_username()
   end
