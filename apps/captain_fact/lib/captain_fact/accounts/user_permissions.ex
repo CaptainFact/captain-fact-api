@@ -38,7 +38,7 @@ defmodule CaptainFact.Accounts.UserPermissions do
       comment:              { 3  , 10 , 15 , 30 , 30 , 100 , 100 , 100 , 100 },
       statement:            { 0  ,  0 ,  2 ,  5 , 10 ,  50 , 100 , 100 , 100 },
       speaker:              { 0  ,  0 ,  0 ,  0 , 5  ,  20 ,  30 ,  40 ,  80 },
-      video:                { 0  ,  0 ,  0 ,  0 , 0  ,   5  ,  8 ,  10 ,  20 },
+      video:                { 0  ,  0 ,  0 ,  0 , 0  ,   0  ,  5 ,  10 ,  20 },
     },
     delete: %{
       # Not much risk here, as user can only delete own comments

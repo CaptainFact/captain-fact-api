@@ -52,7 +52,7 @@ defmodule CaptainFact.Comments do
   # Delete
 
   @doc"""
-  ⚠️ Admin-only function. Delete a comment as admin.
+  Delete a comment.
 
   Returns delete action or nil if comment doesn't exist
   """

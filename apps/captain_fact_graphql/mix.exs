@@ -4,7 +4,7 @@ defmodule CaptainFactGraphql.Mixfile do
   def project do
     [
       app: :captain_fact_graphql,
-      version: "0.8.2",
+      version: "0.8.3",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
