@@ -22,16 +22,16 @@ config :captain_fact, CaptainFactWeb.Endpoint,
 
 # Configure scheduler
 config :captain_fact, CaptainFact.Scheduler,
-  global: true,
+  global: true, # Run only one instance across cluster
   jobs: [
     # Actions analysers
-    {{:extended, "*/5 * * * * *"}, {CaptainFact.Jobs.Votes, :update, []}}, # Every 5 seconds
-    {            "*/1 * * * *",    {CaptainFact.Jobs.Reputation, :update, []}}, # Every minute
-    {            "@daily",         {CaptainFact.Jobs.Reputation, :reset_daily_limits, []}}, # Every day
-    {            "*/1 * * * *",    {CaptainFact.Jobs.Flags, :update, []}}, # Every minute
-    {            "*/3 * * * *",    {CaptainFact.Jobs.Achievements, :update, []}}, # Every 3 minutes
+    {{:extended, "*/5 * * * * *"}, {CaptainFactJobs.Votes, :update, []}}, # Every 5 seconds
+    {            "*/1 * * * *",    {CaptainFactJobs.Reputation, :update, []}}, # Every minute
+    {            "@daily",         {CaptainFactJobs.Reputation, :reset_daily_limits, []}}, # Every day
+    {            "*/1 * * * *",    {CaptainFactJobs.Flags, :update, []}}, # Every minute
+    {            "*/3 * * * *",    {CaptainFactJobs.Achievements, :update, []}}, # Every 3 minutes
     # Various updaters
-    {            "*/20 * * * *",   {CaptainFact.Jobs.ModerationUpdater, :update, []}}, # Every 20 minutes
+    {            "*/20 * * * *",   {CaptainFactJobs.ModerationUpdater, :update, []}}, # Every 20 minutes
   ]
 
 # Configure mailer

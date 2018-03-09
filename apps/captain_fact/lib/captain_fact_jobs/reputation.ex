@@ -1,4 +1,4 @@
-defmodule CaptainFact.Jobs.Reputation do
+defmodule CaptainFactJobs.Reputation do
   @moduledoc """
   Updates a user reputation periodically, verifying at the same time that the maximum reputation
   gain per day quota is respected.
@@ -14,7 +14,7 @@ defmodule CaptainFact.Jobs.Reputation do
   alias DB.Schema.UserAction
   alias DB.Schema.UsersActionsReport
 
-  alias CaptainFact.Actions.ReportManager
+  alias CaptainFactJobs.ReportManager
 
 
   @name __MODULE__
@@ -157,7 +157,7 @@ defmodule CaptainFact.Jobs.Reputation do
     UserAction.type(:confirmed_flag)
   ]
   defp reputation_changes(%{type: type, entity: entity, changes: changes}) when type in @collective_moderation_actions,
-    do: {0, CaptainFact.Jobs.ModerationUpdater.reputation_change(type, entity, changes)}
+    do: {0, CaptainFactJobs.ModerationUpdater.reputation_change(type, entity, changes)}
   defp reputation_changes(%{type: type, entity: entity}) do
     case Map.get(@actions, type) do
       nil -> {0, 0}

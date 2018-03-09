@@ -21,11 +21,11 @@ defmodule CaptainFact.Application do
       # Scheduler for all CRON jobs
       worker(CaptainFact.Scheduler, []),
       # Jobs
-      worker(CaptainFact.Jobs.Reputation, []),
-      worker(CaptainFact.Jobs.Flags, []),
-      worker(CaptainFact.Jobs.Achievements, []),
-      worker(CaptainFact.Jobs.Votes, []),
-      worker(CaptainFact.Jobs.ModerationUpdater, []),
+      worker(CaptainFactJobs.Reputation, []),
+      worker(CaptainFactJobs.Flags, []),
+      worker(CaptainFactJobs.Achievements, []),
+      worker(CaptainFactJobs.Votes, []),
+      worker(CaptainFactJobs.ModerationUpdater, []),
       # Misc workers
       worker(CaptainFact.Accounts.UsernameGenerator, [])
     ]
