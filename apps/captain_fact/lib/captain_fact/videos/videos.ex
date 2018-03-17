@@ -24,8 +24,10 @@ defmodule CaptainFact.Videos do
     * language: two characters identifier string (fr,en,es...etc) or "unknown" to list videos with unknown language
   """
   def videos_list(filters \\ [], with_speakers \\ true)
-  def videos_list(filters, true), do: Repo.all(videos_query(Video.with_speakers(Video), filters))
-  def videos_list(filters, false), do: Repo.all(videos_query(Video, filters))
+  def videos_list(filters, true),
+    do: Repo.all(Video.query_list(Video.with_speakers(Video), filters))
+  def videos_list(filters, false),
+    do: Repo.all(Video.query_list(Video, filters))
 
   @doc"""
   Index videos, returning only their id, provider_id and provider.
@@ -109,26 +111,5 @@ defmodule CaptainFact.Videos do
       where: vs.video_id in ^videos_ids,
       select: {vs.video_id, s}
     )) |> Enum.group_by(&(elem(&1, 0)), &(elem(&1, 1)))
-  end
-
-  defp videos_query(query, filters) do
-    query
-    |> order_by([v], desc: v.id)
-    |> filter_with(filters)
-  end
-
-  defp filter_with(query, filters) do
-    Enum.reduce(filters, query, fn
-      {:language, "unknown"}, query ->
-        from v in query, where: is_nil(v.language)
-      {:language, language}, query ->
-        from v in query, where: v.language == ^language
-      {:speaker_id, id}, query ->
-        from v in query, join: s in assoc(v, :speakers), where: s.id == ^id
-      {:speaker_slug, slug}, query ->
-        from v in query, join: s in assoc(v, :speakers), where: s.slug == ^slug
-      {:min_id, id}, query ->
-        from v in query, where: v.id > ^id
-    end)
   end
 end

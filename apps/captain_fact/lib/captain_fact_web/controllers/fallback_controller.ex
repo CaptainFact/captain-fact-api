@@ -14,6 +14,12 @@ defmodule CaptainFactWeb.FallbackController do
     |> render(CaptainFactWeb.ChangesetView, "error.json", changeset: changeset)
   end
 
+  def call(conn, {:error, :not_found}) do
+    conn
+    |> put_status(404)
+    |> render(CaptainFactWeb.ErrorView, "error.json", message: "not_found")
+  end
+
   def call(conn, {:error, %PermissionsError{}}) do
     conn
     |> put_status(403)
