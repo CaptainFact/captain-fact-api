@@ -1,4 +1,4 @@
-defmodule CaptainFact.Jobs.ModerationUpdater do
+defmodule CaptainFactJobs.ModerationUpdater do
   use GenServer
   require Logger
   import Ecto.Query
@@ -48,7 +48,7 @@ defmodule CaptainFact.Jobs.ModerationUpdater do
 
   ## Examples
 
-    iex> alias CaptainFact.Jobs.ModerationUpdater
+    iex> alias CaptainFactJobs.ModerationUpdater
     iex> alias DB.Schema.UserAction
     iex> ModerationUpdater.reputation_change(UserAction.type(:action_banned), nil, %{"score" => 1})
     -25
@@ -72,7 +72,7 @@ defmodule CaptainFact.Jobs.ModerationUpdater do
 
   ## Examples
 
-    iex> alias CaptainFact.Jobs.ModerationUpdater
+    iex> alias CaptainFactJobs.ModerationUpdater
     iex> ModerationUpdater.get_consensus_strength(ModerationUpdater.confirm_ban_above)
     0.0
     iex> ModerationUpdater.get_consensus_strength(ModerationUpdater.refute_ban_under)

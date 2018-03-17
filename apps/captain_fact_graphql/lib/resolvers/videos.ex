@@ -29,7 +29,8 @@ defmodule CaptainFactGraphql.Resolvers.Videos do
   end
 
   def list(_root, args, _info) do
-    {:ok, videos_list(args[:filters] || [])}
+    videos_list = Repo.all(Video.query_list(Video, args[:filters] || []))
+    {:ok, videos_list}
   end
 
   # Fields
@@ -44,36 +45,14 @@ defmodule CaptainFactGraphql.Resolvers.Videos do
   # However, we need to extract core features from :captain_fact
   # and re-add the dependency to avoid duplicate code in the future
 
-  defp videos_list(filters),
-    do: Repo.all(videos_query(Video, filters))
-
-  defp videos_query(query, filters) do
-    query
-    |> order_by([v], desc: v.id)
-    |> filter_with(filters)
-  end
-
   defp get_video_by_url(url) do
     case Video.parse_url(url) do
-      {provider, id} -> Repo.get_by(Video.with_speakers(Video), provider: provider, provider_id: id)
-      nil -> nil
+      {provider, id} ->
+        Repo.get_by(Video.with_speakers(Video), provider: provider, provider_id: id)
+      nil ->
+        nil
     end
   end
 
   defp get_video_by_id(id), do: Repo.get(Video, id)
-
-  defp filter_with(query, filters) do
-    Enum.reduce(filters, query, fn
-      {:language, "unknown"}, query ->
-        from v in query, where: is_nil(v.language)
-      {:language, language}, query ->
-        from v in query, where: v.language == ^language
-      {:speaker_id, id}, query ->
-        from v in query, join: s in assoc(v, :speakers), where: s.id == ^id
-      {:speaker_slug, slug}, query ->
-        from v in query, join: s in assoc(v, :speakers), where: s.slug == ^slug
-      {:min_id, id}, query ->
-        from v in query, where: v.id > ^id
-    end)
-  end
 end

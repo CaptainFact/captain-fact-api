@@ -1,4 +1,4 @@
-defmodule CaptainFact.Actions.ReportManager do
+defmodule CaptainFactJobs.ReportManager do
   import Ecto.Query
 
   alias DB.Repo

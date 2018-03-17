@@ -1,4 +1,4 @@
-defmodule CaptainFact.Jobs.Achievements do
+defmodule CaptainFactJobs.Achievements do
   @moduledoc """
   Checks for special actions or actions combinations that could trigger an achievement
   """
@@ -14,7 +14,7 @@ defmodule CaptainFact.Jobs.Achievements do
   alias DB.Schema.UserAction
   alias DB.Schema.UsersActionsReport
 
-  alias CaptainFact.Actions.ReportManager
+  alias CaptainFactJobs.ReportManager
 
   @name __MODULE__
   @analyser_id UsersActionsReport.analyser_id(:achievements)

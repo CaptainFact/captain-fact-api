@@ -1,4 +1,4 @@
-defmodule CaptainFact.Jobs.Votes do
+defmodule CaptainFactJobs.Votes do
   @moduledoc """
   Update votes at a certain interval
   """
@@ -13,7 +13,7 @@ defmodule CaptainFact.Jobs.Votes do
   alias DB.Schema.UserAction
   alias DB.Schema.UsersActionsReport
 
-  alias CaptainFact.Actions.ReportManager
+  alias CaptainFactJobs.ReportManager
 
 
   @name __MODULE__
