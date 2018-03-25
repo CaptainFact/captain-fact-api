@@ -1,4 +1,4 @@
-defmodule CaptainFact.Jobs.Flags do
+defmodule CaptainFactJobs.Flags do
   @moduledoc """
   Analyse flags periodically to report innapropriate content
   """
@@ -15,8 +15,10 @@ defmodule CaptainFact.Jobs.Flags do
   alias DB.Schema.Comment
   alias DB.Schema.Comment
 
-  alias CaptainFact.Actions.{ReportManager, Flagger}
+  alias CaptainFact.Actions.Flagger
   alias CaptainFact.Moderation
+
+  alias CaptainFactJobs.ReportManager
 
   @name __MODULE__
   @analyser_id UsersActionsReport.analyser_id(:flags)

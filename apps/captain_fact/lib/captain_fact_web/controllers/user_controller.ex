@@ -34,7 +34,10 @@ defmodule CaptainFactWeb.UserController do
   end
 
   def show(conn, %{"username" => username}) do
-    render(conn, "show_public.json", user: Repo.get_by!(User, username: username))
+    case Repo.get_by(User, username: username) do
+      nil -> {:error, :not_found}
+      user -> render(conn, "show_public.json", user: user)
+    end
   end
 
   def show_me(conn, _params) do

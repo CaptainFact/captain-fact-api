@@ -3,7 +3,7 @@ defmodule CaptainFact.AccountsTest do
   use Bamboo.Test
 
   alias CaptainFact.Accounts
-  alias CaptainFact.Jobs.{Reputation, Achievements}
+  alias CaptainFactJobs.{Reputation, Achievements}
 
   describe "reset_password_requests" do
     alias DB.Schema.ResetPasswordRequest
