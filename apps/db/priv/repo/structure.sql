@@ -3,7 +3,7 @@
 --
 
 -- Dumped from database version 9.6.4
--- Dumped by pg_dump version 9.6.8
+-- Dumped by pg_dump version 10.3 (Ubuntu 10.3-1.pgdg16.04+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -231,7 +231,8 @@ CREATE TABLE public.sources (
     language character varying(255),
     site_name character varying(255),
     inserted_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    og_url character varying(255) DEFAULT NULL::character varying
 );
 
 
@@ -455,7 +456,8 @@ CREATE TABLE public.videos (
     title character varying(255) NOT NULL,
     inserted_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    language character varying(2)
+    language character varying(2),
+    unlisted boolean DEFAULT false NOT NULL
 );
 
 
@@ -995,5 +997,5 @@ ALTER TABLE ONLY public.votes
 -- PostgreSQL database dump complete
 --
 
-INSERT INTO "schema_migrations" (version) VALUES (20170118223600), (20170118223631), (20170125235612), (20170206062334), (20170206063137), (20170221035619), (20170309214200), (20170309214307), (20170316233954), (20170428062411), (20170611075306), (20170726224741), (20170730064848), (20170928043353), (20171003220327), (20171003220416), (20171004100258), (20171005001838), (20171005215001), (20171009065840), (20171026222425), (20171105124655), (20171109105152), (20171110040302), (20171110212108), (20171117131508), (20171119075520), (20171205174328), (20180131002547), (20180302024059);
+INSERT INTO "schema_migrations" (version) VALUES (20170118223600), (20170118223631), (20170125235612), (20170206062334), (20170206063137), (20170221035619), (20170309214200), (20170309214307), (20170316233954), (20170428062411), (20170611075306), (20170726224741), (20170730064848), (20170928043353), (20171003220327), (20171003220416), (20171004100258), (20171005001838), (20171005215001), (20171009065840), (20171026222425), (20171105124655), (20171109105152), (20171110040302), (20171110212108), (20171117131508), (20171119075520), (20171205174328), (20180131002547), (20180302024059), (20180317062636), (20180330204602);
 

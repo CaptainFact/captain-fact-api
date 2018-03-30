@@ -27,7 +27,8 @@ defmodule CaptainFact.Sources.Fetcher do
   """
   def fetch_source_metadata(url, callback) do
     case Fetcher.LinkChecker.reserve_url(url) do
-      :error -> :error # Already started, it's ok
+      :error ->
+        :error # Already started, it's ok
       :ok ->
         Task.start(fn ->
           try do
@@ -71,7 +72,7 @@ defmodule CaptainFact.Sources.Fetcher do
       title_alt2: Floki.text(Floki.find(head, "title")),
       language: attribute(tree, "html", "lang"),
       site_name: attribute(head, "meta[property='og:site_name']", "content"),
-      url: attribute(head, "meta[property='og:url']", "content")
+      og_url: attribute(head, "meta[property='og:url']", "content")
     }
     |> Enum.filter(fn({_, value}) -> value != nil && value != "" end)
     |> select_best_title()
