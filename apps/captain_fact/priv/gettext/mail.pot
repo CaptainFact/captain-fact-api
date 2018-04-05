@@ -1,0 +1,46 @@
+## This file is a PO Template file.
+##
+## `msgid`s here are often extracted from source code.
+## Add new translations manually only if they're dynamic
+## translations that can't be statically extracted.
+##
+## Run `mix gettext.extract` to bring this file up to
+## date. Leave `msgstr`s empty as changing them here as no
+## effect: edit them in PO (`.po`) files instead.
+msgid ""
+msgstr ""
+
+#: lib/captain_fact_mailer/email.ex:62 lib/captain_fact_mailer/email.ex:62
+msgid "%{name} invited you to try CaptainFact.io !"
+msgstr ""
+
+#: lib/captain_fact_mailer/email.ex:37 lib/captain_fact_mailer/email.ex:37
+msgid "CaptainFact.io - Reset your password"
+msgstr ""
+
+#: lib/captain_fact_mailer/templates/newsletter.html.eex:5
+#: lib/captain_fact_mailer/templates/newsletter.html.eex:5
+msgid "Unsubscribe from this newsletter"
+msgstr ""
+
+#: lib/captain_fact_mailer/email.ex:20 lib/captain_fact_mailer/email.ex:20
+msgid "Welcome to CaptainFact.io !"
+msgstr ""
+
+#: lib/captain_fact_mailer/email.ex:45 lib/captain_fact_mailer/email.ex:45
+msgid "About your recent loss of reputation on CaptainFact"
+msgstr ""
+
+#: lib/captain_fact_mailer/templates/_layout.html.eex:190
+#: lib/captain_fact_mailer/templates/_layout.html.eex:190
+#: lib/captain_fact_mailer/templates/_layout.text.eex:16
+#: lib/captain_fact_mailer/templates/_layout.text.eex:16
+msgid "CaptainFact is a free and open source project."
+msgstr ""
+
+#: lib/captain_fact_mailer/templates/_layout.html.eex:191
+#: lib/captain_fact_mailer/templates/_layout.html.eex:191
+#: lib/captain_fact_mailer/templates/_layout.text.eex:17
+#: lib/captain_fact_mailer/templates/_layout.text.eex:17
+msgid "If you like it, please share the word!"
+msgstr ""

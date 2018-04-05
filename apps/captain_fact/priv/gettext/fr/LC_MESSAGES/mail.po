@@ -1,0 +1,46 @@
+## `msgid`s in this file come from POT (.pot) files.
+##
+## Do not add, change, or remove `msgid`s manually here as
+## they're tied to the ones in the corresponding POT file
+## (with the same domain).
+##
+## Use `mix gettext.extract --merge` or `mix gettext.merge`
+## to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: fr\n"
+
+#: lib/captain_fact_mailer/email.ex:62 lib/captain_fact_mailer/email.ex:62
+msgid "%{name} invited you to try CaptainFact.io !"
+msgstr "%{name} vous a invité à rejoindre CaptainFact.io !"
+
+#: lib/captain_fact_mailer/email.ex:37 lib/captain_fact_mailer/email.ex:37
+msgid "CaptainFact.io - Reset your password"
+msgstr "CaptainFact.io - Réinitialisation du mot de passe"
+
+#: lib/captain_fact_mailer/templates/newsletter.html.eex:5
+#: lib/captain_fact_mailer/templates/newsletter.html.eex:5
+msgid "Unsubscribe from this newsletter"
+msgstr "Se désinscrire de la newsletter"
+
+#: lib/captain_fact_mailer/email.ex:20 lib/captain_fact_mailer/email.ex:20
+msgid "Welcome to CaptainFact.io !"
+msgstr "Bienvenue sur CaptainFact.io !"
+
+#: lib/captain_fact_mailer/email.ex:45 lib/captain_fact_mailer/email.ex:45
+msgid "About your recent loss of reputation on CaptainFact"
+msgstr "A propos de votre récente perte de réputation sur CaptainFact"
+
+#: lib/captain_fact_mailer/templates/_layout.html.eex:190
+#: lib/captain_fact_mailer/templates/_layout.html.eex:190
+#: lib/captain_fact_mailer/templates/_layout.text.eex:16
+#: lib/captain_fact_mailer/templates/_layout.text.eex:16
+msgid "CaptainFact is a free and open source project."
+msgstr "CaptainFact est un projet open-source à but non lucratif."
+
+#: lib/captain_fact_mailer/templates/_layout.html.eex:191
+#: lib/captain_fact_mailer/templates/_layout.html.eex:191
+#: lib/captain_fact_mailer/templates/_layout.text.eex:17
+#: lib/captain_fact_mailer/templates/_layout.text.eex:17
+msgid "If you like it, please share the word!"
+msgstr "Si vous appréciez notre travail, partagez-le !"

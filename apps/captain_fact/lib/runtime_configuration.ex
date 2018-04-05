@@ -98,7 +98,7 @@ defmodule CaptainFact.RuntimeConfiguration do
     do: put_in_env(:captain_fact, [CaptainFactWeb.Endpoint] ++ keys, value)
 
   defp put_in_mailer(keys, value),
-    do: put_in_env(:captain_fact, [CaptainFact.Mailer] ++ keys, value)
+    do: put_in_env(:captain_fact, [CaptainFactMailer] ++ keys, value)
 
   defp put_in_oauth_fb(keys, value),
     do: put_in_env(:captain_fact, [:oauth, :facebook] ++ keys, value)

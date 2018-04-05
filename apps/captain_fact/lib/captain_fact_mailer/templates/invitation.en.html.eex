@@ -1,0 +1,8 @@
+Your invitation to try CaptainFact is ready !
+
+<br/><br/>
+
+Please follow this link to create your account:
+<a href="<%= frontend_url() %>/signup?invitation_token=<%= @invitation_token %>">
+  Create account
+</a>
