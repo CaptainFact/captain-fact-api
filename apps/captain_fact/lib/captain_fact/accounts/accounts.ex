@@ -68,7 +68,7 @@ defmodule CaptainFact.Accounts do
 
     # Send welcome mail or directly confirm email if third party provider
     if user.fb_user_id == nil do
-      send_welcome_email(user)
+      send_welcome(user)
     else
       confirm_email!(user)
     end
@@ -80,9 +80,9 @@ defmodule CaptainFact.Accounts do
   @doc"""
   Send user a welcome email, with a link to confirm it (only if not already confirmed)
   """
-  def send_welcome_email(%User{email_confirmed: true}), do: nil
-  def send_welcome_email(user) do
-    CaptainFactMailer.deliver_later(CaptainFactMailer.Email.welcome_email(user))
+  def send_welcome(%User{email_confirmed: true}), do: nil
+  def send_welcome(user) do
+    CaptainFactMailer.deliver_later(CaptainFactMailer.Email.welcome(user))
   end
 
   defp do_create_account(user_params, provider_params) do
@@ -225,7 +225,7 @@ defmodule CaptainFact.Accounts do
     # Email request
     request
     |> Map.put(:user, user)
-    |> Email.reset_password_request_mail()
+    |> Email.reset_password_request()
     |> CaptainFactMailer.deliver_later()
   end
 
@@ -298,7 +298,7 @@ defmodule CaptainFact.Accounts do
     |> Enum.each(&send_invite/1)
   end
 
-  @default_token_length 12
+  @default_token_length 8
   @doc """
   Send invite to the given email or invitation request
   """
@@ -314,7 +314,8 @@ defmodule CaptainFact.Accounts do
   end
   def send_invite(request = %InvitationRequest{}) do
     request
-    |> CaptainFactMailer.Email.invite_user_email()
+    |> Repo.preload(:invited_by)
+    |> CaptainFactMailer.Email.invitation_to_register()
     |> CaptainFactMailer.deliver_later()
 
     # Email sent successfuly

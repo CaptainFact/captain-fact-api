@@ -14,7 +14,6 @@ defmodule CaptainFactMailer.Email do
 
   require CaptainFactJobs.Reputation
 
-  alias DB.Repo
   alias DB.Schema.ResetPasswordRequest
   alias DB.Schema.InvitationRequest
   alias DB.Schema.User
@@ -26,53 +25,66 @@ defmodule CaptainFactMailer.Email do
   @supported_locales ~w(fr en)
 
 
-  def welcome_email(user) do
+  @doc"""
+  Generate a welcome email to user, with a link to confirm his email address.
+  """
+  def welcome(user) do
     user_email(user)
-    |> subject(gettext_mail_user(user, "Welcome to CaptainFact.io !"))
+    |> subject(gettext_mail_user(user, "Welcome to CaptainFact.io!"))
     |> assign(:confirm_email_reputation, Reputation.self_reputation_change(:email_confirmed))
-    |> render_localized(:welcome)
+    |> render_i18n(:welcome)
   end
 
+  @doc"""
+  Generate a newsletter email to user with a button to unsubscribe. If user is
+  already unsubscribed, return nil.
+
+  [Library] A HTML to Markdown converter would help to generate text_content
+  """
   def newsletter(%{newsletter: false}, _, _), do: nil
   def newsletter(user, subject, html_message) do
     user_email(user)
     |> subject(subject)
     |> assign(:content, html_message)
     |> assign(:text_content, Floki.text(html_message))
-    |> render_localized(:newsletter)
+    |> render_i18n(:newsletter)
   end
 
-  def reset_password_request_mail(req = %ResetPasswordRequest{user: %Ecto.Association.NotLoaded{}}),
-    do: reset_password_request_mail(Repo.preload(req, :user))
-  def reset_password_request_mail(%ResetPasswordRequest{user: user, token: token, source_ip: ip}) do
+  @doc"""
+  Generate a reset password email from a ResetPasswordRequest
+  """
+  def reset_password_request(%ResetPasswordRequest{user: user, token: token, source_ip: ip}) do
     user_email(user)
     |> subject(gettext_mail_user(user, "CaptainFact.io - Reset your password"))
     |> assign(:reset_password_token, token)
     |> assign(:source_ip, ip)
-    |> render_localized(:reset_password)
+    |> render_i18n(:reset_password)
   end
 
-  def big_reputation_loss(user) do
+  @doc"""
+  Generate an email for when users fall under a certain reputation threshold
+  with the community guidelines.
+  """
+  def reputation_loss(user) do
     user_email(user)
     |> subject(gettext_mail_user(user, "About your recent loss of reputation on CaptainFact"))
-    |> render_localized(:reputation_loss)
+    |> render_i18n(:reputation_loss)
   end
 
-  # No localisation for now, we need to store locale in invitation request
-  def invite_user_email(req = %InvitationRequest{invited_by: %Ecto.Association.NotLoaded{}}),
-    do: invite_user_email(Repo.preload(req, :invited_by))
-  def invite_user_email(%InvitationRequest{invited_by: invited_by, email: email, token: token}) do
+  # No localization for now, we need to store locale in invitation request
+  def invitation_to_register(%InvitationRequest{invited_by: invited_by, email: email, token: token}) do
     base_email()
     |> to(email)
     |> subject(invitation_subject(invited_by))
     |> assign(:invitation_token, token)
-    |> render_localized(:invitation)
+    |> assign(:invited_by, invited_by)
+    |> render_i18n(:invitation)
   end
 
   defp invitation_subject(nil),
-    do: "Your invitation to try CaptainFact.io is ready !"
+    do: gettext_mail("Your invitation to try CaptainFact.io is ready!")
   defp invitation_subject(user = %User{}),
-    do: gettext_mail_user(user, "%{name} invited you to try CaptainFact.io !", name: User.user_appelation(user))
+    do: gettext_mail_user(user, "%{name} invited you to try CaptainFact.io!", name: User.user_appelation(user))
 
   # Build a base email with `from` set and default layout
   defp base_email() do
@@ -90,7 +102,7 @@ defmodule CaptainFactMailer.Email do
 
   # If a user is available use his locale for rendering email. Otherwise just
   # render with default locale
-  defp render_localized(email = %{assigns: %{user: %{locale: locale}}}, view)
+  defp render_i18n(email = %{assigns: %{user: %{locale: locale}}}, view)
   when locale in @supported_locales
   do
     Gettext.with_locale CaptainFact.Gettext, locale, fn ->
@@ -105,7 +117,7 @@ defmodule CaptainFactMailer.Email do
       end
     end
   end
-  defp render_localized(email, view) do
+  defp render_i18n(email, view) do
     render(email, String.to_atom(Atom.to_string(view) <> ".en"))
   end
 end

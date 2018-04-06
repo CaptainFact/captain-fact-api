@@ -1,5 +1,10 @@
 Your invitation to try CaptainFact is ready !<br>
 <br>
+<%= unless is_nil(@invited_by) do %>
+  <%= user_appelation(@invited_by) %> invited you to join CaptainFact.io, a
+  platform to collaboratively fact-check content on the Internet.
+  <br><br>
+<% end %>
 Please follow this link to create your account:
 <a href="<%= frontend_url() %>/signup?invitation_token=<%= @invitation_token %>">
   Create account

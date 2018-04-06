@@ -11,7 +11,7 @@ msgstr ""
 "Language: fr\n"
 
 #: lib/captain_fact_mailer/email.ex:75
-msgid "%{name} invited you to try CaptainFact.io !"
+msgid "%{name} invited you to try CaptainFact.io!"
 msgstr "%{name} vous a invité à rejoindre CaptainFact.io !"
 
 #: lib/captain_fact_mailer/email.ex:49
@@ -19,7 +19,7 @@ msgid "CaptainFact.io - Reset your password"
 msgstr "CaptainFact.io - Réinitialisation du mot de passe"
 
 #: lib/captain_fact_mailer/email.ex:31
-msgid "Welcome to CaptainFact.io !"
+msgid "Welcome to CaptainFact.io!"
 msgstr "Bienvenue sur CaptainFact.io !"
 
 #: lib/captain_fact_mailer/email.ex:57

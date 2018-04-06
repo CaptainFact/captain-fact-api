@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 
 #: lib/captain_fact_mailer/email.ex:75
-msgid "%{name} invited you to try CaptainFact.io !"
+msgid "%{name} invited you to try CaptainFact.io!"
 msgstr ""
 
 #: lib/captain_fact_mailer/email.ex:49
@@ -19,7 +19,7 @@ msgid "CaptainFact.io - Reset your password"
 msgstr ""
 
 #: lib/captain_fact_mailer/email.ex:31
-msgid "Welcome to CaptainFact.io !"
+msgid "Welcome to CaptainFact.io!"
 msgstr ""
 
 #: lib/captain_fact_mailer/email.ex:57

@@ -17,6 +17,7 @@ defmodule DB.Factory do
   alias DB.Schema.Speaker
   alias DB.Schema.Statement
   alias DB.Schema.Flag
+  alias DB.Schema.ResetPasswordRequest
 
 
   def user_factory do
@@ -76,7 +77,7 @@ defmodule DB.Factory do
     %InvitationRequest{
       email: Faker.Internet.email,
       invited_by: build(:user),
-      token: "TestInvitationToken"
+      token: "TestToken-" <> random_string(8)
     }
   end
 
@@ -114,6 +115,14 @@ defmodule DB.Factory do
       source_user: build(:user),
       action: build(:user_action),
       reason: 1
+    }
+  end
+
+  def reset_password_request_factory do
+    %ResetPasswordRequest{
+      user: build(:user),
+      token: "TestToken-" <> random_string(8),
+      source_ip: Enum.random([Faker.Internet.ip_v4_address, Faker.Internet.ip_v6_address])
     }
   end
 

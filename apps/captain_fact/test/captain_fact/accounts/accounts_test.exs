@@ -18,9 +18,13 @@ defmodule CaptainFact.AccountsTest do
       Accounts.reset_password!(user.email, "127.0.0.1")
 
       assert Repo.aggregate(ResetPasswordRequest, :count, :token) == 1
-      req = Repo.get_by!(ResetPasswordRequest, user_id: user.id)
+      req =
+        ResetPasswordRequest
+        |> preload(:user)
+        |> Repo.get_by!(user_id: user.id)
+
       refute is_nil(req.token) or String.length(req.token) < 128
-      assert_delivered_email CaptainFactMailer.Email.reset_password_request_mail(req)
+      assert_delivered_email CaptainFactMailer.Email.reset_password_request(req)
     end
 
     test "a single ip cannot make too much requests" do
@@ -103,7 +107,7 @@ defmodule CaptainFact.AccountsTest do
     test "send a mail when calling send_invite/1" do
       req = insert(:invitation_request)
       Accounts.send_invite(req)
-      assert_delivered_email CaptainFactMailer.Email.invite_user_email(req)
+      assert_delivered_email CaptainFactMailer.Email.invitation_to_register(req)
     end
 
     test "send mails when calling send_invites/1" do
@@ -111,7 +115,7 @@ defmodule CaptainFact.AccountsTest do
       requests = insert_list(nb_invites, :invitation_request)
       Accounts.send_invites(nb_invites)
       Enum.each(requests, fn req ->
-        assert_delivered_email CaptainFactMailer.Email.invite_user_email(req)
+        assert_delivered_email CaptainFactMailer.Email.invitation_to_register(req)
       end)
     end
 
@@ -191,7 +195,7 @@ defmodule CaptainFact.AccountsTest do
       invit = insert(:invitation_request)
       user_params = build_user_params()
       {:ok, user} = Accounts.create_account(user_params, invit.token)
-      assert_delivered_email CaptainFactMailer.Email.welcome_email(user)
+      assert_delivered_email CaptainFactMailer.Email.welcome(user)
     end
 
     defp build_user_params() do
