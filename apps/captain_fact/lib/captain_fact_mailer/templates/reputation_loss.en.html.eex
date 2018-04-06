@@ -1,8 +1,8 @@
-Hello @<%= @user.username %>,<br/>
-<br/>
+Hello @<%= @user.username %>,<br>
+<br>
 Your CaptainFact reputation passed below -5. This email is here to give
 you some explanations about why this might have happen and some advices
-to find your way back up.<br/>
+to find your way back up.<br>
 <div>
    <h2>Comments</h2>
    <p>CaptainFact is no ordinary social platform. Its vocation is to
@@ -11,7 +11,7 @@ to find your way back up.<br/>
       The comment section can be used to open the context but must not
       deviate from the initial subject. Off-topic is sanctioned by the community.
    </p>
-   <p>The <code>Approve</code> and <code>Refute</code> buttons should only be used when evidence
+   <p>The "<code>Approve</code>" and "<code>Refute</code>" buttons should only be used when evidence
       allow for <strong>significantly</strong> tilting the verification to one side or the other.
       A minor error on a date or a slightly coarse rounding on a number do not
       necessarily deserve to be invalidated: one can <strong>confirm</strong>
@@ -53,14 +53,11 @@ to find your way back up.<br/>
       <p>This social measure [...] has created a massive increase in unemployment</p>
    </blockquote>
 </div>
-<br/>
-<hr>
+<br>
+<hr><br>
 <p>
   We hope that this is helpful to you and that you'll come back
-  to contribute again.
-</p>
-<p>
-  You can always contact us
-  on <a href="mailto:contact@captainfact.io">contact@captainfact.io</a> if you
+  to contribute again. You can also contact us
+  at <a href="mailto:contact@captainfact.io">contact@captainfact.io</a> if you
   think that this reputation loss is unfair or want to learn more.
 </p>

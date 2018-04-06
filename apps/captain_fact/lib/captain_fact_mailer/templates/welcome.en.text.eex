@@ -1,7 +1,7 @@
 Welcome to CaptainFact.io !
 
 To confirm your email and gain a bonus of
-+<%= @confirm_email_reputation %> reputation, follow this link :
++<%= @confirm_email_reputation %> reputation, click on the following link:
 
 <%= frontend_url() %>/confirm_email/<%= @user.email_confirmation_token %>
 

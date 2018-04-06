@@ -1,15 +1,16 @@
 Bienvenue sur CaptainFact !<br>
 <br>
 Pour confirmer votre adresse email et obtenir un bonus de
-+<%= @confirm_email_reputation %> de réputation, cliquez ici :
++<%= @confirm_email_reputation %> de réputation, cliquez sur le lien suivant :
 <a href="<%= frontend_url() %>/confirm_email/<%= @user.email_confirmation_token %>">
   Confirmer mon adresse email
 </a>
-<br/><br/>
+<br><br>
 Vous pouvez en apprendre plus sur le fonctionnement du système en
 allant voir les <a href="<%= frontend_url() %>/help">pages d'aide</a>.
-<br/><br/>
+<br><br>
 Vous pouvez également nous contacter
-sur <a href="mailto:contact@captainfact.io">contact@captainfact.io</a>.<br/>
-<br/>
+sur <a href="mailto:contact@captainfact.io">contact@captainfact.io</a>.<br>
+<br>
 Bon fact-checking !
+<br>

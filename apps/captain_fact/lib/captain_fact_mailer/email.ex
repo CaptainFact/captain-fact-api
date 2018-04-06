@@ -58,6 +58,7 @@ defmodule CaptainFactMailer.Email do
     |> render_localized(:reputation_loss)
   end
 
+  # No localisation for now, we need to store locale in invitation request
   def invite_user_email(req = %InvitationRequest{invited_by: %Ecto.Association.NotLoaded{}}),
     do: invite_user_email(Repo.preload(req, :invited_by))
   def invite_user_email(%InvitationRequest{invited_by: invited_by, email: email, token: token}) do
@@ -65,7 +66,7 @@ defmodule CaptainFactMailer.Email do
     |> to(email)
     |> subject(invitation_subject(invited_by))
     |> assign(:invitation_token, token)
-    |> render(:invitation) # No localisation (we don't know user's locale yet)
+    |> render_localized(:invitation)
   end
 
   defp invitation_subject(nil),
