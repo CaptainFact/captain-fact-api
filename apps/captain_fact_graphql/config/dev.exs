@@ -10,7 +10,7 @@ config :captain_fact_graphql, CaptainFactGraphqlWeb.Endpoint,
     certfile: "priv/keys/fullchain.pem"
   ],
   debug_errors: true,
-  code_reloader: true,
+  code_reloader: false,
   check_origin: false,
   watchers: []
 
