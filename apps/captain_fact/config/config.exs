@@ -35,7 +35,7 @@ config :captain_fact, CaptainFact.Scheduler,
   ]
 
 # Configure mailer
-config :captain_fact, CaptainFact.Mailer, adapter: Bamboo.MailgunAdapter
+config :captain_fact, CaptainFactMailer, adapter: Bamboo.MailgunAdapter
 
 # Configures Elixir's Logger
 config :logger, :console,

@@ -71,12 +71,19 @@ defmodule CaptainFactJobs.Reputation do
 
   # Utils
 
-  def action_reputation_change(type) when is_integer(type), do: Map.get(@actions, type)
-  def action_reputation_change(type) when is_atom(type), do: action_reputation_change(UserAction.type(type))
+  def action_reputation_change(type) when is_integer(type),
+    do: Map.get(@actions, type)
+  def action_reputation_change(type) when is_atom(type),
+    do: action_reputation_change(UserAction.type(type))
   def action_reputation_change(type, entity) when is_integer(type) and is_integer(entity),
     do: get_in(@actions, [type, entity])
   def action_reputation_change(type, entity) when is_atom(type) and is_atom(entity),
     do: action_reputation_change(UserAction.type(type), UserAction.entity(entity))
+
+  def self_reputation_change(type),
+    do: elem(action_reputation_change(type), 0)
+  def self_reputation_change(type, entity),
+    do: elem(action_reputation_change(type, entity), 0)
 
   def actions, do: @actions
 

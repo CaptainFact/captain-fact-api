@@ -119,6 +119,7 @@ defmodule DB.Schema.User do
     |> unique_constraint(:username)
     |> validate_length(:username, min: 5, max: 15)
     |> validate_length(:name, min: 2, max: 20)
+    |> update_change(:locale, &String.downcase/1)
     |> validate_inclusion(:locale, @valid_locales)
     |> validate_format(:name, ~r/^[ a-zA-Z]*$/)
     |> validate_email()
