@@ -77,6 +77,24 @@ defmodule CaptainFact.Accounts do
     result
   end
 
+
+  @doc"""
+  Update user
+  """
+  def update(user, params) do
+    UserPermissions.check!(user, :update, :user)
+    user
+    |> User.changeset(params)
+    |> Repo.update()
+    |> case do
+      {:ok, user} ->
+        Recorder.record(user, :update, :user)
+        {:ok, user}
+      {:error, changeset} ->
+        {:error, changeset}
+    end
+  end
+
   @doc"""
   Send user a welcome email, with a link to confirm it (only if not already confirmed)
   """
@@ -371,3 +389,4 @@ defmodule CaptainFact.Accounts do
     |> Repo.one!()
   end
 end
+
