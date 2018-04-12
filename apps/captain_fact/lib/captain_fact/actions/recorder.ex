@@ -44,9 +44,13 @@ defmodule CaptainFact.Actions.Recorder do
   This is useful to log actions on multiple users at the same time
   """
   def admin_record_all!(action_type, entity, actions_params) do
-    datetime = Ecto.DateTime.utc
     Repo.insert_all(UserAction, Enum.map(actions_params, fn params ->
-      Map.merge params, %{user_id: nil, type: type(action_type), entity: entity(entity), inserted_at: datetime}
+      Map.merge params, %{
+        user_id: nil,
+        type: type(action_type),
+        entity: entity(entity),
+        inserted_at: Ecto.DateTime.utc
+      }
     end))
   end
 

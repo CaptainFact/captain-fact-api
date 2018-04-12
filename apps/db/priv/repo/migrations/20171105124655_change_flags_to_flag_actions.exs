@@ -12,7 +12,7 @@ defmodule DB.Repo.Migrations.ChangeFlagsToFlagActions do
   """
   def change do
     # Remove all entries and deprecated indexes
-    Repo.delete_all(from(f in "flags"))
+    Repo.delete_all(DB.Schema.Flag, log: false)
     drop unique_index(:flags, [:source_user_id, :entity, :entity_id])
 
     # Alter table

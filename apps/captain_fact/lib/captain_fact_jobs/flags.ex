@@ -7,6 +7,7 @@ defmodule CaptainFactJobs.Flags do
 
   require Logger
   import Ecto.Query
+  import CaptainFactWeb.CommentsChannel, only: [broadcast_comment_update: 2]
 
   alias DB.Repo
   alias DB.Schema.Comment
@@ -78,36 +79,21 @@ defmodule CaptainFactJobs.Flags do
   @entity_comment UserAction.entity(:comment)
   defp update_entity_flags(@entity_comment, %UserAction{entity_id: comment_id}) do
     nb_flags = Flagger.get_nb_flags(:create, :comment, comment_id)
-    if nb_flags >= Moderation.nb_flags_report(:create, :comment) do
+    if nb_flags >= Moderation.nb_flags_to_report(:create, :comment) do
       # Ban comment
       {nb_updated, _} = Repo.update_all((
         from c in Comment,
-             where: c.id == ^comment_id,
-             where: c.is_reported == false
+          where: c.id == ^comment_id,
+          where: c.is_reported == false
         ), [set: [is_reported: true]]
       )
       if nb_updated == 1 do
-        broadcast_report(:comment, comment_id)
+        broadcast_comment_update(comment_id, [:is_reported])
       end
       nb_updated
     else
       0
     end
   end
-  # Ignore other flags
-  defp update_entity_flags(_, _), do: 0
-
-  def broadcast_report(:comment, comment_id) do
-    comment_context = Repo.one!(
-      from c in Comment,
-      join: s in DB.Schema.Statement, on: c.statement_id == s.id,
-      where: c.id == ^comment_id,
-      select: %{video_id: s.video_id, statement_id: s.id}
-    )
-    # TODO Use a event bus here
-    CaptainFactWeb.Endpoint.broadcast(
-      "comments:video:#{DB.Type.VideoHashId.encode(comment_context.video_id)}", "comment_removed",
-      %{id: comment_id, statement_id: comment_context.statement_id}
-    )
-  end
+  defp update_entity_flags(_, _), do: 0 # Ignore other flags
 end

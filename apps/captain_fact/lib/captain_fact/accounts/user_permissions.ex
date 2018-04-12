@@ -26,44 +26,39 @@ defmodule CaptainFact.Accounts.UserPermissions do
     # reputation            {-30 , -5 , 15 , 30 , 75 , 125 , 200 , 500 , 1000}
     #-------------------------------------------------------------------------
     create: %{
-      comment:              { 1  ,  5 , 7  , 10 , 15 ,  50 , 75  , 100 , 200 },
-      statement:            { 0  ,  2 , 6  , 10 , 30 ,  50 , 100 , 100 , 100 },
-      speaker:              { 0  ,  0 , 0  , 0  , 2  ,  10 ,  15 , 20  , 40  },
+      comment:              { 2  ,  5 , 7  , 10 , 15 ,  50 , 75  , 100 , 200 },
+      statement:            { 2  ,  2 , 6  , 10 , 30 ,  50 , 100 , 100 , 100 },
+      speaker:              { 0  ,  0 , 0  , 0  , 3  ,  10 ,  15 , 20  , 40  },
     },
     add: %{
       video:                { 0  ,  0 ,  0 , 0  , 0  ,  0  ,  1  ,  2  ,  3  },
-      speaker:              { 0  ,  0 ,  0 , 3  , 8  ,  30 ,  50 , 100 , 100 },
+      speaker:              { 0  ,  0 ,  0 , 0  , 5  ,  30 ,  50 , 100 , 100 },
     },
     update: %{
-      comment:              { 3  , 10 , 15 , 30 , 30 , 100 , 100 , 100 , 100 },
       statement:            { 0  ,  0 ,  2 ,  5 , 10 ,  50 , 100 , 100 , 100 },
       speaker:              { 0  ,  0 ,  0 ,  0 , 5  ,  20 ,  30 ,  40 ,  80 },
       video:                { 0  ,  0 ,  0 ,  0 , 0  ,   0  ,  5 ,  10 ,  20 },
     },
     delete: %{
-      # Not much risk here, as user can only delete own comments
       comment:              { 10  , 20, 30 , 50 , 75 , 300 , 300 , 300 , 300 },
     },
     remove: %{
-      statement:            { 0  ,  0 ,  0 ,  0 ,  2 ,  5  ,  10 ,  15 ,  25 },
-      speaker:              { 0  ,  0 ,  0 ,  0 ,  0 ,   2 ,   5 ,  10 ,  20 },
+      statement:            { 0  ,  0 ,  0 ,  0 ,  0 ,  5  ,  10 ,  15 ,  25 },
+      speaker:              { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   5 ,  20 ,  40 },
     },
     restore: %{
-      statement:            { 0  ,  0 ,  0 ,  0 ,  5 ,  15 ,  15 ,  15 ,  15 },
-      speaker:              { 0  ,  0 ,  0 ,  0 , 10 ,  30 ,  50 , 100 , 100 }
-    },
-    approve: %{
-      video_debate_action:  { 0  ,  0 ,  0 ,  0 ,  0 ,   3 ,  10 ,  20 ,  30 },
+      statement:            { 0  ,  0 ,  0 ,  0 ,  0 ,  15 ,  20 ,  30 ,  50 },
+      speaker:              { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,  10 ,  30 ,  60 }
     },
     flag: %{
-      video_debate_action:  { 0  ,  0 ,  0 ,  5 ,  5 ,   5 ,   5 ,   5 ,   5 },
-      comment:              { 0  ,  0 ,  1 ,  3 ,  3 ,   5 ,  10 ,  10 ,  10 },
+      comment:              { 0  ,  0 ,  0 ,  0 ,  2 ,   5 ,  10 ,  15 ,  20 },
     },
+    # Wildcards actions (they don't care about the entity type)
     vote_up:                { 0  ,  3 ,  5 , 10 , 15 ,  30 ,  50 ,  75 , 100 },
     vote_down:              { 0  ,  0 ,  2 ,  5 , 10 ,  20 ,  40 ,  80 , 100 },
     self_vote:              { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   3 ,   5 },
-    revert_vote_up:         { 10  , 20, 30 , 50 , 75 , 150 , 300 , 500 , 500 },
-    revert_vote_down:       { 10  , 20, 30 , 50 , 75 , 150 , 300 , 500 , 500 },
+    revert_vote_up:         { 0  ,  10, 25 , 30 , 50 ,  75 ,  75 , 100 , 100 },
+    revert_vote_down:       { 0  ,  10, 25 , 30 , 50 ,  75 ,  75 , 100 , 100 },
     revert_self_vote:       { 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   0 ,   3 ,   5 },
     collective_moderation:  { 0  ,  0 ,  0 ,  0 ,  0 ,   0  ,  5 ,   10 , 50 }
   }

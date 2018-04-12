@@ -157,10 +157,13 @@ defmodule CaptainFact.Accounts do
   def confirm_email!(%User{email_confirmed: true}),
     do: nil
   def confirm_email!(user = %User{email_confirmed: false}) do
-    user
-    |> User.changeset_confirm_email(true)
-    |> Repo.update!()
-    |> Recorder.record!(:email_confirmed, :user)
+    updated_user =
+      user
+      |> User.changeset_confirm_email(true)
+      |> Repo.update!()
+
+    Recorder.admin_record!(:email_confirmed, :user, %{target_user_id: user.id})
+    updated_user
   end
 
   # ---- Achievements -----

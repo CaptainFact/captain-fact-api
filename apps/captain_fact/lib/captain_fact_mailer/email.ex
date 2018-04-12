@@ -12,13 +12,11 @@ defmodule CaptainFactMailer.Email do
   use Bamboo.Phoenix, view: CaptainFactMailer.View
   import CaptainFact.Gettext
 
-  require CaptainFactJobs.Reputation
-
   alias DB.Schema.ResetPasswordRequest
   alias DB.Schema.InvitationRequest
   alias DB.Schema.User
 
-  alias CaptainFactJobs.Reputation
+  alias CaptainFact.Actions.ReputationChange
 
 
   @sender_no_reply {"CaptainFact", "no-reply@captainfact.io"}
@@ -29,9 +27,10 @@ defmodule CaptainFactMailer.Email do
   Generate a welcome email to user, with a link to confirm his email address.
   """
   def welcome(user) do
+    reputation_change = ReputationChange.for_admin_action(:email_confirmed)
     user_email(user)
     |> subject(gettext_mail_user(user, "Welcome to CaptainFact.io!"))
-    |> assign(:confirm_email_reputation, Reputation.self_reputation_change(:email_confirmed))
+    |> assign(:confirm_email_reputation, reputation_change)
     |> render_i18n(:welcome)
   end
 

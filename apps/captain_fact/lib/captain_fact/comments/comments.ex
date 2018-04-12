@@ -35,11 +35,11 @@ defmodule CaptainFact.Comments do
       |> Map.put(:score, 0)
 
     # Record action
-    action_params = Map.merge(action_params(context, full_comment), %{
-      changes: %{
-        text: full_comment.text,
-        source: source_url
-      }
+    action_params = Map.put(action_params(context, full_comment), :changes, %{
+      text: full_comment.text,
+      source: source_url,
+      statement_id: full_comment.statement_id,
+      reply_to_id: full_comment.reply_to_id
     })
     Recorder.record!(user, :create, :comment, action_params)
 
@@ -147,7 +147,6 @@ defmodule CaptainFact.Comments do
 
   defp action_params(context, comment), do: %{
     context: context,
-    target_user_id: comment.user_id,
     entity_id: comment.id
   }
 
