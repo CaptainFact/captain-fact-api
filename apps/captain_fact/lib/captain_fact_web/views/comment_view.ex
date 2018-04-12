@@ -23,6 +23,7 @@ defmodule CaptainFactWeb.CommentView do
       user: user,
       statement_id: comment.statement_id,
       text: comment.text,
+      is_reported: comment.is_reported,
       approve: comment.approve,
       inserted_at: comment.inserted_at,
       score: comment.score,

@@ -70,6 +70,9 @@ defmodule DB.Schema.User do
   when is_integer(change) do
     change(model, %{reputation: reputation + change, today_reputation_gain: today_gain + change})
   end
+  def reputation_changeset(model, 0) do
+    change(model)
+  end
 
   def registration_changeset(model, params \\ %{}) do
     model

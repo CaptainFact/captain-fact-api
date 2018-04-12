@@ -138,7 +138,9 @@ defmodule DB.Factory do
       entity_id: comment.id,
       changes: %{
         text: comment.text,
-        source: comment.source && comment.source.url
+        source: comment.source && comment.source.url,
+        statement_id: comment.statement.id,
+        reply_to_id: comment.reply_to_id
       }
     })
     comment

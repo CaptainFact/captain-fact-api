@@ -37,6 +37,7 @@ defmodule DB.Schema.Comment do
         source: source,
         statement_id: c.statement_id,
         text: c.text,
+        is_reported: c.is_reported,
         inserted_at: c.inserted_at,
         updated_at: c.updated_at,
         score: v.score,
@@ -55,9 +56,12 @@ defmodule DB.Schema.Comment do
   def with_source(query, true) do
     from c in query, join: source in Source, on: [id: c.source_id]
   end
-
   def with_source(query, false) do
     from c in query, left_join: source in Source, on: [id: c.source_id]
+  end
+
+  def with_statement(query) do
+    from c in query, preload: [:statement]
   end
 
   @required_fields ~w(statement_id user_id)a

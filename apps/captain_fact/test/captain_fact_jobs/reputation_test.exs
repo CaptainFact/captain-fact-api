@@ -3,13 +3,14 @@ defmodule CaptainFactJobs.ReputationTest do
 
   alias DB.Schema.User
   alias DB.Schema.UserAction
+  alias CaptainFact.Actions.ReputationChange
   alias CaptainFactJobs.Reputation
 
 
   test "target user gains reputation" do
     action = insert_action(:vote_up, :comment)
     user_before = Repo.get!(User, action.target_user_id)
-    {_, expected_diff} = Reputation.action_reputation_change(action.type, action.entity)
+    {_, expected_diff} = ReputationChange.for_action(action.type, action.entity)
 
     Reputation.update()
     updated_user = Repo.get!(User, action.target_user_id)
@@ -20,7 +21,7 @@ defmodule CaptainFactJobs.ReputationTest do
   test "some actions should have impact on both users reputation" do
     # Register action
     action = insert_action(:vote_down, :fact)
-    {diff_source, diff_target} = Reputation.action_reputation_change(action.type, action.entity)
+    {diff_source, diff_target} = ReputationChange.for_action(action.type, action.entity)
     source_user = Repo.get!(User, action.user_id)
     target_user = Repo.get!(User, action.target_user_id)
     Reputation.update()
@@ -49,7 +50,7 @@ defmodule CaptainFactJobs.ReputationTest do
     # Ensure we still loose reputation
     type = :vote_down
     entity = :comment
-    {_, expected_diff} = Reputation.action_reputation_change(type, entity)
+    {_, expected_diff} = ReputationChange.for_action(type, entity)
     insert(:user_action, %{
       type: UserAction.type(type),
       entity: UserAction.entity(entity),
@@ -65,7 +66,7 @@ defmodule CaptainFactJobs.ReputationTest do
 
   test "reset_daily_limits/0 reset all users limits" do
     action = insert_action(:vote_up, :comment)
-    {_, expected_diff} = Reputation.action_reputation_change(action.type, action.entity)
+    {_, expected_diff} = ReputationChange.for_action(action.type, action.entity)
 
     Reputation.update()
     updated_user = Repo.get!(User, action.target_user_id)

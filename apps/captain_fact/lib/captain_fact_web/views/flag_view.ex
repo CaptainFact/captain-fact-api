@@ -1,14 +1,13 @@
 defmodule CaptainFactWeb.FlagView do
   use CaptainFactWeb, :view
 
-  def render("my_flags.json", %{flags: flags}) do
-    render_many(flags, CaptainFactWeb.FlagView, "my_flag.json")
-  end
+  alias CaptainFactWeb.UserView
 
-  def render("my_flag.json", %{flag: flag}) do
+
+  def render("flag_without_action.json", %{flag: flag}) do
     %{
-      entity: flag.entity,
-      entity_id: flag.entity_id
+      source_user: UserView.render("show.json", user: flag.source_user),
+      reason: flag.reason
     }
   end
 end

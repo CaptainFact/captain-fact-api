@@ -1,16 +1,17 @@
-defmodule CaptainFactJobs.ModerationUpdaterTest do
+defmodule CaptainFactJobs.ModerationTest do
   use CaptainFact.DataCase
   import CaptainFact.TestUtils
-  doctest CaptainFactJobs.ModerationUpdater
+  doctest CaptainFactJobs.Moderation
 
   alias DB.Schema.Comment
   alias DB.Schema.User
   alias DB.Schema.Flag
   alias DB.Schema.UserAction
 
+  import CaptainFactJobs.Moderation, only: [
+    min_nb_feedbacks_to_process_entry: 0
+  ]
   alias CaptainFact.Moderation
-  alias CaptainFactJobs.ModerationUpdater
-
 
   @feedback_confirm 1
   @feedback_refute -1
@@ -18,8 +19,8 @@ defmodule CaptainFactJobs.ModerationUpdaterTest do
 
   test "Report confirmed (score >= 0.66)" do
     {comment, action} = insert_reported_comment_with_action()
-    generate_feedback(action, @feedback_confirm, ModerationUpdater.min_nb_feedbacks_to_take_action)
-    ModerationUpdater.update()
+    generate_feedback(action, @feedback_confirm, min_nb_feedbacks_to_process_entry())
+    CaptainFactJobs.Moderation.update()
     CaptainFactJobs.Reputation.update()
 
     assert_deleted comment
@@ -34,9 +35,10 @@ defmodule CaptainFactJobs.ModerationUpdaterTest do
 
   test "Report refuted (if score <= -0.66)" do
     {comment, action} = insert_reported_comment_with_action()
-    generate_feedback(action, @feedback_refute, ModerationUpdater.min_nb_feedbacks_to_take_action)
+    generate_feedback(action, @feedback_refute, min_nb_feedbacks_to_process_entry())
     flags = Repo.all from(f in Flag, where: f.action_id == ^action.id, preload: :source_user)
-    ModerationUpdater.update()
+    CaptainFactJobs.Flags.update()
+    CaptainFactJobs.Moderation.update()
     CaptainFactJobs.Reputation.update()
 
     refute_deleted comment
@@ -54,8 +56,8 @@ defmodule CaptainFactJobs.ModerationUpdaterTest do
 
   test "Not sure yet (if score between -0.66 and 0.66)" do
     {comment, action} = insert_reported_comment_with_action()
-    generate_feedback(action, @feedback_neutral, ModerationUpdater.min_nb_feedbacks_to_take_action)
-    ModerationUpdater.update()
+    generate_feedback(action, @feedback_neutral, min_nb_feedbacks_to_process_entry())
+    CaptainFactJobs.Moderation.update()
     CaptainFactJobs.Reputation.update()
 
     refute_deleted comment
@@ -67,21 +69,22 @@ defmodule CaptainFactJobs.ModerationUpdaterTest do
     assert Repo.get!(User, action.user_id).reputation == action.user.reputation
   end
 
-  test "reputation gain / loss is ponderated with the strength of the consensus" do
-    {_, action} = insert_reported_comment_with_action()
-    # Generate one neutral so consensus_strength should not be 1
-    generate_feedback(action, @feedback_confirm, ModerationUpdater.min_nb_feedbacks_to_take_action)
-    generate_feedback(action, @feedback_neutral, 1)
-
-    ModerationUpdater.update()
-    CaptainFactJobs.Reputation.update()
-
-    min_change..max_change = ModerationUpdater.reputation_change_ranges[UserAction.type(:action_banned)]
-    updated_reputation = Repo.get!(User, action.user_id).reputation
-    abs_change = abs(updated_reputation - action.user.reputation)
-    assert abs_change > abs(min_change)
-    assert abs_change < abs(max_change)
-  end
+  # Not ponderated on consensus strength anymore. May come back in the future
+  #  test "reputation gain / loss is ponderated with the strength of the consensus" do
+  #    {_, action} = insert_reported_comment_with_action()
+  #    # Generate one neutral so consensus_strength should not be 1
+  #    generate_feedback(action, @feedback_confirm, min_nb_feedbacks_to_process_entry())
+  #    generate_feedback(action, @feedback_neutral, 1)
+  #
+  #    CaptainFactJobs.Moderation.update()
+  #    CaptainFactJobs.Reputation.update()
+  #
+  #    min_change..max_change = Moderation.reputation_change_ranges[UserAction.type(:action_banned)]
+  #    updated_reputation = Repo.get!(User, action.user_id).reputation
+  #    abs_change = abs(updated_reputation - action.user.reputation)
+  #    assert abs_change > abs(min_change)
+  #    assert abs_change < abs(max_change)
+  #  end
 
   defp insert_reported_comment_with_action() do
     comment = insert_reported_comment()
@@ -93,12 +96,12 @@ defmodule CaptainFactJobs.ModerationUpdaterTest do
   defp generate_feedback(action, feedback_type, num) do
     for _ <- 1..num do
       user = insert(:user, %{reputation: 10000})
-      Moderation.feedback!(user, action.id, feedback_type)
+      Moderation.feedback!(user, action.id, feedback_type, 1)
     end
   end
 
   defp insert_reported_comment() do
-    limit = CaptainFact.Moderation.nb_flags_report(UserAction.type(:create), UserAction.entity(:comment))
+    limit = CaptainFact.Moderation.nb_flags_to_report(UserAction.type(:create), UserAction.entity(:comment))
     comment = insert(:comment) |> with_action() |> flag(limit)
     CaptainFactJobs.Flags.update()
 

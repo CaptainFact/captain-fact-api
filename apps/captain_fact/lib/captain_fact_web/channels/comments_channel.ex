@@ -1,8 +1,9 @@
-defmodule CaptainFact.Comments.CommentsChannel do
+defmodule CaptainFactWeb.CommentsChannel do
   use CaptainFactWeb, :channel
 
   import CaptainFactWeb.UserSocket, only: [handle_in_authenticated: 4]
   alias CaptainFactWeb.{ CommentView, VoteView }
+  alias CaptainFactWeb.Endpoint
 
   alias DB.Type.VideoHashId
   alias DB.Schema.User
@@ -15,6 +16,45 @@ defmodule CaptainFact.Comments.CommentsChannel do
   alias CaptainFact.Comments
 
 
+  @event_comment_updated "comment_updated"
+  @event_comment_removed "comment_removed"
+
+  # ---- Public API (called from external code) ----
+
+  @doc"""
+  Broadcast a comment update on concerned channels.
+  Fetch `video_id` and `statement_id` from DB.
+  """
+  def broadcast_comment_update(comment_id, updated_fields) do
+    Comment
+    |> preload(:statement)
+    |> where([c], c.id == ^comment_id)
+    |> Repo.one()
+    |> case do
+         nil ->
+           {:error, :not_found}
+         comment ->
+           channel = comments_channel(comment.statement.video_id)
+           msg = msg_partial_update(comment, updated_fields)
+           Endpoint.broadcast(channel, @event_comment_updated, msg)
+       end
+  end
+
+  @doc"""
+  Broadcast a comment remove on concerned channels.
+  """
+  def broadcast_comment_remove(comment = %Comment{}) do
+    comment.statement.video_id
+    |> comments_channel()
+    |> Endpoint.broadcast(@event_comment_removed, msg_comment_remove(comment))
+  end
+
+  defp comments_channel(video_id) when is_integer(video_id) do
+    "comments:video:#{VideoHashId.encode(video_id)}"
+  end
+
+  # ---- Channel API ----
+
   def join("comments:video:" <> video_id_hash, _payload, socket) do
     user = Guardian.Phoenix.Socket.current_resource(socket)
     video_id = VideoHashId.decode!(video_id_hash)
@@ -23,7 +63,6 @@ defmodule CaptainFact.Comments.CommentsChannel do
       |> Map.put(:comments, CommentView.render("index.json", comments:
           Comment.full(Comment)
           |> where([c, s], s.video_id == ^video_id)
-          |> where([c, _], c.is_reported == false)
           |> Repo.all()
         ))
       |> load_user_data(user, video_id)
@@ -42,7 +81,7 @@ defmodule CaptainFact.Comments.CommentsChannel do
     comment = Comments.add_comment(user, context(socket), params, source_url, fn comment ->
       comment = Repo.preload(comment, :source) |> Repo.preload(:user)
       rendered_comment = CommentView.render("comment.json", comment: comment)
-      broadcast!(socket, "comment_updated", rendered_comment)
+      broadcast!(socket, @event_comment_updated, rendered_comment)
     end)
     broadcast!(socket, "comment_added", CommentView.render("comment.json", comment: comment))
     {:reply, :ok, socket}
@@ -54,11 +93,7 @@ defmodule CaptainFact.Comments.CommentsChannel do
     case Comments.delete_comment(user, comment, context(socket)) do
       nil -> {:reply, :ok, socket}
       _ ->
-        broadcast!(socket, "comment_removed", %{
-          id: id,
-          statement_id: comment.statement_id,
-          reply_to_id: comment.reply_to_id
-        })
+        broadcast!(socket, @event_comment_removed, msg_comment_remove(comment))
         {:reply, :ok, socket}
     end
   end
@@ -96,5 +131,24 @@ defmodule CaptainFact.Comments.CommentsChannel do
         |> select([_, a], a.entity_id)
         |> Repo.all()
       )
+  end
+
+  # ---- Messages builders ----
+
+  defp msg_comment_remove(comment = %Comment{}) do
+    %{
+      id: comment.id,
+      statement_id: comment.statement_id,
+      reply_to_id: comment.reply_to_id
+    }
+  end
+
+  defp msg_partial_update(comment = %Comment{}, updated_fields) do
+    Map.merge(%{
+      id: comment.id,
+      statement_id: comment.statement_id,
+      reply_to_id: comment.reply_to_id,
+      __partial: true
+    }, Map.take(comment, updated_fields))
   end
 end
