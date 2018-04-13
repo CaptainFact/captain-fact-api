@@ -28,7 +28,7 @@ Check `./dev/test.sh` script comments for details.
 A concurrency bug sometimes trigger when running tests. If you get something 
 like the following just re-run your tests:
 
-```markdown
+```
 04:16:05.680 [error] GenServer CaptainFactJobs.Reputation terminating
 ** (stop) exited in: GenServer.call(#PID<0.1308.0>, {:checkout, #Reference<0.2515546025.2910322690.13424>, true, 15000}, 5000)
     ** (EXIT) shutdown: "owner #PID<0.1307.0> exited with: shutdown"
@@ -105,6 +105,13 @@ graph BT;
 │   ├── config.exs => Releases configuration
 │   └── docker => Docker-specific files & configs
 ```
+
+## Styling
+
+Code should match [Elixy Style Guide](https://github.com/christopheradams/elixir_style_guide)
+as much as possible.
+
+Avoid lines longer than 80 characters, **never** go beyond 110 characters.
 
 ## Known problems and limitations
 

@@ -31,7 +31,7 @@ defmodule DB.Schema.Source do
 
   def changeset_fetched(struct, params) do
     struct
-    |> cast(params, [:og_url, :url, :title, :language, :site_name, :og_url])
+    |> cast(params, [:og_url, :url, :title, :language, :site_name])
     |> update_change(:url, &prepare_url/1)
     |> update_change(:og_url, &prepare_url/1)
     |> update_change(:title, &clean_and_truncate/1)
