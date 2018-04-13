@@ -128,7 +128,7 @@ defmodule CaptainFactJobs.Moderation do
         where: f.action_id == ^action.id,
         group_by: f.flag_reason,
         select: f.flag_reason,
-        order_by: count(f.id),
+        order_by: [desc: count(f.id)],
         limit: 1
       ))
     )
