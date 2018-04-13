@@ -1,5 +1,6 @@
 defmodule CaptainFactJobs.ReportManager do
   import Ecto.Query
+  # TODO Implement this as a behaviour
 
   alias DB.Repo
   alias DB.Schema.UsersActionsReport

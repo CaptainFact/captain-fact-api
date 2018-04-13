@@ -1,0 +1,65 @@
+Bonjour @<%= @user.username %>,<br>
+<br>
+Votre réputation sur CaptainFact est récemment passée en dessous de -5. Ce mail
+a pour objectif de vous expliquer ce qui a pu se passer et de vous donner quelques
+conseils pour remonter la pente.<br>
+<div>
+   <h2>Commentaires</h2>
+   <p>CaptainFact n'est pas une plateforme sociale ordinaire. Elle a pour vocation de
+      s'intéresser aux faits, aux preuves, aux sources, aux arguments et au contexte
+      <strong>mais pas aux opinions</strong>.
+      La partie commentaire peut être utilisée pour ouvrir le contexte mais ne doit
+      pas dévier du sujet initial. Les hors-sujets sont sanctionnés par la communauté.
+   </p>
+   <p>Les boutons "<code>J'approuve</code>" et "<code>Je réfute</code>" doivent être utilisés quand des preuves
+      permettent de faire <strong>nettement</strong> pencher la vérification d'un côté ou de
+      l'autre. Une erreur mineure sur une date ou un arrondi un peu grossier sur un
+      chiffre ne méritent pas nécessairement d'être infirmés : on peut <strong>confirmer</strong>
+      l'affirmation dès lors que l'ordre de grandeur est bon ou poster en commentaire
+      si l'on est confrontés à une approximation acceptable.
+   </p>
+   <h2>Citations</h2>
+   <p>Pour avoir sa place sur CaptainFact, une citation <strong>doit</strong> remplir au moins un
+      des critères suivants :
+   </p>
+   <ul>
+      <li>Être vérifiable</li>
+      <li>Faire mention d'une source ou d'un contenu sur lequel un commentaire pourrait faire le lien</li>
+      <li>Présenter des éléments incomplets ou approximatifs</li>
+      <li>Présenter un argument fallacieux, trompeur ou mensonger</li>
+   </ul>
+   <p>Il est également recommandé de se poser les questions suivantes avant d'ajouter
+      une citation :
+   </p>
+   <ul>
+      <li>Une personne typique pourrait-elle, en entendant l'affirmation, se demander
+         si elle est vraie ? Par exemple, l'affirmation "Le ciel est bleu" est vérifiable
+         mais n'a pas vraiment besoin d'être sourcée.
+      </li>
+      <li>Est-ce que l'affirmation est susceptible d'être répétée et partagée ?</li>
+      <li>S'agît-t-il d'une erreur mineure ? D'une hyperbole "acceptable" - souvent
+         utilisées en politique ?
+      </li>
+   </ul>
+   <h4>A propos des opinions dans les citations</h4>
+   <p>Les opinions doivent autant que possible éviter d'apparaître dans les citations.
+      Vous pouvez, si cela ne la prive pas de son sens, remplacer les jugements de
+      valeur (le mieux, le pire, stupide...etc) par des <code>[...]</code>.
+   </p>
+   <p>Par exemple :</p>
+   <blockquote>
+      <p>Cette mesure sociale a été un désastre le la pensée, ça ne m'évoque que du dégoût. Elle n'a fait que créer une augmentation massive du chômage, c'est pour moi une pure folie</p>
+   </blockquote>
+   <p>Peut devenir :</p>
+   <blockquote>
+      <p>Cette mesure sociale [...] n'a fait que créer une augmentation massive du chômage</p>
+   </blockquote>
+</div>
+<br>
+<hr><br>
+<p>
+  Nous espérons que ces quelques informations vous sont utiles et que vous
+  contribuerez à nouveau. Vous pouvez toujours nous contacter
+  sur <a href="mailto:contact@captainfact.io">contact@captainfact.io</a> si vous
+  pensez que cette perte de réputation est injuste ou si vous voulez en savoir plus.
+</p>

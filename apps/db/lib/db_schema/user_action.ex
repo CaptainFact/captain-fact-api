@@ -59,10 +59,15 @@ defmodule DB.Schema.UserAction do
   def type(:revert_vote_up),    do: 12
   def type(:revert_vote_down),  do: 13
   def type(:revert_self_vote),  do: 14
+  # Bans - See DB.Type.FlagReason for labels
+  def type(:action_banned_bad_language),      do: 21
+  def type(:action_banned_spam),              do: 22
+  def type(:action_banned_irrelevant),        do: 23
+  def type(:action_banned_not_constructive),  do: 24
   # Special actions
   def type(:email_confirmed),       do: 100
   def type(:collective_moderation), do: 101
-  def type(:action_banned),         do: 102
+  def type(:action_banned),         do: 102 # Deprecated. Can safelly be re-used
   def type(:abused_flag),           do: 103
   def type(:confirmed_flag),        do: 104
   def type(:social_network_linked), do: 105

@@ -11,7 +11,7 @@ defmodule CaptainFactWeb.UserSocket do
   channel "video_debate_history:*", CaptainFactWeb.VideoDebateHistoryChannel
   channel "statement_history:*", CaptainFactWeb.VideoDebateHistoryChannel
   channel "statements:video:*", CaptainFactWeb.StatementsChannel
-  channel "comments:video:*", CaptainFact.Comments.CommentsChannel
+  channel "comments:video:*", CaptainFactWeb.CommentsChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket

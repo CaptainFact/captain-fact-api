@@ -30,7 +30,7 @@ config :captain_fact,
 config :captain_fact, CaptainFactWeb.Endpoint,
   secret_key_base: dev_secret,
   debug_errors: false,
-  code_reloader: true,
+  code_reloader: false,
   check_origin: false,
   http: [port: 4000],
   force_ssl: false,
@@ -52,7 +52,7 @@ config :logger, :console, format: "[$level] $message\n"
 config :phoenix, :stacktrace_depth, 20
 
 # Mails
-config :captain_fact, CaptainFact.Mailer, adapter: Bamboo.LocalAdapter
+config :captain_fact, CaptainFactMailer, adapter: Bamboo.LocalAdapter
 
 # Env / Secrets are above everything else
 # Weave loads config from env or secret files

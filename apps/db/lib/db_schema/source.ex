@@ -4,6 +4,7 @@ defmodule DB.Schema.Source do
 
   schema "sources" do
     field :url, :string
+    field :og_url, :string
     field :title, :string
     field :language, :string
     field :site_name, :string
@@ -21,8 +22,18 @@ defmodule DB.Schema.Source do
   """
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:url, :title, :language, :site_name])
+    |> cast(params, [:url])
     |> update_change(:url, &prepare_url/1)
+    |> validate_required([:url])
+    |> unique_constraint(:url)
+    |> validate_format(:url, @url_regex)
+  end
+
+  def changeset_fetched(struct, params) do
+    struct
+    |> cast(params, [:og_url, :url, :title, :language, :site_name])
+    |> update_change(:url, &prepare_url/1)
+    |> update_change(:og_url, &prepare_url/1)
     |> update_change(:title, &clean_and_truncate/1)
     |> update_change(:language, &String.trim/1)
     |> update_change(:site_name, &clean_and_truncate/1)

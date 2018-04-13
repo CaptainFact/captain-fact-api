@@ -1,6 +1,7 @@
 defmodule CaptainFactWeb.UserActionView do
   use CaptainFactWeb, :view
 
+  alias DB.Schema.UserAction
   alias CaptainFactWeb.UserView
   alias CaptainFactWeb.UserActionView
 
@@ -22,7 +23,32 @@ defmodule CaptainFactWeb.UserActionView do
       entity_id: action.entity_id,
       changes: action.changes,
       time: action.inserted_at,
-      # context: action.context, TODO We need to convert "VD:42" to "VD:xxx" if we want to send this value
     }
+  end
+
+  def render("user_action_with_context.json", %{user_action: action}) do
+    %{
+      id: action.id,
+      user: UserView.render("show_public.json", %{user: action.user}),
+      type: action.type,
+      entity: action.entity,
+      entity_id: action.entity_id,
+      changes: action.changes,
+      time: action.inserted_at,
+      context: context_expander(action)
+    }
+  end
+
+  @create UserAction.type(:create)
+  @comment UserAction.entity(:comment)
+  defp context_expander(action = %{type: @create, entity: @comment, context: "VD:" <> video_id}) do
+    %{
+      type: "video",
+      hash_id: DB.Type.VideoHashId.encode(String.to_integer(video_id)),
+      statement_id: action.changes[:statement_id]
+    }
+  end
+  defp context_expander(_) do
+    nil
   end
 end

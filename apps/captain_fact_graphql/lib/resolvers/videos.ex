@@ -1,6 +1,4 @@
 defmodule CaptainFactGraphql.Resolvers.Videos do
-  import Ecto.Query
-
   alias DB.Repo
   alias DB.Schema.Video
 
@@ -38,12 +36,6 @@ defmodule CaptainFactGraphql.Resolvers.Videos do
   def url(video, _, _) do
     {:ok, DB.Schema.Video.build_url(video)}
   end
-
-  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  # TODO [Refactor] All videos queries have been temporarily copied here
-  # so we can cut the dependence to :captain_fact.
-  # However, we need to extract core features from :captain_fact
-  # and re-add the dependency to avoid duplicate code in the future
 
   defp get_video_by_url(url) do
     case Video.parse_url(url) do

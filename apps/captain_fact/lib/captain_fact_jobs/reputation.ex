@@ -14,41 +14,15 @@ defmodule CaptainFactJobs.Reputation do
   alias DB.Schema.UserAction
   alias DB.Schema.UsersActionsReport
 
+  alias CaptainFact.Actions.ReputationChange
   alias CaptainFactJobs.ReportManager
 
 
   @name __MODULE__
   @analyser_id UsersActionsReport.analyser_id(:reputation)
   @daily_gain_limit 25
-  @actions %{
-    UserAction.type(:vote_up) => %{
-      UserAction.entity(:comment) =>  {  0  , +2  },
-      UserAction.entity(:fact) =>     {  0  , +3  },
-    },
-    UserAction.type(:vote_down) => %{
-      UserAction.entity(:comment) =>  {  -1 , -2   },
-      UserAction.entity(:fact) =>     {  -1 , -3   }
-    },
-    UserAction.type(:revert_vote_up) => %{
-      UserAction.entity(:comment) =>  {  0  , -2  },
-      UserAction.entity(:fact) =>     {  0  , -3  },
-    },
-    UserAction.type(:revert_vote_down) => %{
-      UserAction.entity(:comment) =>  {  +1 , +2   },
-      UserAction.entity(:fact) =>     {  +1 , +3   }
-    },
-    UserAction.type(:delete) => %{
-      UserAction.entity(:comment) =>  {  -1 ,  0   },
-    },
+  @daily_loss_limit -50
 
-    # Special actions
-    UserAction.type(:email_confirmed) => {  +15,  0 },
-    # For reference and query. See `reputation_changes/1` for real implementation
-    UserAction.type(:action_banned) => nil,
-    UserAction.type(:abused_flag) => nil,
-    UserAction.type(:confirmed_flag) => nil,
-  }
-  @actions_types Map.keys(@actions)
 
   # --- Client API ---
 
@@ -69,25 +43,61 @@ defmodule CaptainFactJobs.Reputation do
     GenServer.call(@name, :reset_daily_limits, @timeout)
   end
 
-  # Utils
+  @doc"""
+  Adjust reputation change based on user's today reputation changes
 
-  def action_reputation_change(type) when is_integer(type), do: Map.get(@actions, type)
-  def action_reputation_change(type) when is_atom(type), do: action_reputation_change(UserAction.type(type))
-  def action_reputation_change(type, entity) when is_integer(type) and is_integer(entity),
-    do: get_in(@actions, [type, entity])
-  def action_reputation_change(type, entity) when is_atom(type) and is_atom(entity),
-    do: action_reputation_change(UserAction.type(type), UserAction.entity(entity))
+  ## Examples
 
-  def actions, do: @actions
+      iex> import CaptainFactJobs.Reputation
+
+      iex> # Nothing special when not hitting the limit, just returns change
+      iex> calculate_adjusted_diff(0, 3)
+      3
+      iex> calculate_adjusted_diff(0, -4)
+      -4
+
+      iex> # Gain limit
+      iex> calculate_adjusted_diff(daily_gain_limit, 5)
+      0
+      iex> calculate_adjusted_diff(daily_gain_limit, -5)
+      -5
+      iex> calculate_adjusted_diff(daily_gain_limit -1, 5)
+      4
+      iex> calculate_adjusted_diff(daily_gain_limit - 1, -5)
+      -5
+      iex> calculate_adjusted_diff(daily_gain_limit + 5, 1)
+      0
+
+      iex> # Loss limit
+      iex> calculate_adjusted_diff(daily_loss_limit, 5)
+      5
+      iex> calculate_adjusted_diff(daily_loss_limit, -5)
+      0
+      iex> calculate_adjusted_diff(daily_loss_limit + 1, 5)
+      5
+      iex> calculate_adjusted_diff(daily_loss_limit + 1, -5)
+      -4
+      iex> calculate_adjusted_diff(daily_loss_limit - 5, -1)
+      0
+  """
+  def calculate_adjusted_diff(0, _),
+    do: 0
+  def calculate_adjusted_diff(change, today_change) when change > 0,
+    do: min(change, @daily_gain_limit - today_change)
+  def calculate_adjusted_diff(change, today_change) when change < 0,
+    do: max(change, @daily_loss_limit + today_change)
 
   def daily_gain_limit, do: @daily_gain_limit
+  def daily_loss_limit, do: @daily_loss_limit
 
   # --- Server callbacks ---
 
   def handle_call(:update_reputations, _from, _state) do
     last_action_id = ReportManager.get_last_action_id(@analyser_id)
     unless last_action_id == -1 do
-      from(a in UserAction, where: a.id > ^last_action_id, where: a.type in @actions_types)
+      UserAction
+      |> where([a], a.id > ^last_action_id)
+      |> where([a], a.type in ^ReputationChange.actions_types)
       |> Repo.all(log: false)
       |> start_analysis()
     end
@@ -113,56 +123,51 @@ defmodule CaptainFactJobs.Reputation do
   # Update reputations, return the number of updated users
   defp do_update_reputations(actions) do
     actions
-    |> Enum.reduce(%{}, fn (action, all_changes) ->
-         {source_change, target_change} = reputation_changes(action)
-         all_changes
-         |> changes_updater(action.user_id, source_change)
-         |> changes_updater(action.target_user_id, target_change)
-       end)
-    |> Enum.map(fn {user_id, diff} ->
-         User
-         |> select([:id, :reputation, :today_reputation_gain])
-         |> Repo.get(user_id)
-         |> update_user_reputation(diff)
-       end)
-    |> Enum.count(&(&1 == true))
+    |> Enum.reduce(%{}, &group_changes_by_user/2)
+    |> Enum.map(&apply_reputation_diff/1)
+    |> Enum.count(&(&1 != false))
+  end
+
+  def group_changes_by_user(action, changes) do
+    {source_change, target_change} = ReputationChange.for_action(action)
+    changes
+    |> changes_updater(action.user_id, source_change)
+    |> changes_updater(action.target_user_id, target_change)
+  end
+
+  defp apply_reputation_diff({user_id, diff}) do
+    Repo.transaction(fn ->
+      User
+      |> select([:id, :reputation, :today_reputation_gain])
+      |> lock("FOR UPDATE")
+      |> Repo.get(user_id)
+      |> apply_adjusted_reputation_diff(diff)
+    end)
   end
 
   # User may have deleted its account. Ignore him/her
-  defp update_user_reputation(nil, _), do: false
+  defp apply_adjusted_reputation_diff(nil, _),
+    do: false
   # Ignore null reputation changes
-  defp update_user_reputation(_, 0), do: false
-  # No need to check anything when lowering reputation
-  defp update_user_reputation(user, change) when change < 0, do: do_update_user_reputation(user, change)
+  defp apply_adjusted_reputation_diff(_, 0),
+    do: false
   # Ignore update if limit has already been reached
-  defp update_user_reputation(%{today_reputation_gain: today_gain}, _) when today_gain > @daily_gain_limit, do: false
-  # Limit gains to `@daily_gain_limit`
-  defp update_user_reputation(user = %{today_reputation_gain: today_gain}, change),
-    do: do_update_user_reputation(user, min(change, @daily_gain_limit - today_gain))
+  defp apply_adjusted_reputation_diff(%{today_reputation_gain: today_gain}, change)
+  when (change > 0 and today_gain >= @daily_gain_limit) or (change < 0 and today_gain <= @daily_loss_limit ),
+    do: false
+  # Limit gains to `@daily_gain_limit` or `@daily_loss_limid`
+  defp apply_adjusted_reputation_diff(user = %{today_reputation_gain: today_change}, change) do
+    do_update_user_reputation(user, calculate_adjusted_diff(change, today_change))
+  end
 
   defp do_update_user_reputation(user, change) do
-    case Repo.update(User.reputation_changeset(user, change), log: false) do
-      {:ok, _} -> true
-      {:error, _} -> false
-    end
+    Repo.update(User.reputation_changeset(user, change), log: false)
   end
 
-  defp changes_updater(changes, nil, _), do: changes
-  defp changes_updater(changes, _, 0), do: changes
-  defp changes_updater(changes, key, diff), do: Map.update(changes, key, diff, &(&1 + diff))
-
-  @collective_moderation_actions [
-    UserAction.type(:action_banned),
-    UserAction.type(:abused_flag),
-    UserAction.type(:confirmed_flag)
-  ]
-  defp reputation_changes(%{type: type, entity: entity, changes: changes}) when type in @collective_moderation_actions,
-    do: {0, CaptainFactJobs.ModerationUpdater.reputation_change(type, entity, changes)}
-  defp reputation_changes(%{type: type, entity: entity}) do
-    case Map.get(@actions, type) do
-      nil -> {0, 0}
-      res when is_map(res) -> Map.get(res, entity) || {0, 0}
-      res when is_tuple(res) -> res
-    end
-  end
+  defp changes_updater(changes, nil, _),
+    do: changes
+  defp changes_updater(changes, _, 0),
+    do: changes
+  defp changes_updater(changes, key, diff),
+    do: Map.update(changes, key, diff, &(&1 + diff))
 end

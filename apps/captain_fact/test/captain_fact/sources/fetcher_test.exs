@@ -21,7 +21,10 @@ defmodule CaptainFact.Sources.FetcherTest do
     url = endpoint_url(bypass, @valid_attributes.url)
 
     Fetcher.fetch_source_metadata(url, fn response ->
-      assert response == put_real_url(@valid_attributes, bypass)
+      assert response.title == @valid_attributes.title
+      assert response.site_name == @valid_attributes.site_name
+      assert response.language == @valid_attributes.language
+      assert response.og_url == endpoint_url(bypass, @valid_attributes.url)
     end)
     wait_fetcher()
   end
@@ -51,7 +54,10 @@ defmodule CaptainFact.Sources.FetcherTest do
     url = endpoint_url(bypass, @valid_attributes.url)
 
     Fetcher.fetch_source_metadata(url, fn response ->
-      assert response == put_real_url(attrs, bypass)
+      assert response[:title] == attrs[:title]
+      assert response[:site_name] == attrs[:site_name]
+      assert response[:language] == attrs[:language]
+      assert response[:og_url] == endpoint_url(bypass, attrs[:url])
     end)
     wait_fetcher()
   end
@@ -96,12 +102,6 @@ defmodule CaptainFact.Sources.FetcherTest do
   end
 
   defp gen_url(), do: "/#{TokenGenerator.generate(8)}"
-
-  defp put_real_url(attrs, bypass) do
-     if Map.has_key?(attrs, :url),
-       do: Map.put(attrs, :url, endpoint_url(bypass, attrs.url)),
-       else: attrs
-  end
 
   defp wait_fetcher() do
     case MapSet.size(Fetcher.get_queue()) do

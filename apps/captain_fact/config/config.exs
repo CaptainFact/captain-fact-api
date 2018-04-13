@@ -31,11 +31,11 @@ config :captain_fact, CaptainFact.Scheduler,
     {            "*/1 * * * *",    {CaptainFactJobs.Flags, :update, []}}, # Every minute
     {            "*/3 * * * *",    {CaptainFactJobs.Achievements, :update, []}}, # Every 3 minutes
     # Various updaters
-    {            "*/20 * * * *",   {CaptainFactJobs.ModerationUpdater, :update, []}}, # Every 20 minutes
+    {            "*/5 * * * *",   {CaptainFactJobs.Moderation, :update, []}}, # Every 5 minutes
   ]
 
 # Configure mailer
-config :captain_fact, CaptainFact.Mailer, adapter: Bamboo.MailgunAdapter
+config :captain_fact, CaptainFactMailer, adapter: Bamboo.MailgunAdapter
 
 # Configures Elixir's Logger
 config :logger, :console,

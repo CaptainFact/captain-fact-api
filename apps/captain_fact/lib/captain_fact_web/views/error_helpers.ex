@@ -32,9 +32,9 @@ defmodule CaptainFactWeb.ErrorHelpers do
     #     dgettext "errors", "is invalid"
     #
     if count = opts[:count] do
-      Gettext.dngettext(CaptainFactWeb.Gettext, "errors", msg, msg, count, opts)
+      Gettext.dngettext(CaptainFact.Gettext, "errors", msg, msg, count, opts)
     else
-      Gettext.dgettext(CaptainFactWeb.Gettext, "errors", msg, opts)
+      Gettext.dgettext(CaptainFact.Gettext, "errors", msg, opts)
     end
   end
 end

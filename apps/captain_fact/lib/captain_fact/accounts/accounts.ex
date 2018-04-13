@@ -13,7 +13,7 @@ defmodule CaptainFact.Accounts do
   alias DB.Schema.ResetPasswordRequest
   alias DB.Schema.InvitationRequest
 
-  alias CaptainFact.Email
+  alias CaptainFactMailer.Email
   alias CaptainFact.Accounts.{UsernameGenerator, UserPermissions}
   alias CaptainFact.Actions.Recorder
   alias CaptainFact.TokenGenerator
@@ -68,7 +68,7 @@ defmodule CaptainFact.Accounts do
 
     # Send welcome mail or directly confirm email if third party provider
     if user.fb_user_id == nil do
-      send_welcome_email(user)
+      send_welcome(user)
     else
       confirm_email!(user)
     end
@@ -80,9 +80,9 @@ defmodule CaptainFact.Accounts do
   @doc"""
   Send user a welcome email, with a link to confirm it (only if not already confirmed)
   """
-  def send_welcome_email(%User{email_confirmed: true}), do: nil
-  def send_welcome_email(user) do
-    CaptainFact.Mailer.deliver_later(CaptainFact.Email.welcome_email(user))
+  def send_welcome(%User{email_confirmed: true}), do: nil
+  def send_welcome(user) do
+    CaptainFactMailer.deliver_later(CaptainFactMailer.Email.welcome(user))
   end
 
   defp do_create_account(user_params, provider_params) do
@@ -157,10 +157,13 @@ defmodule CaptainFact.Accounts do
   def confirm_email!(%User{email_confirmed: true}),
     do: nil
   def confirm_email!(user = %User{email_confirmed: false}) do
-    user
-    |> User.changeset_confirm_email(true)
-    |> Repo.update!()
-    |> Recorder.record!(:email_confirmed, :user)
+    updated_user =
+      user
+      |> User.changeset_confirm_email(true)
+      |> Repo.update!()
+
+    Recorder.admin_record!(:email_confirmed, :user, %{target_user_id: user.id})
+    updated_user
   end
 
   # ---- Achievements -----
@@ -225,8 +228,8 @@ defmodule CaptainFact.Accounts do
     # Email request
     request
     |> Map.put(:user, user)
-    |> Email.reset_password_request_mail()
-    |> CaptainFact.Mailer.deliver_later()
+    |> Email.reset_password_request()
+    |> CaptainFactMailer.deliver_later()
   end
 
   @doc """
@@ -298,7 +301,7 @@ defmodule CaptainFact.Accounts do
     |> Enum.each(&send_invite/1)
   end
 
-  @default_token_length 12
+  @default_token_length 8
   @doc """
   Send invite to the given email or invitation request
   """
@@ -314,8 +317,9 @@ defmodule CaptainFact.Accounts do
   end
   def send_invite(request = %InvitationRequest{}) do
     request
-    |> CaptainFact.Email.invite_user_email()
-    |> CaptainFact.Mailer.deliver_later()
+    |> Repo.preload(:invited_by)
+    |> CaptainFactMailer.Email.invitation_to_register()
+    |> CaptainFactMailer.deliver_later()
 
     # Email sent successfuly
     Repo.update!(InvitationRequest.changeset_sent(request, true))
@@ -353,8 +357,8 @@ defmodule CaptainFact.Accounts do
     User
     |> filter_newsletter_targets(locale_filter)
     |> Repo.all()
-    |> Enum.map(&(CaptainFact.Email.newsletter(&1, subject, html_body)))
-    |> Enum.map(&CaptainFact.Mailer.deliver_later/1)
+    |> Enum.map(&(CaptainFactMailer.Email.newsletter(&1, subject, html_body)))
+    |> Enum.map(&CaptainFactMailer.deliver_later/1)
     |> Enum.count()
   end
 

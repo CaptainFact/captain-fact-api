@@ -23,4 +23,4 @@ config :logger, level: :warn
 config :captain_fact, CaptainFact.Scheduler, jobs: []
 
 # Mails
-config :captain_fact, CaptainFact.Mailer, adapter: Bamboo.TestAdapter
+config :captain_fact, CaptainFactMailer, adapter: Bamboo.TestAdapter

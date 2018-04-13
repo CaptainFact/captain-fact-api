@@ -35,7 +35,6 @@ defmodule CaptainFactWeb do
       import Ecto.Query
 
       import CaptainFactWeb.Router.Helpers
-      import CaptainFactWeb.Gettext
     end
   end
 
@@ -52,7 +51,6 @@ defmodule CaptainFactWeb do
 
       import CaptainFactWeb.Router.Helpers
       import CaptainFactWeb.ErrorHelpers
-      import CaptainFactWeb.Gettext
     end
   end
 
@@ -69,7 +67,6 @@ defmodule CaptainFactWeb do
       alias DB.Repo
       import Ecto
       import Ecto.Query
-      import CaptainFactWeb.Gettext
     end
   end
 

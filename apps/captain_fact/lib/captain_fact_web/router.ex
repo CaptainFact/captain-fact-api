@@ -63,9 +63,8 @@ defmodule CaptainFactWeb.Router do
       post  "/videos", VideoController, :get_or_create
 
       # Moderation
-      get   "/moderation/random", CollectiveModerationController, :random
-      get   "/moderation/videos/:id", CollectiveModerationController, :video
-      post  "/moderation/feedback", CollectiveModerationController, :post_feedback
+      get   "/moderation/random", ModerationController, :random
+      post  "/moderation/feedback", ModerationController, :post_feedback
     end
   end
 

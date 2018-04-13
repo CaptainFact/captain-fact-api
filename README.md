@@ -6,14 +6,12 @@ Master-[![pipeline status](https://gitlab.com/CaptainFact/captain-fact-api/badge
 
 ## Install & Run
 
-  * [Install Elixir](https://elixir-lang.org/install.html)
-  * Install Phoenix (web framework): `mix local.hex && mix archive.install https://github.com/phoenixframework/archives/raw/master/phx_new.ez`
-  * Download project's dependencies with `mix deps.get`
-  * Create / launch a postrges instance on your local machine. If you have docker installed,
-    you can achieve this by simply running:
-  `docker run -d --name postgres_dev -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=captain_fact_dev postgres:9.6`
-  * Create and migrate your database with `mix ecto.setup`
-  * Start server with `mix phx.server` or with `iex -S mix phx.server` if you need access to an Elixir console
+  * Download project's dependencies with `./dev/get_dependecies.sh`
+  * Create / launch a postrges instance on your local machine. If you have
+  docker installed, you can use the pre-seed postgres docker image:
+  `docker run -d --name postgres_dev -p 5432:5432 captainfact/dev-db:latest`
+  * Migrate your database with `./dev/db_migrate.sh`
+  * Start server with `./dev/start_server.sh`
 
 Following services will be started:
 
@@ -23,7 +21,24 @@ Following services will be started:
   * [localhost:4003](https://localhost:4003) - GraphQL API (https)
   * [localhost:4004](http://localhost:4004) - Atom feed
 
-To run tests simply execute `mix test`
+You can run tests with `./dev/test.sh`. You can filter which tests to run by
+running something like `./dev/test.sh test/your_test_subpath`.
+Check `./dev/test.sh` script comments for details.
+
+A concurrency bug sometimes trigger when running tests. If you get something 
+like the following just re-run your tests:
+
+```
+04:16:05.680 [error] GenServer CaptainFactJobs.Reputation terminating
+** (stop) exited in: GenServer.call(#PID<0.1308.0>, {:checkout, #Reference<0.2515546025.2910322690.13424>, true, 15000}, 5000)
+    ** (EXIT) shutdown: "owner #PID<0.1307.0> exited with: shutdown"
+    (db_connection) lib/db_connection/ownership/proxy.ex:32: DBConnection.Ownership.Proxy.checkout/2
+    (db_connection) lib/db_connection.ex:928: DBConnection.checkout/2
+...
+** (exit) exited in: GenServer.call(CaptainFactJobs.Reputation, :update_reputations, 120000)
+** (EXIT) exited in: GenServer.call(#PID<0.1308.0>, {:checkout, #Reference<0.2515546025.2910322690.13424>, true, 15000}, 5000)
+** (EXIT) shutdown: "owner #PID<0.1307.0> exited with: shutdown"
+```
 
 ## Project architecture
 
@@ -90,6 +105,13 @@ graph BT;
 │   ├── config.exs => Releases configuration
 │   └── docker => Docker-specific files & configs
 ```
+
+## Styling
+
+Code should match [Elixy Style Guide](https://github.com/christopheradams/elixir_style_guide)
+as much as possible.
+
+Avoid lines longer than 80 characters, **never** go beyond 110 characters.
 
 ## Known problems and limitations
 

@@ -1,0 +1,6 @@
+Votre invitation pour rejoindre CaptainFact est prête !
+
+Pour créer un compte dès maintenant, utilisez votre lien d'invitation unique :
+<%= frontend_url() %>/signup?invitation_token=<%= @invitation_token %>
+
+A très vite !

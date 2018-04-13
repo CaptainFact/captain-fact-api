@@ -1,0 +1,63 @@
+Hello @<%= @user.username %>,<br>
+<br>
+Your CaptainFact reputation passed below -5. This email is here to give
+you some explanations about why this might have happen and some advices
+to find your way back up.<br>
+<div>
+   <h2>Comments</h2>
+   <p>CaptainFact is no ordinary social platform. Its vocation is to
+      focus on facts, evidence, sources, arguments and context
+      but not to opinions.
+      The comment section can be used to open the context but must not
+      deviate from the initial subject. Off-topic is sanctioned by the community.
+   </p>
+   <p>The "<code>Approve</code>" and "<code>Refute</code>" buttons should only be used when evidence
+      allow for <strong>significantly</strong> tilting the verification to one side or the other.
+      A minor error on a date or a slightly coarse rounding on a number do not
+      necessarily deserve to be invalidated: one can <strong>confirm</strong>
+      the statement as soon as the order of magnitude is good or post in commentary
+      if faced with an acceptable approximation.
+   </p>
+   <h2>Statements</h2>
+   <p>To have its place on CaptainFact, a quote <strong>must</strong> fill out at least one
+      the following criteria:
+   </p>
+   <ul>
+      <li>Be verifiable</li>
+      <li>Mention a source or a content on which a comment could make the link</li>
+      <li>Present incomplete or approximate elements</li>
+      <li>Making a false, misleading or deceptive argument</li>
+   </ul>
+   <p>It is also recommended to ask the following questions before adding
+      a quotation:
+   </p>
+   <ul>
+      <li>Could a typical person, upon hearing the statement, ask himself
+         if it's true? For example, the statement "The sky is blue" is verifiable
+         but doesn't really need to be sourced.
+      </li>
+      <li>Is the statement likely to be repeated and shared?</li>
+      <li>Is this a minor error or an acceptable hyperbole - often used in politics?</li>
+   </ul>
+   <h4>About opinions in statements</h4>
+   <p>Opinions should as far as possible avoid appearing in quotations.
+      You can, if it does not deprive it of its meaning, replace the judgments of
+      value (best, worst, stupid...etc) by <code>[...]</code>.
+   </p>
+   <p>For example :</p>
+   <blockquote>
+      <p>This social measure was the worst. It disgusts me. It has created a massive increase in unemployment, which is madness.</p>
+   </blockquote>
+   <p>Can become:</p>
+   <blockquote>
+      <p>This social measure [...] has created a massive increase in unemployment</p>
+   </blockquote>
+</div>
+<br>
+<hr><br>
+<p>
+  We hope that this is helpful to you and that you'll come back
+  to contribute again. You can also contact us
+  at <a href="mailto:contact@captainfact.io">contact@captainfact.io</a> if you
+  think that this reputation loss is unfair or want to learn more.
+</p>

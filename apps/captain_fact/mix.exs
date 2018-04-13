@@ -4,7 +4,7 @@ defmodule CaptainFact.Mixfile do
   def project do
     [
       app: :captain_fact,
-      version: "0.8.6",
+      version: "0.8.7",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
@@ -52,7 +52,7 @@ defmodule CaptainFact.Mixfile do
       {:csv, "~> 1.4.4"},
       {:quantum, "~> 2.2.1"},
       {:not_qwerty123, "~> 2.2"},
-      {:bamboo, "~> 1.0.0-rc.1"},
+      {:bamboo, github: "thoughtbot/bamboo"},
       {:hackney, "~> 1.6"},
       {:oauth2, "~> 0.9"},
       {:sweet_xml, "~> 0.6"},

@@ -25,7 +25,7 @@ defmodule CaptainFact.Application do
       worker(CaptainFactJobs.Flags, []),
       worker(CaptainFactJobs.Achievements, []),
       worker(CaptainFactJobs.Votes, []),
-      worker(CaptainFactJobs.ModerationUpdater, []),
+      worker(CaptainFactJobs.Moderation, []),
       # Misc workers
       worker(CaptainFact.Accounts.UsernameGenerator, [])
     ]
