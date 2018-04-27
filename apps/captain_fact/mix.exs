@@ -4,7 +4,7 @@ defmodule CaptainFact.Mixfile do
   def project do
     [
       app: :captain_fact,
-      version: "0.8.7",
+      version: "0.8.8",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",

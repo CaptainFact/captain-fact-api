@@ -110,6 +110,7 @@ defmodule CaptainFact.Comments do
 
   def vote(user, context, comment_id, 0),
     do: delete_vote(user, context, Repo.get!(Comment, comment_id))
+
   def vote(user, context, comment_id, value) do
     comment = Repo.get!(Comment, comment_id)
     vote_type = Vote.vote_type(user, comment, value)
@@ -125,7 +126,11 @@ defmodule CaptainFact.Comments do
       Ecto.build_assoc(user, :votes)
       |> Vote.changeset(%{comment_id: comment_id, value: value})
       |> Repo.insert!()
-    Recorder.record!(user, vote_type, comment_type, action_params(context, comment))
+
+    # Insert action
+    action_params = action_params_with_target(context, comment)
+    Recorder.record!(user, vote_type, comment_type, action_params)
+
     return
   end
 
@@ -136,7 +141,8 @@ defmodule CaptainFact.Comments do
     comment_type = comment_type(comment)
     UserPermissions.check!(user, vote_type, comment_type)
     Repo.delete(vote)
-    Recorder.record!(user, vote_type, comment_type, action_params(context, comment))
+    action_params = action_params_with_target(context, comment)
+    Recorder.record!(user, vote_type, comment_type, action_params)
     %Vote{comment_id: comment.id}
   end
 
@@ -148,6 +154,12 @@ defmodule CaptainFact.Comments do
   defp action_params(context, comment), do: %{
     context: context,
     entity_id: comment.id
+  }
+
+  defp action_params_with_target(context, comment), do: %{
+    context: context,
+    entity_id: comment.id,
+    target_user_id: comment.user_id
   }
 
   defp reverse_vote_type(:vote_up), do: :revert_vote_up

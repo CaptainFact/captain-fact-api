@@ -1,5 +1,6 @@
 defmodule CaptainFactJobs.ReputationTest do
   use CaptainFact.DataCase
+  doctest CaptainFactJobs.Reputation
 
   alias DB.Schema.User
   alias DB.Schema.UserAction
