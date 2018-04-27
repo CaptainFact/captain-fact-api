@@ -49,45 +49,55 @@ defmodule CaptainFactJobs.Reputation do
   ## Examples
 
       iex> import CaptainFactJobs.Reputation
-
       iex> # Nothing special when not hitting the limit, just returns change
-      iex> calculate_adjusted_diff(0, 3)
+      iex> calculate_adjusted_diff(3, 0)
       3
-      iex> calculate_adjusted_diff(0, -4)
+      iex> calculate_adjusted_diff(-4, 0)
       -4
-
       iex> # Gain limit
-      iex> calculate_adjusted_diff(daily_gain_limit, 5)
+      iex> calculate_adjusted_diff(5, daily_gain_limit())
       0
-      iex> calculate_adjusted_diff(daily_gain_limit, -5)
+      iex> calculate_adjusted_diff(-5, daily_gain_limit())
       -5
-      iex> calculate_adjusted_diff(daily_gain_limit -1, 5)
+      iex> calculate_adjusted_diff(5, daily_gain_limit() - 4)
       4
-      iex> calculate_adjusted_diff(daily_gain_limit - 1, -5)
+      iex> calculate_adjusted_diff(-5, daily_gain_limit() - 1)
       -5
-      iex> calculate_adjusted_diff(daily_gain_limit + 5, 1)
+      iex> calculate_adjusted_diff(1, daily_gain_limit() + 5)
       0
-
       iex> # Loss limit
-      iex> calculate_adjusted_diff(daily_loss_limit, 5)
+      iex> calculate_adjusted_diff(5, daily_loss_limit())
       5
-      iex> calculate_adjusted_diff(daily_loss_limit, -5)
+      iex> calculate_adjusted_diff(-5, daily_loss_limit())
       0
-      iex> calculate_adjusted_diff(daily_loss_limit + 1, 5)
+      iex> calculate_adjusted_diff(5, daily_loss_limit() + 1)
       5
-      iex> calculate_adjusted_diff(daily_loss_limit + 1, -5)
-      -4
-      iex> calculate_adjusted_diff(daily_loss_limit - 5, -1)
+      iex> calculate_adjusted_diff(-5, daily_loss_limit() + 1)
+      -1
+      iex> calculate_adjusted_diff(-1, daily_loss_limit() - 5)
       0
   """
   def calculate_adjusted_diff(0, _),
     do: 0
+
+  def calculate_adjusted_diff(change, today_change)
+  when change > 0 and today_change >= @daily_gain_limit,
+    do: 0
+
+  def calculate_adjusted_diff(change, today_change)
+  when change < 0 and today_change <= @daily_loss_limit,
+    do: 0
+
   def calculate_adjusted_diff(change, today_change) when change > 0,
     do: min(change, @daily_gain_limit - today_change)
+
   def calculate_adjusted_diff(change, today_change) when change < 0,
-    do: max(change, @daily_loss_limit + today_change)
+    do: max(change, @daily_loss_limit - today_change)
+
+  # Getters for limits
 
   def daily_gain_limit, do: @daily_gain_limit
+
   def daily_loss_limit, do: @daily_loss_limit
 
   # --- Server callbacks ---
@@ -153,11 +163,13 @@ defmodule CaptainFactJobs.Reputation do
     do: false
   # Ignore update if limit has already been reached
   defp apply_adjusted_reputation_diff(%{today_reputation_gain: today_gain}, change)
-  when (change > 0 and today_gain >= @daily_gain_limit) or (change < 0 and today_gain <= @daily_loss_limit ),
+  when (change > 0 and today_gain >= @daily_gain_limit)
+  or (change < 0 and today_gain <= @daily_loss_limit),
     do: false
   # Limit gains to `@daily_gain_limit` or `@daily_loss_limid`
   defp apply_adjusted_reputation_diff(user = %{today_reputation_gain: today_change}, change) do
-    do_update_user_reputation(user, calculate_adjusted_diff(change, today_change))
+    adjusted_diff = calculate_adjusted_diff(change, today_change)
+    do_update_user_reputation(user, adjusted_diff)
   end
 
   defp do_update_user_reputation(user, change) do
