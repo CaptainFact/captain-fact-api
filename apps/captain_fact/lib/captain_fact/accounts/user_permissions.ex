@@ -37,7 +37,8 @@ defmodule CaptainFact.Accounts.UserPermissions do
     update: %{
       statement:            { 0  ,  0 ,  2 ,  5 , 10 ,  50 , 100 , 100 , 100 },
       speaker:              { 0  ,  0 ,  0 ,  0 , 5  ,  20 ,  30 ,  40 ,  80 },
-      video:                { 0  ,  0 ,  0 ,  0 , 0  ,   0  ,  5 ,  10 ,  20 },
+      video:                { 0  ,  0 ,  0 ,  0 , 0  ,   0 ,  5  ,  10 ,  20 },
+      user:                 { 5  ,  5 ,  5 ,  5 , 5  ,   5 ,  5  ,  5  ,  5  },
     },
     delete: %{
       comment:              { 10  , 20, 30 , 50 , 75 , 300 , 300 , 300 , 300 },

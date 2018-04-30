@@ -46,8 +46,7 @@ defmodule CaptainFactWeb.UserController do
 
   def update(conn, params) do
     Guardian.Plug.current_resource(conn)
-    |> User.changeset(params)
-    |> Repo.update()
+    |> Accounts.update(params)
     |> case do
       {:ok, user} ->
         render(conn, :show, user: user)

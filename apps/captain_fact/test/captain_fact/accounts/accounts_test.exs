@@ -5,6 +5,14 @@ defmodule CaptainFact.AccountsTest do
   alias CaptainFact.Accounts
   alias CaptainFactJobs.{Reputation, Achievements}
 
+  describe "update user" do
+    test "check user is updated" do
+      user = insert(:user)
+      {:ok, updated_user} = Accounts.update(user, %{name: "tototest"})
+      assert user.name != updated_user.name
+    end
+  end
+
   describe "reset_password_requests" do
     alias DB.Schema.ResetPasswordRequest
     alias CaptainFact.Accounts.UserPermissions.PermissionsError
