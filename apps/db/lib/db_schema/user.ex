@@ -45,7 +45,7 @@ defmodule DB.Schema.User do
   def user_appelation(%{username: username, name: name}), do: "#{name} (@#{username})"
 
   @email_regex ~r/\A([\w+\-].?)+@[a-z\d\-]+(\.[a-z]+)*\.[a-z]+\z/i
-  @valid_locales ~w(en fr de it es ru)
+  @valid_locales ~w(en fr)
   @required_fields ~w(email username)a
   @optional_fields ~w(name password locale)a
 
@@ -122,10 +122,9 @@ defmodule DB.Schema.User do
     |> unique_constraint(:username)
     |> validate_length(:username, min: 5, max: 15)
     |> validate_length(:name, min: 2, max: 20)
-    |> update_change(:locale, &String.downcase/1)
-    |> validate_inclusion(:locale, @valid_locales)
     |> validate_format(:name, ~r/^[ a-zA-Z]*$/)
     |> validate_email()
+    |> validate_locale()
     |> validate_username()
   end
 
@@ -151,6 +150,21 @@ defmodule DB.Schema.User do
     end
   end
   def validate_email(changeset), do: changeset
+
+  @doc"""
+  Validate locale change by checking for `locale` in `changes` key. If locale
+  is invalid or unknown, it will be set to the default (en).
+  """
+  def validate_locale(%{changes: %{locale: _}} = changeset) do
+    changeset = update_change(changeset, :locale, &String.downcase/1)
+    if changeset.changes.locale in @valid_locales do
+      changeset
+    else
+      put_change(changeset, :locale, "en")
+    end
+  end
+
+  def validate_locale(changeset), do: changeset
 
   @forbidden_username_keywords ~w(captainfact captain admin newuser temporary anonymous)
   @username_regex ~r/^[a-zA-Z0-9-_]+$/ # Only alphanum, '-' and '_'

@@ -5,6 +5,8 @@ defmodule CaptainFact.Comments.CommentsTest do
 
   import CaptainFact.Support.MetaPage
   import DB.Schema.UserAction, only: [video_debate_context: 1]
+
+  alias DB.Schema.User
   alias DB.Schema.UserAction
   alias DB.Schema.Comment
 
@@ -124,6 +126,34 @@ defmodule CaptainFact.Comments.CommentsTest do
       assert_deleted comment
       Enum.map(replies, &(assert_deleted(&1, false)))
       Enum.map(replies_replies, &(assert_deleted(&1, false)))
+    end
+  end
+
+  describe "vote" do
+    test "positive" do
+      comment = insert(:comment)
+      random_user = insert(:user, reputation: 1000)
+
+      Comments.vote(random_user, "TEST", comment.id, 1)
+
+      CaptainFactJobs.Votes.update()
+      CaptainFactJobs.Reputation.update()
+
+      assert random_user.reputation == Repo.get(User, random_user.id).reputation
+      assert comment.user.reputation < Repo.get(User, comment.user.id).reputation
+    end
+
+    test "negative" do
+      comment = insert(:comment)
+      random_user = insert(:user, reputation: 1000)
+
+      Comments.vote(random_user, "TEST", comment.id, -1)
+
+      CaptainFactJobs.Votes.update()
+      CaptainFactJobs.Reputation.update()
+
+      assert random_user.reputation > Repo.get(User, random_user.id).reputation
+      assert comment.user.reputation > Repo.get(User, comment.user.id).reputation
     end
   end
 

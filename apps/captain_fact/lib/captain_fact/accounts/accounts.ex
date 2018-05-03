@@ -283,8 +283,8 @@ defmodule CaptainFact.Accounts do
   @doc """
   Request an invitation for given email
   """
-  def request_invitation(email, user \\ nil)
-  def request_invitation(email, invited_by_id)
+  def request_invitation(email, invited_by_id \\ nil, locale \\ nil)
+  def request_invitation(email, invited_by_id, locale)
   when is_nil(invited_by_id) or is_integer(invited_by_id) do
     with true <- Regex.match?(User.email_regex, email),
          false <- Burnex.is_burner?(email)
@@ -292,7 +292,11 @@ defmodule CaptainFact.Accounts do
       case Repo.get_by(InvitationRequest, email: email) do
         nil ->
           %InvitationRequest{}
-          |> InvitationRequest.changeset(%{email: email, invited_by_id: invited_by_id})
+          |> InvitationRequest.changeset(%{
+            email: email,
+            invited_by_id: invited_by_id,
+            locale: locale
+          })
           |> Repo.insert()
         %{invitation_sent: true} = invit ->
           Repo.update(InvitationRequest.changeset_sent(invit, false))
@@ -303,7 +307,8 @@ defmodule CaptainFact.Accounts do
       _ -> {:error, "invalid_email"}
     end
   end
-  def request_invitation(email, %User{id: id}), do: request_invitation(email, id)
+  def request_invitation(email, %User{id: id}, locale),
+    do: request_invitation(email, id, locale)
 
   @doc """
   Send `nb_invites` invitations to most recently updated users
