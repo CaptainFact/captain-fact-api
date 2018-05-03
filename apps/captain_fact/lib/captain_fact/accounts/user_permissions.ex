@@ -91,6 +91,8 @@ defmodule CaptainFact.Accounts.UserPermissions do
       {:error, "limit_reached"}
   """
   def check(%User{is_publisher: true}, :add, :video), do: {:ok, -1}
+  def check(%User{is_publisher: true}, :add, :speaker), do: {:ok, -1}
+  def check(%User{is_publisher: true}, :create, :speaker), do: {:ok, -1}
   def check(user = %User{}, action_type, entity) do
     limit = limitation(user, action_type, entity)
     if (limit == 0) do
