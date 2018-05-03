@@ -71,12 +71,13 @@ defmodule CaptainFactMailer.Email do
   end
 
   # No localization for now, we need to store locale in invitation request
-  def invitation_to_register(%InvitationRequest{invited_by: invited_by, email: email, token: token}) do
+  def invitation_to_register(invitation_request = %InvitationRequest{}) do
     base_email()
-    |> to(email)
-    |> subject(invitation_subject(invited_by))
-    |> assign(:invitation_token, token)
-    |> assign(:invited_by, invited_by)
+    |> to(invitation_request.email)
+    |> subject(invitation_subject(invitation_request.invited_by))
+    |> assign(:invitation_token, invitation_request.token)
+    |> assign(:invited_by, invitation_request.invited_by)
+    |> assign(:user, %{locale: invitation_request.locale})
     |> render_i18n(:invitation)
   end
 

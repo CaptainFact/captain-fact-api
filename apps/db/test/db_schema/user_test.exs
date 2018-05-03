@@ -7,7 +7,8 @@ defmodule DB.Schema.UserTest do
     name: "Jouje BigBrother",
     username: "Hell0World",
     email: Faker.Internet.email,
-    password: "@StrongP4ssword!"
+    password: "@StrongP4ssword!",
+    locale: "en"
   }
   @invalid_attrs %{}
 
@@ -98,6 +99,17 @@ defmodule DB.Schema.UserTest do
     changeset2 = User.registration_changeset(%User{}, %{@valid_attrs | username: "xxxxxxx_y"})
     assert changeset.valid?
     assert changeset2.valid?
+  end
+
+  test "locale get verified and set to default if invalid" do
+    changeset = User.changeset(%User{}, %{@valid_attrs | locale: "FR"})
+    assert changeset.changes.locale == "fr"
+
+    changeset = User.changeset(%User{}, %{@valid_attrs | locale: "en"})
+    assert changeset.changes.locale == "en"
+
+    changeset = User.changeset(%User{}, %{@valid_attrs | locale: "xxoooxx"})
+    assert changeset.changes.locale == "en"
   end
 
   test "default user should not be a publisher" do

@@ -10,6 +10,7 @@ defmodule DB.Schema.InvitationRequest do
     field :email, :string
     field :invitation_sent, :boolean, default: false
     field :token, :string
+    field :locale, :string
 
     belongs_to :invited_by, User
 
@@ -19,9 +20,10 @@ defmodule DB.Schema.InvitationRequest do
   @doc false
   def changeset(%InvitationRequest{} = invitation_request, attrs) do
     invitation_request
-    |> cast(attrs, [:email, :invited_by_id])
+    |> cast(attrs, [:email, :invited_by_id, :locale])
     |> validate_required([:email])
     |> User.validate_email()
+    |> User.validate_locale()
     |> unique_constraint(:email)
   end
 
