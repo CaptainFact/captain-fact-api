@@ -95,7 +95,7 @@ defmodule CaptainFact.Accounts.UserPermissions do
   def check(%User{is_publisher: true}, :create, :speaker), do: {:ok, -1}
   def check(user = %User{}, action_type, entity) do
     limit = limitation(user, action_type, entity)
-    if (limit == 0) do
+    if limit == 0 do
       {:error, @error_not_enough_reputation}
     else
       action_count = action_count(user, action_type, entity)

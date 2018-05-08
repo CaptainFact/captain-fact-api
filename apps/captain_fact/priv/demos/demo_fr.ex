@@ -128,7 +128,7 @@ defmodule CaptainFact.DemoFr do
         ]
       },
       %{
-        time: 10000,
+        time: 10_000,
         text: "La France est l’un des pays qui produit le plus d’ingénieurs pour 100 000 habitants"
       }
     ],
@@ -212,7 +212,8 @@ defmodule CaptainFact.DemoFr do
       for reply <- Map.get(comment_base, :replies, []),
         do: add_comment(users, video_id, statement_id, reply, comment.id)
     end)
-    if comment_base[:async] != true, do: Task.await(add_replies_task, @max_sleep * 10000)
+    if comment_base[:async] != true,
+      do: Task.await(add_replies_task, @max_sleep * 10_000)
   end
 
   def rand_sleep_time(min, max) do

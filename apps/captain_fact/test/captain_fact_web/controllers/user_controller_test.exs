@@ -158,8 +158,8 @@ defmodule CaptainFactWeb.UserControllerTest do
       |> delete("/users/me")
       |> response(204)
 
-      assert Enum.count(Repo.all(where(UserAction, [a], a.user_id == ^user.id))) == 0
-      assert Enum.count(Repo.all(where(Comment, [c], c.user_id == ^user.id))) == 0
+      assert Enum.empty?(Repo.all(where(UserAction, [a], a.user_id == ^user.id)))
+      assert Enum.empty?(Repo.all(where(Comment, [c], c.user_id == ^user.id)))
     end
   end
 

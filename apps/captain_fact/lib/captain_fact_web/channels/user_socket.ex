@@ -61,7 +61,9 @@ defmodule CaptainFactWeb.UserSocket do
         reply_error(socket, Phoenix.View.render(ErrorView, "404.json", []))
       e ->
         Logger.error("[RescueChannel] An unknown error just popped : #{inspect(e)}")
-        Logger.debug(fn ->"Stacktrace: #{inspect(System.stacktrace(), pretty: true)}" end)
+        Logger.debug(fn ->
+          "Stacktrace: #{inspect(System.stacktrace(), pretty: true)}"
+        end)
         reply_error(socket, Phoenix.View.render(ErrorView, "error.json", []))
     catch
       e ->

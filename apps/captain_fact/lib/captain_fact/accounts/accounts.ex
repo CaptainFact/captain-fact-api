@@ -368,10 +368,13 @@ defmodule CaptainFact.Accounts do
 
   defp delete_invitation(invitation_token) do
     case get_invitation_for_token(invitation_token) do
-      nil -> {:error, nil}
+      nil ->
+        {:error, nil}
       invit ->
         Repo.delete(invit)
-        Logger.debug("Invitation #{invit.id} for token #{invit.token} has been consumed")
+        Logger.debug(fn ->
+          "Invitation #{invit.id} for token #{invit.token} has been consumed"
+        end)
     end
   end
 
