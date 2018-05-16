@@ -62,7 +62,8 @@ defmodule CaptainFact.Videos do
     case fetch_video_metadata(video_url) do
       {:ok, metadata} ->
         video =
-          Video.changeset(%Video{}, metadata)
+          %Video{}
+          |> Video.changeset(metadata)
           |> Repo.insert!()
           |> Map.put(:speakers, [])
 
@@ -105,11 +106,13 @@ defmodule CaptainFact.Videos do
   }
   """
   def videos_speakers(videos_ids) do
-    Repo.all(from(
+    query = from(
       s in Speaker,
       join: vs in VideoSpeaker, on: vs.speaker_id == s.id,
       where: vs.video_id in ^videos_ids,
       select: {vs.video_id, s}
-    )) |> Enum.group_by(&(elem(&1, 0)), &(elem(&1, 1)))
+    )
+
+    Enum.group_by(Repo.all(query), &(elem(&1, 0)), &(elem(&1, 1)))
   end
 end

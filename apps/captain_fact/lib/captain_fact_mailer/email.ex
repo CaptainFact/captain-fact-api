@@ -28,7 +28,8 @@ defmodule CaptainFactMailer.Email do
   """
   def welcome(user) do
     reputation_change = ReputationChange.for_admin_action(:email_confirmed)
-    user_email(user)
+    user
+    |> user_email()
     |> subject(gettext_mail_user(user, "Welcome to CaptainFact.io!"))
     |> assign(:confirm_email_reputation, reputation_change)
     |> render_i18n(:welcome)
@@ -42,7 +43,8 @@ defmodule CaptainFactMailer.Email do
   """
   def newsletter(%{newsletter: false}, _, _), do: nil
   def newsletter(user, subject, html_message) do
-    user_email(user)
+    user
+    |> user_email()
     |> subject(subject)
     |> assign(:content, html_message)
     |> assign(:text_content, Floki.text(html_message))
@@ -53,7 +55,8 @@ defmodule CaptainFactMailer.Email do
   Generate a reset password email from a ResetPasswordRequest
   """
   def reset_password_request(%ResetPasswordRequest{user: user, token: token, source_ip: ip}) do
-    user_email(user)
+    user
+    |> user_email()
     |> subject(gettext_mail_user(user, "CaptainFact.io - Reset your password"))
     |> assign(:reset_password_token, token)
     |> assign(:source_ip, ip)
@@ -65,7 +68,8 @@ defmodule CaptainFactMailer.Email do
   with the community guidelines.
   """
   def reputation_loss(user) do
-    user_email(user)
+    user
+    |> user_email()
     |> subject(gettext_mail_user(user, "About your recent loss of reputation on CaptainFact"))
     |> render_i18n(:reputation_loss)
   end

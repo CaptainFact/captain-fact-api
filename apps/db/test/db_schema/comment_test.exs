@@ -32,9 +32,9 @@ defmodule DB.Schema.CommentTest do
     refute changeset.valid?
   end
 
-  test "comment text length must be less than 240 characters" do
-    attrs = %{text: String.duplicate("x", 241)}
-    assert {:text, "should be at most 240 character(s)"} in
+  test "comment text length must be less than 255 characters" do
+    attrs = %{text: String.duplicate("x", 256)}
+    assert {:text, "should be at most 255 character(s)"} in
       errors_on(%Comment{}, attrs)
   end
 

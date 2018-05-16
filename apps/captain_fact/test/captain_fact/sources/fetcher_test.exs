@@ -4,7 +4,7 @@ defmodule CaptainFact.Sources.FetcherTest do
   import ExUnit.CaptureLog
   import CaptainFact.Support.MetaPage
   alias CaptainFact.Sources.Fetcher
-  alias CaptainFact.TokenGenerator
+  alias DB.Utils.TokenGenerator
 
 
   @valid_attributes %{
@@ -31,14 +31,16 @@ defmodule CaptainFact.Sources.FetcherTest do
 
   test "return error if status is not 2xx" do
     # Error 404
-    serve(@valid_attributes.url, 404, @valid_attributes)
+    @valid_attributes.url
+    |> serve(404, @valid_attributes)
     |> endpoint_url(@valid_attributes.url)
     |> Fetcher.fetch_source_metadata(fn response ->
          assert response == {:error, :not_found}
        end)
 
     # Random error between 300 and 600
-    serve(@valid_attributes.url, Enum.random([301, 302, 400, 500]), @valid_attributes)
+    @valid_attributes.url
+    |> serve(Enum.random([301, 302, 400, 500]), @valid_attributes)
     |> endpoint_url(@valid_attributes.url)
     |> Fetcher.fetch_source_metadata(fn {:error, _} ->
          :ok
@@ -70,7 +72,8 @@ defmodule CaptainFact.Sources.FetcherTest do
     invalid_urls = Enum.take(Stream.repeatedly(&gen_url/0), div(nb_urls, 3))
     crashing = Enum.take(Stream.repeatedly(&gen_url/0), div(nb_urls, 3))
     all_urls =
-      List.zip([valid_urls, invalid_urls, crashing])
+      [valid_urls, invalid_urls, crashing]
+      |> List.zip()
       |> Stream.flat_map(fn {good, bad, crashing} -> [good, bad, crashing] end)
 
     for url <- valid_urls ++ crashing, do:

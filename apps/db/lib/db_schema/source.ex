@@ -50,13 +50,13 @@ defmodule DB.Schema.Source do
   end
 
   defp clean_and_truncate(str) do
-    if !String.valid?(str) do
-      nil
-    else
+    if String.valid?(str) do
       str = DB.Utils.String.trim_all_whitespaces(str)
       if String.length(str) > 250,
-         do: String.slice(str, 0, 250) <> "...",
-         else: str
+        do: String.slice(str, 0, 250) <> "...",
+        else: str
+    else
+      nil
     end
   end
 end

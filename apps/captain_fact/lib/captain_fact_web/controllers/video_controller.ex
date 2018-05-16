@@ -23,7 +23,8 @@ defmodule CaptainFactWeb.VideoController do
   def get_or_create(conn, %{"url" => url}) do
     case get_video_by_url(url) do
       nil ->
-        Guardian.Plug.current_resource(conn)
+        conn
+        |> Guardian.Plug.current_resource()
         |> create!(url)
         |> case do
              {:error, message} -> json(put_status(conn, :unprocessable_entity), %{error: %{url: message}})
@@ -45,10 +46,17 @@ defmodule CaptainFactWeb.VideoController do
     filters_list = Enum.map(filters, fn {key, value} -> {Map.get(@accepted_filters, key), value} end)
     if Keyword.has_key?(filters_list, :speaker) do
       speaker_identifier = Keyword.get(filters_list, :speaker)
-      case Integer.parse(speaker_identifier) do
-        {id, ""} -> Keyword.put(filters_list, :speaker_id, id) # It's an ID (string has only number)
-        _ -> Keyword.put(filters_list, :speaker_slug, speaker_identifier) # It's a slug (string has at least one alpha character)
-      end |> Keyword.delete(:speaker)
+      updated_filters =
+        case Integer.parse(speaker_identifier) do
+          {id, ""} ->
+            # It's an ID (string has only number)
+            Keyword.put(filters_list, :speaker_id, id)
+          _ ->
+            # It's a slug (string has at least one alpha character)
+            Keyword.put(filters_list, :speaker_slug, speaker_identifier)
+        end
+
+      Keyword.delete(updated_filters, :speaker)
     else
       filters_list
     end

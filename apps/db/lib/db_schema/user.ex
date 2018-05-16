@@ -139,7 +139,7 @@ defmodule DB.Schema.User do
     end
   end
 
-  def validate_email(%{changes: %{email: email}} = changeset) do
+  def validate_email(changeset = %{changes: %{email: email}}) do
     case Regex.match?(@email_regex, email) do
       true ->
         case Burnex.is_burner?(email) do
@@ -155,7 +155,7 @@ defmodule DB.Schema.User do
   Validate locale change by checking for `locale` in `changes` key. If locale
   is invalid or unknown, it will be set to the default (en).
   """
-  def validate_locale(%{changes: %{locale: _}} = changeset) do
+  def validate_locale(changeset = %{changes: %{locale: _}}) do
     changeset = update_change(changeset, :locale, &String.downcase/1)
     if changeset.changes.locale in @valid_locales do
       changeset
@@ -168,7 +168,7 @@ defmodule DB.Schema.User do
 
   @forbidden_username_keywords ~w(captainfact captain admin newuser temporary anonymous)
   @username_regex ~r/^[a-zA-Z0-9-_]+$/ # Only alphanum, '-' and '_'
-  defp validate_username(%{changes: %{username: username}} = changeset) do
+  defp validate_username(changeset = %{changes: %{username: username}}) do
     lower_username = String.downcase(username)
     case Enum.find(@forbidden_username_keywords, &String.contains?(lower_username, &1)) do
       nil -> validate_format(changeset, :username, @username_regex)

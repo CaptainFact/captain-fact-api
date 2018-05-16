@@ -118,12 +118,12 @@ defmodule DB.Schema.UserTest do
   end
 
   test "achievements changeset ensure achievements are unique" do
-    changeset = User.changeset_achievement(%User{achievements: [1,1,1,3,8,8,5,6,6]}, 4)
-    assert changeset.changes.achievements == [4,1,3,8,5,6]
+    changeset = User.changeset_achievement(%User{achievements: [1, 1, 1, 3, 8, 8, 5, 6, 6]}, 4)
+    assert changeset.changes.achievements == [4, 1, 3, 8, 5, 6]
   end
 
   test "empty changeset if no changes in achievements" do
-    changeset = User.changeset_achievement(%User{achievements: [1,1,1,3,8,8,5,6,6]}, 3)
+    changeset = User.changeset_achievement(%User{achievements: [1, 1, 1, 3, 8, 8, 5, 6, 6]}, 3)
     refute changeset.changes[:achievements]
   end
 end

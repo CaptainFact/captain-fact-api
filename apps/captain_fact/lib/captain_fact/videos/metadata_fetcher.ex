@@ -25,7 +25,12 @@ defmodule CaptainFact.Videos.MetadataFetcher do
     case HTTPoison.get("https://www.googleapis.com/youtube/v3/videos?id=#{provider_id}&part=snippet&key=#{api_key}") do
       {:ok, %HTTPoison.Response{body: body}} ->
         # Parse JSON and extract intresting info
-        full_metadata = Poison.decode!(body) |> Map.get("items") |> List.first()
+        full_metadata =
+          body
+          |> Poison.decode!()
+          |> Map.get("items")
+          |> List.first()
+
         if full_metadata == nil do
           {:error, "Video doesn't exist"}
         else

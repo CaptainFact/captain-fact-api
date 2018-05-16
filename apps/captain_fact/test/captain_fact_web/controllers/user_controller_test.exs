@@ -14,7 +14,8 @@ defmodule CaptainFactWeb.UserControllerTest do
     test "displays sensitive info (email...) when requesting /me" do
       user = insert(:user)
       returned_user =
-        build_authenticated_conn(user)
+        user
+        |> build_authenticated_conn()
         |> get("/users/me")
         |> json_response(:ok)
 
@@ -25,7 +26,8 @@ defmodule CaptainFactWeb.UserControllerTest do
       requesting_user = insert(:user)
       requested_user = insert(:user)
       returned_user =
-        build_authenticated_conn(requesting_user)
+        requesting_user
+        |> build_authenticated_conn()
         |> get("/users/username/#{requested_user.username}")
         |> json_response(:ok)
 
@@ -77,7 +79,8 @@ defmodule CaptainFactWeb.UserControllerTest do
       # Verify token
       req = Repo.get_by!(ResetPasswordRequest, user_id: user.id)
       resp =
-        get(build_conn(), "/users/reset_password/verify/#{req.token}")
+        build_conn()
+        |> get("/users/reset_password/verify/#{req.token}")
         |> json_response(200)
       assert Map.has_key?(resp, "username")
 
@@ -107,7 +110,9 @@ defmodule CaptainFactWeb.UserControllerTest do
     test "work for bulletproof / help" do
       achievement = Enum.random(@allowed_achievements)
       updated_achievements =
-        build_authenticated_conn(insert(:user))
+        :user
+        |> insert()
+        |> build_authenticated_conn()
         |> put("/users/me/achievements/#{achievement}")
         |> json_response(200)
         |> Map.get("achievements")
@@ -119,7 +124,8 @@ defmodule CaptainFactWeb.UserControllerTest do
       forbidden = Enum.into(1..20, []) -- @allowed_achievements
       user = insert(:user)
       for achievement <- forbidden do
-        build_authenticated_conn(user)
+        user
+        |> build_authenticated_conn()
         |> put("/users/me/achievements/#{achievement}")
         |> response(400)
       end
@@ -129,8 +135,8 @@ defmodule CaptainFactWeb.UserControllerTest do
   describe "invitations" do
     test "should say ok everytime the user request with valid info" do
       email = "test@email.fr"
-      request_invite(email) |> response(204)
-      request_invite(email) |> response(204)
+      response(request_invite(email), 204)
+      response(request_invite(email), 204)
     end
 
     test "should inform the user if email is not valid" do
@@ -154,7 +160,8 @@ defmodule CaptainFactWeb.UserControllerTest do
       assert Enum.count(Repo.all(where(UserAction, [a], a.user_id == ^user.id))) != 0
       assert Enum.count(Repo.all(where(Comment, [c], c.user_id == ^user.id))) != 0
 
-      build_authenticated_conn(user)
+      user
+      |> build_authenticated_conn()
       |> delete("/users/me")
       |> response(204)
 
@@ -208,7 +215,8 @@ defmodule CaptainFactWeb.UserControllerTest do
   test "GET /users/me/available_flags" do
     user = build(:user) |> Map.put(:reputation, 4200) |> insert()
     available =
-      build_authenticated_conn(user)
+      user
+      |> build_authenticated_conn()
       |> get("/users/me/available_flags")
       |> json_response(:ok)
       |> Map.get("flags_available")

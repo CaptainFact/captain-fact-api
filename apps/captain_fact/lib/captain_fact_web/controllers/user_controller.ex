@@ -45,7 +45,8 @@ defmodule CaptainFactWeb.UserController do
   end
 
   def update(conn, params) do
-    Guardian.Plug.current_resource(conn)
+    conn
+    |> Guardian.Plug.current_resource()
     |> Accounts.update(params)
     |> case do
       {:ok, user} ->
@@ -120,7 +121,8 @@ defmodule CaptainFactWeb.UserController do
       {:ok, _} ->
         send_resp(conn, :no_content, "")
       {:error, "invalid_email"} ->
-        put_status(conn, :bad_request)
+        conn
+        |> put_status(:bad_request)
         |> json(%{error: "invalid_email"})
       {:error, _} ->
         send_resp(conn, :bad_request, "")

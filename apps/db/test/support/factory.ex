@@ -169,6 +169,7 @@ defmodule DB.Factory do
       |> where([a], a.entity_id == ^comment.id)
       |> Repo.one!()
 
+    # credo:disable-for-next-line
     Enum.take(
       Stream.repeatedly(fn ->
         with_action insert(:flag, %{
@@ -182,8 +183,6 @@ defmodule DB.Factory do
   end
 
   defp random_string(length) do
-    :crypto.strong_rand_bytes(length)
-    |> Base.url_encode64
-    |> binary_part(0, length)
+    DB.Utils.TokenGenerator.generate(length)
   end
 end

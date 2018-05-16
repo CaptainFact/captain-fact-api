@@ -1,4 +1,8 @@
 defmodule DB.Type.SpeakerPicture do
+  @moduledoc"""
+  Speaker picture. Map the Ecto type to an URL using ARC
+  """
+
   use Arc.Definition
   use Arc.Ecto.Definition
 

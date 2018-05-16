@@ -14,7 +14,7 @@ defmodule DB.Schema.ModerationUserFeedback do
   end
 
   @doc false
-  def changeset(%ModerationUserFeedback{} = user_feedback, attrs) do
+  def changeset(user_feedback = %ModerationUserFeedback{}, attrs) do
     user_feedback
     |> cast(attrs, [:value, :flag_reason])
     |> validate_required([:value, :action_id, :user_id, :flag_reason])

@@ -58,7 +58,8 @@ defmodule DB.DataCase do
       true
   """
   def errors_on(struct, data) do
-    struct.__struct__.changeset(struct, data)
+    struct
+    |> struct.__struct__.changeset(data)
     |> translate_errors()
     |> Enum.map(fn {key, [value]} -> {key, value} end)
   end

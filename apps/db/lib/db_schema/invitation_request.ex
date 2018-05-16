@@ -18,7 +18,7 @@ defmodule DB.Schema.InvitationRequest do
   end
 
   @doc false
-  def changeset(%InvitationRequest{} = invitation_request, attrs) do
+  def changeset(invitation_request = %InvitationRequest{}, attrs) do
     invitation_request
     |> cast(attrs, [:email, :invited_by_id, :locale])
     |> validate_required([:email])

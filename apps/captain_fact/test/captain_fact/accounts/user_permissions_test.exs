@@ -11,7 +11,7 @@ defmodule CaptainFact.Accounts.UserPermissionsTest do
     banned_user = insert(:user, %{reputation: -4200})
     negative_user = insert(:user, %{reputation: -15})
     new_user = insert(:user, %{reputation: 42})
-    positive_user = insert(:user, %{reputation: 80000})
+    positive_user = insert(:user, %{reputation: 80_000})
     {:ok, [negative_user: negative_user, new_user: new_user, positive_user: positive_user, banned_user: banned_user]}
   end
 

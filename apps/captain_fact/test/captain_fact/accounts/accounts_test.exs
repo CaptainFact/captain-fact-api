@@ -61,8 +61,8 @@ defmodule CaptainFact.AccountsTest do
       assert_raise Ecto.NoResultsError, fn ->
         Accounts.check_reset_password_token!("InvalidToken")
       end
-      tokenUser = Accounts.check_reset_password_token!(req.token)
-      assert tokenUser.id == user.id
+      user_from_token = Accounts.check_reset_password_token!(req.token)
+      assert user_from_token.id == user.id
     end
 
     test "verify token after expired" do
@@ -90,9 +90,9 @@ defmodule CaptainFact.AccountsTest do
         |> ResetPasswordRequest.changeset(%{user_id: user.id, source_ip: "127.0.0.1"})
         |> Repo.insert!()
 
-      updatedUser = Accounts.confirm_password_reset!(req.token, new_password)
+      updated_user = Accounts.confirm_password_reset!(req.token, new_password)
       refute Comeonin.Bcrypt.checkpw(new_password, user.encrypted_password)
-      assert Comeonin.Bcrypt.checkpw(new_password, updatedUser.encrypted_password)
+      assert Comeonin.Bcrypt.checkpw(new_password, updated_user.encrypted_password)
 
       nb_requests =
         ResetPasswordRequest

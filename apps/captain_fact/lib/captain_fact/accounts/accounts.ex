@@ -12,11 +12,11 @@ defmodule CaptainFact.Accounts do
   alias DB.Schema.User
   alias DB.Schema.ResetPasswordRequest
   alias DB.Schema.InvitationRequest
+  alias DB.Utils.TokenGenerator
 
   alias CaptainFactMailer.Email
   alias CaptainFact.Accounts.{UsernameGenerator, UserPermissions}
   alias CaptainFact.Actions.Recorder
-  alias CaptainFact.TokenGenerator
 
 
   @max_ip_reset_requests 3
@@ -104,7 +104,8 @@ defmodule CaptainFact.Accounts do
   end
 
   defp do_create_account(user_params, provider_params) do
-    User.registration_changeset(%User{}, user_params)
+    %User{}
+    |> User.registration_changeset(user_params)
     |> User.provider_changeset(provider_params)
     |> Repo.insert()
   end
@@ -122,7 +123,8 @@ defmodule CaptainFact.Accounts do
          |> User.provider_changeset(provider_params)
        )
     |> Multi.run(:final_user, fn %{base_user: user} ->
-         User.changeset(user, %{})
+         user
+         |> User.changeset(%{})
          |> Ecto.Changeset.put_change(:username, UsernameGenerator.generate(user.id))
          |> Repo.update()
        end)
@@ -270,7 +272,8 @@ defmodule CaptainFact.Accounts do
   """
   def confirm_password_reset!(token, new_password) do
     updated_user =
-      check_reset_password_token!(token)
+      token
+      |> check_reset_password_token!()
       |> User.password_changeset(%{password: new_password})
       |> Repo.update!()
 

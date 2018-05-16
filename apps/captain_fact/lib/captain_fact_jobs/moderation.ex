@@ -101,6 +101,7 @@ defmodule CaptainFactJobs.Moderation do
     |> Enum.map(&put_flag_reason_in_results/1)
     |> log_update()
     |> Enum.map(&process_entry/1)
+    # credo:disable-for-previous-line
 
     {:reply, :ok , :ok}
   end
@@ -150,8 +151,12 @@ defmodule CaptainFactJobs.Moderation do
   # Take an entry with established consensus and decide if we should confirm or refute
   defp confirm_refute_dispatch(%{action: action, results: results}, entity) do
     cond do
-      results.score >= @confirm_ban_above -> confirm_ban(action, entity, results)
-      results.score <= @refute_ban_under  -> refute_ban(action, entity, results)
+      results.score >= @confirm_ban_above ->
+        confirm_ban(action, entity, results)
+      results.score <= @refute_ban_under  ->
+        refute_ban(action, entity, results)
+      true ->
+        nil
     end
   end
 

@@ -9,9 +9,9 @@ defmodule CaptainFact.Comments.CommentsTest do
   alias DB.Schema.User
   alias DB.Schema.UserAction
   alias DB.Schema.Comment
+  alias DB.Utils.TokenGenerator
 
   alias CaptainFact.Comments
-  alias CaptainFact.TokenGenerator
   alias CaptainFact.Sources.Fetcher
 
 
@@ -49,7 +49,8 @@ defmodule CaptainFact.Comments.CommentsTest do
       # Start a server to provide a valid page
       sub_url = unique_url()
       url =
-        serve(sub_url, 200, %{})
+        sub_url
+        |> serve(200, %{})
         |> endpoint_url(sub_url)
 
       # Add comment
@@ -65,7 +66,8 @@ defmodule CaptainFact.Comments.CommentsTest do
       # Start a server to provide a valid page
       attributes = Map.put(@valid_source_attributes, :url, unique_url())
       url =
-        serve(attributes.url, 200, attributes, only_once: true)
+        attributes.url
+        |> serve(200, attributes, only_once: true)
         |> endpoint_url(attributes.url)
 
       # Add comment

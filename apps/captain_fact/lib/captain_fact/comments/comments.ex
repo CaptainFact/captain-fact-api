@@ -29,7 +29,8 @@ defmodule CaptainFact.Comments do
       |> Comment.changeset(params)
 
     full_comment =
-      Repo.insert!(comment_changeset)
+      comment_changeset
+      |> Repo.insert!()
       |> Map.put(:user, user)
       |> Repo.preload(:source)
       |> Map.put(:score, 0)
@@ -123,7 +124,8 @@ defmodule CaptainFact.Comments do
 
     # Record vote
     return =
-      Ecto.build_assoc(user, :votes)
+      user
+      |> Ecto.build_assoc(:votes)
       |> Vote.changeset(%{comment_id: comment_id, value: value})
       |> Repo.insert!()
 

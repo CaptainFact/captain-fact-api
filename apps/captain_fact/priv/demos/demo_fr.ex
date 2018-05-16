@@ -192,8 +192,10 @@ defmodule CaptainFact.DemoFr do
       |> Map.put(:source, (comment_base[:source] && %{url: comment_base.source}) || nil)
 
     comment =
-      Comments.add_comment(Enum.at(users, comment_base.user_idx), context, params, comment_base[:source], fn comment ->
-        comment = Repo.preload(comment, :source) |> Repo.preload(:user)
+      users
+      |> Enum.at(comment_base.user_idx)
+      |> Comments.add_comment(context, params, comment_base[:source], fn comment ->
+        comment = Repo.preload(Repo.preload(comment, :source), :user)
         CaptainFactWeb.Endpoint.broadcast(
           "comments:video:#{VideoHashId.encode(video_id)}", "comment_updated",
           CaptainFactWeb.CommentView.render("comment.json", comment: comment)

@@ -25,6 +25,7 @@ defmodule CaptainFact.Accounts.UserPermissions do
     #                        /!\ |️ New user          | Confirmed user
     # reputation            {-30 , -5 , 15 , 30 , 75 , 125 , 200 , 500 , 1000}
     #-------------------------------------------------------------------------
+    # credo:disable-for-lines:50
     create: %{
       comment:              { 2  ,  5 , 7  , 10 , 15 ,  50 , 75  , 100 , 200 },
       statement:            { 2  ,  2 , 6  , 10 , 30 ,  50 , 100 , 100 , 100 },

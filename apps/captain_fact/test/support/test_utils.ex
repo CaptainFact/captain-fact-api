@@ -10,11 +10,14 @@ defmodule CaptainFact.TestUtils do
 
   def flag_comments(comments, nb_flags, reason \\ 1) do
     users = insert_list(nb_flags, :user, %{reputation: 1000})
-    Enum.map(comments, fn comment ->
-      Enum.map(users, fn user ->
-        CaptainFact.Actions.Flagger.flag!(user.id, comment, reason)
+    flags =
+      Enum.map(comments, fn comment ->
+        Enum.map(users, fn user ->
+          CaptainFact.Actions.Flagger.flag!(user.id, comment, reason)
+        end)
       end)
-    end) |> List.flatten()
+
+    List.flatten(flags)
   end
 
   def assert_deleted(%Comment{id: id}, check_actions \\ true) do
