@@ -1,26 +1,42 @@
 defmodule CaptainFactWeb.VideoController do
+  @moduledoc """
+  Controller for all requests on `/videos`
+  """
+
   use CaptainFactWeb, :controller
   import CaptainFact.Videos
 
   action_fallback CaptainFactWeb.FallbackController
 
+  @doc"""
+  List all videos. Accept `filters` to be passed as parameters.
 
-  @accepted_filters %{
-    "language" => :language,
-    "speaker" => :speaker,
-    "is_partner" => :is_partner
-  }
+  Valid filters:
 
+    - language
+    - is_partner
+    - speaker: can be the speaker slug or its integer ID
+  """
   def index(conn, filters) when not is_nil(filters),
     do: render(conn, :index, videos: videos_list(prepare_filters(filters)))
+
   def index(conn, _params),
     do: render(conn, :index, videos: videos_list())
 
+  @doc"""
+  List all videos but only return indexes.  
+  """
+  @deprecated "Extension/Injector is now using GraphQL API for this"
   def index_ids(conn, %{"min_id" => min_id}),
     do: json(conn, videos_index(min_id))
+
   def index_ids(conn, _),
     do: json(conn, videos_index())
 
+  @doc"""
+  Create a new video based on `url`.
+  If it already exist, just returns the video.
+  """
   def get_or_create(conn, params = %{"url" => url}) do
     case get_video_by_url(url) do
       nil ->
@@ -40,6 +56,9 @@ defmodule CaptainFactWeb.VideoController do
     end
   end
 
+  @doc"""
+  Get a video by its URL
+  """
   def search(conn, %{"url" => url}) do
     case get_video_by_url(url) do
       nil -> send_resp(conn, 204, "")
@@ -48,25 +67,37 @@ defmodule CaptainFactWeb.VideoController do
   end
 
   defp prepare_filters(filters) do
-    filters_list = Enum.map(filters, fn {key, value} ->
-      {Map.get(@accepted_filters, key), value}
-    end)
+    filters
+    |> Enum.map(&prepare_filter/1)
+    |> Enum.filter(&(&1 != nil))
+  end
 
-    if Keyword.has_key?(filters_list, :speaker) do
-      speaker_identifier = Keyword.get(filters_list, :speaker)
-      updated_filters =
-        case Integer.parse(speaker_identifier) do
-          {id, ""} ->
-            # It's an ID (string has only number)
-            Keyword.put(filters_list, :speaker_id, id)
-          _ ->
-            # It's a slug (string has at least one alpha character)
-            Keyword.put(filters_list, :speaker_slug, speaker_identifier)
-        end
+  # ---- Private ----
 
-      Keyword.delete(updated_filters, :speaker)
-    else
-      filters_list
+  # Map a filter as received in GET params to one Videos can understand
+  defp prepare_filter({"speaker", value}) do
+    case Integer.parse(value) do
+      {id, ""} ->
+        # It's an ID (string has only number)
+        {:speaker_id, id}
+      _ ->
+        # It's a slug (string has at least one alpha character)
+        {:speaker_slug, value}
     end
   end
+
+  defp prepare_filter({"language", value}),
+    do: {:language, value}
+
+  defp prepare_filter({"is_partner", value}) do
+    # Accept both bool and string values to handle GET params and test values
+    cond do
+      value in ["true", true] -> {:is_partner, true}
+      value in ["false", false] -> {:is_partner, false}
+      true -> nil
+    end
+  end
+
+  defp prepare_filter(_),
+    do: nil
 end
