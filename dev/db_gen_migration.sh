@@ -9,4 +9,5 @@ fi
 
 IMAGE=bitwalker/alpine-elixir-phoenix:1.6.0
 cd -- "$(dirname $0)/.."
-docker run -it --rm --workdir=/app/apps/db --network=host -v `pwd`:/app ${IMAGE} mix ecto.gen.migration $@
+docker run -it --rm --workdir=/app/apps/db --network=host -v `pwd`:/app ${IMAGE} mix ecto.gen.migration $@ &&
+  echo "Migration created in apps/db/priv/repo/migrations"

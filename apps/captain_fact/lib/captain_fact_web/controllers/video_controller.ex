@@ -20,15 +20,19 @@ defmodule CaptainFactWeb.VideoController do
   def index_ids(conn, _),
     do: json(conn, videos_index())
 
-  def get_or_create(conn, %{"url" => url}) do
+  def get_or_create(conn, params = %{"url" => url}) do
     case get_video_by_url(url) do
       nil ->
         conn
         |> Guardian.Plug.current_resource()
-        |> create!(url)
+        |> create!(url, params["is_partner"])
         |> case do
-             {:error, message} -> json(put_status(conn, :unprocessable_entity), %{error: %{url: message}})
-             video -> render(conn, "show.json", video: video)
+             {:error, message} ->
+               conn
+               |> put_status(:unprocessable_entity)
+               |> json(%{error: %{url: message}})
+             {:ok, video} ->
+               render(conn, "show.json", video: video)
            end
       video ->
         render(conn, "show.json", video: video)
