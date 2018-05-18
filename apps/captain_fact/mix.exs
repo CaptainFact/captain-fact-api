@@ -59,7 +59,6 @@ defmodule CaptainFact.Mixfile do
       {:weave, "3.1.2"},
       {:burnex, "~> 1.0"},
       {:bypass, "~> 0.8", only: :test},
-      {:credo, "~> 0.9.1", only: [:dev, :test], runtime: false},
       {:db, in_umbrella: true}
    ]
   end

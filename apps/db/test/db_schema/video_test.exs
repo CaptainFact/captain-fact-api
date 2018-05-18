@@ -1,5 +1,6 @@
 defmodule DB.Schema.VideoTest do
   use DB.DataCase, async: true
+  doctest DB.Schema.Video
 
   alias DB.Schema.Video
 

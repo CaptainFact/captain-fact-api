@@ -107,11 +107,11 @@ defmodule CaptainFact.Sources.FetcherTest do
   defp gen_url(), do: "/#{TokenGenerator.generate(8)}"
 
   defp wait_fetcher() do
-    case MapSet.size(Fetcher.get_queue()) do
-      0 -> :ok
-      _ ->
-        :timer.sleep(50)
-        wait_fetcher()
+    if Enum.empty?(Fetcher.get_queue()) do
+      :ok
+    else
+      :timer.sleep(50)
+      wait_fetcher()
     end
   end
 end

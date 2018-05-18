@@ -12,12 +12,24 @@ defmodule CaptainFact.Videos.MetadataFetcher do
   iex> fetch_video_metadata("https://www.youtube.com/watch?v=OhWRT3PhMJs")
   iex> fetch_video_metadata({"youtube", "OhWRT3PhMJs"})
   """
-  def fetch_video_metadata(nil), do: {:error, "Invalid URL"}
-  def fetch_video_metadata(url) when is_binary(url), do: fetch_video_metadata(Video.parse_url(url))
+  def fetch_video_metadata(nil),
+    do: {:error, "Invalid URL"}
+
+  if Application.get_env(:db, :env) == :test do
+    def fetch_video_metadata(url = "__TEST__/" <> _id) do
+      {:ok, %{title: "__TEST-TITLE__", url: url}}
+    end
+  end
+
+  def fetch_video_metadata(url) when is_binary(url),
+    do: fetch_video_metadata(Video.parse_url(url))
+
   def fetch_video_metadata({"youtube", provider_id}) do
     case Application.get_env(:captain_fact, :youtube_api_key) do
-      nil -> fetch_video_metadata_html("youtube", provider_id)
-      api_key -> fetch_video_metadata_api("youtube", provider_id, api_key)
+      nil ->
+        fetch_video_metadata_html("youtube", provider_id)
+      api_key ->
+        fetch_video_metadata_api("youtube", provider_id, api_key)
     end
   end
 
