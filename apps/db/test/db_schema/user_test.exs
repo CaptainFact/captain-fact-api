@@ -7,7 +7,8 @@ defmodule DB.Schema.UserTest do
     name: "Jouje BigBrother",
     username: "Hell0World",
     email: Faker.Internet.email,
-    password: "@StrongP4ssword!"
+    password: "@StrongP4ssword!",
+    locale: "en"
   }
   @invalid_attrs %{}
 
@@ -100,18 +101,29 @@ defmodule DB.Schema.UserTest do
     assert changeset2.valid?
   end
 
+  test "locale get verified and set to default if invalid" do
+    changeset = User.changeset(%User{}, %{@valid_attrs | locale: "FR"})
+    assert changeset.changes.locale == "fr"
+
+    changeset = User.changeset(%User{}, %{@valid_attrs | locale: "en"})
+    assert changeset.changes.locale == "en"
+
+    changeset = User.changeset(%User{}, %{@valid_attrs | locale: "xxoooxx"})
+    assert changeset.changes.locale == "en"
+  end
+
   test "default user should not be a publisher" do
     changeset = User.registration_changeset(%User{}, @valid_attrs)
     refute changeset.data.is_publisher
   end
 
   test "achievements changeset ensure achievements are unique" do
-    changeset = User.changeset_achievement(%User{achievements: [1,1,1,3,8,8,5,6,6]}, 4)
-    assert changeset.changes.achievements == [4,1,3,8,5,6]
+    changeset = User.changeset_achievement(%User{achievements: [1, 1, 1, 3, 8, 8, 5, 6, 6]}, 4)
+    assert changeset.changes.achievements == [4, 1, 3, 8, 5, 6]
   end
 
   test "empty changeset if no changes in achievements" do
-    changeset = User.changeset_achievement(%User{achievements: [1,1,1,3,8,8,5,6,6]}, 3)
+    changeset = User.changeset_achievement(%User{achievements: [1, 1, 1, 3, 8, 8, 5, 6, 6]}, 3)
     refute changeset.changes[:achievements]
   end
 end

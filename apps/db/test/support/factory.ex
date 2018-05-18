@@ -26,7 +26,7 @@ defmodule DB.Factory do
       username: "User-#{random_string(10)}",
       email: Faker.Internet.email,
       encrypted_password: "$2b$12$fe55IfCdqNzKp1wMIJDwVeG3f7guOduEE5HS2C9IJyfkuk3avbjQG",
-      fb_user_id: Integer.to_string(Enum.random(10000..9999999999999)),
+      fb_user_id: Integer.to_string(Enum.random(10_000..999_999_999_999_999)),
       reputation: 0,
       email_confirmation_token: random_string(64),
       achievements: [1], # Users are always created with the "Welcome" achievement
@@ -169,6 +169,7 @@ defmodule DB.Factory do
       |> where([a], a.entity_id == ^comment.id)
       |> Repo.one!()
 
+    # credo:disable-for-next-line
     Enum.take(
       Stream.repeatedly(fn ->
         with_action insert(:flag, %{
@@ -182,8 +183,6 @@ defmodule DB.Factory do
   end
 
   defp random_string(length) do
-    :crypto.strong_rand_bytes(length)
-    |> Base.url_encode64
-    |> binary_part(0, length)
+    DB.Utils.TokenGenerator.generate(length)
   end
 end

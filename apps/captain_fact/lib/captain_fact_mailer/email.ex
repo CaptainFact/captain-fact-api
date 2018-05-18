@@ -28,7 +28,8 @@ defmodule CaptainFactMailer.Email do
   """
   def welcome(user) do
     reputation_change = ReputationChange.for_admin_action(:email_confirmed)
-    user_email(user)
+    user
+    |> user_email()
     |> subject(gettext_mail_user(user, "Welcome to CaptainFact.io!"))
     |> assign(:confirm_email_reputation, reputation_change)
     |> render_i18n(:welcome)
@@ -42,7 +43,8 @@ defmodule CaptainFactMailer.Email do
   """
   def newsletter(%{newsletter: false}, _, _), do: nil
   def newsletter(user, subject, html_message) do
-    user_email(user)
+    user
+    |> user_email()
     |> subject(subject)
     |> assign(:content, html_message)
     |> assign(:text_content, Floki.text(html_message))
@@ -53,7 +55,8 @@ defmodule CaptainFactMailer.Email do
   Generate a reset password email from a ResetPasswordRequest
   """
   def reset_password_request(%ResetPasswordRequest{user: user, token: token, source_ip: ip}) do
-    user_email(user)
+    user
+    |> user_email()
     |> subject(gettext_mail_user(user, "CaptainFact.io - Reset your password"))
     |> assign(:reset_password_token, token)
     |> assign(:source_ip, ip)
@@ -65,18 +68,20 @@ defmodule CaptainFactMailer.Email do
   with the community guidelines.
   """
   def reputation_loss(user) do
-    user_email(user)
+    user
+    |> user_email()
     |> subject(gettext_mail_user(user, "About your recent loss of reputation on CaptainFact"))
     |> render_i18n(:reputation_loss)
   end
 
   # No localization for now, we need to store locale in invitation request
-  def invitation_to_register(%InvitationRequest{invited_by: invited_by, email: email, token: token}) do
+  def invitation_to_register(invitation_request = %InvitationRequest{}) do
     base_email()
-    |> to(email)
-    |> subject(invitation_subject(invited_by))
-    |> assign(:invitation_token, token)
-    |> assign(:invited_by, invited_by)
+    |> to(invitation_request.email)
+    |> subject(invitation_subject(invitation_request.invited_by))
+    |> assign(:invitation_token, invitation_request.token)
+    |> assign(:invited_by, invitation_request.invited_by)
+    |> assign(:user, %{locale: invitation_request.locale})
     |> render_i18n(:invitation)
   end
 

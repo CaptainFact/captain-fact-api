@@ -10,12 +10,14 @@ defmodule CaptainFact.Actions.FlaggerTest do
   alias CaptainFact.Moderation
 
 
+  @nb_flags_to_report Moderation.nb_flags_to_report(:create, :comment)
+
   setup do
     Repo.delete_all(Flag)
     Repo.delete_all(User)
-    target_user = insert(:user, %{reputation: 10000})
+    target_user = insert(:user, %{reputation: 10_000})
     comment = insert(:comment, %{user: target_user}) |> with_action
-    source_users = insert_list(Moderation.nb_flags_to_report(:create, :comment), :user, %{reputation: 10000})
+    source_users = insert_list(@nb_flags_to_report, :user, %{reputation: 10_000})
     {:ok, [source_users: source_users, target_user: target_user, comment: comment]}
   end
 

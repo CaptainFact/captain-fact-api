@@ -18,7 +18,8 @@ defmodule DB.Schema.Flag do
   Builds a changeset based on an `UserAction`
   """
   def changeset(struct, params) do
-    cast(struct, params, [:action_id, :reason])
+    struct
+    |> cast(params, [:action_id, :reason])
     |> validate_required(@required_fields)
   end
 end

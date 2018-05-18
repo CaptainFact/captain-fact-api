@@ -12,11 +12,11 @@ defmodule CaptainFact.Accounts do
   alias DB.Schema.User
   alias DB.Schema.ResetPasswordRequest
   alias DB.Schema.InvitationRequest
+  alias DB.Utils.TokenGenerator
 
   alias CaptainFactMailer.Email
   alias CaptainFact.Accounts.{UsernameGenerator, UserPermissions}
   alias CaptainFact.Actions.Recorder
-  alias CaptainFact.TokenGenerator
 
 
   @max_ip_reset_requests 3
@@ -77,6 +77,24 @@ defmodule CaptainFact.Accounts do
     result
   end
 
+
+  @doc"""
+  Update user
+  """
+  def update(user, params) do
+    UserPermissions.check!(user, :update, :user)
+    user
+    |> User.changeset(params)
+    |> Repo.update()
+    |> case do
+      {:ok, user} ->
+        Recorder.record(user, :update, :user)
+        {:ok, user}
+      {:error, changeset} ->
+        {:error, changeset}
+    end
+  end
+
   @doc"""
   Send user a welcome email, with a link to confirm it (only if not already confirmed)
   """
@@ -86,7 +104,8 @@ defmodule CaptainFact.Accounts do
   end
 
   defp do_create_account(user_params, provider_params) do
-    User.registration_changeset(%User{}, user_params)
+    %User{}
+    |> User.registration_changeset(user_params)
     |> User.provider_changeset(provider_params)
     |> Repo.insert()
   end
@@ -104,7 +123,8 @@ defmodule CaptainFact.Accounts do
          |> User.provider_changeset(provider_params)
        )
     |> Multi.run(:final_user, fn %{base_user: user} ->
-         User.changeset(user, %{})
+         user
+         |> User.changeset(%{})
          |> Ecto.Changeset.put_change(:username, UsernameGenerator.generate(user.id))
          |> Repo.update()
        end)
@@ -252,7 +272,8 @@ defmodule CaptainFact.Accounts do
   """
   def confirm_password_reset!(token, new_password) do
     updated_user =
-      check_reset_password_token!(token)
+      token
+      |> check_reset_password_token!()
       |> User.password_changeset(%{password: new_password})
       |> Repo.update!()
 
@@ -265,8 +286,8 @@ defmodule CaptainFact.Accounts do
   @doc """
   Request an invitation for given email
   """
-  def request_invitation(email, user \\ nil)
-  def request_invitation(email, invited_by_id)
+  def request_invitation(email, invited_by_id \\ nil, locale \\ nil)
+  def request_invitation(email, invited_by_id, locale)
   when is_nil(invited_by_id) or is_integer(invited_by_id) do
     with true <- Regex.match?(User.email_regex, email),
          false <- Burnex.is_burner?(email)
@@ -274,7 +295,11 @@ defmodule CaptainFact.Accounts do
       case Repo.get_by(InvitationRequest, email: email) do
         nil ->
           %InvitationRequest{}
-          |> InvitationRequest.changeset(%{email: email, invited_by_id: invited_by_id})
+          |> InvitationRequest.changeset(%{
+            email: email,
+            invited_by_id: invited_by_id,
+            locale: locale
+          })
           |> Repo.insert()
         %{invitation_sent: true} = invit ->
           Repo.update(InvitationRequest.changeset_sent(invit, false))
@@ -285,7 +310,8 @@ defmodule CaptainFact.Accounts do
       _ -> {:error, "invalid_email"}
     end
   end
-  def request_invitation(email, %User{id: id}), do: request_invitation(email, id)
+  def request_invitation(email, %User{id: id}, locale),
+    do: request_invitation(email, id, locale)
 
   @doc """
   Send `nb_invites` invitations to most recently updated users
@@ -345,10 +371,13 @@ defmodule CaptainFact.Accounts do
 
   defp delete_invitation(invitation_token) do
     case get_invitation_for_token(invitation_token) do
-      nil -> {:error, nil}
+      nil ->
+        {:error, nil}
       invit ->
         Repo.delete(invit)
-        Logger.debug("Invitation #{invit.id} for token #{invit.token} has been consumed")
+        Logger.debug(fn ->
+          "Invitation #{invit.id} for token #{invit.token} has been consumed"
+        end)
     end
   end
 
@@ -375,3 +404,4 @@ defmodule CaptainFact.Accounts do
     |> Repo.one!()
   end
 end
+

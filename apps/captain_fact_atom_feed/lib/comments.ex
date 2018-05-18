@@ -60,7 +60,8 @@ defmodule CaptainFactAtomFeed.Comments do
     link = comment_url(comment)
     insert_datetime = DateTime.from_naive!(comment.inserted_at, "Etc/UTC")
 
-    Entry.new(link, insert_datetime, title)
+    link
+    |> Entry.new(insert_datetime, title)
     |> Entry.link(link)
     |> Entry.published(insert_datetime)
     |> Entry.content("""

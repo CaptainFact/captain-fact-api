@@ -4,7 +4,7 @@ defmodule CaptainFact.Mixfile do
   def project do
     [
       app: :captain_fact,
-      version: "0.8.8",
+      version: "0.8.10",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
@@ -59,7 +59,6 @@ defmodule CaptainFact.Mixfile do
       {:weave, "3.1.2"},
       {:burnex, "~> 1.0"},
       {:bypass, "~> 0.8", only: :test},
-      {:credo, "~> 0.8", only: [:dev, :test], runtime: false},
       {:db, in_umbrella: true}
    ]
   end

@@ -25,6 +25,7 @@ defmodule CaptainFact.Accounts.UserPermissions do
     #                        /!\ |️ New user          | Confirmed user
     # reputation            {-30 , -5 , 15 , 30 , 75 , 125 , 200 , 500 , 1000}
     #-------------------------------------------------------------------------
+    # credo:disable-for-lines:50
     create: %{
       comment:              { 2  ,  5 , 7  , 10 , 15 ,  50 , 75  , 100 , 200 },
       statement:            { 2  ,  2 , 6  , 10 , 30 ,  50 , 100 , 100 , 100 },
@@ -37,7 +38,8 @@ defmodule CaptainFact.Accounts.UserPermissions do
     update: %{
       statement:            { 0  ,  0 ,  2 ,  5 , 10 ,  50 , 100 , 100 , 100 },
       speaker:              { 0  ,  0 ,  0 ,  0 , 5  ,  20 ,  30 ,  40 ,  80 },
-      video:                { 0  ,  0 ,  0 ,  0 , 0  ,   0  ,  5 ,  10 ,  20 },
+      video:                { 0  ,  0 ,  0 ,  0 , 0  ,   0 ,  5  ,  10 ,  20 },
+      user:                 { 5  ,  5 ,  5 ,  5 , 5  ,   5 ,  5  ,  5  ,  5  },
     },
     delete: %{
       comment:              { 10  , 20, 30 , 50 , 75 , 300 , 300 , 300 , 300 },
@@ -90,9 +92,11 @@ defmodule CaptainFact.Accounts.UserPermissions do
       {:error, "limit_reached"}
   """
   def check(%User{is_publisher: true}, :add, :video), do: {:ok, -1}
+  def check(%User{is_publisher: true}, :add, :speaker), do: {:ok, -1}
+  def check(%User{is_publisher: true}, :create, :speaker), do: {:ok, -1}
   def check(user = %User{}, action_type, entity) do
     limit = limitation(user, action_type, entity)
-    if (limit == 0) do
+    if limit == 0 do
       {:error, @error_not_enough_reputation}
     else
       action_count = action_count(user, action_type, entity)

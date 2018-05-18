@@ -36,7 +36,7 @@ defmodule CaptainFact.Actions.Recorder do
   """
   def admin_record!(action_type, entity, params \\ %{}) do
     params = Map.merge(params, %{type: type(action_type), entity: entity(entity)})
-    Repo.insert!(UserAction.admin_changeset(%UserAction{}, params))
+    Repo.insert!(UserAction.changeset_admin(%UserAction{}, params))
   end
 
   @doc"""

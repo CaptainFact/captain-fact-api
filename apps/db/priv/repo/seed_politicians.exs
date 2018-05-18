@@ -35,16 +35,17 @@ defmodule SeedPoliticians do
         |> Map.put(:title, "Politician")
 
       changeset = Speaker.changeset(%Speaker{is_user_defined: false}, changes)
-      if !changeset.valid? do
-        Logger.error(:stderr, "Cannot add speaker #{changes.full_name}: #{inspect(changeset.errors)}")
-        nil
-      else
+      if changeset.valid? do
         case Repo.get_by(Speaker, wikidata_item_id: changeset.changes.wikidata_item_id) do
           nil ->
             Logger.info("Insert speaker #{changeset.changes.full_name}")
             Repo.insert!(changeset)
-          speaker -> speaker
+          speaker ->
+            speaker
         end
+      else
+        Logger.error(:stderr, "Cannot add speaker #{changes.full_name}: #{inspect(changeset.errors)}")
+        nil
       end
     end
   end
@@ -62,8 +63,14 @@ defmodule SeedPoliticians do
 
   defp fetch_picture(speaker = %{picture: nil}, picture_url) do
     case Speakers.fetch_picture(speaker, picture_url) do
-      {:ok, _} -> Logger.debug("Fetched picture for #{speaker.full_name} at #{picture_url}")
-      {:error, reason} -> Logger.warn("Fetch picture #{picture_url} failed for #{speaker.full_name} (#{reason})")
+      {:ok, _} ->
+        Logger.debug(fn ->
+          "Fetched picture for #{speaker.full_name} at #{picture_url}"
+        end)
+      {:error, reason} ->
+        Logger.warn(fn ->
+          "Fetch picture #{picture_url} failed for #{speaker.full_name} (#{reason})"
+        end)
     end
   end
   defp fetch_picture(speaker, _), do: Logger.info("Speaker #{speaker.full_name} already have a picture")

@@ -1,7 +1,8 @@
 defmodule CaptainFactWeb.CommentView do
   use CaptainFactWeb, :view
 
-  alias CaptainFactWeb.{ CommentView, UserView }
+  alias CaptainFactWeb.{CommentView, UserView}
+
 
   def render("show.json", %{comment: comment}) do
     render_one(comment, CommentView, "comment.json")

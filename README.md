@@ -108,7 +108,8 @@ graph BT;
 
 ## Styling
 
-Code should match [Elixy Style Guide](https://github.com/christopheradams/elixir_style_guide)
+Code should follow [Elixy Style Guide](https://github.com/christopheradams/elixir_style_guide)
+and [Credo style guide](https://github.com/rrrene/elixir-style-guide)
 as much as possible.
 
 Avoid lines longer than 80 characters, **never** go beyond 110 characters.

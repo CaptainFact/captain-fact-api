@@ -45,7 +45,7 @@ defmodule CaptainFactJobs.ModerationTest do
     # Un-report comment
     assert Repo.get!(Comment, comment.id).is_reported == false
     # Flags are cleared
-    assert Enum.count(Repo.all(from(f in Flag, where: f.action_id == ^action.id))) == 0
+    assert Enum.empty?(Repo.all(from(f in Flag, where: f.action_id == ^action.id)))
     # Source user reputation stays the same
     assert Repo.get!(User, action.user_id).reputation == action.user.reputation
     # Flaggers loose reputation
@@ -95,7 +95,7 @@ defmodule CaptainFactJobs.ModerationTest do
 
   defp generate_feedback(action, feedback_type, num) do
     for _ <- 1..num do
-      user = insert(:user, %{reputation: 10000})
+      user = insert(:user, %{reputation: 10_000})
       Moderation.feedback!(user, action.id, feedback_type, 1)
     end
   end

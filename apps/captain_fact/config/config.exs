@@ -24,6 +24,7 @@ config :captain_fact, CaptainFactWeb.Endpoint,
 config :captain_fact, CaptainFact.Scheduler,
   global: true, # Run only one instance across cluster
   jobs: [
+    # credo:disable-for-lines:10
     # Actions analysers
     {{:extended, "*/5 * * * * *"}, {CaptainFactJobs.Votes, :update, []}}, # Every 5 seconds
     {            "*/1 * * * *",    {CaptainFactJobs.Reputation, :update, []}}, # Every minute

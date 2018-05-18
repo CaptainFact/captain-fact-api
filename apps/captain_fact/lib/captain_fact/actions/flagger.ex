@@ -25,7 +25,8 @@ defmodule CaptainFact.Actions.Flagger do
     UserPermissions.check!(user, :flag, :comment)
     action_id = get_action_id!(@action_create, @entity_comment, comment_id)
     try do
-      Ecto.build_assoc(user, :flags_posted)
+      user
+      |> Ecto.build_assoc(:flags_posted)
       |> Flag.changeset(%{reason: reason, action_id: action_id})
       |> Repo.insert!()
     rescue

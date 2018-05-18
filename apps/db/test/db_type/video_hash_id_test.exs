@@ -8,7 +8,7 @@ defmodule DB.Type.VideoHashIdTest do
 
   @nb_ids_to_test 1_000
 
-  @tag timeout: 3600_000
+  @tag timeout: 3_600_000
   test "ensure there is no collision" do
     start = 1
     range = start..(start + @nb_ids_to_test)

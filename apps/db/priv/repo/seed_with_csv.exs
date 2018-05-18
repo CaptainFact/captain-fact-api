@@ -2,16 +2,17 @@ defmodule SeedWithCSV do
   require Logger
 
   @nb_threads 1
-  @timeout 60000
+  @timeout 60_000
 
   def seed(filename, insert_func, insert_func_args, columns_mapping) do
-    if !File.exists?(filename),
-      do: Logger.error("File #{filename} doesn't exists"),
-      else: do_seed(filename, insert_func, insert_func_args, columns_mapping)
+    if File.exists?(filename),
+      do: do_seed(filename, insert_func, insert_func_args, columns_mapping),
+      else: Logger.error("File #{filename} doesn't exists")
   end
 
   defp do_seed(filename, insert_func, insert_func_args, columns_mapping) do
-    File.stream!(filename)
+    filename
+    |> File.stream!()
     |> CSV.decode(headers: true)
     |> Task.async_stream(
         &build_and_insert(&1, insert_func, insert_func_args, columns_mapping),

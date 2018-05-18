@@ -128,7 +128,7 @@ defmodule CaptainFact.DemoFr do
         ]
       },
       %{
-        time: 10000,
+        time: 10_000,
         text: "La France est l’un des pays qui produit le plus d’ingénieurs pour 100 000 habitants"
       }
     ],
@@ -192,8 +192,10 @@ defmodule CaptainFact.DemoFr do
       |> Map.put(:source, (comment_base[:source] && %{url: comment_base.source}) || nil)
 
     comment =
-      Comments.add_comment(Enum.at(users, comment_base.user_idx), context, params, comment_base[:source], fn comment ->
-        comment = Repo.preload(comment, :source) |> Repo.preload(:user)
+      users
+      |> Enum.at(comment_base.user_idx)
+      |> Comments.add_comment(context, params, comment_base[:source], fn comment ->
+        comment = Repo.preload(Repo.preload(comment, :source), :user)
         CaptainFactWeb.Endpoint.broadcast(
           "comments:video:#{VideoHashId.encode(video_id)}", "comment_updated",
           CaptainFactWeb.CommentView.render("comment.json", comment: comment)
@@ -212,7 +214,8 @@ defmodule CaptainFact.DemoFr do
       for reply <- Map.get(comment_base, :replies, []),
         do: add_comment(users, video_id, statement_id, reply, comment.id)
     end)
-    if comment_base[:async] != true, do: Task.await(add_replies_task, @max_sleep * 10000)
+    if comment_base[:async] != true,
+      do: Task.await(add_replies_task, @max_sleep * 10_000)
   end
 
   def rand_sleep_time(min, max) do

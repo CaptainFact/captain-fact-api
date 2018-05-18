@@ -16,7 +16,9 @@ defmodule CaptainFactWeb.ModerationControllerTest do
     flag_comments([comment], limit)
 
     response =
-      build_authenticated_conn(insert(:user, %{reputation: 10000}))
+      :user
+      |> insert(%{reputation: 10_000})
+      |> build_authenticated_conn()
       |> get("/moderation/random")
       |> json_response(200)
 
@@ -31,7 +33,9 @@ defmodule CaptainFactWeb.ModerationControllerTest do
       entity: UserAction.entity(:comment), type: UserAction.type(:create), entity_id: comment.id
     value = 1
 
-    build_authenticated_conn(insert(:user, %{reputation: 10000}))
+    :user
+    |> insert(%{reputation: 10_000})
+    |> build_authenticated_conn()
     |> post("/moderation/feedback", %{
       "action_id" => action.id,
       "value" => value,

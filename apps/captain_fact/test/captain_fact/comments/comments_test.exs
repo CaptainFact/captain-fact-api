@@ -5,11 +5,13 @@ defmodule CaptainFact.Comments.CommentsTest do
 
   import CaptainFact.Support.MetaPage
   import DB.Schema.UserAction, only: [video_debate_context: 1]
+
+  alias DB.Schema.User
   alias DB.Schema.UserAction
   alias DB.Schema.Comment
+  alias DB.Utils.TokenGenerator
 
   alias CaptainFact.Comments
-  alias CaptainFact.TokenGenerator
   alias CaptainFact.Sources.Fetcher
 
 
@@ -47,7 +49,8 @@ defmodule CaptainFact.Comments.CommentsTest do
       # Start a server to provide a valid page
       sub_url = unique_url()
       url =
-        serve(sub_url, 200, %{})
+        sub_url
+        |> serve(200, %{})
         |> endpoint_url(sub_url)
 
       # Add comment
@@ -63,7 +66,8 @@ defmodule CaptainFact.Comments.CommentsTest do
       # Start a server to provide a valid page
       attributes = Map.put(@valid_source_attributes, :url, unique_url())
       url =
-        serve(attributes.url, 200, attributes, only_once: true)
+        attributes.url
+        |> serve(200, attributes, only_once: true)
         |> endpoint_url(attributes.url)
 
       # Add comment
@@ -124,6 +128,34 @@ defmodule CaptainFact.Comments.CommentsTest do
       assert_deleted comment
       Enum.map(replies, &(assert_deleted(&1, false)))
       Enum.map(replies_replies, &(assert_deleted(&1, false)))
+    end
+  end
+
+  describe "vote" do
+    test "positive" do
+      comment = insert(:comment)
+      random_user = insert(:user, reputation: 1000)
+
+      Comments.vote(random_user, "TEST", comment.id, 1)
+
+      CaptainFactJobs.Votes.update()
+      CaptainFactJobs.Reputation.update()
+
+      assert random_user.reputation == Repo.get(User, random_user.id).reputation
+      assert comment.user.reputation < Repo.get(User, comment.user.id).reputation
+    end
+
+    test "negative" do
+      comment = insert(:comment)
+      random_user = insert(:user, reputation: 1000)
+
+      Comments.vote(random_user, "TEST", comment.id, -1)
+
+      CaptainFactJobs.Votes.update()
+      CaptainFactJobs.Reputation.update()
+
+      assert random_user.reputation > Repo.get(User, random_user.id).reputation
+      assert comment.user.reputation > Repo.get(User, comment.user.id).reputation
     end
   end
 

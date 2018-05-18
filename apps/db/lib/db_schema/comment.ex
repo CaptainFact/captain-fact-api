@@ -77,7 +77,7 @@ defmodule DB.Schema.Comment do
     |> validate_required(@required_fields)
     |> validate_source_or_text()
     |> validate_text()
-    |> validate_length(:text, min: 1, max: 240)
+    |> validate_length(:text, min: 1, max: 255)
   end
 
   def prepare_text(str) do
