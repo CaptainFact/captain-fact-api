@@ -178,6 +178,8 @@ defmodule DB.Schema.Video do
         from v in query, join: s in assoc(v, :speakers), where: s.slug == ^slug
       {:min_id, id}, query ->
         from v in query, where: v.id > ^id
+      {:is_partner, is_partner}, query ->
+        from v in query, where: v.is_partner == ^is_partner
     end)
   end
 end

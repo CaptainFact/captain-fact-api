@@ -18,7 +18,8 @@ defmodule CaptainFactWeb.VideoView do
       url: DB.Schema.Video.build_url(video),
       posted_at: video.inserted_at,
       speakers: render_many(video.speakers, CaptainFactWeb.SpeakerView, "speaker.json"),
-      language: video.language
+      language: video.language,
+      is_partner: video.is_partner
     }
   end
 end

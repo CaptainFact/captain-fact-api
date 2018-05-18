@@ -7,7 +7,8 @@ defmodule CaptainFactWeb.VideoController do
 
   @accepted_filters %{
     "language" => :language,
-    "speaker" => :speaker
+    "speaker" => :speaker,
+    "is_partner" => :is_partner
   }
 
   def index(conn, filters) when not is_nil(filters),
@@ -47,7 +48,10 @@ defmodule CaptainFactWeb.VideoController do
   end
 
   defp prepare_filters(filters) do
-    filters_list = Enum.map(filters, fn {key, value} -> {Map.get(@accepted_filters, key), value} end)
+    filters_list = Enum.map(filters, fn {key, value} ->
+      {Map.get(@accepted_filters, key), value}
+    end)
+
     if Keyword.has_key?(filters_list, :speaker) do
       speaker_identifier = Keyword.get(filters_list, :speaker)
       updated_filters =

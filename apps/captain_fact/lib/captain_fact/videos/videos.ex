@@ -21,7 +21,8 @@ defmodule CaptainFact.Videos do
   @doc"""
   TODO with_speakers param is only required by REST API
   List videos. `filters` may contain the following entries:
-    * language: two characters identifier string (fr,en,es...etc) or "unknown" to list videos with unknown language
+    * language: two characters identifier string (fr,en,es...etc) or
+                "unknown" to list videos with unknown language
   """
   def videos_list(filters \\ [], with_speakers \\ true)
   def videos_list(filters, true),
@@ -95,13 +96,16 @@ defmodule CaptainFact.Videos do
 
   @doc"""
   Shift all video's statements by given offset.
-  Returns {:ok, statements} if success, {:error, reason} otherwise. Returned statements contains only an id and a key
+  Returns {:ok, statements} if success, {:error, reason} otherwise.
+  Returned statements contains only an id and a key
   """
   def shift_statements(user, video_id, offset) when is_integer(offset) do
     UserPermissions.check!(user, :update, :video)
     statements_query = where(Statement, [s], s.video_id == ^video_id)
     Multi.new
-    |> Multi.update_all(:statements_update, statements_query, [inc: [time: offset]], returning: [:id, :time])
+    |> Multi.update_all(:statements_update, statements_query,
+         [inc: [time: offset]], returning: [:id, :time]
+       )
     |> Recorder.multi_record(user, :update, :video, %{
       entity_id: video_id,
       changes: %{"statements_time" => offset},
@@ -109,8 +113,10 @@ defmodule CaptainFact.Videos do
     })
     |> Repo.transaction()
     |> case do
-         {:ok, %{statements_update: {_, statements}}} -> {:ok, Enum.map(statements, &(%{id: &1.id, time: &1.time}))}
-         {:error, _, reason, _} -> {:error, reason}
+         {:ok, %{statements_update: {_, statements}}} ->
+           {:ok, Enum.map(statements, &(%{id: &1.id, time: &1.time}))}
+         {:error, _, reason, _} ->
+           {:error, reason}
        end
   end
 
