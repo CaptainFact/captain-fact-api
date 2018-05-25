@@ -9,7 +9,7 @@ Master-[![pipeline status](https://gitlab.com/CaptainFact/captain-fact-api/badge
   * Download project's dependencies with `./dev/get_dependencies.sh`
   * Create / launch a postrges instance on your local machine. If you have
   docker installed, you can use the pre-seed postgres docker image:
-  `docker run -d --name postgres_dev -p 5432:5432 captainfact/dev-db:latest`
+  `docker run -d --name cf_dev_db -p 5432:5432 captainfact/dev-db:latest`
   * Migrate your database with `./dev/db_migrate.sh`
   * Start server with `./dev/start_server.sh`
 
