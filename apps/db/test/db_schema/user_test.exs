@@ -94,6 +94,22 @@ defmodule DB.Schema.UserTest do
     assert changeset.valid?
   end
 
+  test "name can contain accentuated characters" do
+    changeset = User.registration_changeset(%User{}, %{@valid_attrs | name: "Jésus"})
+    assert changeset.valid?
+  end
+
+  test "name and username are trim" do
+    changeset = User.registration_changeset(%User{}, %{@valid_attrs | 
+      name: "    test  test  ",
+      username: "    testtest "
+    })
+
+    assert changeset.valid?
+    assert changeset.changes.name == "test test"
+    assert changeset.changes.username == "testtest"
+  end
+
   test "characters _ and - are still allowed in username" do
     changeset = User.registration_changeset(%User{}, %{@valid_attrs | username: "xxxxxxx-y"})
     changeset2 = User.registration_changeset(%User{}, %{@valid_attrs | username: "xxxxxxx_y"})

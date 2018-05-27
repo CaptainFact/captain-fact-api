@@ -118,14 +118,17 @@ defmodule DB.Schema.User do
     model
     |> cast(params, @required_fields ++ @optional_fields)
     |> validate_required(@required_fields)
+    |> update_change(:username, &String.trim/1)
+    |> update_change(:name, &(String.replace(&1, ~r/ +/, " ")))
+    |> update_change(:name, &String.trim/1)
     |> unique_constraint(:email)
     |> unique_constraint(:username)
     |> validate_length(:username, min: 5, max: 15)
     |> validate_length(:name, min: 2, max: 20)
-    |> validate_format(:name, ~r/^[ a-zA-Z]*$/)
     |> validate_email()
     |> validate_locale()
     |> validate_username()
+    |> validate_format(:name, ~r/^[^0-9!*();:@&=+$,\/?#\[\].\'\\]+$/)
   end
 
   defp put_encrypted_pw(changeset) do
@@ -171,8 +174,10 @@ defmodule DB.Schema.User do
   defp validate_username(changeset = %{changes: %{username: username}}) do
     lower_username = String.downcase(username)
     case Enum.find(@forbidden_username_keywords, &String.contains?(lower_username, &1)) do
-      nil -> validate_format(changeset, :username, @username_regex)
-      keyword -> add_error(changeset, :username, "contains a foridden keyword: #{keyword}")
+      nil -> 
+        validate_format(changeset, :username, @username_regex)
+      keyword -> 
+        add_error(changeset, :username, "contains a foridden keyword: #{keyword}")
     end
   end
   defp validate_username(changeset), do: changeset
