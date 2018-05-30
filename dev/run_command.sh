@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-IMAGE=bitwalker/alpine-elixir-phoenix:1.6.0
+cd -- "$(dirname $0)/.."
+source "./dev/_common.sh"
 
 if [ "$#" -lt 1 ]; then
   echo "Usage: $0 command"
@@ -11,5 +12,16 @@ if [ "$#" -lt 1 ]; then
   exit 1
 fi
 
-cd -- "$(dirname $0)/.."
-docker run -it --rm --workdir=/app --network=host -v `pwd`:/app ${IMAGE} $@
+docker run -it \
+  --rm \
+  --workdir=/app \
+  -p 4000:4000 \
+  -p 4001:4001 \
+  -p 4002:4002 \
+  -p 4003:4003 \
+  -p 4004:4004 \
+  --link $CF_DB_DEV_IMAGE:localhost \
+  -v `pwd`:/app \
+  ${CF_ELIXIR_IMAGE} \
+  $@
+  
