@@ -110,6 +110,14 @@ defmodule DB.Schema.UserTest do
     assert changeset.changes.username == "testtest"
   end
 
+  test "name can be empty or nil" do
+    changeset = User.registration_changeset(%User{}, %{@valid_attrs | name: ""})
+    assert changeset.valid?
+
+    changeset = User.registration_changeset(%User{}, %{@valid_attrs | name: nil})
+    assert changeset.valid?
+  end
+
   test "characters _ and - are still allowed in username" do
     changeset = User.registration_changeset(%User{}, %{@valid_attrs | username: "xxxxxxx-y"})
     changeset2 = User.registration_changeset(%User{}, %{@valid_attrs | username: "xxxxxxx_y"})
