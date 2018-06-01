@@ -118,11 +118,10 @@ defmodule DB.Schema.User do
     model
     |> cast(params, @required_fields ++ @optional_fields)
     |> validate_required(@required_fields)
-    |> update_change(:username, &String.trim/1)
-    |> update_change(:name, &(String.replace(&1, ~r/ +/, " ")))
-    |> update_change(:name, &String.trim/1)
     |> unique_constraint(:email)
     |> unique_constraint(:username)
+    |> update_change(:username, &String.trim/1)
+    |> update_change(:name,&format_name/1)
     |> validate_length(:username, min: 5, max: 15)
     |> validate_length(:name, min: 2, max: 20)
     |> validate_email()
@@ -181,4 +180,15 @@ defmodule DB.Schema.User do
     end
   end
   defp validate_username(changeset), do: changeset
+
+  # Format name
+
+  defp format_name(nil),
+    do: nil
+
+  defp format_name(name) do
+    name
+    |> String.replace(~r/ +/, " ")
+    |> String.trim()
+  end
 end
