@@ -22,6 +22,7 @@ config :captain_fact, CaptainFactWeb.Endpoint,
 # Configure scheduler
 config :captain_fact, CaptainFact.Scheduler,
   global: true, # Run only one instance across cluster
+  debug_logging: false,
   jobs: [
     # credo:disable-for-lines:10
     # Actions analysers
