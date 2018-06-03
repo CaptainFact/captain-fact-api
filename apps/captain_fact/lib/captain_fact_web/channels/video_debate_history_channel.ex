@@ -1,4 +1,9 @@
 defmodule CaptainFactWeb.VideoDebateHistoryChannel do
+  @moduledoc """
+  A channel to get modifications of the VideoDebate history (action log) in
+  real time.
+  """
+
   use CaptainFactWeb, :channel
   require Logger
 

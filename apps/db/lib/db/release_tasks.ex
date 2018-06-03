@@ -1,4 +1,10 @@
 defmodule DB.ReleaseTasks do
+  @moduledoc """
+  Contains release tasks run by `distillery` on startup. You can find the
+  entrypoints of these commands in `rel/commands/*.sh`, `rel/hooks/*` and the 
+  configuration in `rel/config.exs`
+  """
+
   require Logger
 
   @start_apps [
@@ -16,9 +22,9 @@ defmodule DB.ReleaseTasks do
 
   def migrate do
     init()
-    Logger.info "Loading captainfact for migrations.."
+    Logger.info("Loading captainfact for migrations..")
     Enum.each(@myapps, &run_migrations_for/1)
-    Logger.info "Success!"
+    Logger.info("Success!")
     :init.stop()
   end
 
@@ -27,15 +33,16 @@ defmodule DB.ReleaseTasks do
 
     # Run the seed script if it exists
     seed_script = Path.join([priv_dir(:db), "repo", "seeds.exs"])
+
     if File.exists?(seed_script) do
-      Logger.info "Running seed script.."
+      Logger.info("Running seed script..")
       Code.eval_file(seed_script)
     else
-      Logger.warn "Seed script not found"
+      Logger.warn("Seed script not found")
     end
 
     # Signal shutdown
-    Logger.info "Success!"
+    Logger.info("Success!")
     :init.stop()
   end
 
@@ -60,19 +67,19 @@ defmodule DB.ReleaseTasks do
     # Start apps necessary for executing migrations
     Enum.each(@start_apps, &Application.ensure_all_started/1)
 
-    Logger.info "Dependencies started, loading runtime configuration..."
+    Logger.info("Dependencies started, loading runtime configuration...")
 
     # Loading runtime configuration
     DB.RuntimeConfiguration.setup()
     DB.RuntimeConfiguration.configure()
 
     # Start the Repo(s) for myapp
-    Logger.info "Starting repos.."
-    Enum.each(@repos, &(&1.start_link(pool_size: 1)))
+    Logger.info("Starting repos..")
+    Enum.each(@repos, & &1.start_link(pool_size: 1))
   end
 
   defp run_migrations_for(app) do
-    Logger.info "Running migrations for #{app}"
+    Logger.info("Running migrations for #{app}")
     Ecto.Migrator.run(DB.Repo, migrations_path(app), :up, all: true)
   end
 

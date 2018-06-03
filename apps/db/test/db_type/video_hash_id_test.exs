@@ -16,14 +16,13 @@ defmodule DB.Type.VideoHashIdTest do
     uniq_generated_ids =
       range
       |> Enum.map(&VideoHashId.encode/1)
-      |> Enum.into(MapSet.new)
+      |> Enum.into(MapSet.new())
 
     assert Enum.count(uniq_generated_ids) == Enum.count(range)
   end
 
   property "should work with any integer" do
-    check all id <- id_generator(),
-      do: assert String.length(VideoHashId.encode(id)) >= 4
+    check all id <- id_generator(), do: assert(String.length(VideoHashId.encode(id)) >= 4)
   end
 
   defp id_generator do

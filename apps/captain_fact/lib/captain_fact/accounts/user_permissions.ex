@@ -91,9 +91,15 @@ defmodule CaptainFact.Accounts.UserPermissions do
       iex> UserPermissions.check(user, :create, :comment)
       {:error, "limit_reached"}
   """
-  def check(%User{is_publisher: true}, :add, :video), do: {:ok, -1}
-  def check(%User{is_publisher: true}, :add, :speaker), do: {:ok, -1}
-  def check(%User{is_publisher: true}, :create, :speaker), do: {:ok, -1}
+  def check(%User{is_publisher: true}, :add, :video), 
+    do: {:ok, -1}
+
+  def check(%User{is_publisher: true}, :add, :speaker), 
+    do: {:ok, -1}
+
+  def check(%User{is_publisher: true}, :create, :speaker), 
+    do: {:ok, -1}
+
   def check(user = %User{}, action_type, entity) do
     limit = limitation(user, action_type, entity)
     if limit == 0 do
@@ -102,14 +108,23 @@ defmodule CaptainFact.Accounts.UserPermissions do
       action_count = action_count(user, action_type, entity)
       if action_count >= limit do
         if action_count >= limit + @limit_warning_threshold,
-          do: Logger.warn("User #{user.username} (#{user.id}) overthrown its limit for [#{action_type} #{entity}] (#{action_count}/#{limit})")
+          do: Logger.info(fn -> 
+            "User #{user.username} (#{user.id}) overthrown its limit for [#{action_type} #{entity}] (#{action_count}/#{limit})" 
+          end)
         {:error, @error_limit_reached}
       else
         {:ok, limit - action_count}
       end
     end
   end
-  def check(nil, _, _), do: {:error, "unauthorized"}
+
+  def check(nil, _, _), 
+    do: {:error, "unauthorized"}
+
+  @doc """
+  Same as `check/1` bu raise a PermissionsError if user doesn't have the right
+  permissions.
+  """
   def check!(user, action_type, entity \\ nil)
   def check!(user = %User{}, action_type, entity) do
     case check(user, action_type, entity) do
@@ -117,8 +132,10 @@ defmodule CaptainFact.Accounts.UserPermissions do
       {:ok, nb_available} -> nb_available
     end
   end
+
   def check!(user_id, action_type, entity) when is_integer(user_id),
     do: check!(do_load_user!(user_id), action_type, entity)
+
   def check!(nil, _, _),
     do: raise %PermissionsError{message: "unauthorized"}
 
@@ -156,15 +173,19 @@ defmodule CaptainFact.Accounts.UserPermissions do
       else: (@nb_levels - 1) - Enum.find_index(@reverse_levels, &(reputation >= &1))
   end
 
-  # Static getters
-  def limitations(), do: @limitations
-  def nb_levels(), do: @nb_levels
+  defp do_load_user!(nil), 
+    do: raise %PermissionsError{message: "unauthorized"}
 
-  defp do_load_user!(nil), do: raise %PermissionsError{message: "unauthorized"}
   defp do_load_user!(user_id) do
     User
     |> where([u], u.id == ^user_id)
     |> select([:id, :reputation])
     |> Repo.one!()
   end
+
+  # Static getters
+
+  def limitations(), do: @limitations
+
+  def nb_levels(), do: @nb_levels
 end

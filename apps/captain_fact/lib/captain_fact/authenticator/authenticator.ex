@@ -21,7 +21,7 @@ defmodule CaptainFact.Authenticator do
     end
   end
 
-  @doc"""
+  @doc """
   Get a user from third party info, creating it if necessary
   """
   def get_user_by_third_party!(provider, code, invitation_token \\ nil) do
@@ -33,7 +33,7 @@ defmodule CaptainFact.Authenticator do
     end
   end
 
-  @doc"""
+  @doc """
   Associate a third party account with an existing CaptainFact account
   """
   def associate_user_with_third_party(user, provider, code) do
@@ -45,13 +45,16 @@ defmodule CaptainFact.Authenticator do
     end
   end
 
-  @doc"""
+  @doc """
   Dissociate given third party from user's account
   """
   def disscociate_third_party(user, provider) do
     OAuth.unlink_provider(user, provider)
   end
 
-  defp validate_pass(_encrypted, password) when password in [nil, ""], do: false
-  defp validate_pass(encrypted, password), do: Comeonin.Bcrypt.checkpw(password, encrypted)
+  defp validate_pass(_encrypted, password) when password in [nil, ""], 
+    do: false
+
+  defp validate_pass(encrypted, password),
+    do: Bcrypt.verify_pass(password, encrypted)
 end

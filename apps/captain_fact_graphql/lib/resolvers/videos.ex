@@ -1,4 +1,8 @@
 defmodule CaptainFactGraphql.Resolvers.Videos do
+  @moduledoc """
+  Resolver for `DB.Schema.Video`
+  """
+
   alias DB.Repo
   alias DB.Schema.Video
 

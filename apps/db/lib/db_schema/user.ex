@@ -1,4 +1,9 @@
 defmodule DB.Schema.User do
+  @moduledoc """
+  Represent a user that can login on the website. Users can be marked as
+  `publisher` which allow them to post videos without limitations.
+  """
+
   use Ecto.Schema
   use Arc.Ecto.Schema
   import Ecto.Changeset
@@ -110,7 +115,12 @@ defmodule DB.Schema.User do
 
   @token_length 32
   defp generate_email_verification_token(changeset, false),
-    do: put_change(changeset, :email_confirmation_token, DB.Utils.TokenGenerator.generate(@token_length))
+    do: put_change(
+      changeset, 
+      :email_confirmation_token, 
+      DB.Utils.TokenGenerator.generate(@token_length)
+    )
+
   defp generate_email_verification_token(changeset, true),
     do: put_change(changeset, :email_confirmation_token, nil)
 
@@ -121,7 +131,7 @@ defmodule DB.Schema.User do
     |> unique_constraint(:email)
     |> unique_constraint(:username)
     |> update_change(:username, &String.trim/1)
-    |> update_change(:name,&format_name/1)
+    |> update_change(:name, &format_name/1)
     |> validate_length(:username, min: 5, max: 15)
     |> validate_length(:name, min: 2, max: 20)
     |> validate_email()
@@ -134,7 +144,7 @@ defmodule DB.Schema.User do
     case changeset do
       %Ecto.Changeset{valid?: true, changes: %{password: pass}} ->
         changeset
-        |> put_change(:encrypted_password, Comeonin.Bcrypt.hashpwsalt(pass))
+        |> put_change(:encrypted_password, Bcrypt.hash_pwd_salt(pass))
         |> delete_change(:password)
       _ ->
         changeset

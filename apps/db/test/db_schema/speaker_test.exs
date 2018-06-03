@@ -4,7 +4,7 @@ defmodule DB.Schema.SpeakerTest do
   alias DB.Schema.Speaker
 
   @valid_attrs %{
-    full_name: "#{Faker.Name.first_name} #{Faker.Name.last_name}"
+    full_name: "#{Faker.Name.first_name()} #{Faker.Name.last_name()}"
   }
   @invalid_attrs %{}
 
@@ -42,7 +42,9 @@ defmodule DB.Schema.SpeakerTest do
     changeset = Speaker.changeset(%Speaker{}, Map.put(@valid_attrs, :full_name, "   Hector    "))
     assert changeset.changes.full_name == "Hector"
 
-    changeset = Speaker.changeset(%Speaker{}, Map.put(@valid_attrs, :title, "   King     of the world    "))
+    changeset =
+      Speaker.changeset(%Speaker{}, Map.put(@valid_attrs, :title, "   King     of the world    "))
+
     assert changeset.changes.title == "King of the world"
   end
 end

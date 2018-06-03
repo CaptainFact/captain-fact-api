@@ -1,6 +1,5 @@
 use Mix.Config
 
-
 # Configure your database
 config :db, DB.Repo,
   username: "postgres",
