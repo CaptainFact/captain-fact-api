@@ -1,6 +1,5 @@
 use Mix.Config
 
-
 # General config
 config :captain_fact, frontend_url: "https://TEST_FRONTEND"
 

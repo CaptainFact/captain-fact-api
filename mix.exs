@@ -5,8 +5,8 @@ defmodule CaptainFactAPI.Mixfile do
     [
       apps_path: "apps",
       deps_path: "deps",
-      build_embedded: Mix.env == :prod,
-      start_permanent: Mix.env == :prod,
+      build_embedded: Mix.env() == :prod,
+      start_permanent: Mix.env() == :prod,
       deps: deps(),
       aliases: aliases(),
       test_coverage: [tool: ExCoveralls],

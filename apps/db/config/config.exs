@@ -1,9 +1,8 @@
 use Mix.Config
 
-
 # General application configuration
 config :db,
-  env: Mix.env,
+  env: Mix.env(),
   ecto_repos: [DB.Repo]
 
 # Database: use postgres
@@ -12,4 +11,4 @@ config :db, DB.Repo,
   pool_size: 20
 
 # Import environment specific config
-import_config "#{Mix.env}.exs"
+import_config "#{Mix.env()}.exs"

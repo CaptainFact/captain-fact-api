@@ -5,10 +5,9 @@
 # is restricted to this project.
 use Mix.Config
 
-
 # General application configuration
 config :captain_fact,
-  env: Mix.env,
+  env: Mix.env(),
   ecto_repos: [DB.Repo],
   cors_origins: [],
   oauth: [facebook: []]
@@ -55,4 +54,4 @@ config :weave,
   loaders: [Weave.Loaders.Environment]
 
 # Import environment specific config
-import_config "#{Mix.env}.exs"
+import_config "#{Mix.env()}.exs"

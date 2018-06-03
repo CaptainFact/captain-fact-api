@@ -6,7 +6,7 @@ defmodule DB.Schema.UserTest do
   @valid_attrs %{
     name: "Jouje BigBrother",
     username: "Hell0World",
-    email: Faker.Internet.email,
+    email: Faker.Internet.email(),
     password: "@StrongP4ssword!",
     locale: "en"
   }
@@ -62,30 +62,43 @@ defmodule DB.Schema.UserTest do
   test "email must not be a temporary email (yopmail, jetable.org...etc)" do
     provider = "jetable.org"
     attrs = %{email: "xxxxx@#{provider}"}
-    assert {:email, "forbidden_provider"} in errors_on(%User{}, attrs), "didn't reject #{provider}'"
+
+    assert {:email, "forbidden_provider"} in errors_on(%User{}, attrs),
+           "didn't reject #{provider}'"
   end
 
   test "username should not contains forbidden words" do
     changeset = User.registration_changeset(%User{}, %{@valid_attrs | username: "toto-Admin"})
     refute changeset.valid?
 
-    changeset = User.registration_changeset(%User{}, %{@valid_attrs | username: "toCaptainFactto"})
+    changeset =
+      User.registration_changeset(%User{}, %{@valid_attrs | username: "toCaptainFactto"})
+
     refute changeset.valid?
   end
 
   test "username cannot contains illegal characters" do
     ' !*();:@&=+$,/?#[].\'\\'
     |> Enum.map(fn char ->
-         changeset = User.registration_changeset(%User{}, %{@valid_attrs | username: "x42xxx#{<<char::utf8>>}xx"})
-         refute changeset.valid?, "Illegal character '#{<<char::utf8>>}' accepted in username when it should not"
-       end)
+      changeset =
+        User.registration_changeset(%User{}, %{
+          @valid_attrs
+          | username: "x42xxx#{<<char::utf8>>}xx"
+        })
+
+      refute changeset.valid?,
+             "Illegal character '#{<<char::utf8>>}' accepted in username when it should not"
+    end)
   end
 
   test "name cannot contains illegal characters" do
     '!*();:@&=+$,/?#[].\'\\0123456789'
     |> Enum.map(fn char ->
-      changeset = User.registration_changeset(%User{}, %{@valid_attrs | name: "xxxx#{<<char::utf8>>}xx"})
-      refute changeset.valid?, "Illegal character '#{<<char::utf8>>}' accepted in name when it should not"
+      changeset =
+        User.registration_changeset(%User{}, %{@valid_attrs | name: "xxxx#{<<char::utf8>>}xx"})
+
+      refute changeset.valid?,
+             "Illegal character '#{<<char::utf8>>}' accepted in name when it should not"
     end)
   end
 
@@ -100,10 +113,12 @@ defmodule DB.Schema.UserTest do
   end
 
   test "name and username are trim" do
-    changeset = User.registration_changeset(%User{}, %{@valid_attrs | 
-      name: "    test  test  ",
-      username: "    testtest "
-    })
+    changeset =
+      User.registration_changeset(%User{}, %{
+        @valid_attrs
+        | name: "    test  test  ",
+          username: "    testtest "
+      })
 
     assert changeset.valid?
     assert changeset.changes.name == "test test"
