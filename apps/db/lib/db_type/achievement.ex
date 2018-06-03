@@ -1,6 +1,11 @@
 defmodule DB.Type.Achievement do
+  @moduledoc """
+  Translate a user achievement from atom to integer.
+  """
+  
   @doc"""
-  Get an achievement id from an easy to use / remember atom. You can add more at the end, but you CANNOT change
+  Get an achievement id from an easy to use / remember atom. 
+  You can add more at the end, but you CANNOT change
   existing identifiers, it would break existing achievements
   """
   def get(:welcome),            do: 1

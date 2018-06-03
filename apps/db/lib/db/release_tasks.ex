@@ -1,4 +1,10 @@
 defmodule DB.ReleaseTasks do
+  @moduledoc """
+  Contains release tasks run by `distillery` on startup. You can find the
+  entrypoints of these commands in `rel/commands/*.sh`, `rel/hooks/*` and the 
+  configuration in `rel/config.exs`
+  """
+
   require Logger
 
   @start_apps [

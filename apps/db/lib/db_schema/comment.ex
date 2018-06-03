@@ -1,4 +1,8 @@
 defmodule DB.Schema.Comment do
+  @moduledoc """
+  Represent a user comment that can be linked to a source
+  """
+
   use Ecto.Schema
   import Ecto.{Changeset, Query}
 
