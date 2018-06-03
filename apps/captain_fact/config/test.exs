@@ -24,3 +24,6 @@ config :captain_fact, CaptainFact.Scheduler, jobs: []
 
 # Mails
 config :captain_fact, CaptainFactMailer, adapter: Bamboo.TestAdapter
+
+# Reduce the number of round for encryption during tests
+config :bcrypt_elixir, :log_rounds, 4

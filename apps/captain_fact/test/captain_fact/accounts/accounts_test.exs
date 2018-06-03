@@ -91,8 +91,8 @@ defmodule CaptainFact.AccountsTest do
         |> Repo.insert!()
 
       updated_user = Accounts.confirm_password_reset!(req.token, new_password)
-      refute Comeonin.Bcrypt.checkpw(new_password, user.encrypted_password)
-      assert Comeonin.Bcrypt.checkpw(new_password, updated_user.encrypted_password)
+      refute Bcrypt.verify_pass(new_password, user.encrypted_password)
+      assert Bcrypt.verify_pass(new_password, updated_user.encrypted_password)
 
       nb_requests =
         ResetPasswordRequest

@@ -144,7 +144,7 @@ defmodule DB.Schema.User do
     case changeset do
       %Ecto.Changeset{valid?: true, changes: %{password: pass}} ->
         changeset
-        |> put_change(:encrypted_password, Comeonin.Bcrypt.hashpwsalt(pass))
+        |> put_change(:encrypted_password, Bcrypt.hash_pwd_salt(pass))
         |> delete_change(:password)
       _ ->
         changeset
