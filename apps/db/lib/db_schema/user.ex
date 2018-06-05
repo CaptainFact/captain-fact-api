@@ -25,6 +25,7 @@ defmodule DB.Schema.User do
     field :newsletter, :boolean, default: true
     field :newsletter_subscription_token, :string
     field :is_publisher, :boolean, default: false
+    field :completed_onboarding_steps, {:array, :integer}, default: []
 
     # Social networks profiles
     field :fb_user_id, :string
@@ -116,8 +117,8 @@ defmodule DB.Schema.User do
   @token_length 32
   defp generate_email_verification_token(changeset, false),
     do: put_change(
-      changeset, 
-      :email_confirmation_token, 
+      changeset,
+      :email_confirmation_token,
       DB.Utils.TokenGenerator.generate(@token_length)
     )
 
@@ -183,9 +184,9 @@ defmodule DB.Schema.User do
   defp validate_username(changeset = %{changes: %{username: username}}) do
     lower_username = String.downcase(username)
     case Enum.find(@forbidden_username_keywords, &String.contains?(lower_username, &1)) do
-      nil -> 
+      nil ->
         validate_format(changeset, :username, @username_regex)
-      keyword -> 
+      keyword ->
         add_error(changeset, :username, "contains a foridden keyword: #{keyword}")
     end
   end
