@@ -16,7 +16,12 @@ defmodule CaptainFactAPI.Mixfile do
 
   defp deps do
     [
+      {:kaur, "~> 1.1"},
+
+      # ---- Release ----
       {:distillery, "~> 1.5", runtime: false},
+
+      # ---- Test and Dev
       {:excoveralls, "~> 0.8", only: :test},
       {:credo, "~> 0.9.1", only: [:dev, :test], runtime: false},
       {:mix_test_watch, "~> 0.6", only: :dev, runtime: false}
