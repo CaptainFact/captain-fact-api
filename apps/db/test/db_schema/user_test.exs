@@ -166,7 +166,7 @@ defmodule DB.Schema.UserTest do
     refute changeset.changes[:achievements]
   end
 
-  describe "completed_onboarded_steps" do
+  describe "completed onboarding steps" do
     test "for fresh user default is empty array" do
       user = User.registration_changeset(%User{}, @valid_attrs)
       |> Ecto.Changeset.apply_changes
@@ -184,10 +184,20 @@ defmodule DB.Schema.UserTest do
 
     test "with integers out of the 0..30 range are not accepted" do
       changeset =
-      %User{completed_onboarding_steps: [2,4,6,8]}
-      |> User.changeset_completed_onboarding_step(7)
+        %User{completed_onboarding_steps: [2,4,6,8]}
+        |> User.changeset_completed_onboarding_step(75)
 
-      assert changeset.valid?
+      refute changeset.valid?
+      assert (not is_nil(changeset.errors[:completed_onboarding_steps]))
+    end
+
+    test "are updated when valids" do
+      user =
+        %User{}
+        |> User.changeset_completed_onboarding_step(2)
+        |> Ecto.Changeset.apply_changes
+
+      assert user.completed_onboarding_steps == [2]
     end
   end
 end

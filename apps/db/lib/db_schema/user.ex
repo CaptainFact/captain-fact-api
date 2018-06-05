@@ -116,9 +116,12 @@ defmodule DB.Schema.User do
 
   @spec changeset_completed_onboarding_step(%__MODULE__{}, integer)::Changeset.t
   def changeset_completed_onboarding_step(model, completed_oboarding_step) do
-    updated_completed_onboarding_steps = Enum.uniq([completed_oboarding_step | model.completed_onboarding_steps])
+    updated_completed_onboarding_steps =
+      [completed_oboarding_step | model.completed_onboarding_steps]
+      |> Enum.uniq
 
-    change(model, completed_onboarding_step: updated_completed_onboarding_steps)
+    model
+    |> change(completed_onboarding_steps: updated_completed_onboarding_steps)
     |> validate_subset(:completed_onboarding_steps, 0..30)
   end
 
