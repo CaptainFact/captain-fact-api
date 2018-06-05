@@ -18,6 +18,7 @@ defmodule CaptainFact.Accounts do
   alias CaptainFact.Accounts.{UsernameGenerator, UserPermissions}
   alias CaptainFact.Actions.Recorder
 
+  alias Kaur.Result
 
   @max_ip_reset_requests 3
   @request_validity 48 * 60 * 60 # 48 hours
@@ -205,6 +206,32 @@ defmodule CaptainFact.Accounts do
         |> Repo.update!()
       end)
     end
+  end
+
+  # ---- Onboarding Steps ----
+
+  @doc """
+  add the given `step` to `user`
+
+  Returns `{:ok, updated_user}` or `{:error, reason}`.
+  """
+  @spec complete_onboarding_step(%User{}, integer) :: {:ok, %User{}} | {:error, any}
+  def complete_onboarding_step(%User{} = user, step) do
+    user
+    |> User.changeset_completed_onboarding_step(step)
+    |> Repo.update
+    |> Result.map_error(&(&1.errors[:complete_onboarding_steps]))
+  end
+
+  @doc """
+  reinitialize onboarding steps for `user`
+
+  Returns `{:ok, updated_user}` or `{:error, reason}`.
+  """
+  def delete_onboarding(%User{} = user) do
+    user
+    |> User.changeset_delete_onboarding
+    |> Repo.update
   end
 
   # ---- Reputation ----
@@ -404,4 +431,3 @@ defmodule CaptainFact.Accounts do
     |> Repo.one!()
   end
 end
-

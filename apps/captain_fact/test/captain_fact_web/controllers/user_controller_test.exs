@@ -230,4 +230,32 @@ defmodule CaptainFactWeb.UserControllerTest do
     response(get(build_conn(), "/users/me/available_flags"), 401) =~ "unauthorized"
     response(delete(build_conn(), "/users/me"), 401) =~ "unauthorized"
   end
+
+  describe "get complete_onboarding_step" do
+    test "returns 200 for valid value" do
+      :user
+      |> insert
+      |> build_authenticated_conn
+      |> post("users/me/onboarding/complete_step", %{step: 12})
+      |> json_response(:ok)
+    end
+
+    test "returns 422 for unvalid value" do
+      :user
+      |> insert()
+      |> build_authenticated_conn
+      |> post("users/me/onboarding/complete_step", %{step: 72})
+      |> json_response(:unprocessable_entity)
+    end
+  end
+
+  describe "delete onboarding" do
+    test "returns 200" do
+      :user
+      |> insert(completed_onboarding_steps: [1,2])
+      |> build_authenticated_conn
+      |> delete("/users/me/onboarding")
+      |> json_response(:ok)
+    end
+  end
 end

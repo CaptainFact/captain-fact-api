@@ -114,6 +114,12 @@ defmodule DB.Schema.User do
     Ecto.Changeset.change(model, achievements: updated_achievements)
   end
 
+
+  # --- Onboarding steps ----
+
+  @doc """
+  an Ecto changeset to add one step in user's completed steps
+  """
   @spec changeset_completed_onboarding_step(%__MODULE__{}, integer)::Changeset.t
   def changeset_completed_onboarding_step(model, completed_oboarding_step) do
     updated_completed_onboarding_steps =
@@ -123,6 +129,15 @@ defmodule DB.Schema.User do
     model
     |> change(completed_onboarding_steps: updated_completed_onboarding_steps)
     |> validate_subset(:completed_onboarding_steps, 0..30)
+  end
+
+  @doc """
+  an Ecto changeset to reinit user's onboarding's step
+  """
+  @spec changeset_delete_onboarding(%__MODULE__{})::Changeset.t
+  def changeset_delete_onboarding(%__MODULE__{} = model) do
+    model
+    |> change(completed_oboarding_steps: [])
   end
 
   @token_length 32

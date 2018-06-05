@@ -8,6 +8,7 @@ defmodule CaptainFactWeb.UserController do
   alias CaptainFact.Accounts.UserPermissions
   alias CaptainFactWeb.UserView
 
+  alias Kaur.Result
 
   action_fallback CaptainFactWeb.FallbackController
 
@@ -92,6 +93,40 @@ defmodule CaptainFactWeb.UserController do
     end
   end
 
+  # ---- Onboarding step ----
+
+  def complete_onboarding_step(conn, %{"step" => step}) do
+    conn
+    |> Guardian.Plug.current_resource
+    |> Accounts.complete_onboarding_step(step)
+    |> Result.either(
+      fn reason ->
+        conn
+        |> put_status(422)
+        |> json(%{error: reason})
+      end,
+      fn user ->
+        conn
+        |> render(UserView, :show, user: user)
+      end
+    )
+  end
+
+  def delete_onboarding(conn, _params) do
+    conn
+    |> Guardian.Plug.current_resource
+    |> Accounts.delete_onboarding
+    |> Result.either(
+      fn _reason ->
+        Result.error("unexpected")
+      end,
+      fn user ->
+        conn
+        |> render(UserView, :show, user: user)
+      end
+    )
+  end
+
   # ---- Reset password ----
 
   def reset_password_request(conn, %{"email" => email}) do
@@ -140,4 +175,6 @@ defmodule CaptainFactWeb.UserController do
         send_resp(conn, 204, "")
     end
   end
+
+
 end
