@@ -207,6 +207,17 @@ defmodule CaptainFact.Accounts do
     end
   end
 
+  # ---- Link speaker ----
+
+  @doc """
+  Link a speaker to given user.
+  """
+  def link_speaker(user, speaker) do
+    user
+    |> User.changeset_link_speaker(speaker)
+    |> Repo.update()
+  end
+
   # ---- Reputation ----
 
   @doc"""
@@ -382,6 +393,7 @@ defmodule CaptainFact.Accounts do
   end
 
   # ---- Newsletter ----
+
   def send_newsletter(subject, html_body, locale_filter \\ nil) do
     User
     |> filter_newsletter_targets(locale_filter)
