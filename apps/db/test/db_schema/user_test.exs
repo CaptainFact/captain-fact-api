@@ -168,8 +168,10 @@ defmodule DB.Schema.UserTest do
 
   describe "completed onboarding steps" do
     test "for fresh user default is empty array" do
-      user = User.registration_changeset(%User{}, @valid_attrs)
-      |> Ecto.Changeset.apply_changes
+      user =
+        %User{}
+        |> User.registration_changeset(@valid_attrs)
+        |> Ecto.Changeset.apply_changes
 
       assert user.completed_onboarding_steps == []
     end

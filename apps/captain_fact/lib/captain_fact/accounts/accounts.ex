@@ -216,7 +216,7 @@ defmodule CaptainFact.Accounts do
   Returns `{:ok, updated_user}` or `{:error, reason}`.
   """
   @spec complete_onboarding_step(%User{}, integer) :: {:ok, %User{}} | {:error, any}
-  def complete_onboarding_step(%User{} = user, step) do
+  def complete_onboarding_step(user = %User{}, step) do
     user
     |> User.changeset_completed_onboarding_step(step)
     |> Repo.update
@@ -228,7 +228,7 @@ defmodule CaptainFact.Accounts do
 
   Returns `{:ok, updated_user}` or `{:error, reason}`.
   """
-  def delete_onboarding(%User{} = user) do
+  def delete_onboarding(user = %User{}) do
     user
     |> User.changeset_delete_onboarding
     |> Repo.update

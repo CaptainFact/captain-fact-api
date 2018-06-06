@@ -135,9 +135,8 @@ defmodule DB.Schema.User do
   an Ecto changeset to reinit user's onboarding's step
   """
   @spec changeset_delete_onboarding(%__MODULE__{})::Changeset.t
-  def changeset_delete_onboarding(%__MODULE__{} = model) do
-    model
-    |> change(completed_oboarding_steps: [])
+  def changeset_delete_onboarding(model = %__MODULE__{}) do
+    change(model, completed_oboarding_steps: [])
   end
 
   @token_length 32
