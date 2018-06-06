@@ -241,6 +241,13 @@ defmodule CaptainFact.AccountsTest do
     end
   end
 
+  test "link speaker" do
+    user = insert(:user, speaker: nil)
+    speaker = insert(:speaker)
+    {:ok, updated_user} = Accounts.link_speaker(user, speaker)
+    assert updated_user.speaker_id == speaker.id
+  end
+
   describe "complete_onboarding_step/2" do
     test "it returns {:ok, %User{}} when success" do
       user =

@@ -1,6 +1,7 @@
 defmodule DB.Schema.UserTest do
   use DB.DataCase, async: true
 
+  import DB.Factory, only: [insert: 1, insert: 2]
   alias DB.Schema.User
 
   @valid_attrs %{
@@ -164,6 +165,13 @@ defmodule DB.Schema.UserTest do
   test "empty changeset if no changes in achievements" do
     changeset = User.changeset_achievement(%User{achievements: [1, 1, 1, 3, 8, 8, 5, 6, 6]}, 3)
     refute changeset.changes[:achievements]
+  end
+
+  test "changeset_link_speaker generate a changeset with linked speaker" do
+    user = insert(:user, speaker: nil)
+    speaker = insert(:speaker)
+    changeset = User.changeset_link_speaker(user, speaker)
+    assert changeset.changes.speaker_id == speaker.id
   end
 
   describe "completed onboarding steps" do
