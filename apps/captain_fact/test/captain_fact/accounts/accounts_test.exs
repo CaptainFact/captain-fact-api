@@ -236,4 +236,11 @@ defmodule CaptainFact.AccountsTest do
       assert achievement in updated.achievements
     end
   end
+
+  test "link speaker" do
+    user = insert(:user, speaker: nil)
+    speaker = insert(:speaker)
+    {:ok, updated_user} = Accounts.link_speaker(user, speaker)
+    assert updated_user.speaker_id == speaker.id
+  end
 end

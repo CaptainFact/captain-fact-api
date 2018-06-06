@@ -9,7 +9,7 @@ defmodule DB.Schema.User do
   import Ecto.Changeset
 
   alias DB.Type.{Achievement, UserPicture}
-  alias DB.Schema.{UserAction, Comment, Vote, Flag}
+  alias DB.Schema.{UserAction, Comment, Vote, Flag, Speaker}
 
 
   schema "users" do
@@ -40,8 +40,9 @@ defmodule DB.Schema.User do
     has_many :actions, UserAction, on_delete: :nilify_all
     has_many :comments, Comment, on_delete: :delete_all
     has_many :votes, Vote, on_delete: :delete_all
-
     has_many :flags_posted, Flag, foreign_key: :source_user_id, on_delete: :delete_all
+
+    belongs_to :speaker, Speaker
 
     timestamps()
   end
@@ -111,6 +112,13 @@ defmodule DB.Schema.User do
       else: Enum.uniq([achievement | model.achievements])
 
     Ecto.Changeset.change(model, achievements: updated_achievements)
+  end
+
+  @doc """
+  Generate a changeset to link given `speaker` to user
+  """
+  def changeset_link_speaker(model, %Speaker{id: id}) do
+    change(model, speaker_id: id)
   end
 
   @token_length 32
