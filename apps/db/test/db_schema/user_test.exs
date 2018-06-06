@@ -171,6 +171,6 @@ defmodule DB.Schema.UserTest do
     user = insert(:user, speaker: nil)
     speaker = insert(:speaker)
     changeset = User.changeset_link_speaker(user, speaker)
-    assert changeset.changes.speaker.data.id == speaker.id
+    assert changeset.changes.speaker_id == speaker.id
   end
 end
