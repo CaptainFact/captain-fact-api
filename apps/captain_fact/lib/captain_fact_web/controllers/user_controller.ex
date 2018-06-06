@@ -13,7 +13,15 @@ defmodule CaptainFactWeb.UserController do
   action_fallback CaptainFactWeb.FallbackController
 
   plug Guardian.Plug.EnsureAuthenticated, [handler: CaptainFactWeb.AuthController]
-  when action in [:update, :delete, :available_flags, :show_me, :unlock_achievement]
+  when action in [
+    :update,
+    :delete,
+    :available_flags,
+    :show_me,
+    :unlock_achievement,
+    :complete_onboarding_step,
+    :delete_onboarding
+  ]
 
 
   def create(conn, params = %{"user" => user_params}) do
