@@ -231,7 +231,7 @@ defmodule CaptainFactWeb.UserControllerTest do
     response(delete(build_conn(), "/users/me"), 401) =~ "unauthorized"
   end
 
-  describe "get complete_onboarding_step" do
+  describe "post complete_onboarding_step" do
     test "returns 200 for valid value" do
       :user
       |> insert
@@ -245,6 +245,24 @@ defmodule CaptainFactWeb.UserControllerTest do
       |> insert()
       |> build_authenticated_conn
       |> post("users/me/onboarding/complete_step", %{step: 72})
+      |> json_response(:unprocessable_entity)
+    end
+  end
+
+  describe "post complete_onboarding_steps" do
+    test "returns 200 for valid value" do
+      :user
+      |> insert
+      |> build_authenticated_conn
+      |> post("users/me/onboarding/complete_steps", %{steps: [1, 3, 5]})
+      |> json_response(:ok)
+    end
+
+    test "returns 422 for unvalid value" do
+      :user
+      |> insert
+      |> build_authenticated_conn
+      |> post("users/me/onboarding/complete_steps", %{steps: [1, 3, 76]})
       |> json_response(:unprocessable_entity)
     end
   end

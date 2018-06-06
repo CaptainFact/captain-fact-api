@@ -5,6 +5,10 @@ defmodule CaptainFact.AccountsTest do
   alias CaptainFact.Accounts
   alias CaptainFactJobs.{Reputation, Achievements}
 
+  alias DB.Schema.User
+
+  alias Kaur.Result
+
   describe "update user" do
     test "check user is updated" do
       user = insert(:user)
@@ -234,6 +238,66 @@ defmodule CaptainFact.AccountsTest do
       Accounts.unlock_achievement(user, achievement)
       updated = Repo.get(DB.Schema.User, user.id)
       assert achievement in updated.achievements
+    end
+  end
+
+  describe "complete_onboarding_step/2" do
+    test "it returns {:ok, %User{}} when success" do
+      user =
+        :user
+        |> insert(completed_onboarding_steps: [])
+        |> Accounts.complete_onboarding_step(2)
+
+      assert {:ok, %User{}} = user
+    end
+
+    test "user returned has right onboarding steps" do
+      user =
+        :user
+        |> insert(completed_onboarding_steps: [])
+        |> Accounts.complete_onboarding_step(2)
+
+      assert {:ok, %User{completed_onboarding_steps: [2]}} = user
+    end
+
+    test "it fails with an error tuple" do
+      error =
+        :user
+        |> insert(completed_onboarding_steps: [])
+        |> Accounts.complete_onboarding_step(72)
+
+
+      assert Result.error?(error)
+    end
+  end
+
+  describe "complete_onboarding_steps/2" do
+    test "it returns {:ok, %User{}} when success" do
+      user =
+        :user
+        |> insert(completed_onboarding_steps: [])
+        |> Accounts.complete_onboarding_steps([1, 2])
+
+      assert {:ok, %User{}} = user
+    end
+
+    test "user returned has right onboarding steps" do
+      user =
+        :user
+        |> insert(completed_onboarding_steps: [])
+        |> Accounts.complete_onboarding_steps([1, 2])
+
+      assert {:ok, %User{completed_onboarding_steps: [1, 2]}} = user
+    end
+
+    test "it fails with an error tuple" do
+      error =
+        :user
+        |> insert(completed_onboarding_steps: [])
+        |> Accounts.complete_onboarding_steps([1, 72])
+
+
+      assert Result.error?(error)
     end
   end
 end

@@ -110,8 +110,25 @@ defmodule CaptainFactWeb.UserController do
     |> Result.either(
       fn reason ->
         conn
-        |> put_status(422)
-        |> json(%{error: reason})
+        |> put_status(:unprocessable_entity)
+        |> render(CaptainFactWeb.ChangesetView, "error.json", %{changeset: reason})
+      end,
+      fn user ->
+        conn
+        |> render(UserView, :show, user: user)
+      end
+    )
+  end
+
+  def complete_onboarding_steps(conn, %{"steps" => steps} = _params) do
+    conn
+    |> Guardian.Plug.current_resource
+    |> Accounts.complete_onboarding_steps(steps)
+    |> Result.either(
+      fn reason ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> render(CaptainFactWeb.ChangesetView, "error.json", %{changeset: reason})
       end,
       fn user ->
         conn

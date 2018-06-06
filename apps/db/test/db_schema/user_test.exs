@@ -176,18 +176,35 @@ defmodule DB.Schema.UserTest do
       assert user.completed_onboarding_steps == []
     end
 
-    test "in valid range are accepted" do
+    test "accepts an integer in between 0..30" do
       changeset =
         %User{completed_onboarding_steps: [2,4,6,8]}
-        |> User.changeset_completed_onboarding_step(7)
+        |> User.changeset_completed_onboarding_steps(7)
 
       assert changeset.valid?
     end
 
-    test "with integers out of the 0..30 range are not accepted" do
+    test "does not accept an integer out of 0..30" do
       changeset =
         %User{completed_onboarding_steps: [2,4,6,8]}
-        |> User.changeset_completed_onboarding_step(75)
+        |> User.changeset_completed_onboarding_steps(75)
+
+      refute changeset.valid?
+      assert (not is_nil(changeset.errors[:completed_onboarding_steps]))
+    end
+
+    test "accepts a list of integers in between 0..30" do
+      changeset =
+        %User{completed_onboarding_steps: [2,4,6,8]}
+        |> User.changeset_completed_onboarding_steps([7,9])
+
+      assert changeset.valid?
+    end
+
+    test "does not accepts a list of integers with element out of 0..30" do
+      changeset =
+        %User{completed_onboarding_steps: [2,4,6,8]}
+        |> User.changeset_completed_onboarding_steps([7,9,75])
 
       refute changeset.valid?
       assert (not is_nil(changeset.errors[:completed_onboarding_steps]))
@@ -196,7 +213,7 @@ defmodule DB.Schema.UserTest do
     test "are updated when valids" do
       user =
         %User{}
-        |> User.changeset_completed_onboarding_step(2)
+        |> User.changeset_completed_onboarding_steps(2)
         |> Ecto.Changeset.apply_changes
 
       assert user.completed_onboarding_steps == [2]

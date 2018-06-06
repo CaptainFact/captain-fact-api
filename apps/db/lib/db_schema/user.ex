@@ -118,13 +118,20 @@ defmodule DB.Schema.User do
   # --- Onboarding steps ----
 
   @doc """
-  an Ecto changeset to add one step in user's completed steps
+  an Ecto changeset to add one step or a list of steps in user's completed steps
   """
-  @spec changeset_completed_onboarding_step(%__MODULE__{}, integer)::Changeset.t
-  def changeset_completed_onboarding_step(model, completed_oboarding_step) do
+  @spec changeset_completed_onboarding_steps(%__MODULE__{}, (integer | list))::Changeset.t
+  def changeset_completed_onboarding_steps(model = %__MODULE__{}, to_complete) do
     updated_completed_onboarding_steps =
-      [completed_oboarding_step | model.completed_onboarding_steps]
-      |> Enum.uniq
+      case to_complete do
+        _ when is_integer(to_complete) ->
+          [to_complete | model.completed_onboarding_steps]
+          |> Enum.uniq
+
+        _ when is_list(to_complete) ->
+          (to_complete ++ model.completed_onboarding_steps)
+          |> Enum.uniq
+      end
 
     model
     |> change(completed_onboarding_steps: updated_completed_onboarding_steps)
@@ -136,7 +143,7 @@ defmodule DB.Schema.User do
   """
   @spec changeset_delete_onboarding(%__MODULE__{})::Changeset.t
   def changeset_delete_onboarding(model = %__MODULE__{}) do
-    change(model, completed_oboarding_steps: [])
+    change(model, completed_onboarding_steps: [])
   end
 
   @token_length 32
