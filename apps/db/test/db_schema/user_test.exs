@@ -173,4 +173,58 @@ defmodule DB.Schema.UserTest do
     changeset = User.changeset_link_speaker(user, speaker)
     assert changeset.changes.speaker_id == speaker.id
   end
+
+  describe "completed onboarding steps" do
+    test "for fresh user default is empty array" do
+      user =
+        %User{}
+        |> User.registration_changeset(@valid_attrs)
+        |> Ecto.Changeset.apply_changes
+
+      assert user.completed_onboarding_steps == []
+    end
+
+    test "accepts an integer in between 0..30" do
+      changeset =
+        %User{completed_onboarding_steps: [2,4,6,8]}
+        |> User.changeset_completed_onboarding_steps(7)
+
+      assert changeset.valid?
+    end
+
+    test "does not accept an integer out of 0..30" do
+      changeset =
+        %User{completed_onboarding_steps: [2,4,6,8]}
+        |> User.changeset_completed_onboarding_steps(75)
+
+      refute changeset.valid?
+      assert (not is_nil(changeset.errors[:completed_onboarding_steps]))
+    end
+
+    test "accepts a list of integers in between 0..30" do
+      changeset =
+        %User{completed_onboarding_steps: [2,4,6,8]}
+        |> User.changeset_completed_onboarding_steps([7,9])
+
+      assert changeset.valid?
+    end
+
+    test "does not accepts a list of integers with element out of 0..30" do
+      changeset =
+        %User{completed_onboarding_steps: [2,4,6,8]}
+        |> User.changeset_completed_onboarding_steps([7,9,75])
+
+      refute changeset.valid?
+      assert (not is_nil(changeset.errors[:completed_onboarding_steps]))
+    end
+
+    test "are updated when valids" do
+      user =
+        %User{}
+        |> User.changeset_completed_onboarding_steps(2)
+        |> Ecto.Changeset.apply_changes
+
+      assert user.completed_onboarding_steps == [2]
+    end
+  end
 end

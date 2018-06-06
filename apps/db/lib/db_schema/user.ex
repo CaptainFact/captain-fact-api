@@ -25,6 +25,7 @@ defmodule DB.Schema.User do
     field :newsletter, :boolean, default: true
     field :newsletter_subscription_token, :string
     field :is_publisher, :boolean, default: false
+    field :completed_onboarding_steps, {:array, :integer}, default: []
 
     # Social networks profiles
     field :fb_user_id, :string
@@ -121,11 +122,43 @@ defmodule DB.Schema.User do
     change(model, speaker_id: id)
   end
 
+
+  # --- Onboarding steps ----
+
+  @doc """
+  an Ecto changeset to add one step or a list of steps in user's completed steps
+  """
+  @spec changeset_completed_onboarding_steps(%__MODULE__{}, (integer | list))::Changeset.t
+  def changeset_completed_onboarding_steps(model = %__MODULE__{}, to_complete) do
+    updated_completed_onboarding_steps =
+      case to_complete do
+        _ when is_integer(to_complete) ->
+          [to_complete | model.completed_onboarding_steps]
+          |> Enum.uniq
+
+        _ when is_list(to_complete) ->
+          (to_complete ++ model.completed_onboarding_steps)
+          |> Enum.uniq
+      end
+
+    model
+    |> change(completed_onboarding_steps: updated_completed_onboarding_steps)
+    |> validate_subset(:completed_onboarding_steps, 0..30)
+  end
+
+  @doc """
+  an Ecto changeset to reinit user's onboarding's step
+  """
+  @spec changeset_delete_onboarding(%__MODULE__{})::Changeset.t
+  def changeset_delete_onboarding(model = %__MODULE__{}) do
+    change(model, completed_onboarding_steps: [])
+  end
+
   @token_length 32
   defp generate_email_verification_token(changeset, false),
     do: put_change(
-      changeset, 
-      :email_confirmation_token, 
+      changeset,
+      :email_confirmation_token,
       DB.Utils.TokenGenerator.generate(@token_length)
     )
 
@@ -191,9 +224,9 @@ defmodule DB.Schema.User do
   defp validate_username(changeset = %{changes: %{username: username}}) do
     lower_username = String.downcase(username)
     case Enum.find(@forbidden_username_keywords, &String.contains?(lower_username, &1)) do
-      nil -> 
+      nil ->
         validate_format(changeset, :username, @username_regex)
-      keyword -> 
+      keyword ->
         add_error(changeset, :username, "contains a foridden keyword: #{keyword}")
     end
   end

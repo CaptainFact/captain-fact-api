@@ -8,11 +8,20 @@ defmodule CaptainFactWeb.UserController do
   alias CaptainFact.Accounts.UserPermissions
   alias CaptainFactWeb.UserView
 
+  alias Kaur.Result
 
   action_fallback CaptainFactWeb.FallbackController
 
   plug Guardian.Plug.EnsureAuthenticated, [handler: CaptainFactWeb.AuthController]
-  when action in [:update, :delete, :available_flags, :show_me, :unlock_achievement]
+  when action in [
+    :update,
+    :delete,
+    :available_flags,
+    :show_me,
+    :unlock_achievement,
+    :complete_onboarding_step,
+    :delete_onboarding
+  ]
 
 
   def create(conn, params = %{"user" => user_params}) do
@@ -92,6 +101,57 @@ defmodule CaptainFactWeb.UserController do
     end
   end
 
+  # ---- Onboarding step ----
+
+  def complete_onboarding_step(conn, %{"step" => step}) do
+    conn
+    |> Guardian.Plug.current_resource
+    |> Accounts.complete_onboarding_step(step)
+    |> Result.either(
+      fn reason ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> render(CaptainFactWeb.ChangesetView, "error.json", %{changeset: reason})
+      end,
+      fn user ->
+        conn
+        |> render(UserView, :show, user: user)
+      end
+    )
+  end
+
+  def complete_onboarding_steps(conn, %{"steps" => steps} = _params) do
+    conn
+    |> Guardian.Plug.current_resource
+    |> Accounts.complete_onboarding_steps(steps)
+    |> Result.either(
+      fn reason ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> render(CaptainFactWeb.ChangesetView, "error.json", %{changeset: reason})
+      end,
+      fn user ->
+        conn
+        |> render(UserView, :show, user: user)
+      end
+    )
+  end
+
+  def delete_onboarding(conn, _params) do
+    conn
+    |> Guardian.Plug.current_resource
+    |> Accounts.delete_onboarding
+    |> Result.either(
+      fn _reason ->
+        Result.error("unexpected")
+      end,
+      fn user ->
+        conn
+        |> render(UserView, :show, user: user)
+      end
+    )
+  end
+
   # ---- Reset password ----
 
   def reset_password_request(conn, %{"email" => email}) do
@@ -140,4 +200,6 @@ defmodule CaptainFactWeb.UserController do
         send_resp(conn, 204, "")
     end
   end
+
+
 end
