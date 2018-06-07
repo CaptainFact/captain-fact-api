@@ -72,7 +72,7 @@ defmodule CaptainFact.Accounts.UserPermissions do
   @doc """
   Check if user can execute action. Return `{:ok, nb_available}` if yes,
   `{:error, reason}` otherwise. This method is bypassed and returns {:ok, -1}
-  for :add :video actions if user is publisher.
+  if user is publisher.
 
   `nb_available` is -1 if there is no limit.
   `entity` may be nil **only if** we're checking for a wildcard
@@ -91,13 +91,7 @@ defmodule CaptainFact.Accounts.UserPermissions do
       iex> UserPermissions.check(user, :create, :comment)
       {:error, "limit_reached"}
   """
-  def check(%User{is_publisher: true}, :add, :video), 
-    do: {:ok, -1}
-
-  def check(%User{is_publisher: true}, :add, :speaker), 
-    do: {:ok, -1}
-
-  def check(%User{is_publisher: true}, :create, :speaker), 
+  def check(%User{is_publisher: true}, _, _), 
     do: {:ok, -1}
 
   def check(user = %User{}, action_type, entity) do
@@ -107,8 +101,10 @@ defmodule CaptainFact.Accounts.UserPermissions do
     else
       action_count = action_count(user, action_type, entity)
       if action_count >= limit do
+        # User should never be able to overthrow daily limitations, we must
+        # output a warning if we identify such an issue
         if action_count >= limit + @limit_warning_threshold,
-          do: Logger.info(fn -> 
+          do: Logger.warn(fn -> 
             "User #{user.username} (#{user.id}) overthrown its limit for [#{action_type} #{entity}] (#{action_count}/#{limit})" 
           end)
         {:error, @error_limit_reached}
