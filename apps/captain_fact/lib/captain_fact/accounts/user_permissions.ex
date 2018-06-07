@@ -128,8 +128,10 @@ defmodule CaptainFact.Accounts.UserPermissions do
   def check!(user, action_type, entity \\ nil)
   def check!(user = %User{}, action_type, entity) do
     case check(user, action_type, entity) do
-      {:error, message} -> raise %PermissionsError{message: message}
-      {:ok, nb_available} -> nb_available
+      {:error, message} -> 
+        raise %PermissionsError{message: message}
+      {:ok, nb_available} -> 
+        nb_available
     end
   end
 
@@ -179,7 +181,7 @@ defmodule CaptainFact.Accounts.UserPermissions do
   defp do_load_user!(user_id) do
     User
     |> where([u], u.id == ^user_id)
-    |> select([:id, :reputation])
+    |> select([:id, :reputation, :is_publisher])
     |> Repo.one!()
   end
 
