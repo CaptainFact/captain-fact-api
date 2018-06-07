@@ -5,7 +5,7 @@ defmodule CaptainFact.AccountsTest do
   alias CaptainFact.Accounts
   alias CaptainFactJobs.{Reputation, Achievements}
 
-  alias DB.Schema.User
+  alias DB.Schema.{InvitationRequest, User}
 
   alias Kaur.Result
 
@@ -123,6 +123,7 @@ defmodule CaptainFact.AccountsTest do
     end
 
     test "send mails when calling send_invites/1" do
+      Repo.delete_all(InvitationRequest)
       nb_invites = 10
       requests = insert_list(nb_invites, :invitation_request)
       Accounts.send_invites(nb_invites)
