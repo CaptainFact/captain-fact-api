@@ -31,5 +31,10 @@ defmodule CaptainFactGraphql.Schema do
     field :app_info, :app_info do
       resolve &Resolvers.AppInfo.info/3
     end
+
+    @desc "get all_statistics"
+    field :all_statistcs, :statistics do
+      resolve &Resolvers.Statistics.get/2
+    end
   end
 end

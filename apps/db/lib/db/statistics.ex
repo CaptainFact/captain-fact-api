@@ -44,8 +44,7 @@ defmodule DB.Statistics do
     from(
       u in User,
       order_by: [desc: u.reputation],
-      limit: 20,
-      select: {u.username, u.name, u.reputation}
+      limit: 20
     )
     |> Repo.all
   end
