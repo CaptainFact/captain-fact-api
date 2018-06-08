@@ -134,21 +134,25 @@ defmodule DB.StatisticsTest do
     test "returns the 20 with the best reputation" do
       leaderboard_reputation =
         Statistics.leaderboard
-        |> Enum.map(fn {_,_, reputation} -> reputation end)
+        |> Enum.map(fn %{reputation: reputation} -> reputation end)
 
       assert leaderboard_reputation == Enum.to_list(20..1)
     end
 
     test "returns tuples containing {username, name, reputation}" do
-      user_tuple =
-      {username, name, reputation} =
-        {"El Grande Fact Checkador", "Jean-Michel Mégalo", 9001}
+      username = "El Grande Fact Checkador"
+      name = "Jean-Michel Mégalo"
+      reputation = 9001 # 😱 HIS REPUTATION IS OVER 9000 !!!!!
 
       insert(:user, username: username, name: name, reputation: reputation)
 
       [top_leader | _] = Statistics.leaderboard()
 
-      assert top_leader == user_tuple
+      assert %User{
+        username: ^username,
+        name: ^name,
+        reputation: ^reputation
+      } = top_leader
     end
   end
 
