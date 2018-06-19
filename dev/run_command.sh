@@ -12,4 +12,4 @@ if [ "$#" -lt 1 ]; then
 fi
 
 cd -- "$(dirname $0)/.."
-docker run -it --rm --workdir=/app --network=host -v `pwd`:/app ${IMAGE} $@
+docker run -it --rm --workdir=/app -p 4000:4000 -v `pwd`:/app ${IMAGE} $@

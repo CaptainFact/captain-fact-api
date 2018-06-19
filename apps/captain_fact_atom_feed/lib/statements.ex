@@ -6,6 +6,8 @@ defmodule CaptainFactAtomFeed.Statements do
 
   @nb_items_max 50
 
+  @url Application.fetch_env(:captain_fact_atom_feed, :host)
+
   @doc"""
   Get an RSS feed containing all site's statements in reverse chronological
   order (newest first)
@@ -79,21 +81,21 @@ defmodule CaptainFactAtomFeed.Statements do
        do: "<a href='#{url}'>[Source] #{site_name}</a>"
 
   defp statement_url(nil) do
-    "https://captainfact.io/"
+    "#{@url}/"
   end
 
   defp statement_url(statement) do
     video_hash_id = DB.Type.VideoHashId.encode(statement.video_id)
-    "https://captainfact.io/videos/#{video_hash_id}?statement=#{statement.id}"
+    "#{@url}/videos/#{video_hash_id}?statement=#{statement.id}"
   end
 
   defp speaker_url(statement) do
-    "https://captainfact.io/s/#{statement.speaker_id}"
+    "#{@url}/s/#{statement.speaker_id}"
   end
 
   defp video_url(statement) do
     video_hash_id = DB.Type.VideoHashId.encode(statement.video_id)
-    "https://captainfact.io/videos/#{video_hash_id}"
+    "#{@url}/videos/#{video_hash_id}"
   end
 
 end

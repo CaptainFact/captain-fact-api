@@ -30,4 +30,10 @@ defmodule CaptainFactAtomFeed.Router do
     |> put_resp_content_type(@feed_content_type)
     |> send_resp(200, CaptainFactAtomFeed.Comments.feed_all())
   end
+
+  get "/statements" do
+    conn
+    |> put_resp_content_type(@feed_content_type)
+    |> send_resp(200, CaptainFactAtomFeed.Statements.feed_all())
+  end
 end
