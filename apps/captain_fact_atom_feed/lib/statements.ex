@@ -6,7 +6,7 @@ defmodule CaptainFactAtomFeed.Statements do
 
   @nb_items_max 50
 
-  @url Application.fetch_env(:captain_fact_atom_feed, :host)
+  @url "https://www.captainfact.io"
 
   @doc"""
   Get an RSS feed containing all site's statements in reverse chronological
@@ -54,7 +54,7 @@ defmodule CaptainFactAtomFeed.Statements do
     |> Entry.published(insert_datetime)
     |> Entry.content("""
           <div>ID: #{statement.id}</div>
-          <div>Time code: #{statement.time_code}</div>
+          <div>Time code: #{timecode_to_time(statement.time_code)}</div>
           <div>Text: #{statement.content}</div>
           <div>Posted at: #{insert_datetime}</div>
           <div>Video title: #{statement.video_title}</div>
@@ -66,6 +66,19 @@ defmodule CaptainFactAtomFeed.Statements do
     |> Entry.build()
   end
 
+
+  defp timecode_to_time(timecode) do
+    hours_time_code = div(timecode, 3600)
+                      |> Integer.to_string
+                      |> String.pad_leading(2, "0")
+    minutes_time_code = div(rem(timecode, 3600), 60)
+                        |> Integer.to_string
+                        |> String.pad_leading(2, "0")
+    seconds_time_code = rem(rem(timecode, 3600), 60)
+                        |> Integer.to_string
+                        |> String.pad_leading(2, "0")
+    "#{hours_time_code}:#{minutes_time_code}:#{seconds_time_code}"
+  end
 
   defp speaker_info(%{speaker_id: nil}), do:
     ""
