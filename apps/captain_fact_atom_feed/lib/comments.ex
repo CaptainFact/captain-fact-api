@@ -1,12 +1,17 @@
 defmodule CaptainFactAtomFeed.Comments do
+  @moduledoc """
+  Generate an ATOM feed that contains all comments
+  """
+
   import Ecto.Query
 
   alias Atomex.{Feed, Entry}
 
+
   @nb_items_max 50
 
   @doc"""
-  Get an RSS feed containing all site's comments in reverse chronological
+  Get an ATOM feed containing all site's comments in reverse chronological
   order (newest first)
   """
   def feed_all() do
@@ -60,7 +65,8 @@ defmodule CaptainFactAtomFeed.Comments do
     link = comment_url(comment)
     insert_datetime = DateTime.from_naive!(comment.inserted_at, "Etc/UTC")
 
-    Entry.new(link, insert_datetime, title)
+    link
+    |> Entry.new(insert_datetime, title)
     |> Entry.link(link)
     |> Entry.published(insert_datetime)
     |> Entry.content("""

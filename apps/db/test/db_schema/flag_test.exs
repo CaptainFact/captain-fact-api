@@ -3,7 +3,6 @@ defmodule DB.Schema.FlagTest do
 
   alias DB.Schema.Flag
 
-
   test "changeset with valid attributes" do
     changeset = Flag.changeset(%Flag{source_user_id: 42}, %{reason: 1, action_id: 42})
     assert changeset.valid?

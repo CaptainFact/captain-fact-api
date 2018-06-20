@@ -31,7 +31,7 @@ defmodule DB.Schema.Source do
 
   def changeset_fetched(struct, params) do
     struct
-    |> cast(params, [:og_url, :url, :title, :language, :site_name, :og_url])
+    |> cast(params, [:og_url, :url, :title, :language, :site_name])
     |> update_change(:url, &prepare_url/1)
     |> update_change(:og_url, &prepare_url/1)
     |> update_change(:title, &clean_and_truncate/1)
@@ -50,13 +50,13 @@ defmodule DB.Schema.Source do
   end
 
   defp clean_and_truncate(str) do
-    if !String.valid?(str) do
-      nil
-    else
+    if String.valid?(str) do
       str = DB.Utils.String.trim_all_whitespaces(str)
       if String.length(str) > 250,
-         do: String.slice(str, 0, 250) <> "...",
-         else: str
+        do: String.slice(str, 0, 250) <> "...",
+        else: str
+    else
+      nil
     end
   end
 end

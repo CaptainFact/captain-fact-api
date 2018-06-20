@@ -25,6 +25,7 @@ defmodule CaptainFact.Accounts.UserPermissions do
     #                        /!\ |️ New user          | Confirmed user
     # reputation            {-30 , -5 , 15 , 30 , 75 , 125 , 200 , 500 , 1000}
     #-------------------------------------------------------------------------
+    # credo:disable-for-lines:50
     create: %{
       comment:              { 2  ,  5 , 7  , 10 , 15 ,  50 , 75  , 100 , 200 },
       statement:            { 2  ,  2 , 6  , 10 , 30 ,  50 , 100 , 100 , 100 },
@@ -37,7 +38,8 @@ defmodule CaptainFact.Accounts.UserPermissions do
     update: %{
       statement:            { 0  ,  0 ,  2 ,  5 , 10 ,  50 , 100 , 100 , 100 },
       speaker:              { 0  ,  0 ,  0 ,  0 , 5  ,  20 ,  30 ,  40 ,  80 },
-      video:                { 0  ,  0 ,  0 ,  0 , 0  ,   0  ,  5 ,  10 ,  20 },
+      video:                { 0  ,  0 ,  0 ,  0 , 0  ,   0 ,  5  ,  10 ,  20 },
+      user:                 { 5  ,  5 ,  5 ,  5 , 5  ,   5 ,  5  ,  5  ,  5  },
     },
     delete: %{
       comment:              { 10  , 20, 30 , 50 , 75 , 300 , 300 , 300 , 300 },
@@ -70,7 +72,7 @@ defmodule CaptainFact.Accounts.UserPermissions do
   @doc """
   Check if user can execute action. Return `{:ok, nb_available}` if yes,
   `{:error, reason}` otherwise. This method is bypassed and returns {:ok, -1}
-  for :add :video actions if user is publisher.
+  if user is publisher.
 
   `nb_available` is -1 if there is no limit.
   `entity` may be nil **only if** we're checking for a wildcard
@@ -89,32 +91,49 @@ defmodule CaptainFact.Accounts.UserPermissions do
       iex> UserPermissions.check(user, :create, :comment)
       {:error, "limit_reached"}
   """
-  def check(%User{is_publisher: true}, :add, :video), do: {:ok, -1}
+  def check(%User{is_publisher: true}, _, _), 
+    do: {:ok, -1}
+
   def check(user = %User{}, action_type, entity) do
     limit = limitation(user, action_type, entity)
-    if (limit == 0) do
+    if limit == 0 do
       {:error, @error_not_enough_reputation}
     else
       action_count = action_count(user, action_type, entity)
       if action_count >= limit do
+        # User should never be able to overthrow daily limitations, we must
+        # output a warning if we identify such an issue
         if action_count >= limit + @limit_warning_threshold,
-          do: Logger.warn("User #{user.username} (#{user.id}) overthrown its limit for [#{action_type} #{entity}] (#{action_count}/#{limit})")
+          do: Logger.warn(fn -> 
+            "User #{user.username} (#{user.id}) overthrown its limit for [#{action_type} #{entity}] (#{action_count}/#{limit})" 
+          end)
         {:error, @error_limit_reached}
       else
         {:ok, limit - action_count}
       end
     end
   end
-  def check(nil, _, _), do: {:error, "unauthorized"}
+
+  def check(nil, _, _), 
+    do: {:error, "unauthorized"}
+
+  @doc """
+  Same as `check/1` bu raise a PermissionsError if user doesn't have the right
+  permissions.
+  """
   def check!(user, action_type, entity \\ nil)
   def check!(user = %User{}, action_type, entity) do
     case check(user, action_type, entity) do
-      {:error, message} -> raise %PermissionsError{message: message}
-      {:ok, nb_available} -> nb_available
+      {:error, message} -> 
+        raise %PermissionsError{message: message}
+      {:ok, nb_available} -> 
+        nb_available
     end
   end
+
   def check!(user_id, action_type, entity) when is_integer(user_id),
     do: check!(do_load_user!(user_id), action_type, entity)
+
   def check!(nil, _, _),
     do: raise %PermissionsError{message: "unauthorized"}
 
@@ -152,15 +171,19 @@ defmodule CaptainFact.Accounts.UserPermissions do
       else: (@nb_levels - 1) - Enum.find_index(@reverse_levels, &(reputation >= &1))
   end
 
-  # Static getters
-  def limitations(), do: @limitations
-  def nb_levels(), do: @nb_levels
+  defp do_load_user!(nil), 
+    do: raise %PermissionsError{message: "unauthorized"}
 
-  defp do_load_user!(nil), do: raise %PermissionsError{message: "unauthorized"}
   defp do_load_user!(user_id) do
     User
     |> where([u], u.id == ^user_id)
-    |> select([:id, :reputation])
+    |> select([:id, :reputation, :is_publisher])
     |> Repo.one!()
   end
+
+  # Static getters
+
+  def limitations(), do: @limitations
+
+  def nb_levels(), do: @nb_levels
 end

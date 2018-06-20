@@ -1,7 +1,14 @@
 defmodule DB.Schema.UserAction do
+  @moduledoc"""
+  Represent a user action. This is usefull to generate logs of all actions
+  for a video, or all actions for a user without having to query multiple
+  tables with complicated requests.
+
+  This is also used by UserPermissions to check daily limitations.
+  """
+
   use Ecto.Schema
   import Ecto.Changeset
-
   alias DB.Schema.{UserAction, User, Video}
 
 
@@ -19,8 +26,8 @@ defmodule DB.Schema.UserAction do
   end
 
   @doc false
-  def changeset(%UserAction{} = user_action, attrs) do
-    user_action
+  def changeset(action = %UserAction{}, attrs) do
+    action
     |> cast(attrs, [:context, :type, :entity, :entity_id, :changes, :user_id, :target_user_id])
     |> validate_required([:user_id, :type])
     |> cast_assoc(:user)
@@ -32,8 +39,8 @@ defmodule DB.Schema.UserAction do
   @doc"""
   ⚠️ Admin-only function
   """
-  def admin_changeset(%UserAction{} = user_action, attrs) do
-    user_action
+  def changeset_admin(action = %UserAction{}, attrs) do
+    action
     |> cast(attrs, [:context, :type, :entity, :entity_id, :changes, :target_user_id])
     |> validate_required([:type])
     |> validate_inclusion(:user, [nil])

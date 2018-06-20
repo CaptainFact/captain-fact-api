@@ -1,6 +1,5 @@
 use Mix.Config
 
-
 # General config
 config :captain_fact, frontend_url: "https://TEST_FRONTEND"
 
@@ -24,3 +23,6 @@ config :captain_fact, CaptainFact.Scheduler, jobs: []
 
 # Mails
 config :captain_fact, CaptainFactMailer, adapter: Bamboo.TestAdapter
+
+# Reduce the number of round for encryption during tests
+config :bcrypt_elixir, :log_rounds, 4

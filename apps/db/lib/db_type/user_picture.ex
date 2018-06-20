@@ -1,4 +1,8 @@
 defmodule DB.Type.UserPicture do
+  @moduledoc"""
+  User profile picture. Map the Ecto type to an URL using ARC
+  """
+
   use Arc.Definition
   use Arc.Ecto.Definition
 

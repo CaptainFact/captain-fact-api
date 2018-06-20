@@ -12,12 +12,10 @@ defmodule CaptainFactGraphql.Resolvers.Comments do
   end
 
   def comments_scores(_, comments_ids) do
-    from(
-      v in Vote,
-      where: v.comment_id in ^comments_ids,
-      select: {v.comment_id, sum(v.value)},
-      group_by: v.comment_id
-    )
+    Vote
+    |> where([v], v.comment_id in ^comments_ids)
+    |> select([v], {v.comment_id, sum(v.value)})
+    |> group_by([v], v.comment_id)
     |> Repo.all()
     |> Enum.into(%{})
   end

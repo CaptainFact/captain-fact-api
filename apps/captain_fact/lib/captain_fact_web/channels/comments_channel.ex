@@ -2,7 +2,7 @@ defmodule CaptainFactWeb.CommentsChannel do
   use CaptainFactWeb, :channel
 
   import CaptainFactWeb.UserSocket, only: [handle_in_authenticated: 4]
-  alias CaptainFactWeb.{ CommentView, VoteView }
+  alias CaptainFactWeb.{CommentView, VoteView}
   alias CaptainFactWeb.Endpoint
 
   alias DB.Type.VideoHashId
@@ -61,7 +61,8 @@ defmodule CaptainFactWeb.CommentsChannel do
     response =
       %{}
       |> Map.put(:comments, CommentView.render("index.json", comments:
-          Comment.full(Comment)
+          Comment
+          |> Comment.full()
           |> where([c, s], s.video_id == ^video_id)
           |> Repo.all()
         ))
@@ -79,7 +80,7 @@ defmodule CaptainFactWeb.CommentsChannel do
     source_url = get_in(params, ["source", "url"])
     user = Repo.get!(User, socket.assigns.user_id)
     comment = Comments.add_comment(user, context(socket), params, source_url, fn comment ->
-      comment = Repo.preload(comment, :source) |> Repo.preload(:user)
+      comment = Repo.preload(Repo.preload(comment, :source), :user)
       rendered_comment = CommentView.render("comment.json", comment: comment)
       broadcast!(socket, @event_comment_updated, rendered_comment)
     end)

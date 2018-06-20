@@ -18,8 +18,6 @@ defmodule DB.Schema.UserActionTest do
   @must_not_have_changes ~w(remove delete restore)
   @valid_action_types @must_have_changes ++ @must_not_have_changes
 
-
-
   test "changeset with valid attributes" do
     changeset = UserAction.changeset(%UserAction{}, @valid_attrs)
     assert changeset.valid?
@@ -44,10 +42,12 @@ defmodule DB.Schema.UserActionTest do
 
   test "some action types cannot have changes" do
     for action_type <- @must_not_have_changes do
-      attrs = Map.merge @valid_attrs, %{
-        type: action_type,
-        changes: %{text: "Beer Time ! 🍺🍺🍺"}
-      }
+      attrs =
+        Map.merge(@valid_attrs, %{
+          type: action_type,
+          changes: %{text: "Beer Time ! 🍺🍺🍺"}
+        })
+
       changeset = UserAction.changeset(%UserAction{}, attrs)
       refute changeset.valid?
     end
@@ -55,10 +55,12 @@ defmodule DB.Schema.UserActionTest do
 
   test "some action types must have changes" do
     for action_type <- @must_have_changes do
-      attrs = Map.merge @valid_attrs, %{
-        type: action_type,
-        changes: nil
-      }
+      attrs =
+        Map.merge(@valid_attrs, %{
+          type: action_type,
+          changes: nil
+        })
+
       changeset = UserAction.changeset(%UserAction{}, attrs)
       refute changeset.valid?
     end
@@ -66,10 +68,12 @@ defmodule DB.Schema.UserActionTest do
 
   test "empty changes must never be valids" do
     for action_type <- @valid_action_types do
-      attrs = Map.merge @valid_attrs, %{
-        type: action_type,
-        changes: %{}
-      }
+      attrs =
+        Map.merge(@valid_attrs, %{
+          type: action_type,
+          changes: %{}
+        })
+
       changeset = UserAction.changeset(%UserAction{}, attrs)
       refute changeset.valid?
     end

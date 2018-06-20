@@ -1,4 +1,8 @@
 defmodule DB.Schema.Comment do
+  @moduledoc """
+  Represent a user comment that can be linked to a source
+  """
+
   use Ecto.Schema
   import Ecto.{Changeset, Query}
 
@@ -48,7 +52,8 @@ defmodule DB.Schema.Comment do
           reputation: u.reputation,
           inserted_at: u.inserted_at,
           picture_url: u.picture_url,
-          achievements: u.achievements
+          achievements: u.achievements,
+          speaker_id: u.speaker_id
         }
       })
   end
@@ -77,7 +82,7 @@ defmodule DB.Schema.Comment do
     |> validate_required(@required_fields)
     |> validate_source_or_text()
     |> validate_text()
-    |> validate_length(:text, min: 1, max: 240)
+    |> validate_length(:text, min: 1, max: 255)
   end
 
   def prepare_text(str) do

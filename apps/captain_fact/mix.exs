@@ -4,7 +4,7 @@ defmodule CaptainFact.Mixfile do
   def project do
     [
       app: :captain_fact,
-      version: "0.8.6",
+      version: "0.8.10",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
@@ -43,14 +43,15 @@ defmodule CaptainFact.Mixfile do
       {:gettext, "~> 0.13.1"},
       {:cowboy, "~> 1.0"},
       {:corsica, "~> 1.0"},
-      {:comeonin, "~> 3.0"},
+      {:bcrypt_elixir, "~> 1.0"},
       {:guardian, "~> 0.14"},
-      {:floki, "~> 0.17.0"},
+      {:floki, "~> 0.20.2"},
       {:html_entities, "~> 0.3"},
       {:httpoison, "~> 0.11"},
       {:poison, "~> 2.2.0"},
       {:csv, "~> 1.4.4"},
-      {:quantum, "~> 2.2.1"},
+      {:quantum, github: "quantum-elixir/quantum-core"},
+      {:timex, "~> 3.0"},
       {:not_qwerty123, "~> 2.2"},
       {:bamboo, github: "thoughtbot/bamboo"},
       {:hackney, "~> 1.6"},
@@ -59,7 +60,6 @@ defmodule CaptainFact.Mixfile do
       {:weave, "3.1.2"},
       {:burnex, "~> 1.0"},
       {:bypass, "~> 0.8", only: :test},
-      {:credo, "~> 0.8", only: [:dev, :test], runtime: false},
       {:db, in_umbrella: true}
    ]
   end

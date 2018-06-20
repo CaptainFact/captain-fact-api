@@ -1,6 +1,5 @@
 defmodule DB.Repo.Migrations.ChangeFlagsToFlagActions do
   use Ecto.Migration
-  import Ecto.Query
 
   alias DB.Repo
 

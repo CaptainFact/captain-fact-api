@@ -5,6 +5,18 @@ defmodule CaptainFact.AccountsTest do
   alias CaptainFact.Accounts
   alias CaptainFactJobs.{Reputation, Achievements}
 
+  alias DB.Schema.{InvitationRequest, User}
+
+  alias Kaur.Result
+
+  describe "update user" do
+    test "check user is updated" do
+      user = insert(:user)
+      {:ok, updated_user} = Accounts.update(user, %{name: "tototest"})
+      assert user.name != updated_user.name
+    end
+  end
+
   describe "reset_password_requests" do
     alias DB.Schema.ResetPasswordRequest
     alias CaptainFact.Accounts.UserPermissions.PermissionsError
@@ -53,8 +65,8 @@ defmodule CaptainFact.AccountsTest do
       assert_raise Ecto.NoResultsError, fn ->
         Accounts.check_reset_password_token!("InvalidToken")
       end
-      tokenUser = Accounts.check_reset_password_token!(req.token)
-      assert tokenUser.id == user.id
+      user_from_token = Accounts.check_reset_password_token!(req.token)
+      assert user_from_token.id == user.id
     end
 
     test "verify token after expired" do
@@ -82,9 +94,9 @@ defmodule CaptainFact.AccountsTest do
         |> ResetPasswordRequest.changeset(%{user_id: user.id, source_ip: "127.0.0.1"})
         |> Repo.insert!()
 
-      updatedUser = Accounts.confirm_password_reset!(req.token, new_password)
-      refute Comeonin.Bcrypt.checkpw(new_password, user.encrypted_password)
-      assert Comeonin.Bcrypt.checkpw(new_password, updatedUser.encrypted_password)
+      updated_user = Accounts.confirm_password_reset!(req.token, new_password)
+      refute Bcrypt.verify_pass(new_password, user.encrypted_password)
+      assert Bcrypt.verify_pass(new_password, updated_user.encrypted_password)
 
       nb_requests =
         ResetPasswordRequest
@@ -111,6 +123,7 @@ defmodule CaptainFact.AccountsTest do
     end
 
     test "send mails when calling send_invites/1" do
+      Repo.delete_all(InvitationRequest)
       nb_invites = 10
       requests = insert_list(nb_invites, :invitation_request)
       Accounts.send_invites(nb_invites)
@@ -226,6 +239,73 @@ defmodule CaptainFact.AccountsTest do
       Accounts.unlock_achievement(user, achievement)
       updated = Repo.get(DB.Schema.User, user.id)
       assert achievement in updated.achievements
+    end
+  end
+
+  test "link speaker" do
+    user = insert(:user, speaker: nil)
+    speaker = insert(:speaker)
+    {:ok, updated_user} = Accounts.link_speaker(user, speaker)
+    assert updated_user.speaker_id == speaker.id
+  end
+
+  describe "complete_onboarding_step/2" do
+    test "it returns {:ok, %User{}} when success" do
+      user =
+        :user
+        |> insert(completed_onboarding_steps: [])
+        |> Accounts.complete_onboarding_step(2)
+
+      assert {:ok, %User{}} = user
+    end
+
+    test "user returned has right onboarding steps" do
+      user =
+        :user
+        |> insert(completed_onboarding_steps: [])
+        |> Accounts.complete_onboarding_step(2)
+
+      assert {:ok, %User{completed_onboarding_steps: [2]}} = user
+    end
+
+    test "it fails with an error tuple" do
+      error =
+        :user
+        |> insert(completed_onboarding_steps: [])
+        |> Accounts.complete_onboarding_step(72)
+
+
+      assert Result.error?(error)
+    end
+  end
+
+  describe "complete_onboarding_steps/2" do
+    test "it returns {:ok, %User{}} when success" do
+      user =
+        :user
+        |> insert(completed_onboarding_steps: [])
+        |> Accounts.complete_onboarding_steps([1, 2])
+
+      assert {:ok, %User{}} = user
+    end
+
+    test "user returned has right onboarding steps" do
+      user =
+        :user
+        |> insert(completed_onboarding_steps: [])
+        |> Accounts.complete_onboarding_steps([1, 2])
+
+      assert {:ok, %User{completed_onboarding_steps: [1, 2]}} = user
+    end
+
+    test "it fails with an error tuple" do
+      error =
+        :user
+        |> insert(completed_onboarding_steps: [])
+        |> Accounts.complete_onboarding_steps([1, 72])
+
+
+      assert Result.error?(error)
     end
   end
 end

@@ -1,13 +1,15 @@
 defmodule DB.Schema.UserTest do
   use DB.DataCase, async: true
 
+  import DB.Factory, only: [insert: 1, insert: 2]
   alias DB.Schema.User
 
   @valid_attrs %{
     name: "Jouje BigBrother",
     username: "Hell0World",
-    email: Faker.Internet.email,
-    password: "@StrongP4ssword!"
+    email: Faker.Internet.email(),
+    password: "@StrongP4ssword!",
+    locale: "en"
   }
   @invalid_attrs %{}
 
@@ -61,35 +63,74 @@ defmodule DB.Schema.UserTest do
   test "email must not be a temporary email (yopmail, jetable.org...etc)" do
     provider = "jetable.org"
     attrs = %{email: "xxxxx@#{provider}"}
-    assert {:email, "forbidden_provider"} in errors_on(%User{}, attrs), "didn't reject #{provider}'"
+
+    assert {:email, "forbidden_provider"} in errors_on(%User{}, attrs),
+           "didn't reject #{provider}'"
   end
 
   test "username should not contains forbidden words" do
     changeset = User.registration_changeset(%User{}, %{@valid_attrs | username: "toto-Admin"})
     refute changeset.valid?
 
-    changeset = User.registration_changeset(%User{}, %{@valid_attrs | username: "toCaptainFactto"})
+    changeset =
+      User.registration_changeset(%User{}, %{@valid_attrs | username: "toCaptainFactto"})
+
     refute changeset.valid?
   end
 
   test "username cannot contains illegal characters" do
     ' !*();:@&=+$,/?#[].\'\\'
     |> Enum.map(fn char ->
-         changeset = User.registration_changeset(%User{}, %{@valid_attrs | username: "x42xxx#{<<char::utf8>>}xx"})
-         refute changeset.valid?, "Illegal character '#{<<char::utf8>>}' accepted in username when it should not"
-       end)
+      changeset =
+        User.registration_changeset(%User{}, %{
+          @valid_attrs
+          | username: "x42xxx#{<<char::utf8>>}xx"
+        })
+
+      refute changeset.valid?,
+             "Illegal character '#{<<char::utf8>>}' accepted in username when it should not"
+    end)
   end
 
   test "name cannot contains illegal characters" do
     '!*();:@&=+$,/?#[].\'\\0123456789'
     |> Enum.map(fn char ->
-      changeset = User.registration_changeset(%User{}, %{@valid_attrs | name: "xxxx#{<<char::utf8>>}xx"})
-      refute changeset.valid?, "Illegal character '#{<<char::utf8>>}' accepted in name when it should not"
+      changeset =
+        User.registration_changeset(%User{}, %{@valid_attrs | name: "xxxx#{<<char::utf8>>}xx"})
+
+      refute changeset.valid?,
+             "Illegal character '#{<<char::utf8>>}' accepted in name when it should not"
     end)
   end
 
   test "name can contain a space" do
     changeset = User.registration_changeset(%User{}, %{@valid_attrs | name: "David Gilmour"})
+    assert changeset.valid?
+  end
+
+  test "name can contain accentuated characters" do
+    changeset = User.registration_changeset(%User{}, %{@valid_attrs | name: "Jésus"})
+    assert changeset.valid?
+  end
+
+  test "name and username are trim" do
+    changeset =
+      User.registration_changeset(%User{}, %{
+        @valid_attrs
+        | name: "    test  test  ",
+          username: "    testtest "
+      })
+
+    assert changeset.valid?
+    assert changeset.changes.name == "test test"
+    assert changeset.changes.username == "testtest"
+  end
+
+  test "name can be empty or nil" do
+    changeset = User.registration_changeset(%User{}, %{@valid_attrs | name: ""})
+    assert changeset.valid?
+
+    changeset = User.registration_changeset(%User{}, %{@valid_attrs | name: nil})
     assert changeset.valid?
   end
 
@@ -100,18 +141,90 @@ defmodule DB.Schema.UserTest do
     assert changeset2.valid?
   end
 
+  test "locale get verified and set to default if invalid" do
+    changeset = User.changeset(%User{}, %{@valid_attrs | locale: "FR"})
+    assert changeset.changes.locale == "fr"
+
+    changeset = User.changeset(%User{}, %{@valid_attrs | locale: "en"})
+    assert changeset.changes.locale == "en"
+
+    changeset = User.changeset(%User{}, %{@valid_attrs | locale: "xxoooxx"})
+    assert changeset.changes.locale == "en"
+  end
+
   test "default user should not be a publisher" do
     changeset = User.registration_changeset(%User{}, @valid_attrs)
     refute changeset.data.is_publisher
   end
 
   test "achievements changeset ensure achievements are unique" do
-    changeset = User.changeset_achievement(%User{achievements: [1,1,1,3,8,8,5,6,6]}, 4)
-    assert changeset.changes.achievements == [4,1,3,8,5,6]
+    changeset = User.changeset_achievement(%User{achievements: [1, 1, 1, 3, 8, 8, 5, 6, 6]}, 4)
+    assert changeset.changes.achievements == [4, 1, 3, 8, 5, 6]
   end
 
   test "empty changeset if no changes in achievements" do
-    changeset = User.changeset_achievement(%User{achievements: [1,1,1,3,8,8,5,6,6]}, 3)
+    changeset = User.changeset_achievement(%User{achievements: [1, 1, 1, 3, 8, 8, 5, 6, 6]}, 3)
     refute changeset.changes[:achievements]
+  end
+
+  test "changeset_link_speaker generate a changeset with linked speaker" do
+    user = insert(:user, speaker: nil)
+    speaker = insert(:speaker)
+    changeset = User.changeset_link_speaker(user, speaker)
+    assert changeset.changes.speaker_id == speaker.id
+  end
+
+  describe "completed onboarding steps" do
+    test "for fresh user default is empty array" do
+      user =
+        %User{}
+        |> User.registration_changeset(@valid_attrs)
+        |> Ecto.Changeset.apply_changes
+
+      assert user.completed_onboarding_steps == []
+    end
+
+    test "accepts an integer in between 0..30" do
+      changeset =
+        %User{completed_onboarding_steps: [2,4,6,8]}
+        |> User.changeset_completed_onboarding_steps(7)
+
+      assert changeset.valid?
+    end
+
+    test "does not accept an integer out of 0..30" do
+      changeset =
+        %User{completed_onboarding_steps: [2,4,6,8]}
+        |> User.changeset_completed_onboarding_steps(75)
+
+      refute changeset.valid?
+      assert (not is_nil(changeset.errors[:completed_onboarding_steps]))
+    end
+
+    test "accepts a list of integers in between 0..30" do
+      changeset =
+        %User{completed_onboarding_steps: [2,4,6,8]}
+        |> User.changeset_completed_onboarding_steps([7,9])
+
+      assert changeset.valid?
+    end
+
+    test "does not accepts a list of integers with element out of 0..30" do
+      changeset =
+        %User{completed_onboarding_steps: [2,4,6,8]}
+        |> User.changeset_completed_onboarding_steps([7,9,75])
+
+      refute changeset.valid?
+      assert (not is_nil(changeset.errors[:completed_onboarding_steps]))
+    end
+
+    test "are updated when valids" do
+      user =
+        %User{}
+        |> User.changeset_completed_onboarding_steps(2)
+        |> Ecto.Changeset.apply_changes
+
+      assert user.completed_onboarding_steps == [2]
+    end
   end
 end

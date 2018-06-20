@@ -112,9 +112,7 @@ defmodule CaptainFactWeb.VideoDebateChannel do
   def handle_in_authenticated!("update_speaker", params, socket) do
     UserPermissions.check!(socket.assigns.user_id, :update, :speaker)
     speaker = Repo.get_by!(Speaker, id: params["id"], is_removed: false)
-    if !speaker.is_user_defined do
-      {:reply, {:error, %{speaker: "forbidden"}}, socket}
-    else
+    if speaker.is_user_defined do
       changeset = Speaker.changeset(speaker, params)
       case changeset.changes do
         changes when changes === %{} -> {:reply, :ok, socket}
@@ -134,6 +132,8 @@ defmodule CaptainFactWeb.VideoDebateChannel do
               {:reply, :error, socket}
           end
       end
+    else
+      {:reply, {:error, %{speaker: "forbidden"}}, socket}
     end
   end
 

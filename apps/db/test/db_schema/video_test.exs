@@ -1,10 +1,11 @@
 defmodule DB.Schema.VideoTest do
   use DB.DataCase, async: true
+  doctest DB.Schema.Video
 
   alias DB.Schema.Video
 
   @valid_attrs %{
-    title: Faker.Lorem.sentence,
+    title: Faker.Lorem.sentence(),
     url: "https://www.youtube.com/watch?v=zoP-XFuWstw"
   }
 
