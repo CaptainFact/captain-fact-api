@@ -18,7 +18,7 @@ defmodule CaptainFact.Speakers do
     case SpeakerPicture.store({picture_url, speaker}) do
       {:ok, picture} ->
         speaker
-        |> Ecto.Changeset.change(picture: %{file_name: picture, updated_at: Ecto.DateTime.utc})
+        |> Ecto.Changeset.change(picture: %{file_name: picture, updated_at: DateTime.utc_now})
         |> Repo.update()
       error -> error
     end

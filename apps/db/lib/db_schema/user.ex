@@ -1,10 +1,15 @@
 defmodule DB.Schema.User do
+  @moduledoc """
+  Represent a user that can login on the website. Users can be marked as
+  `publisher` which allow them to post videos without limitations.
+  """
+
   use Ecto.Schema
   use Arc.Ecto.Schema
   import Ecto.Changeset
 
   alias DB.Type.{Achievement, UserPicture}
-  alias DB.Schema.{UserAction, Comment, Vote, Flag}
+  alias DB.Schema.{UserAction, Comment, Vote, Flag, Speaker}
 
 
   schema "users" do
@@ -20,6 +25,7 @@ defmodule DB.Schema.User do
     field :newsletter, :boolean, default: true
     field :newsletter_subscription_token, :string
     field :is_publisher, :boolean, default: false
+    field :completed_onboarding_steps, {:array, :integer}, default: []
 
     # Social networks profiles
     field :fb_user_id, :string
@@ -35,8 +41,9 @@ defmodule DB.Schema.User do
     has_many :actions, UserAction, on_delete: :nilify_all
     has_many :comments, Comment, on_delete: :delete_all
     has_many :votes, Vote, on_delete: :delete_all
-
     has_many :flags_posted, Flag, foreign_key: :source_user_id, on_delete: :delete_all
+
+    belongs_to :speaker, Speaker
 
     timestamps()
   end
@@ -108,9 +115,53 @@ defmodule DB.Schema.User do
     Ecto.Changeset.change(model, achievements: updated_achievements)
   end
 
+  @doc """
+  Generate a changeset to link given `speaker` to user
+  """
+  def changeset_link_speaker(model, %Speaker{id: id}) do
+    change(model, speaker_id: id)
+  end
+
+
+  # --- Onboarding steps ----
+
+  @doc """
+  an Ecto changeset to add one step or a list of steps in user's completed steps
+  """
+  @spec changeset_completed_onboarding_steps(%__MODULE__{}, (integer | list))::Changeset.t
+  def changeset_completed_onboarding_steps(model = %__MODULE__{}, to_complete) do
+    updated_completed_onboarding_steps =
+      case to_complete do
+        _ when is_integer(to_complete) ->
+          [to_complete | model.completed_onboarding_steps]
+          |> Enum.uniq
+
+        _ when is_list(to_complete) ->
+          (to_complete ++ model.completed_onboarding_steps)
+          |> Enum.uniq
+      end
+
+    model
+    |> change(completed_onboarding_steps: updated_completed_onboarding_steps)
+    |> validate_subset(:completed_onboarding_steps, 0..30)
+  end
+
+  @doc """
+  an Ecto changeset to reinit user's onboarding's step
+  """
+  @spec changeset_delete_onboarding(%__MODULE__{})::Changeset.t
+  def changeset_delete_onboarding(model = %__MODULE__{}) do
+    change(model, completed_onboarding_steps: [])
+  end
+
   @token_length 32
   defp generate_email_verification_token(changeset, false),
-    do: put_change(changeset, :email_confirmation_token, DB.Utils.TokenGenerator.generate(@token_length))
+    do: put_change(
+      changeset,
+      :email_confirmation_token,
+      DB.Utils.TokenGenerator.generate(@token_length)
+    )
+
   defp generate_email_verification_token(changeset, true),
     do: put_change(changeset, :email_confirmation_token, nil)
 
@@ -121,7 +172,7 @@ defmodule DB.Schema.User do
     |> unique_constraint(:email)
     |> unique_constraint(:username)
     |> update_change(:username, &String.trim/1)
-    |> update_change(:name,&format_name/1)
+    |> update_change(:name, &format_name/1)
     |> validate_length(:username, min: 5, max: 15)
     |> validate_length(:name, min: 2, max: 20)
     |> validate_email()
@@ -134,7 +185,7 @@ defmodule DB.Schema.User do
     case changeset do
       %Ecto.Changeset{valid?: true, changes: %{password: pass}} ->
         changeset
-        |> put_change(:encrypted_password, Comeonin.Bcrypt.hashpwsalt(pass))
+        |> put_change(:encrypted_password, Bcrypt.hash_pwd_salt(pass))
         |> delete_change(:password)
       _ ->
         changeset
@@ -173,9 +224,9 @@ defmodule DB.Schema.User do
   defp validate_username(changeset = %{changes: %{username: username}}) do
     lower_username = String.downcase(username)
     case Enum.find(@forbidden_username_keywords, &String.contains?(lower_username, &1)) do
-      nil -> 
+      nil ->
         validate_format(changeset, :username, @username_regex)
-      keyword -> 
+      keyword ->
         add_error(changeset, :username, "contains a foridden keyword: #{keyword}")
     end
   end

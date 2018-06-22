@@ -94,12 +94,15 @@ defmodule CaptainFact.Accounts.UserPermissionsTest do
   test "users with is_publisher set to true can always add videos without limits" do
     user = insert(:user, %{reputation: 0, is_publisher: true})
     assert UserPermissions.check(user, :add, :video) == {:ok, -1}
+    assert UserPermissions.check!(user.id, :add, :video) == -1
   end
 
   test "users with is_publisher can add speakers without limits" do
     user = insert(:user, %{reputation: 0, is_publisher: true})
     assert UserPermissions.check(user, :create, :speaker) == {:ok, -1}
     assert UserPermissions.check(user, :add, :speaker) == {:ok, -1}
+    assert UserPermissions.check!(user.id, :create, :speaker) == -1
+    assert UserPermissions.check!(user.id, :add, :speaker) == -1
   end
 
   defp each_limitation(func) do

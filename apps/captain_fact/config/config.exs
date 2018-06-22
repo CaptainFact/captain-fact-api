@@ -5,10 +5,9 @@
 # is restricted to this project.
 use Mix.Config
 
-
 # General application configuration
 config :captain_fact,
-  env: Mix.env,
+  env: Mix.env(),
   ecto_repos: [DB.Repo],
   cors_origins: [],
   oauth: [facebook: []]
@@ -23,6 +22,7 @@ config :captain_fact, CaptainFactWeb.Endpoint,
 # Configure scheduler
 config :captain_fact, CaptainFact.Scheduler,
   global: true, # Run only one instance across cluster
+  debug_logging: false,
   jobs: [
     # credo:disable-for-lines:10
     # Actions analysers
@@ -55,4 +55,4 @@ config :weave,
   loaders: [Weave.Loaders.Environment]
 
 # Import environment specific config
-import_config "#{Mix.env}.exs"
+import_config "#{Mix.env()}.exs"

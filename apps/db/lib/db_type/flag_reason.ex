@@ -1,4 +1,10 @@
 defmodule DB.Type.FlagReason do
+  @moduledoc """
+  An Ecto type to represent a Flag reason in DB. Reason is stored as an integer
+  but thanks to this type, it also accept a string representation that will
+  automatically be converted (ex: "spam", "bad_language"...)
+  """
+
   @behaviour Ecto.Type
   def type, do: :integer
 
@@ -11,13 +17,14 @@ defmodule DB.Type.FlagReason do
   @nb_reasons Enum.count(@reasons)
 
   defguard is_valid_identifier(identifier)
-    when is_integer(identifier) and identifier >= 1 and identifier <= @nb_reasons
+    when is_integer(identifier) 
+    and identifier >= 1 
+    and identifier <= @nb_reasons
 
   # ---- Ecto.Type implementation ----
 
   # Flag type can be passed as a string
-  def cast(str)
-  when is_binary(str) do
+  def cast(str) when is_binary(str) do
     case Map.get(@reasons, str) do
       nil -> :error
       id -> {:ok, id}
@@ -28,6 +35,7 @@ defmodule DB.Type.FlagReason do
   def cast(identifier) when is_valid_identifier(identifier) do
     {:ok, identifier}
   end
+
   def cast(_), do: :error
 
   # Load from DB - keep base integer
@@ -45,6 +53,11 @@ defmodule DB.Type.FlagReason do
 
   # ---- Custom functions ----
 
+  @doc """
+  Return the string representation of given `reason_id`. This function is not
+  well optimized and should mostly be used to debug or to convert unique 
+  entries.
+  """
   def label(reason_id) when is_valid_identifier(reason_id) do
     @reasons
     |> Enum.find(fn {_, id} -> id == reason_id end)

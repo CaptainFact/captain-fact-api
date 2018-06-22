@@ -6,14 +6,19 @@ defmodule DB.Schema.CommentTest do
   @valid_attrs %{
     statement_id: 1,
     user_id: 42,
-    text: Faker.Lorem.sentence,
-    source_title: Faker.Lorem.sentence
+    text: Faker.Lorem.sentence(),
+    source_title: Faker.Lorem.sentence()
   }
 
-  @valid_source %{id: 42, url: Faker.Internet.url}
+  @valid_source %{id: 42, url: Faker.Internet.url()}
 
   test "can post with a source and no text (fact)" do
-    changeset = Comment.changeset(Map.merge(%Comment{}, %{source: @valid_source}), Map.delete(@valid_attrs, :text))
+    changeset =
+      Comment.changeset(
+        Map.merge(%Comment{}, %{source: @valid_source}),
+        Map.delete(@valid_attrs, :text)
+      )
+
     assert changeset.valid?
   end
 
@@ -34,8 +39,7 @@ defmodule DB.Schema.CommentTest do
 
   test "comment text length must be less than 255 characters" do
     attrs = %{text: String.duplicate("x", 256)}
-    assert {:text, "should be at most 255 character(s)"} in
-      errors_on(%Comment{}, attrs)
+    assert {:text, "should be at most 255 character(s)"} in errors_on(%Comment{}, attrs)
   end
 
   test "comment text cannot contains urls" do

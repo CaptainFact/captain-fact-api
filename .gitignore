@@ -3,6 +3,7 @@ deps
 
 # Local uploads
 dev/resources
+./resources
 
 # Release binaries
 rel/docker/*.tar

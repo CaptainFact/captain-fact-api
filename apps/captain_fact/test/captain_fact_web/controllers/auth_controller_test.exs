@@ -60,6 +60,6 @@ defmodule CaptainFactWeb.AuthControllerTest do
   end
 
   defp insert_user_with_custom_password(password) do
-    insert(:user, %{encrypted_password: Comeonin.Bcrypt.hashpwsalt(password)})
+    insert(:user, %{encrypted_password: Bcrypt.hash_pwd_salt(password)})
   end
 end

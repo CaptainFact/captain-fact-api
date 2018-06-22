@@ -18,7 +18,6 @@ defmodule CaptainFact.Accounts do
   alias CaptainFact.Accounts.{UsernameGenerator, UserPermissions}
   alias CaptainFact.Actions.Recorder
 
-
   @max_ip_reset_requests 3
   @request_validity 48 * 60 * 60 # 48 hours
 
@@ -207,6 +206,56 @@ defmodule CaptainFact.Accounts do
     end
   end
 
+  # ---- Onboarding Steps ----
+
+  @doc """
+  add the given `step` to `user`
+
+  Returns `{:ok, updated_user}` or `{:error, reason}`.
+  """
+  @spec complete_onboarding_step(%User{}, integer) :: {:ok, %User{}} | {:error, any}
+  def complete_onboarding_step(user = %User{}, step)
+  when is_integer(step) do
+    user
+    |> User.changeset_completed_onboarding_steps(step)
+    |> Repo.update
+  end
+
+  @doc """
+  add the given `steps` to `user`
+
+  Returns `{:ok, updated_user}` or `{:error, changeset}
+  """
+  @spec complete_onboarding_steps(%User{}, list)::({:ok, %User{}} | {:error, Ecto.Changeset.t})
+  def complete_onboarding_steps(user = %User{}, steps)
+  when is_list(steps) do
+    user
+    |> User.changeset_completed_onboarding_steps(steps)
+    |> Repo.update
+  end
+
+  @doc """
+  reinitialize onboarding steps for `user`
+
+  Returns `{:ok, updated_user}` or `{:error, reason}`.
+  """
+  def delete_onboarding(user = %User{}) do
+    user
+    |> User.changeset_delete_onboarding
+    |> Repo.update
+  end
+
+  # ---- Link speaker ----
+
+  @doc """
+  Link a speaker to given user.
+  """
+  def link_speaker(user, speaker) do
+    user
+    |> User.changeset_link_speaker(speaker)
+    |> Repo.update()
+  end
+
   # ---- Reputation ----
 
   @doc"""
@@ -382,6 +431,7 @@ defmodule CaptainFact.Accounts do
   end
 
   # ---- Newsletter ----
+
   def send_newsletter(subject, html_body, locale_filter \\ nil) do
     User
     |> filter_newsletter_targets(locale_filter)
@@ -404,4 +454,3 @@ defmodule CaptainFact.Accounts do
     |> Repo.one!()
   end
 end
-

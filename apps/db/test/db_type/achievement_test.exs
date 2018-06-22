@@ -3,7 +3,6 @@ defmodule DB.Type.AchievementTest do
 
   alias DB.Type.Achievement
 
-
   test "ensure values don't change" do
     assert Achievement.get(:welcome) == 1
     assert Achievement.get(:not_a_robot) == 2
@@ -12,8 +11,10 @@ defmodule DB.Type.AchievementTest do
     assert Achievement.get(:you_are_fake_news) == 5
     assert Achievement.get(:social_networks) == 6
     assert Achievement.get(:ambassador) == 7
-    assert Achievement.get(:ghostbuster) == 8 # Made a bug report
-    assert Achievement.get(:famous) == 9 # Leaderboard
+    # Made a bug report
+    assert Achievement.get(:ghostbuster) == 8
+    # Leaderboard
+    assert Achievement.get(:famous) == 9
   end
 
   test "doesn't compile if bad value" do

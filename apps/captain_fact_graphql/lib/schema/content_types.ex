@@ -169,4 +169,20 @@ defmodule CaptainFactGraphql.Schema.ContentTypes do
     @desc "Version of the database app attached to this API"
     field :db_version, non_null(:string)
   end
+
+  @desc "Statistics about the platform community"
+  object :statistics do
+    @desc "the amount of user with a valid account"
+    field :user_count, non_null(:integer)
+    @desc "the amount of comment"
+    field :comment_count, non_null(:integer)
+    @desc "the amount of statements transcripted"
+    field :statement_count, non_null(:integer)
+    @desc "the amount of sources given"
+    field :source_count, non_null(:integer)
+    @desc "List the 20 best users"
+    field :leaderboard, list_of(:user)
+    @desc "the amount of inviations request not validated yet"
+    field :pending_invites_count, non_null(:integer)
+  end
 end

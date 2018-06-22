@@ -4,7 +4,7 @@ defmodule CaptainFactWeb.Endpoint do
   socket "/socket", CaptainFactWeb.UserSocket
 
   if (Application.get_env(:arc, :storage) == Arc.Storage.Local),
-    do: plug Plug.Static, at: "/resources", from: "./dev/resources", gzip: false
+    do: plug Plug.Static, at: "/resources", from: "./resources", gzip: false
 
   plug Plug.RequestId
   plug Plug.Logger
