@@ -22,8 +22,11 @@ defmodule Opengraph.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:cowboy, "~> 1.1"},
       {:plug, "~> 1.5.1"},
-      {:cowboy, "~> 1.1"}
+
+      # ---- Test only ----
+      {:sweet_xml, "~> 0.6.5"}
     ]
   end
 end
