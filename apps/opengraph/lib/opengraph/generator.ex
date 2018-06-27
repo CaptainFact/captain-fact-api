@@ -129,20 +129,13 @@ defmodule Opengraph.Generator do
       "www.captainfact.io/u/#{user.username}"
       |> URI.encode()
 
-    image_url =
-      unless is_nil(user.picture_url) do
-        "#{URI.encode(user.picture_url)}"
-      else
-        "#{URI.encode("https://api.adorable.io/avatars/285/#{user.id}.jpg")}"
-      end
-
     escaped_username = Plug.HTML.html_escape(user.username)
 
     %{
       title: "#{escaped_username}'s profile on Captain Fact",
       url: encoded_url,
       description: "discover #{escaped_username}'s profile on Captain Fact",
-      image: image_url
+      image: DB.Type.UserPicture.url({user.picture_url, user}, :thumb)
     }
     |> (fn content -> generate_tag(:og, content) end).()
   end
