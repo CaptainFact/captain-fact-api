@@ -43,7 +43,9 @@ defmodule Opengraph.Router do
           |> send_resp(500, "there has been an unexpected error")
         end,
         fn body ->
-          send_resp(conn, 200, body)
+          conn
+          |> put_resp_content_type("text/html")
+          |> send_resp(200, body)
         end
       )
     end
