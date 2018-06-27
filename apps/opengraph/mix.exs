@@ -15,7 +15,8 @@ defmodule Opengraph.MixProject do
   def application do
     [
       applicationss: [:cowboy, :plug],
-      extra_applications: [:logger]
+      extra_applications: [:logger],
+      mod: {Opengraph.Application, []}
     ]
   end
 
