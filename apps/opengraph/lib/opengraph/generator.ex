@@ -24,32 +24,52 @@ defmodule Opengraph.Generator do
     # you can encode basic scalar types (strings, number, booleans and atoms)
     iex> alias Opengraph.Generator
     iex> Generator.generate_tag("og:title", "a magnificent title")
-    {:ok,
-            {:meta, %{content: "a magnificent title", property: "og:title"},
-             nil}}
+    {
+      :ok,
+      {
+        :meta,
+        %{content: "a magnificent title", property: "og:title"},
+        nil
+      }
+    }
 
     # you can encode lists
     iex> alias Opengraph.Generator
     iex> Generator.generate_tag("og:image", ["imageversion1.jpg", "imageversion2.jpg"])
-    {:ok,
+    {
+      :ok,
             [
-              {:meta, %{content: "imageversion1.jpg", property: "og:image"},
-               nil},
-              {:meta, %{content: "imageversion2.jpg", property: "og:image"},
-               nil}
-            ]}
+        {
+          :meta,
+          %{content: "imageversion1.jpg", property: "og:image"},
+          nil
+        },
+        {
+          :meta,
+          %{content: "imageversion2.jpg", property: "og:image"},
+          nil
+        }
+      ]
+    }
 
     # you can encode maps
     iex> alias Opengraph.Generator
     iex> Generator.generate_tag("og", %{title: "a magnificent title", description: "a magnificent content"})
-    {:ok,
+    {
+      :ok,
             [
-              {:meta,
+        {
+          :meta,
                %{content: "a magnificent content", property: "og:description"},
-               nil},
-              {:meta, %{content: "a magnificent title", property: "og:title"},
-               nil}
-            ]}
+          nil
+        },
+        {
+          :meta,
+          %{content: "a magnificent title", property: "og:title"},
+          nil
+        }
+      ]
+    }
   """
   @spec generate_tag(binary, any) :: Result.result_tuple()
   def generate_tag(property, content)
@@ -93,6 +113,7 @@ defmodule Opengraph.Generator do
   end
 
   # --- User ----
+
   @doc """
   generate an open graph tags for the given user
 
