@@ -115,14 +115,14 @@ defmodule Opengraph.Generator do
   # --- User ----
 
   @doc """
-  generate an open graph tags for the given user
+  generate open graph tags for the given user
 
   ## Examples
       alias Opengraph.Generator
       user = %DB.Schema.User{username: "captain", picture_url: "picture.jpg", id: 1}
       Generator.user_tags(user)
   """
-  @spec user_tags(%User{}) :: binary
+  @spec user_tags(%User{}) :: tuple
   def user_tags(user = %User{}) do
     # TODO : Dynamic urls
     encoded_url =
