@@ -38,7 +38,7 @@ defmodule Opengraph.Generator do
     iex> Generator.generate_tag("og:image", ["imageversion1.jpg", "imageversion2.jpg"])
     {
       :ok,
-            [
+      [
         {
           :meta,
           %{content: "imageversion1.jpg", property: "og:image"},
@@ -57,10 +57,10 @@ defmodule Opengraph.Generator do
     iex> Generator.generate_tag("og", %{title: "a magnificent title", description: "a magnificent content"})
     {
       :ok,
-            [
+      [
         {
           :meta,
-               %{content: "a magnificent content", property: "og:description"},
+          %{content: "a magnificent content", property: "og:description"},
           nil
         },
         {
@@ -136,6 +136,21 @@ defmodule Opengraph.Generator do
       url: encoded_url,
       description: "discover #{escaped_username}'s profile on Captain Fact",
       image: DB.Type.UserPicture.url({user.picture_url, user}, :thumb)
+    }
+    |> (fn content -> generate_tag(:og, content) end).()
+  end
+
+  # ---- Videos ----
+
+  @doc """
+  generate open graph tags for the videos index route
+  """
+  @spec videos_list_tags() :: tuple
+  def videos_list_tags() do
+    %{
+      title: "Every videos crowd sourced and fact checked on Captain Fact",
+      url: "www.captainfact.io/videos",
+      description: "Discover the work of Captain Fact's community on diverse videos"
     }
     |> (fn content -> generate_tag(:og, content) end).()
   end

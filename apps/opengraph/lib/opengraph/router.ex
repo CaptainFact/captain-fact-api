@@ -4,29 +4,30 @@ defmodule Opengraph.Router do
   alias Opengraph.Generator
   require Logger
 
-  plug Plug.Logger, log: :debug
-  plug :match
-  plug :dispatch
+  plug(Plug.Logger, log: :debug)
+  plug(:match)
+  plug(:dispatch)
 
   def start_link do
-    port = 4005 # TODO load config
-    success_logging =
-      fn _ ->
-        Logger.info("Running Opengraph.Router with cowboy on port #{port}")
-      end
+    # TODO load config
+    port = 4005
 
-    failure_logging =
-      fn error ->
-        Logger.error("Unable to start Opengraph router : #{error}")
-      end
+    success_logging = fn _ ->
+      Logger.info("Running Opengraph.Router with cowboy on port #{port}")
+    end
 
-    Plug.Adapters.Cowboy.http(__MODULE__, [], [port: port])
+    failure_logging = fn error ->
+      Logger.error("Unable to start Opengraph router : #{error}")
+    end
+
+    Plug.Adapters.Cowboy.http(__MODULE__, [], port: port)
     |> Result.tap(success_logging)
     |> Result.tap_error(failure_logging)
   end
 
   get "/u/:username" do
     username = conn.params["username"]
+
     user =
       DB.Schema.User
       |> DB.Repo.get_by(username: username)
@@ -35,7 +36,7 @@ defmodule Opengraph.Router do
       send_resp(conn, 404, "not_found")
     else
       user
-      |> Generator.user_tags
+      |> Generator.user_tags()
       |> Result.map(&Generator.generate_html/1)
       |> Result.either(
         fn _error ->
@@ -51,19 +52,23 @@ defmodule Opengraph.Router do
     end
   end
 
-  # get "/videos" do
-  #   opengraphs = """
-  #   <html>
-  #     <head>
-  #       <meta property="og:title" content="Discover crowd fact checked videos on Captain Fact">
-  #       <meta property="og:type" content=
-  #     </head>
-  #   </html>
-  #   """
-  # end
+  get "/videos" do
+    Generator.videos_list_tags
+    |> Result.map(&Generator.generate_html)
+    |> Result.either(
+      fn _error ->
+        conn
+        |> send_resp(500, "there has been an unexpected error")
+      end,
+      fn body ->
+        conn
+        |> put_resp_content_type("text/html")
+        |> send_resp(200, body)
+      end
+    )
+  end
 
   # get "/videos/:video_id" do
-  #   VideoController.get(conn)
   # end
 
   # get "/videos/:video_id/history" do
@@ -78,5 +83,4 @@ defmodule Opengraph.Router do
     conn
     |> send_resp(404, "NOT FOUND")
   end
-
 end
