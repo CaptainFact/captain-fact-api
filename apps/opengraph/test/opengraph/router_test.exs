@@ -18,8 +18,10 @@ defmodule Opengraph.RouterTest do
     end
 
     test "returns 404 for an unknown user" do
-      username = Kaur.Secure.generate_api_key   # best way I know to generate URL
-                                                # compatible random string
+      # best way I know to generate URL
+      # compatible random string
+      username = Kaur.Secure.generate_api_key()
+
       response =
         conn(:get, "/u/#{username}")
         |> Router.call([])
