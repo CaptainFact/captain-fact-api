@@ -53,8 +53,8 @@ defmodule Opengraph.Router do
   end
 
   get "/videos" do
-    Generator.videos_list_tags
-    |> Result.map(&Generator.generate_html)
+    Generator.videos_list_tags()
+    |> Result.map(&Generator.generate_html/1)
     |> Result.either(
       fn _error ->
         conn
@@ -68,15 +68,31 @@ defmodule Opengraph.Router do
     )
   end
 
-  # get "/videos/:video_id" do
-  # end
-
-  # get "/videos/:video_id/history" do
-  #   VideoController.get_history(conn)
-  # end
+  get "/videos/:video_id/*_" do
+    conn.params["video_id"]
+    |> DB.Type.VideoHashId.decode
+    |> Result.map(&CaptainFact.Videos.get_video_by_id/1)
+    |> Result.and_then(&Result.from_value/1)
+    |> Result.and_then(&Generator.video_tags/1)
+    |> Result.map(&Generator.generate_html/1)
+    |> Result.either(
+      fn error ->
+        case error do
+          :no_value -> send_resp(conn, 404, "content not found")
+          _ -> conn
+            |> send_resp(500, "there has been an unexpected error")
+        end
+      end,
+      fn body ->
+        conn
+        |> put_resp_content_type("text/html")
+        |> send_resp(200, body)
+      end
+    )
+  end
 
   # get "/s/:slug_or_id" do
-  #   SpeakerController.get(conn)
+
   # end
 
   match _ do

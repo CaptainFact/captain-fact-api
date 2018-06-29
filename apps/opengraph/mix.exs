@@ -24,6 +24,7 @@ defmodule Opengraph.MixProject do
   defp deps do
     [
       {:cowboy, "~> 1.1"},
+      {:phoenix_html, "~> 2.11.2"},
       {:plug, "~> 1.5.1"},
 
       # ---- Test only ----

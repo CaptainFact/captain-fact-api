@@ -154,4 +154,17 @@ defmodule Opengraph.Generator do
     }
     |> (fn content -> generate_tag(:og, content) end).()
   end
+
+  @doc """
+  generate open graph tags for the given video
+  """
+  @spec video_tags(%DB.Schema.Video{}) :: tuple
+  def video_tags(video) do
+    %{
+      title: "Vérification complète de : #{video.title}",
+      url: "www.captainfact.io#{DB.Type.VideoHashId.encode(video.id)}",
+      description: "#{video.title} vérifié citation par citation par la communauté Captain Fact"
+    }
+    |> (fn content -> generate_tag(:og, content) end).()
+  end
 end
