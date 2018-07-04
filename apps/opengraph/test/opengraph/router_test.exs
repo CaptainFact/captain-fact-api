@@ -11,7 +11,8 @@ defmodule Opengraph.RouterTest do
       user = insert(:user)
 
       response =
-        conn(:get, "/u/#{user.username}")
+        :get
+        |> conn("/u/#{user.username}")
         |> Router.call([])
 
       # TODO investigate random warning
@@ -24,7 +25,8 @@ defmodule Opengraph.RouterTest do
       username = Kaur.Secure.generate_api_key()
 
       response =
-        conn(:get, "/u/#{username}")
+        :get
+        |> conn("/u/#{username}")
         |> Router.call([])
 
       assert response.status == 404
@@ -33,7 +35,10 @@ defmodule Opengraph.RouterTest do
 
   describe "get /videos" do
     test "returns 200" do
-      response = conn(:get, "/videos", []) |> Router.call([])
+      response =
+        :get
+        |> conn("/videos", [])
+        |> Router.call([])
 
       assert response.status == 200
     end
@@ -50,7 +55,10 @@ defmodule Opengraph.RouterTest do
     end
 
     test "returns 200 for a valid video id", context do
-      response = conn(:get, "/videos/#{context[:video_id]}") |> Router.call([])
+      response =
+        :get
+        |> conn("/videos/#{context[:video_id]}")
+        |> Router.call([])
 
       assert response.status == 200
     end
@@ -60,7 +68,10 @@ defmodule Opengraph.RouterTest do
 
       # best way I know to generate URL
       # compatible random string
-      response = conn(:get, "videos/#{video_id}") |> Router.call([])
+      response =
+        :get
+        |> conn("videos/#{video_id}")
+        |> Router.call([])
 
       assert response.status == 404
     end
@@ -77,7 +88,10 @@ defmodule Opengraph.RouterTest do
     end
 
     test "returns 200 for a valid video id", context do
-      response = conn(:get, "/videos/#{context[:video_id]}/history") |> Router.call([])
+      response =
+        :get
+        |> conn("/videos/#{context[:video_id]}/history")
+        |> Router.call([])
 
       assert response.status == 200
     end
@@ -87,7 +101,10 @@ defmodule Opengraph.RouterTest do
 
       # best way I know to generate URL
       # compatible random string
-      response = conn(:get, "videos/#{video_id}/history") |> Router.call([])
+      response =
+        :get
+        |> conn("videos/#{video_id}/history")
+        |> Router.call([])
 
       assert response.status == 404
     end
