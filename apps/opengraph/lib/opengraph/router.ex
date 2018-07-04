@@ -67,8 +67,7 @@ defmodule Opengraph.Router do
             send_resp(conn, 404, "content not found")
 
           _ ->
-            conn
-            |> send_resp(500, "there has been an unexpected error")
+            send_resp(conn, 500, "there has been an unexpected error")
         end
       end,
       fn body ->
