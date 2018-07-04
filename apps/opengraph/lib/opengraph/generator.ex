@@ -9,14 +9,13 @@ defmodule Opengraph.Generator do
 
   @template_path fn ->
     # In case of a non umbrella deployment
-    if Mix.Project.umbrella?() do
+    root = if Mix.Project.umbrella?() do
       "./apps/opengraph"
     else
       "."
     end
-    |> (fn root ->
-          Path.join(root, "lib/opengraph/template.html.eex")
-        end).()
+
+    Path.join(root, "lib/opengraph/template.html.eex")
   end
 
   EEx.function_from_file(
@@ -43,10 +42,7 @@ defmodule Opengraph.Generator do
   render open graph metadata for given user
   """
   def render_user(user = %User{}, path) do
-    encoded_url =
-      "captainfact.io#{path}"
-      |> URI.encode()
-
+    encoded_url = URI.encode("captainfact.io#{path}")
     escaped_username = Plug.HTML.html_escape(user.username)
 
     render(%{
@@ -76,13 +72,12 @@ defmodule Opengraph.Generator do
   generate open graph tags for the given video
   """
   def render_video(video = %DB.Schema.Video{}, path) do
-    %{
+    render(%{
       title: "Vérification complète de : #{video.title}",
       url: "captainfact.io#{path}",
       description: "#{video.title} vérifiée citation par citation par la communauté Captain Fact",
       image: CaptainFact.Videos.image_url(video)
-    }
-    |> render
+    })
   end
 
   # ---- Speakers ----
@@ -91,12 +86,11 @@ defmodule Opengraph.Generator do
   render open graph tags for the given speaker
   """
   def render_speaker(speaker = %DB.Schema.Speaker{}, path) do
-    %{
+    render(%{
       title: speaker.full_name,
       description: "Les interventions de #{speaker.full_name} sur Captain Fact",
       url: "captainfact.io#{path}",
       image: speaker.image_url
-    }
-    |> render
+    })
   end
 end
