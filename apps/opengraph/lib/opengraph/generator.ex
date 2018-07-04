@@ -44,7 +44,7 @@ defmodule Opengraph.Generator do
   """
   def render_user(user = %User{}, path) do
     encoded_url =
-      "www.captainfact.io#{path}"
+      "captainfact.io#{path}"
       |> URI.encode()
 
     escaped_username = Plug.HTML.html_escape(user.username)
@@ -65,7 +65,7 @@ defmodule Opengraph.Generator do
   def render_videos_list(path) do
     render(%{
       title: "Les vidéos sourcées et vérifiées sur Captain Fact",
-      url: "www.captainfact.io#{path}",
+      url: "captainfact.io#{path}",
       description:
         "Découvrez diverses vidéos sourcées et vérifiées par la communauté Captain Fact",
       image: "captainfact.io/assets/img/logo.png"
@@ -78,7 +78,7 @@ defmodule Opengraph.Generator do
   def render_video(video = %DB.Schema.Video{}, path) do
     %{
       title: "Vérification complète de : #{video.title}",
-      url: "www.captainfact.io#{path}",
+      url: "captainfact.io#{path}",
       description: "#{video.title} vérifiée citation par citation par la communauté Captain Fact",
       image: CaptainFact.Videos.image_url(video)
     }
@@ -94,7 +94,7 @@ defmodule Opengraph.Generator do
     %{
       title: speaker.full_name,
       description: "Les interventions de #{speaker.full_name} sur Captain Fact",
-      url: "www.captainfact.io#{path}",
+      url: "captainfact.io#{path}",
       image: speaker.image_url
     }
     |> render
