@@ -4,6 +4,13 @@ defmodule Opengraph.Application do
   alias Opengraph.Router
 
   def start(_, _) do
-    Router.start_link()
+    children = [
+      %{
+        id: Opengraph.Router,
+        start: {Router, :start_link, []}
+      }
+    ]
+
+    Supervisor.start_link(children, strategy: :one_for_one)
   end
 end
