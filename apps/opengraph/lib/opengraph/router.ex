@@ -38,11 +38,11 @@ defmodule Opengraph.Router do
     else
       user
       |> Generator.render_user(conn.request_path)
-      |>  fn body ->
-        conn
-        |> put_resp_content_type("text/html")
-        |> send_resp(200, body)
-      end.()
+      |> (fn body ->
+            conn
+            |> put_resp_content_type("text/html")
+            |> send_resp(200, body)
+          end).()
     end
   end
 
@@ -56,15 +56,18 @@ defmodule Opengraph.Router do
 
   get "/videos/:video_id/*_" do
     conn.params["video_id"]
-    |> DB.Type.VideoHashId.decode
+    |> DB.Type.VideoHashId.decode()
     |> Result.map(&CaptainFact.Videos.get_video_by_id/1)
     |> Result.and_then(&Result.from_value/1)
     |> Result.map(&Generator.render_video(&1, conn.request_path))
     |> Result.either(
       fn error ->
         case error do
-          :no_value -> send_resp(conn, 404, "content not found")
-          _ -> conn
+          :no_value ->
+            send_resp(conn, 404, "content not found")
+
+          _ ->
+            conn
             |> send_resp(500, "there has been an unexpected error")
         end
       end,
@@ -80,19 +83,20 @@ defmodule Opengraph.Router do
     slug = conn.params[:slug_or_id]
 
     slug
-    |> Integer.parse
+    |> Integer.parse()
     |> case do
       # If integer parsing succeed it's an ID
       {id, ""} ->
         Speaker
         |> Repo.get(id)
+
       # Otherwise it's a slug
       _ ->
         Speaker
         |> Repo.get_by(slug: slug)
     end
-    |> Result.from_value
-    |> Result.map(&(Generator.render_speaker(&1, conn.request_path)))
+    |> Result.from_value()
+    |> Result.map(&Generator.render_speaker(&1, conn.request_path))
     |> Result.either(
       fn error ->
         case error do

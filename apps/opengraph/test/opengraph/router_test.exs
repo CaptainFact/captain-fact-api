@@ -29,7 +29,6 @@ defmodule Opengraph.RouterTest do
 
       assert response.status == 404
     end
-
   end
 
   describe "get /videos" do
@@ -65,7 +64,6 @@ defmodule Opengraph.RouterTest do
 
       assert response.status == 404
     end
-
   end
 
   describe "get /videos/:video_id/history" do
