@@ -141,7 +141,7 @@ defmodule CaptainFact.Videos do
   @doc"""
   Returns overview image url for the given video
   """
-  def image_url(video = %Video{
+  def image_url(_video = %Video{
     provider: "youtube",
     provider_id: youtube_id
     })
