@@ -37,9 +37,9 @@ defmodule Opengraph.Generator do
   @doc """
   render open graph metadata for given user
   """
-  def render_user(user = %User{}) do
+  def render_user(user = %User{}, path) do
     encoded_url =
-    "www.captainfact.io/u/#{user.username}"
+    "www.captainfact.io#{path}"
     |> URI.encode()
 
     escaped_username = Plug.HTML.html_escape(user.username)
@@ -59,10 +59,10 @@ defmodule Opengraph.Generator do
   @doc """
   generate open graph tags for the videos index route
   """
-  def render_videos_list() do
+  def render_videos_list(path) do
     render(%{
       title: "Every videos crowd sourced and fact checked on Captain Fact",
-      url: "www.captainfact.io/videos",
+      url: "www.captainfact.io#{path}",
       description: "Discover the work of Captain Fact's community on diverse videos",
       image: "captainfact.io/assets/img/logo.png"
     })
@@ -71,12 +71,27 @@ defmodule Opengraph.Generator do
   @doc """
   generate open graph tags for the given video
   """
-  def render_video(video) do
+  def render_video(video = %DB.Schema.Video{}, path) do
     %{
       title: "Vérification complète de : #{video.title}",
-      url: "www.captainfact.io#{DB.Type.VideoHashId.encode(video.id)}",
+      url: "www.captainfact.io#{path}",
       description: "#{video.title} vérifiée citation par citation par la communauté Captain Fact",
       image: CaptainFact.Videos.image_url(video)
+    }
+    |> render
+  end
+
+  # ---- Speakers ----
+
+  @doc """
+  render open graph tags for the given speaker
+  """
+  def render_speaker(speaker = %DB.Schema.Speaker{}, path) do
+    %{
+      title: speaker.full_name,
+      description: "Les interventions de #{speaker.full_name} sur Captain Fact",
+      url: "www.captainfact.io#{path}",
+      image: speaker.image_url
     }
     |> render
   end

@@ -1,5 +1,6 @@
 defmodule Opengraph.Router do
   use Plug.Router
+  alias DB.Repo
   alias Kaur.Result
   alias Opengraph.Generator
   require Logger
@@ -36,36 +37,21 @@ defmodule Opengraph.Router do
       send_resp(conn, 404, "not_found")
     else
       user
-      |> Generator.user_tags()
-      |> Result.map(&Generator.generate_html/1)
-      |> Result.either(
-        fn _error ->
-          conn
-          |> send_resp(500, "there has been an unexpected error")
-        end,
-        fn body ->
-          conn
-          |> put_resp_content_type("text/html")
-          |> send_resp(200, body)
-        end
-      )
+      |> Generator.render_user(conn.request_path)
+      |>  fn body ->
+        conn
+        |> put_resp_content_type("text/html")
+        |> send_resp(200, body)
+      end.()
     end
   end
 
   get "/videos" do
-    Generator.videos_list_tags()
-    |> Result.map(&Generator.generate_html/1)
-    |> Result.either(
-      fn _error ->
-        conn
-        |> send_resp(500, "there has been an unexpected error")
-      end,
-      fn body ->
-        conn
-        |> put_resp_content_type("text/html")
-        |> send_resp(200, body)
-      end
-    )
+    body = Generator.render_videos_list(conn.request_path)
+
+    conn
+    |> put_resp_content_type("text/html")
+    |> send_resp(200, body)
   end
 
   get "/videos/:video_id/*_" do
@@ -73,8 +59,7 @@ defmodule Opengraph.Router do
     |> DB.Type.VideoHashId.decode
     |> Result.map(&CaptainFact.Videos.get_video_by_id/1)
     |> Result.and_then(&Result.from_value/1)
-    |> Result.and_then(&Generator.video_tags/1)
-    |> Result.map(&Generator.generate_html/1)
+    |> Result.map(&Generator.render_video(&1, conn.request_path))
     |> Result.either(
       fn error ->
         case error do
@@ -91,9 +76,37 @@ defmodule Opengraph.Router do
     )
   end
 
-  # get "/s/:slug_or_id" do
+  get "/s/:slug_or_id" do
+    slug = conn.params[:slug_or_id]
 
-  # end
+    slug
+    |> Integer.parse
+    |> case do
+      # If integer parsing succeed it's an ID
+      {id, ""} ->
+        Speaker
+        |> Repo.get(id)
+      # Otherwise it's a slug
+      _ ->
+        Speaker
+        |> Repo.get_by(slug: slug)
+    end
+    |> Result.from_value
+    |> Result.map(&(Generator.render_speaker(&1, conn.request_path)))
+    |> Result.either(
+      fn error ->
+        case error do
+          :no_value -> send_resp(conn, 404, "content not found")
+          _ -> send_resp(conn, 500, "there has been an unexpected error")
+        end
+      end,
+      fn body ->
+        conn
+        |> put_resp_content_type("text/html")
+        |> send_resp(200, body)
+      end
+    )
+  end
 
   match _ do
     conn
