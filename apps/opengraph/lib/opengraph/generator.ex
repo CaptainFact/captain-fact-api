@@ -46,9 +46,9 @@ defmodule Opengraph.Generator do
     escaped_username = Plug.HTML.html_escape(user.username)
 
     render(%{
-      title: "le profil de : #{escaped_username} sur Captain Fact",
+      title: "le profil de : #{escaped_username} sur CaptainFact",
       url: encoded_url,
-      description: "Découvrez le profil de #{escaped_username} sur Captain Fact",
+      description: "Découvrez le profil de #{escaped_username} sur CaptainFact",
       image: DB.Type.UserPicture.url({user.picture_url, user}, :thumb)
     })
   end
@@ -60,10 +60,10 @@ defmodule Opengraph.Generator do
   """
   def render_videos_list(path) do
     render(%{
-      title: "Les vidéos sourcées et vérifiées sur Captain Fact",
+      title: "Les vidéos sourcées et vérifiées sur CaptainFact",
       url: "captainfact.io#{path}",
       description:
-        "Découvrez diverses vidéos sourcées et vérifiées par la communauté Captain Fact",
+        "Découvrez diverses vidéos sourcées et vérifiées par la communauté CaptainFact",
       image: "captainfact.io/assets/img/logo.png"
     })
   end
@@ -75,7 +75,7 @@ defmodule Opengraph.Generator do
     render(%{
       title: "Vérification complète de : #{video.title}",
       url: "captainfact.io#{path}",
-      description: "#{video.title} vérifiée citation par citation par la communauté Captain Fact",
+      description: "#{video.title} vérifiée citation par citation par la communauté CaptainFact",
       image: CaptainFact.Videos.image_url(video)
     })
   end
@@ -88,7 +88,7 @@ defmodule Opengraph.Generator do
   def render_speaker(speaker = %DB.Schema.Speaker{}, path) do
     render(%{
       title: speaker.full_name,
-      description: "Les interventions de #{speaker.full_name} sur Captain Fact",
+      description: "Les interventions de #{speaker.full_name} sur CaptainFact",
       url: "captainfact.io#{path}",
       image: speaker.image_url
     })

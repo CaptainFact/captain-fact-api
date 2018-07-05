@@ -6,7 +6,7 @@
     <meta property="og:image" content="<%= image %>">
     <meta property="og:url" content="<%= url %>">
 
-    <title>Captain Fact</title>
+    <title>CaptainFact</title>
   </head>
 
   <body>
