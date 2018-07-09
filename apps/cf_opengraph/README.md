@@ -10,7 +10,7 @@ by adding `opengraph` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:opengraph, "~> 0.1.0"}
+    {:cf_opengraph, "~> 0.1.0"}
   ]
 end
 ```

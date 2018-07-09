@@ -8,24 +8,28 @@ stages:
 
 variables:
   # Temporary build image
-  CF_API_BUILD_IMAGE: captain-fact-api-build:$CI_COMMIT_REF_NAME
+  CF_API_BUILD_IMAGE: captain-fact-api-build:$CI_COMMIT_REF_SLUG
   # Releases
-  CF_API_REST_IMAGE: registry.gitlab.com/captainfact/captain-fact-api/rest:$CI_COMMIT_REF_NAME
-  CF_API_GRAPHQL_IMAGE: captainfact/graphql-api:$CI_COMMIT_REF_NAME
-  CF_API_ATOM_FEED: captainfact/atom-feed:$CI_COMMIT_REF_NAME
+  CF_API_REST_IMAGE: registry.gitlab.com/captainfact/captain-fact-api/rest:$CI_COMMIT_REF_SLUG
+  CF_API_GRAPHQL_IMAGE: captainfact/graphql-api:$CI_COMMIT_REF_SLUG
+  CF_API_ATOM_FEED: captainfact/atom-feed:$CI_COMMIT_REF_SLUG
+  CF_API_OPENGRAPH_IMAGE: captainfact/opengraph:$CI_COMMIT_REF_SLUG
 
 # ---- Jobs ----
 
 build_api:
   stage: build
-  only: [tags, triggers, schedules, /^(master|staging)$/]
+  only: [tags, triggers, schedules, pushes]
   tags: [docker, captainfact, api]
   script:
-    - docker build -t ${CF_API_BUILD_IMAGE} -f ./rel/docker/Dockerfile.build .
+    - docker build 
+      -t ${CF_API_BUILD_IMAGE} 
+      -f ./rel/docker/Dockerfile.build
+      .
 
 test_api:
   stage: test
-  only: [tags, triggers, schedules, /^(master|staging)$/]
+  only: [tags, triggers, schedules, pushes]
   tags: [docker, captainfact, api]
   variables:
     TEST_NETWORK: network_api_testing
@@ -33,11 +37,20 @@ test_api:
   before_script:
     - (docker network rm $TEST_NETWORK || /bin/true) && docker network create $TEST_NETWORK
     - ((docker stop $TEST_DB && docker rm $TEST_DB) || /bin/true) &&
-      docker run -d --name $TEST_DB --network $TEST_NETWORK
-      -e POSTGRES_DB=captain_fact_test -e POSTGRES_PASSWORD=postgres
+      docker run -d
+      --name $TEST_DB 
+      --network $TEST_NETWORK
+      -e POSTGRES_DB=captain_fact_test 
+      -e POSTGRES_PASSWORD=postgres
       postgres:9.6
   script:
-    - docker run --rm --network $TEST_NETWORK -e MIX_ENV=test -e CF_DB_HOSTNAME=$TEST_DB $CF_API_BUILD_IMAGE /bin/sh -c "mix ecto.reset && mix coveralls --umbrella"
+    - docker run 
+      --rm 
+      --network $TEST_NETWORK 
+      -e MIX_ENV=test 
+      -e CF_DB_HOSTNAME=$TEST_DB
+      $CF_API_BUILD_IMAGE 
+      /bin/sh -c "mix ecto.reset && mix coveralls --umbrella"
   after_script:
     - (docker stop $TEST_DB && docker rm $TEST_DB) || /bin/true
     - docker network rm $TEST_NETWORK || /bin/true
@@ -47,7 +60,12 @@ package_api:
   only: [tags, triggers, schedules, /^(master|staging)$/]
   tags: [docker, captainfact, api]
   script:
-    - ./rel/docker/build_release.sh ${CF_API_BUILD_IMAGE} ${CF_API_REST_IMAGE} ${CF_API_GRAPHQL_IMAGE} ${CF_API_ATOM_FEED}
+    - ./rel/docker/build_release.sh
+      ${CF_API_BUILD_IMAGE}
+      ${CF_API_REST_IMAGE}
+      ${CF_API_GRAPHQL_IMAGE}
+      ${CF_API_ATOM_FEED}
+      ${CF_API_OPENGRAPH_IMAGE}
 
 release_api:
   stage: release
@@ -59,3 +77,4 @@ release_api:
     - docker push $CF_API_REST_IMAGE
     - docker push $CF_API_GRAPHQL_IMAGE
     - docker push $CF_API_ATOM_FEED
+    - docker push $CF_API_OPENGRAPH_IMAGE
