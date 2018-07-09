@@ -1,8 +1,8 @@
-defmodule Opengraph.Router do
+defmodule CF.Opengraph.Router do
   use Plug.Router
   alias DB.Repo
   alias Kaur.Result
-  alias Opengraph.Generator
+  alias CF.Opengraph.Generator
   require Logger
 
   plug(Plug.Logger, log: :debug)
@@ -14,11 +14,11 @@ defmodule Opengraph.Router do
     port = 4005
 
     success_logging = fn _ ->
-      Logger.info("Running Opengraph.Router with cowboy on port #{port}")
+      Logger.info("Running CF.Opengraph.Router with cowboy on port #{port}")
     end
 
     failure_logging = fn error ->
-      Logger.error("Unable to start Opengraph router : #{error}")
+      Logger.error("Unable to start CF.Opengraph router : #{error}")
     end
 
     Plug.Adapters.Cowboy.http(__MODULE__, [], port: port)
