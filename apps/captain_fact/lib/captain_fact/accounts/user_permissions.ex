@@ -14,8 +14,10 @@ defmodule CaptainFact.Accounts.UserPermissions do
     defexception message: "forbidden", plug_status: 403
   end
 
-  @daily_limit 24 * 60 * 60 # 24 hours
-  @weekly_limit 7 * @daily_limit # 1 week
+  # 24 hours
+  @daily_limit 24 * 60 * 60
+  # 1 week
+  @weekly_limit 7 * @daily_limit
 
   @error_not_enough_reputation "not_enough_reputation"
   @error_limit_reached "limit_reached"
@@ -29,12 +31,12 @@ defmodule CaptainFact.Accounts.UserPermissions do
   # Limitations
   # @external_resource specify the file dependency to compiler
   # See https://hexdocs.pm/elixir/Module.html#module-external_resource
-  @limitations_file Path.join(:code.priv_dir(:captain_fact), "limitations.yaml") 
+  @limitations_file Path.join(:code.priv_dir(:captain_fact), "limitations.yaml")
   @external_resource @limitations_file
   @limitations @limitations_file
-    |> YamlElixir.read_all_from_file!()
-    |> List.first()
-    |> CF.Utils.map_string_keys_to_atom_keys()
+               |> YamlElixir.read_all_from_file!()
+               |> List.first()
+               |> CF.Utils.map_string_keys_to_atom_keys()
 
   # --- API ---
 
@@ -60,22 +62,28 @@ defmodule CaptainFact.Accounts.UserPermissions do
       iex> UserPermissions.check(user, :create, :comment)
       {:error, "limit_reached"}
   """
-  def check(%User{is_publisher: true}, _, _), 
+  def check(%User{is_publisher: true}, _, _),
     do: {:ok, -1}
 
   def check(user = %User{}, action_type, entity) do
     limit = limitation(user, action_type, entity)
+
     if limit == 0 do
       {:error, @error_not_enough_reputation}
     else
       action_count = action_count(user, action_type, entity)
+
       if action_count >= limit do
         # User should never be able to overthrow daily limitations, we must
         # output a warning if we identify such an issue
         if action_count >= limit + @limit_warning_threshold,
-          do: Logger.warn(fn -> 
-            "User #{user.username} (#{user.id}) overthrown its limit for [#{action_type} #{entity}] (#{action_count}/#{limit})" 
-          end)
+          do:
+            Logger.warn(fn ->
+              "User #{user.username} (#{user.id}) overthrown its limit for [#{action_type} #{
+                entity
+              }] (#{action_count}/#{limit})"
+            end)
+
         {:error, @error_limit_reached}
       else
         {:ok, limit - action_count}
@@ -83,7 +91,7 @@ defmodule CaptainFact.Accounts.UserPermissions do
     end
   end
 
-  def check(nil, _, _), 
+  def check(nil, _, _),
     do: {:error, "unauthorized"}
 
   @doc """
@@ -91,11 +99,13 @@ defmodule CaptainFact.Accounts.UserPermissions do
   permissions.
   """
   def check!(user, action_type, entity \\ nil)
+
   def check!(user = %User{}, action_type, entity) do
     case check(user, action_type, entity) do
-      {:error, message} -> 
+      {:error, message} ->
         raise %PermissionsError{message: message}
-      {:ok, nb_available} -> 
+
+      {:ok, nb_available} ->
         nb_available
     end
   end
@@ -104,7 +114,7 @@ defmodule CaptainFact.Accounts.UserPermissions do
     do: check!(do_load_user!(user_id), action_type, entity)
 
   def check!(nil, _, _),
-    do: raise %PermissionsError{message: "unauthorized"}
+    do: raise(%PermissionsError{message: "unauthorized"})
 
   @doc """
   Count the number of occurences of this user / action type in limited perdiod.
@@ -122,8 +132,10 @@ defmodule CaptainFact.Accounts.UserPermissions do
 
   def limitation(user = %User{}, action_type, entity) do
     case level(user) do
-      -1 -> 
-        0 # Reputation under minimum user can't do anything
+      -1 ->
+        # Reputation under minimum user can't do anything
+        0
+
       level ->
         case Map.get(@limitations, action_type) do
           l when is_list(l) -> Enum.at(l, level)
@@ -139,11 +151,11 @@ defmodule CaptainFact.Accounts.UserPermissions do
   def level(%User{reputation: reputation}) do
     if reputation < @lowest_acceptable_reputation,
       do: -1,
-      else: (@nb_levels - 1) - Enum.find_index(@reverse_levels, &(reputation >= &1))
+      else: @nb_levels - 1 - Enum.find_index(@reverse_levels, &(reputation >= &1))
   end
 
-  defp do_load_user!(nil), 
-    do: raise %PermissionsError{message: "unauthorized"}
+  defp do_load_user!(nil),
+    do: raise(%PermissionsError{message: "unauthorized"})
 
   defp do_load_user!(user_id) do
     User

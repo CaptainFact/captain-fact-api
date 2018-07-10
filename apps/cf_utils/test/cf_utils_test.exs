@@ -10,12 +10,14 @@ defmodule CF.UtilsTest do
         },
         "test2" => :ok
       }
+
       expected_map = %{
         test: %{
           hello: :ok
         },
         test2: :ok
       }
+
       assert CF.Utils.map_string_keys_to_atom_keys(base_map) == expected_map
     end
 
@@ -30,12 +32,14 @@ defmodule CF.UtilsTest do
         },
         test_again: :ok
       }
+
       expected_map = %{
         test: %{
           hello: 42
         },
         test_again: :ok
       }
+
       assert CF.Utils.map_string_keys_to_atom_keys(base_map) == expected_map
     end
   end
