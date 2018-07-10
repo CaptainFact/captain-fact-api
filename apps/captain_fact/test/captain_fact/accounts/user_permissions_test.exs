@@ -16,8 +16,8 @@ defmodule CaptainFact.Accounts.UserPermissionsTest do
   end
 
   test "for each limitation, we must define all levels" do
-    each_limitation(fn {_, _, limitations_tuple} ->
-      assert limitations_tuple |> Tuple.to_list() |> Enum.count() == UserPermissions.nb_levels()
+    each_limitation(fn {_, _, limitations} ->
+      assert Enum.count(limitations) == UserPermissions.nb_levels()
     end)
   end
 
@@ -108,7 +108,8 @@ defmodule CaptainFact.Accounts.UserPermissionsTest do
   defp each_limitation(func) do
     for {action_type, entities_limitations} <- UserPermissions.limitations do
       case entities_limitations do
-        limitation when is_tuple(limitation) -> nil # Ignore wildcards (cannot guess entity)
+        limitation when is_list(limitation) -> 
+          nil # Ignore wildcards (cannot guess entity)
         limitations when is_map(limitations) ->
           for {entity, limitation} <- limitations do
             func.({action_type, entity, limitation})
