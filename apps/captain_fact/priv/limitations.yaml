@@ -4,16 +4,16 @@
 # Specific limitations by entity type
 create:
   comment:              [  2 ,  5 , 10 , 20 , 45 ,  75 , 100 , 150 , 200 ]
-  statement:            [  2 ,  3 , 6  , 12 , 30 ,  50 , 100 , 100 , 100 ]
-  speaker:              [  0 ,  0 , 0  , 3  , 6  ,  15 ,  30 , 40  , 50  ]
+  statement:            [  0 ,  3 ,  6 , 12 , 30 ,  50 , 100 , 100 , 100 ]
+  speaker:              [  0 ,  0 , 0  ,  3 ,  6 ,  15 ,  30 ,  40 ,  50 ]
 add:
-  video:                [  0 ,  0 ,  0 , 0  , 0  ,  0  ,  1  ,  2  ,  3  ]
-  speaker:              [  0 ,  0 ,  0 , 3  , 6  , 15  , 30  , 40  , 50  ]
+  video:                [  0 ,  0 ,  0 , 0  , 0  ,   0 ,  1  ,  2  ,   3 ]
+  speaker:              [  0 ,  0 ,  0 , 3  , 6  ,  15 , 30  , 40  ,  50 ]
 update:
   statement:            [  0 ,  0 ,  5 , 15 , 30 ,  75 , 125 , 150 , 200 ]
   speaker:              [  0 ,  0 ,  3 ,  7 , 15 ,  30 ,  60 ,  80 , 100 ]
   video:                [  0 ,  0 ,  0 ,  0 ,  3 ,   6 ,  12 ,  25 ,  40 ]
-  user:                 [  1 , 10 ,  10,  10, 10 ,   10,  10 ,  10 ,  10 ]
+  user:                 [  1 , 10 , 10 , 10 , 10 ,  10 ,  10 ,  10 ,  10 ]
 delete:
   comment:              [  1  , 20, 30 , 50 , 75 , 300 , 300 , 300 , 300 ]
 remove:
@@ -25,7 +25,7 @@ restore:
 flag:
   comment:              [  0 ,  0 ,  3 ,  5 , 10 ,  15 ,  20 ,  25 ,  30 ]
 
-# Wildcards actions (they don't care about the entity type)
+# Wildcards actions
 vote_up:                [ 0  ,  3 ,  6 , 10 , 20 ,  30 ,  50 ,  75 , 100 ]
 vote_down:              [ 0  ,  0 ,  2 ,  5 , 10 ,  20 ,  40 ,  80 , 100 ]
 self_vote:              [ 0  ,  0 ,  0 ,  0 ,  0 ,   0 ,   3 ,   5 ,  10 ]
