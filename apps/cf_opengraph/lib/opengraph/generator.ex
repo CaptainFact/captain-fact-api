@@ -1,4 +1,4 @@
-defmodule Opengraph.Generator do
+defmodule CF.Opengraph.Generator do
   alias DB.Schema.User
 
   require EEx

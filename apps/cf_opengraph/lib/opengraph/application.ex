@@ -1,12 +1,12 @@
-defmodule Opengraph.Application do
+defmodule CF.Opengraph.Application do
   use Application
 
-  alias Opengraph.Router
+  alias CF.Opengraph.Router
 
   def start(_, _) do
     children = [
       %{
-        id: Opengraph.Router,
+        id: CF.Opengraph.Router,
         start: {Router, :start_link, []}
       }
     ]

@@ -1,10 +1,10 @@
-defmodule Opengraph.RouterTest do
-  use ExUnit.Case
+defmodule CF.Opengraph.RouterTest do
+  use CF.Opengraph.Case, async: true
 
   import Plug.Test
   import DB.Factory
 
-  alias Opengraph.Router
+  alias CF.Opengraph.Router
 
   describe "get /u/:username" do
     test "returns 200 for a valid user" do
