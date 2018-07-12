@@ -34,9 +34,12 @@ defmodule CaptainFactAtomFeed.Mixfile do
 
   defp deps do
     [
-      {:plug, "~> 1.0"},
-      {:cowboy, "~> 1.0"},
+      # --- Runtime
       {:atomex, "~> 0.2"},
+      {:cowboy, "~> 1.0"},
+      {:plug, "~> 1.0"},
+
+      # ---- In Umbrella
       {:db, in_umbrella: true}
     ]
   end
