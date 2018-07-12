@@ -3,7 +3,7 @@ defmodule CaptainFactAtomFeed.Mixfile do
 
   def project do
     [
-      app: :captain_fact_atom_feed,
+      app: :cf_atom_feed,
       version: "0.8.6",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
