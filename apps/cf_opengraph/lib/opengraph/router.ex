@@ -9,10 +9,7 @@ defmodule CF.Opengraph.Router do
   plug(:match)
   plug(:dispatch)
 
-  def start_link do
-    # TODO load config
-    port = 4005
-
+  def start_link(port) do
     success_logging = fn _ ->
       Logger.info("Running CF.Opengraph.Router with cowboy on port #{port}")
     end
