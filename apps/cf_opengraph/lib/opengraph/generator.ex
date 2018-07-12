@@ -44,12 +44,13 @@ defmodule CF.Opengraph.Generator do
   def render_user(user = %User{}, path) do
     encoded_url = URI.encode("captainfact.io#{path}")
     escaped_username = Plug.HTML.html_escape(user.username)
+    escaped_appellation = Plug.HTML.html_escape(User.user_appelation(user))
 
     render(%{
-      title: "le profil de : #{escaped_username} sur CaptainFact",
+      title: "Le profil de #{escaped_appellation} sur CaptainFact",
       url: encoded_url,
       description: "Découvrez le profil de #{escaped_username} sur CaptainFact",
-      image: DB.Type.UserPicture.url({user.picture_url, user}, :thumb)
+      image: nil # User picture doesn't have a large enough resolution
     })
   end
 
@@ -64,7 +65,7 @@ defmodule CF.Opengraph.Generator do
       url: "captainfact.io#{path}",
       description:
         "Découvrez diverses vidéos sourcées et vérifiées par la communauté CaptainFact",
-      image: "captainfact.io/assets/img/logo.png"
+      image: nil
     })
   end
 
@@ -90,7 +91,7 @@ defmodule CF.Opengraph.Generator do
       title: speaker.full_name,
       description: "Les interventions de #{speaker.full_name} sur CaptainFact",
       url: "captainfact.io#{path}",
-      image: speaker.image_url
+      image: nil # Speaker picture doesn't have a large enough resolution
     })
   end
 end

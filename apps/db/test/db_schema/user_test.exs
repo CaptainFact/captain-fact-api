@@ -1,5 +1,6 @@
 defmodule DB.Schema.UserTest do
   use DB.DataCase, async: true
+  doctest DB.Schema.User
 
   import DB.Factory, only: [insert: 1, insert: 2]
   alias DB.Schema.User
