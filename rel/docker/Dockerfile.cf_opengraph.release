@@ -1,4 +1,4 @@
-FROM bitwalker/alpine-elixir:1.6.0
+FROM bitwalker/alpine-elixir:1.6.6
 RUN apk add bash imagemagick curl && rm -rf /var/cache/apk/*
 
 ENV HOME=/opt/app/ SHELL=/bin/bash MIX_ENV=prod
@@ -8,4 +8,4 @@ COPY cf_opengraph.tar .
 RUN tar x -f cf_opengraph.tar && rm cf_opengraph.tar
 
 EXPOSE 80
-ENTRYPOINT ["bin/captain_fact"]
+ENTRYPOINT ["bin/cf_opengraph"]
