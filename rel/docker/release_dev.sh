@@ -6,6 +6,7 @@ CF_BUILD_IMAGE=captain-fact-builder:dev-release
 CF_REST_API_IMAGE=registry.gitlab.com/captainfact/captain-fact-api/rest:dev
 CF_GRAPHQL_API_IMAGE=captainfact/graphql-api:dev
 CF_ATOM_FEED_IMAGE=captainfact/atom-feed:dev
+CF_OPENGRAPH_IMAGE=captainfact/opengraph:dev
 
 function confirm()
 {
@@ -26,10 +27,16 @@ function confirm()
 
 # ---- Build ----
 set -e
-
 cd -- "$(dirname $0)"
+
 docker build -t ${CF_BUILD_IMAGE} --build-arg MIX_ENV=dev -f Dockerfile.build ../../
-./build_release.sh ${CF_BUILD_IMAGE} ${CF_REST_API_IMAGE} ${CF_GRAPHQL_API_IMAGE} ${CF_ATOM_FEED_IMAGE}
+
+./build_release.sh \
+    ${CF_BUILD_IMAGE} \
+    ${CF_REST_API_IMAGE} \
+    ${CF_GRAPHQL_API_IMAGE} \
+    ${CF_ATOM_FEED_IMAGE} \
+    ${CF_OPENGRAPH_IMAGE}
 
 # ---- Push ----
 set +e
@@ -37,3 +44,4 @@ set +e
 confirm "Push $CF_REST_API_IMAGE ?" && docker push ${CF_REST_API_IMAGE}
 confirm "Push $CF_GRAPHQL_API_IMAGE ?" && docker push ${CF_GRAPHQL_API_IMAGE}
 confirm "Push $CF_ATOM_FEED_IMAGE ?" && docker push ${CF_ATOM_FEED_IMAGE}
+confirm "Push $CF_OPENGRAPH_IMAGE ?" && docker push ${CF_OPENGRAPH_IMAGE}

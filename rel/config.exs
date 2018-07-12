@@ -49,3 +49,9 @@ release :captain_fact_atom_feed do
   set version: current_version(:captain_fact_atom_feed)
   set applications: [:captain_fact_atom_feed]
 end
+
+release :cf_opengraph do
+  set version: current_version(:cf_opengraph)
+  set applications: [:cf_opengraph]
+  set code_paths: ["apps/opengraph"]
+end
