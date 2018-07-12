@@ -37,6 +37,9 @@ defmodule CaptainFactAtomFeed.Mixfile do
       {:plug, "~> 1.0"},
       {:cowboy, "~> 1.0"},
       {:atomex, "~> 0.2"},
+      {:kaur, "~> 1.1"},
+
+      # ---- Internal ----
       {:db, in_umbrella: true}
     ]
   end
