@@ -1,5 +1,6 @@
 defmodule CF.Opengraph.Generator do
   alias DB.Schema.User
+  alias DB.Schema.Video
 
   require EEx
 
@@ -72,12 +73,12 @@ defmodule CF.Opengraph.Generator do
   @doc """
   generate open graph tags for the given video
   """
-  def render_video(video = %DB.Schema.Video{}, path) do
+  def render_video(video = %Video{}, path) do
     render(%{
       title: "Vérification complète de : #{video.title}",
       url: "captainfact.io#{path}",
       description: "#{video.title} vérifiée citation par citation par la communauté CaptainFact",
-      image: CaptainFact.Videos.image_url(video)
+      image: Video.image_url(video)
     })
   end
 

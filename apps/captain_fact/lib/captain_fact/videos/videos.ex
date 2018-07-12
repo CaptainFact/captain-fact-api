@@ -147,16 +147,4 @@ defmodule CaptainFact.Videos do
 
     Enum.group_by(Repo.all(query), &elem(&1, 0), &elem(&1, 1))
   end
-
-  @doc """
-  Returns overview image url for the given video
-  """
-  def image_url(
-        _video = %Video{
-          provider: "youtube",
-          provider_id: youtube_id
-        }
-      ) do
-    "https://img.youtube.com/vi/#{youtube_id}/hqdefault.jpg"
-  end
 end
