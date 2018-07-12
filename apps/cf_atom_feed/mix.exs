@@ -1,4 +1,4 @@
-defmodule CaptainFactAtomFeed.Mixfile do
+defmodule CF.AtomFeed.Mixfile do
   use Mix.Project
 
   def project do
@@ -23,7 +23,7 @@ defmodule CaptainFactAtomFeed.Mixfile do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {CaptainFactAtomFeed.Application, []},
+      mod: {CF.AtomFeed.Application, []},
       extra_applications: [:logger, :runtime_tools, :cowboy, :plug]
     ]
   end

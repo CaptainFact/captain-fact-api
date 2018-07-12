@@ -1,4 +1,4 @@
-defmodule CaptainFactAtomFeed.StatementsTest do
+defmodule CF.AtomFeed.StatementsTest do
   use ExUnit.Case
   alias DB.{Repo, Schema, Factory}
 
@@ -12,7 +12,7 @@ defmodule CaptainFactAtomFeed.StatementsTest do
 
     # Insert fake comments and render feed
     statements = Factory.insert_list(5, :statement)
-    feed = CaptainFactAtomFeed.Statements.feed_all()
+    feed = CF.AtomFeed.Statements.feed_all()
 
     # Check feed info
     assert String.starts_with?(feed, """

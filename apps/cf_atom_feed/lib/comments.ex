@@ -1,4 +1,4 @@
-defmodule CaptainFactAtomFeed.Comments do
+defmodule CF.AtomFeed.Comments do
   @moduledoc """
   Generate an ATOM feed that contains all comments
   """

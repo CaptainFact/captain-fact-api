@@ -8,4 +8,4 @@ COPY atom-feed_release.tar .
 RUN tar x -f atom-feed_release.tar && rm atom-feed_release.tar
 
 EXPOSE 80
-ENTRYPOINT ["bin/captain_fact_atom_feed"]
+ENTRYPOINT ["bin/cf_atom_feed"]

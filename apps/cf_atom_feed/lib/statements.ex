@@ -1,4 +1,4 @@
-defmodule CaptainFactAtomFeed.Statements do
+defmodule CF.AtomFeed.Statements do
   import Ecto.Query
 
   alias Atomex.{Feed, Entry}

@@ -6,12 +6,12 @@
 use Mix.Config
 
 # General application configuration
-config :captain_fact_atom_feed,
-  namespace: CaptainFactAtomFeed,
+config :cf_atom_feed,
+  namespace: CF.AtomFeed,
   ecto_repos: [DB.Repo]
 
-config :captain_fact_atom_feed,
-  CaptainFactAtomFeed.Router, cowboy: [port: 4004]
+config :cf_atom_feed,
+  CF.AtomFeed.Router, cowboy: [port: 4004]
 
 # Configures Elixir's Logger
 config :logger, :console,
