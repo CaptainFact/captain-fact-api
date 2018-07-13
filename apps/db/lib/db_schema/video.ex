@@ -110,6 +110,18 @@ defmodule DB.Schema.Video do
   end
 
   @doc """
+  Returns overview image url for the given video
+  """
+  def image_url(
+        _video = %__MODULE__{
+          provider: "youtube",
+          provider_id: youtube_id
+        }
+      ) do
+    "https://img.youtube.com/vi/#{youtube_id}/hqdefault.jpg"
+  end
+
+  @doc """
   Builds a changeset based on the `struct` and `params`.
   """
   def changeset(struct, params \\ %{}) do
