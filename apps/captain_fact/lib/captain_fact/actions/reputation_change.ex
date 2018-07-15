@@ -17,11 +17,6 @@ defmodule CaptainFact.Actions.ReputationChange do
   @actions_types Map.keys(@actions)
 
   @doc """
-  Return a list of all actions types known by reputation change calculator.
-  """
-  def actions_types, do: @actions_types
-
-  @doc """
   Get a tuple with {self_reputation_change, target_reputation_change)
   for given action type / entity.
   """
@@ -50,4 +45,34 @@ defmodule CaptainFact.Actions.ReputationChange do
   flag...etc)
   """
   def for_admin_action(type), do: elem(for_action(type), 1)
+
+  @doc """
+  Estimate total reputation change from given `actions`.
+  (!) This function should only be used for informational puproses as it doesn't
+  take into account the daily limitations.
+  """
+  def estimate_reputation_change(user_id, actions) do
+    Enum.reduce(actions, 0, fn action, total ->
+      {source_change, target_change} = for_action(action)
+
+      cond do
+        # User is the source of the action
+        action.user_id == user_id ->
+          total + source_change
+
+        # User is action's target
+        action.target_user_id == user_id ->
+          total + target_change
+
+        # Action has no impact on user
+        true ->
+          total
+      end
+    end)
+  end
+
+  @doc """
+  Return a list of all actions types known by reputation change calculator.
+  """
+  def actions_types, do: @actions_types
 end
