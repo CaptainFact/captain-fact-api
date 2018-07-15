@@ -1,9 +1,9 @@
-defmodule CaptainFactAtomFeed.Mixfile do
+defmodule CF.AtomFeed.Mixfile do
   use Mix.Project
 
   def project do
     [
-      app: :captain_fact_atom_feed,
+      app: :cf_atom_feed,
       version: "0.8.6",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
@@ -23,7 +23,7 @@ defmodule CaptainFactAtomFeed.Mixfile do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {CaptainFactAtomFeed.Application, []},
+      mod: {CF.AtomFeed.Application, []},
       extra_applications: [:logger, :runtime_tools, :cowboy, :plug]
     ]
   end
@@ -34,12 +34,13 @@ defmodule CaptainFactAtomFeed.Mixfile do
 
   defp deps do
     [
-      {:plug, "~> 1.0"},
-      {:cowboy, "~> 1.0"},
+      # --- Runtime
       {:atomex, "~> 0.2"},
+      {:cowboy, "~> 1.0"},
+      {:plug, "~> 1.0"},
       {:kaur, "~> 1.1"},
 
-      # ---- Internal ----
+      # ---- In Umbrella
       {:db, in_umbrella: true}
     ]
   end
