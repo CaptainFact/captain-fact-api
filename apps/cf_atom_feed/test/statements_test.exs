@@ -29,8 +29,10 @@ defmodule CF.AtomFeed.StatementsTest do
 
     # Check comment entries
     for statement <- statements do
-      assert feed =~ ~r(<link href="https://captainfact\.io/videos/[a-zA-Z0-9]+\?statement=#{statement.id}"/>)
-      assert feed =~ ~r(<title>New statement on ##{statement.video.id}</title>)
+      video_id = DB.Type.VideoHashId.encode(statement.video_id)
+      statement_url = "https://captainfact\.io/videos/#{video_id}?statement=#{statement.id}"
+      assert feed =~ "<link href=\"#{statement_url}\"/>"
+      assert feed =~ "<title>New statement on ##{statement.video.id}</title>"
     end
   end
 end

@@ -6,7 +6,7 @@ defmodule CF.AtomFeed.Statements do
 
   @nb_items_max 50
 
-  @url "https://www.captainfact.io"
+  @url "https://captainfact.io"
 
   @doc"""
   Get an RSS feed containing all site's statements in reverse chronological
