@@ -1,7 +1,10 @@
 defmodule CaptainFact.Actions.ReputationChange do
+  @moduledoc """
+  Calculate reputation changes.
+  """
+
   alias DB.Schema.UserAction
   alias CaptainFact.Actions.ReputationChangeConfigLoader
-
 
   # Reputation changes definition
   # @external_resource specify the file dependency to compiler
@@ -13,13 +16,12 @@ defmodule CaptainFact.Actions.ReputationChange do
   @actions ReputationChangeConfigLoader.load(@reputations_file)
   @actions_types Map.keys(@actions)
 
-
-  @doc"""
+  @doc """
   Return a list of all actions types known by reputation change calculator.
   """
   def actions_types, do: @actions_types
 
-  @doc"""
+  @doc """
   Get a tuple with {self_reputation_change, target_reputation_change)
   for given action type / entity.
   """
@@ -30,16 +32,20 @@ defmodule CaptainFact.Actions.ReputationChange do
       res when is_tuple(res) -> res
     end
   end
+
   def for_action(type) when is_atom(type),
     do: for_action(UserAction.type(type))
+
   def for_action(type) when is_integer(type),
     do: Map.get(@actions, type) || {0, 0}
+
   def for_action(type, entity) when is_atom(type) and is_atom(entity),
     do: for_action(UserAction.type(type), UserAction.entity(entity))
+
   def for_action(type, entity) when is_integer(type) and is_integer(entity),
     do: get_in(@actions, [type, entity]) || {0, 0}
 
-  @doc"""
+  @doc """
   Get reputation change as an integer for admin action (email confirmed, abusive
   flag...etc)
   """
