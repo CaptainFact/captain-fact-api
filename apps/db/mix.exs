@@ -48,6 +48,7 @@ defmodule DB.Mixfile do
       {:bcrypt_elixir, "~> 1.0"},
       {:burnex, "~> 1.0"},
       {:hashids, "~> 2.0"},
+      {:kaur, "~> 1.1"},
       {:ex_machina, "~> 2.0", only: [:dev, :test]},
       {:faker, "~> 0.7", only: [:dev, :test]},
       {:stream_data, "~> 0.1", only: :test}

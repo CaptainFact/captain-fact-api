@@ -30,6 +30,7 @@ defmodule CF.Opengraph.MixProject do
   defp deps do
     [
       {:cowboy, "~> 1.1"},
+      {:kaur, "~> 1.1"},
       {:phoenix_html, "~> 2.11.2"},
       {:plug, "~> 1.5.1"},
 

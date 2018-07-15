@@ -1,6 +1,7 @@
 defmodule CF.Opengraph.Router do
   use Plug.Router
   alias DB.Repo
+  alias DB.Schema.Video
   alias Kaur.Result
   alias CF.Opengraph.Generator
   require Logger
@@ -54,7 +55,7 @@ defmodule CF.Opengraph.Router do
   get "/videos/:video_id/*_" do
     conn.params["video_id"]
     |> DB.Type.VideoHashId.decode()
-    |> Result.map(&CaptainFact.Videos.get_video_by_id/1)
+    |> Result.map(fn id -> Repo.get(Video, id) end)
     |> Result.and_then(&Result.from_value/1)
     |> Result.map(&Generator.render_video(&1, conn.request_path))
     |> Result.either(

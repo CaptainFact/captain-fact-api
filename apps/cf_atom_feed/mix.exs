@@ -38,6 +38,7 @@ defmodule CF.AtomFeed.Mixfile do
       {:atomex, "~> 0.2"},
       {:cowboy, "~> 1.0"},
       {:plug, "~> 1.0"},
+      {:kaur, "~> 1.1"},
 
       # ---- In Umbrella
       {:db, in_umbrella: true}
