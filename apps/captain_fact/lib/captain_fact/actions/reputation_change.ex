@@ -1,38 +1,16 @@
 defmodule CaptainFact.Actions.ReputationChange do
   alias DB.Schema.UserAction
+  alias CaptainFact.Actions.ReputationChangeConfigLoader
 
-  @actions %{
-    # Votes
-    UserAction.type(:vote_up) => %{
-      UserAction.entity(:comment) =>  {0, +2},
-      UserAction.entity(:fact) =>     {0, +3},
-    },
-    UserAction.type(:revert_vote_up) => %{
-      UserAction.entity(:comment) =>  {0, -2},
-      UserAction.entity(:fact) =>     {0, -3},
-    },
-    UserAction.type(:vote_down) => %{
-      UserAction.entity(:comment) =>  {-1, -2},
-      UserAction.entity(:fact) =>     {-1, -3}
-    },
-    UserAction.type(:revert_vote_down) => %{
-      UserAction.entity(:comment) =>  {+1 , +2},
-      UserAction.entity(:fact) =>     {+1 , +3}
-    },
 
-    # Moderation - target user got its comment banned
-    UserAction.type(:action_banned_bad_language) =>     {0, -25},
-    UserAction.type(:action_banned_spam) =>             {0, -30},
-    UserAction.type(:action_banned_irrelevant) =>       {0, -10},
-    UserAction.type(:action_banned_not_constructive) => {0, -5},
-
-    # Moderation - source user (who made the flag) has made a good or bad flag
-    UserAction.type(:abused_flag) =>          {0, -5},
-    UserAction.type(:confirmed_flag) =>       {0, +3},
-
-    # Misc
-    UserAction.type(:email_confirmed) => {0, +15},
-  }
+  # Reputation changes definition
+  # @external_resource specify the file dependency to compiler
+  # See https://hexdocs.pm/elixir/Module.html#module-external_resource
+  # We load a file with atoms keys from YAML and then convert all keys to their
+  # numerical value.
+  @reputations_file Path.join(:code.priv_dir(:captain_fact), "reputation_changes.yaml")
+  @external_resource @reputations_file
+  @actions ReputationChangeConfigLoader.load(@reputations_file)
   @actions_types Map.keys(@actions)
 
 

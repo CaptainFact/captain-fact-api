@@ -33,10 +33,7 @@ defmodule CaptainFact.Accounts.UserPermissions do
   # See https://hexdocs.pm/elixir/Module.html#module-external_resource
   @limitations_file Path.join(:code.priv_dir(:captain_fact), "limitations.yaml")
   @external_resource @limitations_file
-  @limitations @limitations_file
-               |> YamlElixir.read_all_from_file!()
-               |> List.first()
-               |> CF.Utils.map_string_keys_to_atom_keys()
+  @limitations CF.Utils.load_yaml_config(@limitations_file)
 
   # --- API ---
 
