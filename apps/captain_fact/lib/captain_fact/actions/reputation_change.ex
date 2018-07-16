@@ -4,6 +4,7 @@ defmodule CaptainFact.Actions.ReputationChange do
   """
 
   alias DB.Schema.{User, UserAction}
+  alias CaptainFact.Actions
   alias CaptainFact.Actions.ReputationChangeConfigLoader
 
   # Reputation changes definition
@@ -55,10 +56,23 @@ defmodule CaptainFact.Actions.ReputationChange do
   (!) This function should only be used for informational puproses as it doesn't
   take into account the daily limitations.
   """
-  def estimate_reputation_change(user = %User{}, actions) do
+  def estimate_reputation_change(actions, user = %User{}) do
     Enum.reduce(actions, 0, fn action, total ->
       total + impact_on_user(action, user)
     end)
+  end
+
+  @doc """
+  Same as `estimate_reputation_change/2` except it automatically fetch all
+  actions between `datetime_start` and `datetime_end`.
+  """
+  def estimate_reputation_change_period(datetime_start, datetime_end, user) do
+    UserAction
+    |> Actions.query_about_user(user)
+    |> Actions.query_matching_types(@actions_types)
+    |> Actions.query_period(datetime_start, datetime_end)
+    |> DB.Repo.all()
+    |> estimate_reputation_change(user)
   end
 
   @doc """

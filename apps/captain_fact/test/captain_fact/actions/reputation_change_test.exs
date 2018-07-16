@@ -20,7 +20,7 @@ defmodule CaptainFact.Actions.ReputationChangeTest do
 
       # Estimate change and ensure it matches the change for this action
       {expected_source_change, _} = for_action(action_type, entity)
-      result = estimate_reputation_change(user, [action])
+      result = estimate_reputation_change([action], user)
       assert result == expected_source_change
     end
 
@@ -33,7 +33,7 @@ defmodule CaptainFact.Actions.ReputationChangeTest do
 
       # Estimate change and ensure it matches the change for this action
       {_, expected_target_change} = for_action(action_type)
-      result = estimate_reputation_change(user, [action])
+      result = estimate_reputation_change([action], user)
       assert result == expected_target_change
     end
 
@@ -57,7 +57,7 @@ defmodule CaptainFact.Actions.ReputationChangeTest do
       expected_total = expected_source_change + expected_target_change
 
       # Calculate it with `estimate_reputation_change/1` and compare results
-      result = estimate_reputation_change(user, [self_action, target_action])
+      result = estimate_reputation_change([self_action, target_action], user)
       assert result == expected_total
     end
 
@@ -73,7 +73,7 @@ defmodule CaptainFact.Actions.ReputationChangeTest do
 
       # Estimate change and ensure it matches the change for this action
       {_, expected_target_change} = for_action(action_type)
-      result = estimate_reputation_change(user, [action, random_action])
+      result = estimate_reputation_change([action, random_action], user)
       assert result == expected_target_change
     end
   end

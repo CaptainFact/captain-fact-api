@@ -1,6 +1,7 @@
 defmodule CaptainFact.Accounts.UserPermissionsTest do
   use CaptainFact.DataCase
 
+  alias CaptainFact.Actions
   alias CaptainFact.Actions.Recorder
   alias CaptainFact.Accounts.UserPermissions
   alias UserPermissions.PermissionsError
@@ -88,7 +89,7 @@ defmodule CaptainFact.Accounts.UserPermissionsTest do
     |> Enum.take(nb_threads)
     |> Enum.map(&Task.await/1)
 
-    assert Recorder.count(user, action_type, entity) - tolerated_errors <= max_occurences
+    assert Actions.count(user, action_type, entity) - tolerated_errors <= max_occurences
   end
 
   test "users with too low reputation shouldn't be able to do anything", context do
