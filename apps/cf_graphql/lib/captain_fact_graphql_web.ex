@@ -1,12 +1,12 @@
-defmodule CaptainFactGraphqlWeb do
+defmodule CF.GraphQLWeb do
   @moduledoc """
   The entrypoint for defining your web interface, such
   as controllers, views, channels and so on.
 
   This can be used in your application as:
 
-      use CaptainFactGraphqlWeb, :controller
-      use CaptainFactGraphqlWeb, :view
+      use CF.GraphQLWeb, :controller
+      use CF.GraphQLWeb, :view
 
   The definitions below will be executed for every view,
   controller, etc, so keep them short and clean, focused

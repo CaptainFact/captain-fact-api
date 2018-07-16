@@ -1,8 +1,8 @@
-defmodule CaptainFactGraphql.Resolvers.AppInfo do
+defmodule CF.GraphQL.Resolvers.AppInfo do
   def info(_, _args, _info) do
     {:ok, %{
       status: "✔",
-      version: CaptainFactGraphql.Application.version(),
+      version: CF.GraphQL.Application.version(),
       db_version: DB.Application.version()
     }}
   end

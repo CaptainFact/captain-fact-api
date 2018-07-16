@@ -1,5 +1,5 @@
-defmodule CaptainFactGraphqlWeb.Endpoint do
-  use Phoenix.Endpoint, otp_app: :captain_fact_graphql
+defmodule CF.GraphQLWeb.Endpoint do
+  use Phoenix.Endpoint, otp_app: :cf_graphql
 
   plug Plug.RequestId
   plug Plug.Logger
@@ -13,5 +13,5 @@ defmodule CaptainFactGraphqlWeb.Endpoint do
        json_decoder: Poison
   plug Plug.MethodOverride
   plug Plug.Head
-  plug CaptainFactGraphqlWeb.Router
+  plug CF.GraphQLWeb.Router
 end

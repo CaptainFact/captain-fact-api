@@ -6,8 +6,8 @@
 use Mix.Config
 
 # General application configuration
-config :captain_fact_graphql,
-  namespace: CaptainFactGraphql,
+config :cf_graphql,
+  namespace: CF.GraphQL,
   ecto_repos: [DB.Repo],
   env: Mix.env,
   basic_auth: [
@@ -17,10 +17,10 @@ config :captain_fact_graphql,
   ]
 
 # Configures the endpoint
-config :captain_fact_graphql, CaptainFactGraphqlWeb.Endpoint,
+config :cf_graphql, CF.GraphQLWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "Nl5lfMlBMvQpY3n74G9iNTxH4okMpbMWArWst9Vhj75tl+m2PuV+KPwjX0fNMaa8",
-  pubsub: [name: CaptainFactGraphql.PubSub, adapter: Phoenix.PubSub.PG2],
+  pubsub: [name: CF.GraphQL.PubSub, adapter: Phoenix.PubSub.PG2],
   server: true
 
 # Configures Elixir's Logger

@@ -86,7 +86,7 @@ graph BT;
 │   │   │   ├── captain_fact => Core functions + jobs
 │   │   │   └── captain_fact_web => REST API
 │   │   └── priv/secrets => dev secrets for this app
-│   ├── captain_fact_graphql => GraphQL API
+│   ├── cf_graphql => GraphQL API
 │   │   └── priv/secrets => dev secrets for this app
 │   ├── cf_atom_feed => Atom feed
 │   └── db => DB repository and schemas

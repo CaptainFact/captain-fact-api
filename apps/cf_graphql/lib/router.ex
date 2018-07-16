@@ -1,5 +1,5 @@
-defmodule CaptainFactGraphqlWeb.Router do
-  use CaptainFactGraphqlWeb, :router
+defmodule CF.GraphQLWeb.Router do
+  use CF.GraphQLWeb, :router
 
   @graphiql_route "/graphiql"
 
@@ -8,7 +8,7 @@ defmodule CaptainFactGraphqlWeb.Router do
   end
 
   pipeline :authenticated do
-    plug BasicAuth, use_config: {:captain_fact_graphql, :basic_auth}
+    plug BasicAuth, use_config: {:cf_graphql, :basic_auth}
   end
 
   scope "/" do
@@ -18,14 +18,14 @@ defmodule CaptainFactGraphqlWeb.Router do
       if Mix.env == :prod, do: pipe_through :authenticated
 
       forward "/", Absinthe.Plug.GraphiQL,
-        schema: CaptainFactGraphql.Schema,
+        schema: CF.GraphQL.Schema,
         analyze_complexity: true,
         max_complexity: 320, # (6 joins = 300) + 20 fields
-        context: %{pubsub: CaptainFactGraphqlWeb.Endpoint}
+        context: %{pubsub: CF.GraphQLWeb.Endpoint}
     end
 
     forward "/", Absinthe.Plug,
-      schema: CaptainFactGraphql.Schema,
+      schema: CF.GraphQL.Schema,
       analyze_complexity: true,
       max_complexity: 320 # (6 joins = 300) + 20 fields
   end

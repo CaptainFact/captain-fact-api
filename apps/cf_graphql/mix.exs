@@ -1,9 +1,9 @@
-defmodule CaptainFactGraphql.Mixfile do
+defmodule CF.GraphQL.Mixfile do
   use Mix.Project
 
   def project do
     [
-      app: :captain_fact_graphql,
+      app: :cf_graphql,
       version: "0.8.11",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
@@ -22,7 +22,7 @@ defmodule CaptainFactGraphql.Mixfile do
 
   def application do
     [
-      mod: {CaptainFactGraphql.Application, []},
+      mod: {CF.GraphQL.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end

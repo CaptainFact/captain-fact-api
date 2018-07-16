@@ -1,4 +1,4 @@
-defmodule CaptainFactGraphql.Resolvers.Videos do
+defmodule CF.GraphQL.Resolvers.Videos do
   @moduledoc """
   Resolver for `DB.Schema.Video`
   """

@@ -1,4 +1,4 @@
-defmodule CaptainFactGraphql.Resolvers.Users do
+defmodule CF.GraphQL.Resolvers.Users do
   def picture_url(user, _, _) do
     {:ok, DB.Type.UserPicture.url({user.picture_url, user}, :thumb)}
   end

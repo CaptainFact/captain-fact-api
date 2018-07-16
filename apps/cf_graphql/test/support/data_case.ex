@@ -1,4 +1,4 @@
-defmodule CaptainFactGraphql.DataCase do
+defmodule CF.GraphQL.DataCase do
   @moduledoc """
   This module defines the setup for tests requiring
   access to the application's data layer.
@@ -21,7 +21,7 @@ defmodule CaptainFactGraphql.DataCase do
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
-      import CaptainFactGraphql.DataCase
+      import CF.GraphQL.DataCase
     end
   end
 

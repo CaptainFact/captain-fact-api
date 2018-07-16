@@ -1,4 +1,4 @@
-defmodule CaptainFactGraphql.Resolvers.Comments do
+defmodule CF.GraphQL.Resolvers.Comments do
   import Absinthe.Resolution.Helpers, only: [batch: 3]
   import Ecto.Query
   alias DB.Repo
