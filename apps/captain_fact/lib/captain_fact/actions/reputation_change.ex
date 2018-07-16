@@ -3,7 +3,7 @@ defmodule CaptainFact.Actions.ReputationChange do
   Calculate reputation changes.
   """
 
-  alias DB.Schema.UserAction
+  alias DB.Schema.{User, UserAction}
   alias CaptainFact.Actions.ReputationChangeConfigLoader
 
   # Reputation changes definition
@@ -15,6 +15,10 @@ defmodule CaptainFact.Actions.ReputationChange do
   @external_resource @reputations_file
   @actions ReputationChangeConfigLoader.load(@reputations_file)
   @actions_types Map.keys(@actions)
+
+  # Define limitations for reputation gain / loss
+  @daily_gain_limit 25
+  @daily_loss_limit -50
 
   @doc """
   Get a tuple with {self_reputation_change, target_reputation_change)
@@ -51,28 +55,38 @@ defmodule CaptainFact.Actions.ReputationChange do
   (!) This function should only be used for informational puproses as it doesn't
   take into account the daily limitations.
   """
-  def estimate_reputation_change(user_id, actions) do
+  def estimate_reputation_change(user = %User{}, actions) do
     Enum.reduce(actions, 0, fn action, total ->
-      {source_change, target_change} = for_action(action)
-
-      cond do
-        # User is the source of the action
-        action.user_id == user_id ->
-          total + source_change
-
-        # User is action's target
-        action.target_user_id == user_id ->
-          total + target_change
-
-        # Action has no impact on user
-        true ->
-          total
-      end
+      total + impact_on_user(action, user)
     end)
+  end
+
+  @doc """
+  Calculate the impact of an action for given `user_id` without taking
+  `today_reputation_gain` into account
+  """
+  def impact_on_user(action = %{user_id: user_id}, %User{id: user_id}) do
+    action
+    |> for_action()
+    |> elem(0)
+  end
+
+  def impact_on_user(action = %{target_user_id: user_id}, %User{id: user_id}) do
+    action
+    |> for_action()
+    |> elem(1)
+  end
+
+  def impact_on_user(_, _) do
+    0
   end
 
   @doc """
   Return a list of all actions types known by reputation change calculator.
   """
   def actions_types, do: @actions_types
+  
+  def daily_gain_limit, do: @daily_gain_limit
+
+  def daily_loss_limit, do: @daily_loss_limit
 end

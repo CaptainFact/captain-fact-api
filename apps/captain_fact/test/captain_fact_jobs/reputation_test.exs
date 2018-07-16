@@ -34,7 +34,7 @@ defmodule CaptainFactJobs.ReputationTest do
   test "user gains should be limited, but loosing reputation should still happen" do
     source_user = insert(:user, %{reputation: 42_000})
     target_user = insert(:user, %{reputation: 0})
-    limit = Reputation.daily_gain_limit()
+    limit = ReputationChange.daily_gain_limit()
     insert_list(limit * 2, :user_action, %{
       type: UserAction.type(:vote_up),
       entity: UserAction.entity(:comment),
