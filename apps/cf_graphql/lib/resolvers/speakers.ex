@@ -1,4 +1,4 @@
-defmodule CaptainFactGraphql.Resolvers.Speakers do
+defmodule CF.GraphQL.Resolvers.Speakers do
   def picture(speaker, _, _) do
     {:ok, DB.Type.SpeakerPicture.url({speaker.picture, speaker}, :thumb)}
   end

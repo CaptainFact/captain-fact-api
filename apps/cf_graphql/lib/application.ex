@@ -1,4 +1,4 @@
-defmodule CaptainFactGraphql.Application do
+defmodule CF.GraphQL.Application do
   use Application
 
   # See https://hexdocs.pm/elixir/Application.html
@@ -7,30 +7,30 @@ defmodule CaptainFactGraphql.Application do
     import Supervisor.Spec
 
     # Start by configuring the app with runtime configuration (env + secrets)
-    CaptainFactGraphql.RuntimeConfiguration.setup()
-    CaptainFactGraphql.RuntimeConfiguration.configure()
+    CF.GraphQL.RuntimeConfiguration.setup()
+    CF.GraphQL.RuntimeConfiguration.configure()
 
     # Define workers and child supervisors to be supervised
     children = [
       # Start the endpoint when the application starts
-      supervisor(CaptainFactGraphqlWeb.Endpoint, []),
+      supervisor(CF.GraphQLWeb.Endpoint, []),
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: CaptainFactGraphql.Supervisor]
+    opts = [strategy: :one_for_one, name: CF.GraphQL.Supervisor]
     Supervisor.start_link(children, opts)
   end
 
   # Tell Phoenix to update the endpoint configuration
   # whenever the application is updated.
   def config_change(changed, _new, removed) do
-    CaptainFactGraphqlWeb.Endpoint.config_change(changed, removed)
+    CF.GraphQLWeb.Endpoint.config_change(changed, removed)
     :ok
   end
 
   def version() do
-    case :application.get_key(:captain_fact_graphql, :vsn) do
+    case :application.get_key(:cf_graphql, :vsn) do
       {:ok, version} -> to_string(version)
       _ -> "unknown"
     end

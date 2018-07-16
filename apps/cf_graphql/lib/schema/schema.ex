@@ -1,7 +1,7 @@
-defmodule CaptainFactGraphql.Schema do
+defmodule CF.GraphQL.Schema do
   use Absinthe.Schema
-  import_types CaptainFactGraphql.Schema.ContentTypes
-  alias CaptainFactGraphql.Resolvers
+  import_types CF.GraphQL.Schema.ContentTypes
+  alias CF.GraphQL.Resolvers
 
   # Actual API
 

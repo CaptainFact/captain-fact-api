@@ -4,7 +4,7 @@ use Mix.Config
 config :logger, level: :info
 
 # Configure endpoint
-config :captain_fact_graphql, CaptainFactGraphqlWeb.Endpoint,
+config :cf_graphql, CF.GraphQLWeb.Endpoint,
   http: [port: 80],
   debug_errors: false,
   code_reloader: false,

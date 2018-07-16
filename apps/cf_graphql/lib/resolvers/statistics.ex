@@ -1,4 +1,4 @@
-defmodule CaptainFactGraphql.Resolvers.Statistics do
+defmodule CF.GraphQL.Resolvers.Statistics do
 
   @moduledoc """
   Absinthe solver for community insights and statistics
