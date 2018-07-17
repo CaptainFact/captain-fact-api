@@ -31,7 +31,7 @@ defmodule CaptainFact.Actions do
   Filter given query to return only actions that occured between `date_start`
   and `date_end`.
   """
-  @spec query_period(Ecto.Queryable.t, %NaiveDateTime{}, %NaiveDateTime{}) :: Ecto.Queryable.t
+  @spec query_period(Ecto.Queryable.t, NaiveDateTime.t, NaiveDateTime.t) :: Ecto.Queryable.t
   def query_period(query, datetime_start, datetime_end) do
     query
     |> where([a], a.inserted_at >= ^datetime_start)
@@ -66,7 +66,7 @@ defmodule CaptainFact.Actions do
   end
 
   # ---- Private methods ----
-
+  
   defp age_filter(query, -1),
     do: query
 
