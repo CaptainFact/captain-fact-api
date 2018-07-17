@@ -1,47 +1,27 @@
 defmodule CaptainFact.Actions.ReputationChange do
-  alias DB.Schema.UserAction
+  @moduledoc """
+  Calculate reputation changes.
+  """
 
-  @actions %{
-    # Votes
-    UserAction.type(:vote_up) => %{
-      UserAction.entity(:comment) =>  {0, +2},
-      UserAction.entity(:fact) =>     {0, +3},
-    },
-    UserAction.type(:revert_vote_up) => %{
-      UserAction.entity(:comment) =>  {0, -2},
-      UserAction.entity(:fact) =>     {0, -3},
-    },
-    UserAction.type(:vote_down) => %{
-      UserAction.entity(:comment) =>  {-1, -2},
-      UserAction.entity(:fact) =>     {-1, -3}
-    },
-    UserAction.type(:revert_vote_down) => %{
-      UserAction.entity(:comment) =>  {+1 , +2},
-      UserAction.entity(:fact) =>     {+1 , +3}
-    },
+  alias DB.Schema.{User, UserAction}
+  alias CaptainFact.Actions
+  alias CaptainFact.Actions.ReputationChangeConfigLoader
 
-    # Moderation - target user got its comment banned
-    UserAction.type(:action_banned_bad_language) =>     {0, -25},
-    UserAction.type(:action_banned_spam) =>             {0, -30},
-    UserAction.type(:action_banned_irrelevant) =>       {0, -10},
-    UserAction.type(:action_banned_not_constructive) => {0, -5},
-
-    # Moderation - source user (who made the flag) has made a good or bad flag
-    UserAction.type(:abused_flag) =>          {0, -5},
-    UserAction.type(:confirmed_flag) =>       {0, +3},
-
-    # Misc
-    UserAction.type(:email_confirmed) => {0, +15},
-  }
+  # Reputation changes definition
+  # @external_resource specify the file dependency to compiler
+  # See https://hexdocs.pm/elixir/Module.html#module-external_resource
+  # We load a file with atoms keys from YAML and then convert all keys to their
+  # numerical value.
+  @reputations_file Path.join(:code.priv_dir(:captain_fact), "reputation_changes.yaml")
+  @external_resource @reputations_file
+  @actions ReputationChangeConfigLoader.load(@reputations_file)
   @actions_types Map.keys(@actions)
 
+  # Define limitations for reputation gain / loss
+  @daily_gain_limit 25
+  @daily_loss_limit -50
 
-  @doc"""
-  Return a list of all actions types known by reputation change calculator.
-  """
-  def actions_types, do: @actions_types
-
-  @doc"""
+  @doc """
   Get a tuple with {self_reputation_change, target_reputation_change)
   for given action type / entity.
   """
@@ -52,18 +32,75 @@ defmodule CaptainFact.Actions.ReputationChange do
       res when is_tuple(res) -> res
     end
   end
+
   def for_action(type) when is_atom(type),
     do: for_action(UserAction.type(type))
+
   def for_action(type) when is_integer(type),
     do: Map.get(@actions, type) || {0, 0}
+
   def for_action(type, entity) when is_atom(type) and is_atom(entity),
     do: for_action(UserAction.type(type), UserAction.entity(entity))
+
   def for_action(type, entity) when is_integer(type) and is_integer(entity),
     do: get_in(@actions, [type, entity]) || {0, 0}
 
-  @doc"""
+  @doc """
   Get reputation change as an integer for admin action (email confirmed, abusive
   flag...etc)
   """
   def for_admin_action(type), do: elem(for_action(type), 1)
+
+  @doc """
+  Estimate total reputation change from given `actions`.
+  (!) This function should only be used for informational puproses as it doesn't
+  take into account the daily limitations.
+  """
+  def estimate_reputation_change(actions, user = %User{}) do
+    Enum.reduce(actions, 0, fn action, total ->
+      total + impact_on_user(action, user)
+    end)
+  end
+
+  @doc """
+  Same as `estimate_reputation_change/2` except it automatically fetch all
+  actions between `datetime_start` and `datetime_end`.
+  """
+  def estimate_reputation_change_period(datetime_start, datetime_end, user) do
+    UserAction
+    |> Actions.query_about_user(user)
+    |> Actions.query_matching_types(@actions_types)
+    |> Actions.query_period(datetime_start, datetime_end)
+    |> DB.Repo.all()
+    |> estimate_reputation_change(user)
+  end
+
+  @doc """
+  Calculate the impact of an action for given `user_id` without taking
+  `today_reputation_gain` into account
+  """
+  def impact_on_user(action = %{user_id: user_id}, %User{id: user_id}) do
+    action
+    |> for_action()
+    |> elem(0)
+  end
+
+  def impact_on_user(action = %{target_user_id: user_id}, %User{id: user_id}) do
+    action
+    |> for_action()
+    |> elem(1)
+  end
+
+  def impact_on_user(_, _) do
+    0
+  end
+
+  @doc """
+  Return a list of all actions types known by reputation change calculator.
+  """
+  def actions_types, do: @actions_types
+  
+  def daily_gain_limit, do: @daily_gain_limit
+
+  def daily_loss_limit, do: @daily_loss_limit
 end

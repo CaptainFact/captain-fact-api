@@ -14,14 +14,16 @@ defmodule CaptainFactJobs.Reputation do
   alias DB.Schema.UserAction
   alias DB.Schema.UsersActionsReport
 
+  alias CaptainFact.Actions
   alias CaptainFact.Actions.ReputationChange
   alias CaptainFactJobs.ReportManager
 
 
   @name __MODULE__
   @analyser_id UsersActionsReport.analyser_id(:reputation)
-  @daily_gain_limit 25
-  @daily_loss_limit -50
+
+  @daily_gain_limit ReputationChange.daily_gain_limit()
+  @daily_loss_limit ReputationChange.daily_loss_limit()
 
 
   # --- Client API ---
@@ -49,6 +51,7 @@ defmodule CaptainFactJobs.Reputation do
   ## Examples
 
       iex> import CaptainFactJobs.Reputation
+      iex> import CaptainFact.Actions.ReputationChange
       iex> # Nothing special when not hitting the limit, just returns change
       iex> calculate_adjusted_diff(3, 0)
       3
@@ -94,12 +97,6 @@ defmodule CaptainFactJobs.Reputation do
   def calculate_adjusted_diff(change, today_change) when change < 0,
     do: max(change, @daily_loss_limit - today_change)
 
-  # Getters for limits
-
-  def daily_gain_limit, do: @daily_gain_limit
-
-  def daily_loss_limit, do: @daily_loss_limit
-
   # --- Server callbacks ---
 
   def handle_call(:update_reputations, _from, _state) do
@@ -107,7 +104,7 @@ defmodule CaptainFactJobs.Reputation do
     unless last_action_id == -1 do
       UserAction
       |> where([a], a.id > ^last_action_id)
-      |> where([a], a.type in ^ReputationChange.actions_types)
+      |> Actions.query_matching_types(ReputationChange.actions_types)
       |> Repo.all(log: false)
       |> start_analysis()
     end

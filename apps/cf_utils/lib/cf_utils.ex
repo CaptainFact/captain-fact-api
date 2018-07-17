@@ -4,6 +4,17 @@ defmodule CF.Utils do
   """
 
   @doc """
+  Load a YAML map from given file and recursively convert all keys to atoms.
+  (!) This function uses `String.to_existing_atom/1` so atom must already exist
+  """
+  def load_yaml_config(filename) do
+    filename
+    |> YamlElixir.read_all_from_file!()
+    |> List.first()
+    |> map_string_keys_to_atom_keys()
+  end
+
+  @doc """
   Transform all map binary indexes to atoms. Use this function carefuly,
   generating too much atoms (for example when accepting user's input) can
   result in terrible performances issues.

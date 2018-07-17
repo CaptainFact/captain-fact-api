@@ -8,7 +8,7 @@ defmodule CaptainFact.Accounts.UserPermissions do
 
   alias DB.Repo
   alias DB.Schema.User
-  alias CaptainFact.Actions.Recorder
+  alias CaptainFact.Actions
 
   defmodule PermissionsError do
     defexception message: "forbidden", plug_status: 403
@@ -33,10 +33,7 @@ defmodule CaptainFact.Accounts.UserPermissions do
   # See https://hexdocs.pm/elixir/Module.html#module-external_resource
   @limitations_file Path.join(:code.priv_dir(:captain_fact), "limitations.yaml")
   @external_resource @limitations_file
-  @limitations @limitations_file
-               |> YamlElixir.read_all_from_file!()
-               |> List.first()
-               |> CF.Utils.map_string_keys_to_atom_keys()
+  @limitations CF.Utils.load_yaml_config(@limitations_file)
 
   # --- API ---
 
@@ -120,13 +117,13 @@ defmodule CaptainFact.Accounts.UserPermissions do
   Count the number of occurences of this user / action type in limited perdiod.
   """
   def action_count(user, :add, :video),
-    do: Recorder.count(user, :add, :video, @weekly_limit)
+    do: Actions.count(user, :add, :video, @weekly_limit)
 
   def action_count(user, action_type, entity) do
     if is_wildcard_limitation(action_type) do
-      Recorder.count_wildcard(user, action_type, @daily_limit)
+      Actions.count_wildcard(user, action_type, @daily_limit)
     else
-      Recorder.count(user, action_type, entity, @daily_limit)
+      Actions.count(user, action_type, entity, @daily_limit)
     end
   end
 
