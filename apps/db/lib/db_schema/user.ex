@@ -48,8 +48,20 @@ defmodule DB.Schema.User do
     timestamps()
   end
 
-  def user_appelation(%{username: username, name: nil}), do: "@#{username}"
-  def user_appelation(%{username: username, name: name}), do: "#{name} (@#{username})"
+  @doc """
+  Generate a user appelation from user.name and user.username
+
+  ## Examples
+
+      iex> DB.Schema.User.user_appelation(%{username: "Zappa", name: nil})
+      "@Zappa"
+      iex> DB.Schema.User.user_appelation(%{username: "Zappa", name: "Frank"})
+      "Frank (@Zappa)"
+  """
+  def user_appelation(%{username: username, name: nil}), 
+    do: "@#{username}"
+  def user_appelation(%{username: username, name: name}), 
+    do: "#{name} (@#{username})"
 
   @email_regex ~r/\A([\w+\-].?)+@[a-z\d\-]+(\.[a-z]+)*\.[a-z]+\z/i
   @valid_locales ~w(en fr)

@@ -16,8 +16,6 @@ defmodule CaptainFactAPI.Mixfile do
 
   defp deps do
     [
-      {:kaur, "~> 1.1"},
-
       # ---- Release ----
       {:distillery, "~> 1.5", runtime: false},
 

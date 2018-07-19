@@ -4,7 +4,7 @@ defmodule CaptainFact.Mixfile do
   def project do
     [
       app: :captain_fact,
-      version: "0.8.11",
+      version: "0.8.12",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
@@ -41,6 +41,7 @@ defmodule CaptainFact.Mixfile do
       {:phoenix_pubsub, "~> 1.0"},
       {:phoenix_html, "~> 2.6"},
       {:gettext, "~> 0.13.1"},
+      {:kaur, "~> 1.1"},
       {:cowboy, "~> 1.0"},
       {:corsica, "~> 1.0"},
       {:bcrypt_elixir, "~> 1.0"},
@@ -59,9 +60,15 @@ defmodule CaptainFact.Mixfile do
       {:sweet_xml, "~> 0.6"},
       {:weave, "3.1.2"},
       {:burnex, "~> 1.0"},
+      {:yaml_elixir, "~> 2.1.0"},
+
+      # ---- Internal ----
+      {:db, in_umbrella: true},
+      {:cf_utils, in_umbrella: true},
+
+      # ---- Test only ----
       {:bypass, "~> 0.8", only: :test},
-      {:db, in_umbrella: true}
-   ]
+    ]
   end
 
   defp aliases do

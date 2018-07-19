@@ -1,6 +1,7 @@
 defmodule CaptainFact.Accounts.UserPermissionsTest do
   use CaptainFact.DataCase
 
+  alias CaptainFact.Actions
   alias CaptainFact.Actions.Recorder
   alias CaptainFact.Accounts.UserPermissions
   alias UserPermissions.PermissionsError
@@ -12,12 +13,19 @@ defmodule CaptainFact.Accounts.UserPermissionsTest do
     negative_user = insert(:user, %{reputation: -15})
     new_user = insert(:user, %{reputation: 42})
     positive_user = insert(:user, %{reputation: 80_000})
-    {:ok, [negative_user: negative_user, new_user: new_user, positive_user: positive_user, banned_user: banned_user]}
+
+    {:ok,
+     [
+       negative_user: negative_user,
+       new_user: new_user,
+       positive_user: positive_user,
+       banned_user: banned_user
+     ]}
   end
 
   test "for each limitation, we must define all levels" do
-    each_limitation(fn {_, _, limitations_tuple} ->
-      assert limitations_tuple |> Tuple.to_list() |> Enum.count() == UserPermissions.nb_levels()
+    each_limitation(fn {_, _, limitations} ->
+      assert Enum.count(limitations) == UserPermissions.nb_levels()
     end)
   end
 
@@ -27,7 +35,9 @@ defmodule CaptainFact.Accounts.UserPermissionsTest do
   end
 
   test "check! ensures permissions are verified and throws exception otherwise", context do
-    assert_raise PermissionsError, fn -> UserPermissions.check!(context[:negative_user], :vote_down, :comment) end
+    assert_raise PermissionsError, fn ->
+      UserPermissions.check!(context[:negative_user], :vote_down, :comment)
+    end
   end
 
   test "check! must fail if we hit the limit", context do
@@ -46,10 +56,12 @@ defmodule CaptainFact.Accounts.UserPermissionsTest do
     entity = :video
     max_occurences = UserPermissions.limitation(user, action_type, entity)
     actions = for _ <- 0..max_occurences, do: Recorder.record!(user, action_type, entity)
-    two_days_ago = NaiveDateTime.add(NaiveDateTime.utc_now, -(2 * 24 * 60 * 60))
+    two_days_ago = NaiveDateTime.add(NaiveDateTime.utc_now(), -(2 * 24 * 60 * 60))
+
     for action <- actions do
       DB.Repo.update(Ecto.Changeset.change(action, inserted_at: two_days_ago))
     end
+
     assert_raise PermissionsError, fn -> UserPermissions.check!(user, action_type, entity) end
   end
 
@@ -60,23 +72,30 @@ defmodule CaptainFact.Accounts.UserPermissionsTest do
     max_occurences = UserPermissions.limitation(user, action_type, entity)
     nb_threads = max_occurences * 2
     tolerated_errors = 10
+
     Stream.repeatedly(fn ->
-      Process.sleep(10) # To better simulate requests
+      # To better simulate requests
+      Process.sleep(10)
+
       Task.async(fn ->
         try do
           UserPermissions.check!(user, action_type, entity)
           Recorder.record!(user, action_type, entity)
-        rescue e in PermissionsError -> e end
+        rescue
+          e in PermissionsError -> e
+        end
       end)
     end)
     |> Enum.take(nb_threads)
     |> Enum.map(&Task.await/1)
-    assert Recorder.count(user, action_type, entity) - tolerated_errors <= max_occurences
+
+    assert Actions.count(user, action_type, entity) - tolerated_errors <= max_occurences
   end
 
   test "users with too low reputation shouldn't be able to do anything", context do
     each_limitation(fn {action_type, entity, _} ->
-      assert UserPermissions.check(context[:banned_user], action_type, entity) == {:error, "not_enough_reputation"}
+      assert UserPermissions.check(context[:banned_user], action_type, entity) ==
+               {:error, "not_enough_reputation"}
     end)
   end
 
@@ -106,9 +125,12 @@ defmodule CaptainFact.Accounts.UserPermissionsTest do
   end
 
   defp each_limitation(func) do
-    for {action_type, entities_limitations} <- UserPermissions.limitations do
+    for {action_type, entities_limitations} <- UserPermissions.limitations() do
       case entities_limitations do
-        limitation when is_tuple(limitation) -> nil # Ignore wildcards (cannot guess entity)
+        limitation when is_list(limitation) ->
+          # Ignore wildcards (cannot guess entity)
+          nil
+
         limitations when is_map(limitations) ->
           for {entity, limitation} <- limitations do
             func.({action_type, entity, limitation})
