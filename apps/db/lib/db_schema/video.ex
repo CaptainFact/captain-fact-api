@@ -1,5 +1,5 @@
 defmodule DB.Schema.Video do
-  @moduledoc"""
+  @moduledoc """
   Ecto schema for `videos` table.
   """
 
@@ -9,16 +9,16 @@ defmodule DB.Schema.Video do
   alias DB.Schema.{Speaker, Statement, VideoSpeaker}
 
   schema "videos" do
-    field :title, :string
-    field :url, :string, virtual: true
-    field :provider, :string, null: false
-    field :provider_id, :string, null: false
-    field :language, :string, null: true
-    field :unlisted, :boolean, null: false
-    field :is_partner, :boolean, null: false
+    field(:title, :string)
+    field(:url, :string, virtual: true)
+    field(:provider, :string, null: false)
+    field(:provider_id, :string, null: false)
+    field(:language, :string, null: true)
+    field(:unlisted, :boolean, null: false)
+    field(:is_partner, :boolean, null: false)
 
-    many_to_many :speakers, Speaker, join_through: VideoSpeaker, on_delete: :delete_all
-    has_many :statements, Statement, on_delete: :delete_all
+    many_to_many(:speakers, Speaker, join_through: VideoSpeaker, on_delete: :delete_all)
+    has_many(:statements, Statement, on_delete: :delete_all)
 
     timestamps()
   end
@@ -27,7 +27,8 @@ defmodule DB.Schema.Video do
 
   @providers_regexs %{
     # Map a provider name to its regex, using named_captures to get the id --------------------↘️
-    "youtube" => ~r/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)(?<id>[^"&?\/ ]{11})/i
+    "youtube" =>
+      ~r/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)(?<id>[^"&?\/ ]{11})/i
   }
 
   # Allow for URLs like `https://anything.com/__TEST__/ID` in tests
@@ -37,7 +38,7 @@ defmodule DB.Schema.Video do
 
   # Define queries
 
-  @doc"""
+  @doc """
   Select all videos not unlisted and order them by id.
 
   ## Params
@@ -49,31 +50,39 @@ defmodule DB.Schema.Video do
         - speaker_id: speaker's integer ID
         - speaker_slug: speaker's slug
         - min_id: select all videos with id above given integer
+    * nbMax: Max number of videos to return (limit)
   """
-  def query_list(query, filters \\ []) do
+  def query_list(query, filters \\ [], nbMax \\ nil) do
     query
     |> where([v], v.unlisted == false)
     |> order_by([v], desc: v.id)
     |> filter_with(filters)
+    |> limit_video_query_list(nbMax)
   end
 
-  @doc"""
+  defp limit_video_query_list(query, nbMax) when is_nil(nbMax) or nbMax == 0,
+    do: query
+
+  defp limit_video_query_list(query, nbMax),
+    do: limit(query, ^nbMax)
+
+  @doc """
   Preload speakers for given video query
   """
   def with_speakers(query) do
-    from v in query, preload: [:speakers]
+    from(v in query, preload: [:speakers])
   end
 
-  @doc"""
+  @doc """
   Preload statements for given video query
   """
   def with_statements(query) do
-    from v in query, preload: [:statements]
+    from(v in query, preload: [:statements])
   end
 
   # Utils
 
-  @doc"""
+  @doc """
   Check if `url` is a valid URL, with a known provider and a valid ID.
 
   ## Examples
@@ -91,7 +100,7 @@ defmodule DB.Schema.Video do
     end)
   end
 
-  @doc"""
+  @doc """
   Build an URL for given video.
 
   ## Examples
@@ -132,10 +141,11 @@ defmodule DB.Schema.Video do
     |> validate_required([:provider, :provider_id])
     |> validate_length(:title, min: 5, max: 120)
     |> unique_constraint(:videos_provider_provider_id_index)
-    |> update_change(:language, &(hd(String.split(&1, "-")))) # Change "en-US" to "en"
+    # Change "en-US" to "en"
+    |> update_change(:language, &hd(String.split(&1, "-")))
   end
 
-  @doc"""
+  @doc """
   Parse an URL.
   If given a changeset, fill the `provider` and `provider_id` fields or add
   an error if URL is not valid.
@@ -159,9 +169,11 @@ defmodule DB.Schema.Video do
             changeset
             |> put_change(:provider, provider)
             |> put_change(:provider_id, id)
+
           _ ->
             add_error(changeset, :url, "invalid_url")
         end
+
       _ ->
         changeset
     end
@@ -172,6 +184,7 @@ defmodule DB.Schema.Video do
       case Regex.named_captures(regex, url) do
         %{"id" => id} ->
           {provider, id}
+
         nil ->
           nil
       end
@@ -181,17 +194,22 @@ defmodule DB.Schema.Video do
   defp filter_with(query, filters) do
     Enum.reduce(filters, query, fn
       {:language, "unknown"}, query ->
-        from v in query, where: is_nil(v.language)
+        from(v in query, where: is_nil(v.language))
+
       {:language, language}, query ->
-        from v in query, where: v.language == ^language
+        from(v in query, where: v.language == ^language)
+
       {:speaker_id, id}, query ->
-        from v in query, join: s in assoc(v, :speakers), where: s.id == ^id
+        from(v in query, join: s in assoc(v, :speakers), where: s.id == ^id)
+
       {:speaker_slug, slug}, query ->
-        from v in query, join: s in assoc(v, :speakers), where: s.slug == ^slug
+        from(v in query, join: s in assoc(v, :speakers), where: s.slug == ^slug)
+
       {:min_id, id}, query ->
-        from v in query, where: v.id > ^id
+        from(v in query, where: v.id > ^id)
+
       {:is_partner, is_partner}, query ->
-        from v in query, where: v.is_partner == ^is_partner
+        from(v in query, where: v.is_partner == ^is_partner)
     end)
   end
 end
