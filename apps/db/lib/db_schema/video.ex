@@ -50,21 +50,21 @@ defmodule DB.Schema.Video do
         - speaker_id: speaker's integer ID
         - speaker_slug: speaker's slug
         - min_id: select all videos with id above given integer
-    * nbMax: Max number of videos to return (limit)
+    * limit: Max number of videos to return
   """
-  def query_list(query, filters \\ [], nbMax \\ nil) do
+  def query_list(query, filters \\ [], limit \\ nil) do
     query
     |> where([v], v.unlisted == false)
     |> order_by([v], desc: v.id)
     |> filter_with(filters)
-    |> limit_video_query_list(nbMax)
+    |> limit_video_query_list(limit)
   end
 
-  defp limit_video_query_list(query, nbMax) when is_nil(nbMax) or nbMax == 0,
+  defp limit_video_query_list(query, nil),
     do: query
 
-  defp limit_video_query_list(query, nbMax),
-    do: limit(query, ^nbMax)
+  defp limit_video_query_list(query, limit),
+    do: limit(query, ^limit)
 
   @doc """
   Preload speakers for given video query
