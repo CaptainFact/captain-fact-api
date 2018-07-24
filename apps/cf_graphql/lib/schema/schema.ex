@@ -16,6 +16,7 @@ defmodule CF.GraphQL.Schema do
     @desc "Get all videos"
     field :all_videos, list_of(:video) do
       arg :filters, :video_filter
+      arg :limit, :integer
       resolve &Resolvers.Videos.list/3
     end
 

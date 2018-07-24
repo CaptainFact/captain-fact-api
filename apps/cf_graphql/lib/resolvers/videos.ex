@@ -3,6 +3,9 @@ defmodule CF.GraphQL.Resolvers.Videos do
   Resolver for `DB.Schema.Video`
   """
 
+
+  alias Kaur.Result
+
   import Ecto.Query
   import Absinthe.Resolution.Helpers, only: [batch: 3]
 
@@ -34,8 +37,10 @@ defmodule CF.GraphQL.Resolvers.Videos do
   end
 
   def list(_root, args, _info) do
-    videos_list = Repo.all(Video.query_list(Video, args[:filters] || []))
-    {:ok, videos_list}
+    Video
+    |> Video.query_list(Map.get(args, :filters, []), args[:limit])
+    |> Repo.all()
+    |> Result.ok()
   end
 
   # Fields
