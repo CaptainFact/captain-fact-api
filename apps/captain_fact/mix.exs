@@ -59,8 +59,11 @@ defmodule CaptainFact.Mixfile do
       {:sweet_xml, "~> 0.6"},
       {:weave, "3.1.2"},
       {:burnex, "~> 1.0"},
+      {:db, in_umbrella: true},
+
+      # Test only
       {:bypass, "~> 0.8", only: :test},
-      {:db, in_umbrella: true}
+      {:mock, "~> 0.3.1", only: :test}
    ]
   end
 
