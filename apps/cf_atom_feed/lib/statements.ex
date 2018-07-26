@@ -32,7 +32,7 @@ defmodule CF.AtomFeed.Statements do
       video_id: v.id,
       video_title: v.title
     })
-    |> limit(50)
+    |> limit(@nb_items_max)
     |> DB.Repo.all()
   end
 
