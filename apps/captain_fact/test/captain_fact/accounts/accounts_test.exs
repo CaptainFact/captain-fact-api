@@ -3,6 +3,7 @@ defmodule CaptainFact.AccountsTest do
   use Bamboo.Test
 
   alias CaptainFact.Accounts
+  alias CaptainFact.Accounts.Invitations
   alias CaptainFactJobs.{Reputation, Achievements}
 
   alias DB.Schema.User
@@ -106,14 +107,21 @@ defmodule CaptainFact.AccountsTest do
     end
   end
 
-  describe "create_account" do
+  describe "create_account with invitation system enabled" do
+    setup do
+      Invitations.enable()
+      on_exit fn -> Invitations.disable() end
+    end
+    
     test "requires a valid invitation token" do
       assert Accounts.create_account(%{}, nil) == {:error, "invalid_invitation_token"}
       assert Accounts.create_account(%{}, "") == {:error, "invalid_invitation_token"}
       assert Accounts.create_account(%{}, "zzzzz") == {:error, "invalid_invitation_token"}
     end
+  end
 
-    test "create an account if a valid user is given" do
+  describe "create_account without invitation system (default)" do
+    test "if a valid user is given" do
       invit = insert(:invitation_request)
       user_params = build_user_params()
       {:ok, created} = Accounts.create_account(user_params, invit.token)
@@ -121,7 +129,7 @@ defmodule CaptainFact.AccountsTest do
       assert user_params.email == created.email
     end
 
-    test "can create an account with auto-generated username only if explicitly requested" do
+    test "with auto-generated username only if explicitly requested" do
       invit = insert(:invitation_request)
       user_params = Map.delete(build_user_params(), :username)
 

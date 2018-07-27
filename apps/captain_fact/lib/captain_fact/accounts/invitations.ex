@@ -3,7 +3,7 @@ defmodule CaptainFact.Accounts.Invitations do
   Invitation system. Generate invites, validate them...
 
   Can be bypassed by setting the {:captain_fact, :invitation_system} env variable
-  to false.
+  to false. This configuration can safely be modified at runtime.
   """
 
   require Logger
@@ -14,34 +14,61 @@ defmodule CaptainFact.Accounts.Invitations do
   alias DB.Schema.User
   alias DB.Repo
 
+  @default_token_length 8
+
   @doc """
-  Returns true if invitation can be safely used, false otherwise
+  Returns true if invitation system is enabled, false otherwise
   """
-  def invitation_valid?(nil),
+  def enabled?, do: Application.get_env(:captain_fact, :invitation_system)
+
+  @doc """
+  Returns true if invitation system is enabled, false otherwise
+  """
+  def enable, do: Application.put_env(:captain_fact, :invitation_system, true)
+
+  @doc """
+  Returns true if invitation system is enabled, false otherwise
+  """
+  def disable, do: Application.put_env(:captain_fact, :invitation_system, false)
+
+  @doc """
+  Returns true if invitation can be safely used, false otherwise.
+
+  Always returns true is invitation system is disabled.
+  """
+  def invitation_valid?(invitation) do
+    if enabled?(), do: do_invitation_valid?(invitation), else: true
+  end
+
+  defp do_invitation_valid?(nil),
     do: false
 
-  def invitation_valid?(invitation_token) when is_binary(invitation_token),
-    do: do_invitation_valid?(invitation_token)
-
-  def invitation_valid?(%InvitationRequest{token: token}),
+  defp do_invitation_valid?(%InvitationRequest{token: token}),
     do: do_invitation_valid?(token)
+
+  defp do_invitation_valid?(token) when is_binary(token),
+    do: not is_nil(get_invitation_for_token(token))
 
   @doc """
   Consume one invitation for given `invitation_token`. We willingly delete token
   using `invitation_token` string because we accept having multiple invitations
   with the same token.
   """
-  def consume_invitation(invitation_token) do
+  def consume_invitation(%InvitationRequest{token: token}),
+    do: consume_invitation(token)
+
+  def consume_invitation(invitation_token)
+  when is_binary(invitation_token) do
     case get_invitation_for_token(invitation_token) do
       nil ->
-        {:error, nil}
+        {:error, "invalid_invitation_token"}
 
       invit ->
         Repo.delete(invit)
-
         Logger.debug(fn ->
           "Invitation #{invit.id} for token #{invit.token} has been consumed"
         end)
+        {:ok, invitation_token}
     end
   end
 
@@ -94,7 +121,6 @@ defmodule CaptainFact.Accounts.Invitations do
     |> Enum.each(&send_invite/1)
   end
 
-  @default_token_length 8
   @doc """
   Send invite to the given email or invitation request
   """
@@ -152,7 +178,4 @@ defmodule CaptainFact.Accounts.Invitations do
     |> limit(1)
     |> Repo.one()
   end
-
-  defp do_invitation_valid?(token),
-    do: not is_nil(get_invitation_for_token(token))
 end
