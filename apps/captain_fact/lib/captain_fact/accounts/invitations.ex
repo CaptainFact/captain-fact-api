@@ -36,17 +36,17 @@ defmodule CaptainFact.Accounts.Invitations do
 
   Always returns true is invitation system is disabled.
   """
-  def invitation_valid?(invitation) do
-    if enabled?(), do: do_invitation_valid?(invitation), else: true
+  def valid_invitation?(invitation) do
+    if enabled?(), do: do_valid_invitation?(invitation), else: true
   end
 
-  defp do_invitation_valid?(nil),
+  defp do_valid_invitation?(nil),
     do: false
 
-  defp do_invitation_valid?(%InvitationRequest{token: token}),
-    do: do_invitation_valid?(token)
+  defp do_valid_invitation?(%InvitationRequest{token: token}),
+    do: do_valid_invitation?(token)
 
-  defp do_invitation_valid?(token) when is_binary(token),
+  defp do_valid_invitation?(token) when is_binary(token),
     do: not is_nil(get_invitation_for_token(token))
 
   @doc """

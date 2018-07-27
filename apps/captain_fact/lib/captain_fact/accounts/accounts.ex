@@ -35,7 +35,7 @@ defmodule CaptainFact.Accounts do
   def create_account(_, _ \\ nil, _ \\ [])
 
   def create_account(user_params, invitation, opts) do
-    unless Invitations.invitation_valid?(invitation) do
+    unless Invitations.valid_invitation?(invitation) do
       {:error, "invalid_invitation_token"}
     else
       allow_empty_username = Keyword.get(opts, :allow_empty_username, false)

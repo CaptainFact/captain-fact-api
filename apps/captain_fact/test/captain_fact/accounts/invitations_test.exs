@@ -6,7 +6,12 @@ defmodule CaptainFact.Invitations.InvitationsTest do
   alias CaptainFact.Accounts.Invitations
 
 
-  describe "invitation_requests" do
+  describe "with system enabled" do
+    setup do
+      Invitations.enable()
+      on_exit fn -> Invitations.disable() end
+    end
+
     test "invitation request get created with given invited_by user" do
       email = "test@email.com"
       user = insert(:user)
@@ -58,4 +63,15 @@ defmodule CaptainFact.Invitations.InvitationsTest do
     # TODO What if user already have an account and request an invitation ?
   end
 
+  describe "with system disabled (default)" do
+    test "valid? always returns true" do
+      assert Invitations.valid_invitation?("xxxxxxxxBAD_INVITxxxxxxxxxxxx") == true
+    end
+
+    test "still consumes invitation" do
+      invitation = insert(:invitation_request)
+      Invitations.consume_invitation(invitation)
+      assert DB.Repo.get(InvitationRequest, invitation.id) == nil
+    end
+  end
 end
