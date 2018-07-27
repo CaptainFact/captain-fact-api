@@ -72,15 +72,13 @@ defmodule CaptainFact.Accounts.Invitations do
     end
   end
 
-  # --------
-
   @doc """
   Request an invitation for given email
   """
   def request_invitation(email, invited_by_id \\ nil, locale \\ nil)
 
   def request_invitation(email, invited_by_id, locale)
-      when is_nil(invited_by_id) or is_integer(invited_by_id) do
+  when is_nil(invited_by_id) or is_integer(invited_by_id) do
     with true <- Regex.match?(User.email_regex(), email),
          false <- Burnex.is_burner?(email) do
       case Repo.get_by(InvitationRequest, email: email) do
