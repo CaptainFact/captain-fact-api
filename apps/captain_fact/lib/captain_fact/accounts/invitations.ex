@@ -22,17 +22,17 @@ defmodule CaptainFact.Accounts.Invitations do
   def enabled?, do: Application.get_env(:captain_fact, :invitation_system)
 
   @doc """
-  Returns true if invitation system is enabled, false otherwise
+  Enable the invitation system
   """
   def enable, do: Application.put_env(:captain_fact, :invitation_system, true)
 
   @doc """
-  Returns true if invitation system is enabled, false otherwise
+  Disable the invitation system
   """
   def disable, do: Application.put_env(:captain_fact, :invitation_system, false)
 
   @doc """
-  Returns true if invitation can be safely used, false otherwise.
+  Returns true if invitation can be safely consumed, false otherwise.
 
   Always returns true is invitation system is disabled.
   """
