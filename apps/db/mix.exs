@@ -36,10 +36,10 @@ defmodule DB.Mixfile do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:arc, github: "Betree/arc", override: true},
+      {:arc_ecto, "~> 0.10.0"},
       {:ecto, "~> 2.2.8"},
       {:postgrex, "~> 0.13.3"},
-      {:arc, github: "Betree/arc", override: true},
-      {:arc_ecto, "~> 0.8.0"},
       {:weave, "3.1.2"},
       {:ex_aws, "~> 1.1"},
       {:xml_builder, "~> 2.0", override: true},
