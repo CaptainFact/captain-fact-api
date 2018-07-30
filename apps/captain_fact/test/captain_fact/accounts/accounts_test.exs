@@ -308,4 +308,18 @@ defmodule CaptainFact.AccountsTest do
       assert Result.error?(error)
     end
   end
+
+  describe "delete account" do
+    test "nilify all user's comments" do
+      user = insert(:user)
+      comments = insert_list(3, :comment, user: user)
+      Accounts.delete_user(user)
+
+      for comment <- comments do
+        comment = Repo.get(DB.Schema.Comment, comment.id)
+        assert not is_nil(comment), "User's comment should not be deleted"
+        assert comment.user_id == nil, "Comment should be anonymized"
+      end
+    end
+  end
 end
