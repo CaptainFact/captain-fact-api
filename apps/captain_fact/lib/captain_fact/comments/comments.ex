@@ -16,6 +16,16 @@ defmodule CaptainFact.Comments do
 
   # ---- Public API ----
 
+  @doc """
+  Returns all comments for given `video_id`
+  """
+  def video_comments(video_id) do
+    Comment
+    |> Comment.full()
+    |> where([c, s], s.video_id == ^video_id)
+    |> Repo.all()
+  end
+
   def add_comment(user, context, params, source_url, source_fetch_callback \\ nil) do
     # TODO [Security] What if reply_to_id refer to a comment that is on a different statement ?
     UserPermissions.check!(user, :create, :comment)
