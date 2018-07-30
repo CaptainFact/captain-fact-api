@@ -61,7 +61,7 @@ defmodule CaptainFactWeb.AuthController do
   def unlink_provider(conn, %{"provider" => provider_str}) do
     user = Guardian.Plug.current_resource(conn)
     provider = provider_atom!(provider_str)
-    updated_user = Authenticator.disscociate_third_party(user, provider)
+    updated_user = Authenticator.dissociate_third_party(user, provider)
     render(conn, UserView, :show, user: updated_user)
   end
 

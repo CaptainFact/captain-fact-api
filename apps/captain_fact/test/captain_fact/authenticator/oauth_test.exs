@@ -6,7 +6,11 @@ defmodule CaptainFact.Authenticator.OAuthTest do
 
   describe "Facebook" do
     test "login with existing user using FB id" do
-      user = insert :user
+      user =
+        :user
+        |> build
+        |> with_fb_user_id
+        |> insert
       # Set nil email on provider infos to ensure we're finding him by ID
       provider_infos = fb_provider_infos_from_user(user, %{email: nil})
       result = OAuth.find_or_create_user!(provider_infos)
@@ -14,7 +18,7 @@ defmodule CaptainFact.Authenticator.OAuthTest do
     end
 
     test "login with existing user using email" do
-      user = insert :user, fb_user_id: nil
+      user = insert :user
       provider_infos = fb_provider_infos_from_user(user, %{uid: "4242"})
       result = OAuth.find_or_create_user!(provider_infos)
       assert result.id == user.id
@@ -22,7 +26,10 @@ defmodule CaptainFact.Authenticator.OAuthTest do
     end
 
     test "create account if it doesn't exist" do
-      user = build :user
+      user =
+        :user
+        |> build
+        |> with_fb_user_id
       provider_infos = fb_provider_infos_from_user(user)
       invitation_token = insert(:invitation_request).token
 
@@ -40,7 +47,10 @@ defmodule CaptainFact.Authenticator.OAuthTest do
     end
 
     test "return a proper error when trying to create account without email permission" do
-      user = build :user
+      user =
+        :user
+        |> build
+        |> with_fb_user_id
       provider_infos = fb_provider_infos_from_user(user, %{email: nil})
       invitation_token = insert(:invitation_request).token
       result = OAuth.find_or_create_user!(provider_infos, invitation_token)
@@ -51,11 +61,16 @@ defmodule CaptainFact.Authenticator.OAuthTest do
       nb_accounts_before = Repo.aggregate(User, :count, :id)
       nb_to_create = 10
       # User creates 5 accounts via email
-      user_emails = insert_list(div(nb_to_create, 2), :user, %{fb_user_id: nil})
+      user_emails = insert_list(div(nb_to_create, 2), :user)
       # User create an account using facebook with a new, unused email
-      user_facebook = insert(:user)
+      user_facebook =
+        :user
+        |> build
+        |> with_fb_user_id
+        |> insert
+
       # And create again 4 accounts via email
-      user_emails = user_emails ++ insert_list(div(nb_to_create, 2) - 1, :user, %{fb_user_id: nil})
+      user_emails = user_emails ++ insert_list(div(nb_to_create, 2) - 1, :user)
 
       # User changes its email on FB using existing emails and try to login...
       for user <- user_emails do
