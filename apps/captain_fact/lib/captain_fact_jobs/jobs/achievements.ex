@@ -3,11 +3,15 @@ defmodule CaptainFactJobs.Achievements do
   Checks for special actions or actions combinations that could trigger an achievement
   """
 
-  use GenServer
+  use CaptainFactJobs.Job, 
+    name: __MODULE__,
+    id: :achievements,
+    watched_actions: [:email_confirmed],
+    timeout: 120_000 # 2 minutes
 
   require Logger
-  import Ecto.Query
   import CaptainFact.Accounts, only: [unlock_achievement: 2]
+  import Ecto.Query
 
   alias DB.Repo
   alias DB.Schema.User
@@ -21,24 +25,9 @@ defmodule CaptainFactJobs.Achievements do
   @action_email_confirmed UserAction.type(:email_confirmed)
   @watched_action_types [@action_email_confirmed]
 
-  # --- Client API ---
-
-  def start_link() do
-    GenServer.start_link(@name, :ok, name: @name)
-  end
-
-  def init(args) do
-    {:ok, args}
-  end
-
-  @timeout 120_000 # 2 minute
-  def update() do
-    GenServer.call(@name, :update_flags, @timeout)
-  end
-
   # --- Server callbacks ---
 
-  def handle_call(:update_flags, _from, _state) do
+  def handle_call(:update, _from, _state) do
     last_action_id = ReportManager.get_last_action_id(@analyser_id)
     unless last_action_id == -1 do
       UserAction

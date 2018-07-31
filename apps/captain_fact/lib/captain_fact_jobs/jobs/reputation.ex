@@ -4,8 +4,6 @@ defmodule CaptainFactJobs.Reputation do
   gain per day quota is respected.
   """
 
-  use GenServer
-
   require Logger
   import Ecto.Query
 
