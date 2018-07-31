@@ -46,7 +46,11 @@ defmodule CaptainFact.Authenticator.OAuthTest do
       on_exit fn -> Invitations.disable() end
 
       # Mock user
-      user = build(:user)
+      user =
+        :user
+        |> build
+        |> with_fb_user_id
+
       provider_infos = fb_provider_infos_from_user(user)
 
       # Fail if no invitation token or invalid
