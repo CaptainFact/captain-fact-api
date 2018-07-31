@@ -24,8 +24,6 @@ defmodule CaptainFact.Accounts do
   @doc """
   Create an account with given user `params`
 
-  May raise if `invitation_token` is not valid
-
   Returns {:ok, %User{}} if success
   In case of error, return can be :
     * {:error, %Ecto.Changeset{}}
