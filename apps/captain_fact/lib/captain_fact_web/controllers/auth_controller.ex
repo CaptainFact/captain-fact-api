@@ -1,5 +1,5 @@
 defmodule CaptainFactWeb.AuthController do
-  @moduledoc"""
+  @moduledoc """
   Manages identity and third party authentication.
   """
 
@@ -9,14 +9,18 @@ defmodule CaptainFactWeb.AuthController do
   alias CaptainFact.Authenticator
   alias CaptainFactWeb.{ErrorView, UserView, AuthController}
 
-  plug Guardian.Plug.EnsureAuthenticated, [handler: AuthController]
+  alias Kaur.Result
+
+  plug(
+    Guardian.Plug.EnsureAuthenticated,
+    [handler: AuthController]
     when action in [:logout, :unlink_provider]
+  )
 
   @err_authentication_failed "authentication_failed"
   @err_invalid_email_password "invalid_email_password"
 
-
-  @doc"""
+  @doc """
   Auth with identity (email + password)
   """
   def callback(conn, %{"provider" => "identity", "email" => email, "password" => password}) do
@@ -25,12 +29,13 @@ defmodule CaptainFactWeb.AuthController do
         conn
         |> put_status(:unauthorized)
         |> render(ErrorView, "error.json", message: @err_invalid_email_password)
+
       user ->
         signin_user(conn, user)
     end
   end
 
-  @doc"""
+  @doc """
   Auth with third party provider (OAuth, only Facebook for now).
   If user is connected -> associate account with third party
   If not -> get or create account from third party infos
@@ -38,6 +43,7 @@ defmodule CaptainFactWeb.AuthController do
   def callback(conn, params = %{"provider" => provider_str, "code" => code}) do
     user = Guardian.Plug.current_resource(conn)
     provider = provider_atom!(provider_str)
+
     result =
       if user != nil do
         Authenticator.associate_user_with_third_party(user, provider, code)
@@ -50,28 +56,33 @@ defmodule CaptainFactWeb.AuthController do
         conn
         |> put_status(:unauthorized)
         |> render(ErrorView, "error.json", message: message)
+
       user ->
         signin_user(conn, user)
     end
   end
 
-  @doc"""
+  @doc """
   Unlink given provider from user's account
   """
   def unlink_provider(conn, %{"provider" => provider_str}) do
     user = Guardian.Plug.current_resource(conn)
     provider = provider_atom!(provider_str)
-    updated_user = Authenticator.disscociate_third_party(user, provider)
-    render(conn, UserView, :show, user: updated_user)
+
+    Authenticator.dissociate_third_party(user, provider)
+    |> Result.and_then(fn updated_user ->
+      render(conn, UserView, :show, user: updated_user)
+    end)
   end
 
-  @doc"""
+  @doc """
   Logout user
   """
   def logout(conn, _params) do
     conn
-    |> Guardian.Plug.current_token
-    |> Guardian.revoke!
+    |> Guardian.Plug.current_token()
+    |> Guardian.revoke!()
+
     send_resp(conn, 204, "")
   end
 
@@ -97,15 +108,16 @@ defmodule CaptainFactWeb.AuthController do
   defp signin_user(conn, user) do
     conn
     |> Guardian.Plug.api_sign_in(user)
-    |> Guardian.Plug.current_token
+    |> Guardian.Plug.current_token()
     |> case do
-         nil ->
-           conn
-           |> put_status(:bad_request)
-           |> render(ErrorView, "error.json", message: @err_authentication_failed)
-         token ->
-           render(conn, UserView, "user_with_token.json", %{user: user, token: token})
-       end
+      nil ->
+        conn
+        |> put_status(:bad_request)
+        |> render(ErrorView, "error.json", message: @err_authentication_failed)
+
+      token ->
+        render(conn, UserView, "user_with_token.json", %{user: user, token: token})
+    end
   end
 
   # Add supported providers here. If provider is not supported, it will raise

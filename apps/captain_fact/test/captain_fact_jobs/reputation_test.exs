@@ -7,7 +7,6 @@ defmodule CaptainFactJobs.ReputationTest do
   alias CaptainFact.Actions.ReputationChange
   alias CaptainFactJobs.Reputation
 
-
   test "target user gains reputation" do
     action = insert_action(:vote_up, :comment)
     user_before = Repo.get!(User, action.target_user_id)
@@ -28,13 +27,16 @@ defmodule CaptainFactJobs.ReputationTest do
     Reputation.update()
 
     assert Repo.get!(User, action.user_id).reputation == source_user.reputation + diff_source
-    assert Repo.get!(User, action.target_user_id).reputation == target_user.reputation + diff_target
+
+    assert Repo.get!(User, action.target_user_id).reputation ==
+             target_user.reputation + diff_target
   end
 
   test "user gains should be limited, but loosing reputation should still happen" do
     source_user = insert(:user, %{reputation: 42_000})
     target_user = insert(:user, %{reputation: 0})
     limit = ReputationChange.daily_gain_limit()
+
     insert_list(limit * 2, :user_action, %{
       type: UserAction.type(:vote_up),
       entity: UserAction.entity(:comment),
@@ -52,6 +54,7 @@ defmodule CaptainFactJobs.ReputationTest do
     type = :vote_down
     entity = :comment
     {_, expected_diff} = ReputationChange.for_action(type, entity)
+
     insert(:user_action, %{
       type: UserAction.type(type),
       entity: UserAction.entity(entity),

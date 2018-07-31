@@ -51,7 +51,10 @@ defmodule DB.ReleaseTasks do
     Application.ensure_all_started(:httpoison)
     seed_script = Path.join([priv_dir(:db), "repo", "seed_politicians.exs"])
     [{module, _}] = Code.load_file(seed_script)
-    url = "https://raw.githubusercontent.com/CaptainFact/captain-fact-data/master/Wikidata/data/politicians_born_after_1945_having_a_picture.csv"
+
+    url =
+      "https://raw.githubusercontent.com/CaptainFact/captain-fact-data/master/Wikidata/data/politicians_born_after_1945_having_a_picture.csv"
+
     filename = "politicians.csv"
     %HTTPoison.Response{body: csv_content} = HTTPoison.get!(url)
     File.write!(filename, csv_content)

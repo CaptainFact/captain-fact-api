@@ -6,9 +6,9 @@ defmodule CaptainFactWeb.VideoController do
   use CaptainFactWeb, :controller
   import CaptainFact.Videos
 
-  action_fallback CaptainFactWeb.FallbackController
+  action_fallback(CaptainFactWeb.FallbackController)
 
-  @doc"""
+  @doc """
   List all videos. Accept `filters` to be passed as parameters.
 
   Valid filters:
@@ -23,7 +23,7 @@ defmodule CaptainFactWeb.VideoController do
   def index(conn, _params),
     do: render(conn, :index, videos: videos_list())
 
-  @doc"""
+  @doc """
   List all videos but only return indexes.  
   """
   @deprecated "Extension/Injector is now using GraphQL API for this"
@@ -33,7 +33,7 @@ defmodule CaptainFactWeb.VideoController do
   def index_ids(conn, _),
     do: json(conn, videos_index())
 
-  @doc"""
+  @doc """
   Create a new video based on `url`.
   If it already exist, just returns the video.
   """
@@ -44,19 +44,21 @@ defmodule CaptainFactWeb.VideoController do
         |> Guardian.Plug.current_resource()
         |> create!(url, params["is_partner"])
         |> case do
-             {:error, message} ->
-               conn
-               |> put_status(:unprocessable_entity)
-               |> json(%{error: %{url: message}})
-             {:ok, video} ->
-               render(conn, "show.json", video: video)
-           end
+          {:error, message} ->
+            conn
+            |> put_status(:unprocessable_entity)
+            |> json(%{error: %{url: message}})
+
+          {:ok, video} ->
+            render(conn, "show.json", video: video)
+        end
+
       video ->
         render(conn, "show.json", video: video)
     end
   end
 
-  @doc"""
+  @doc """
   Get a video by its URL
   """
   def search(conn, %{"url" => url}) do
@@ -80,6 +82,7 @@ defmodule CaptainFactWeb.VideoController do
       {id, ""} ->
         # It's an ID (string has only number)
         {:speaker_id, id}
+
       _ ->
         # It's a slug (string has at least one alpha character)
         {:speaker_slug, value}

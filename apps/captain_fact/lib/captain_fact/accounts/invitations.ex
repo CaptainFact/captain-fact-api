@@ -58,16 +58,18 @@ defmodule CaptainFact.Accounts.Invitations do
     do: consume_invitation(token)
 
   def consume_invitation(invitation_token)
-  when is_binary(invitation_token) do
+      when is_binary(invitation_token) do
     case get_invitation_for_token(invitation_token) do
       nil ->
         {:error, "invalid_invitation_token"}
 
       invit ->
         Repo.delete(invit)
+
         Logger.debug(fn ->
           "Invitation #{invit.id} for token #{invit.token} has been consumed"
         end)
+
         {:ok, invitation_token}
     end
   end
@@ -78,7 +80,7 @@ defmodule CaptainFact.Accounts.Invitations do
   def request_invitation(email, invited_by_id \\ nil, locale \\ nil)
 
   def request_invitation(email, invited_by_id, locale)
-  when is_nil(invited_by_id) or is_integer(invited_by_id) do
+      when is_nil(invited_by_id) or is_integer(invited_by_id) do
     with true <- Regex.match?(User.email_regex(), email),
          false <- Burnex.is_burner?(email) do
       case Repo.get_by(InvitationRequest, email: email) do

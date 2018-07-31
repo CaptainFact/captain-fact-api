@@ -5,11 +5,10 @@ defmodule CaptainFact.Invitations.InvitationsTest do
   alias DB.Schema.InvitationRequest
   alias CaptainFact.Accounts.Invitations
 
-
   describe "with system enabled" do
     setup do
       Invitations.enable()
-      on_exit fn -> Invitations.disable() end
+      on_exit(fn -> Invitations.disable() end)
     end
 
     test "invitation request get created with given invited_by user" do
@@ -24,7 +23,7 @@ defmodule CaptainFact.Invitations.InvitationsTest do
     test "send a mail when calling send_invite/1" do
       req = insert(:invitation_request)
       Invitations.send_invite(req)
-      assert_delivered_email CaptainFactMailer.Email.invitation_to_register(req)
+      assert_delivered_email(CaptainFactMailer.Email.invitation_to_register(req))
     end
 
     test "send mails when calling send_invites/1" do
@@ -32,8 +31,9 @@ defmodule CaptainFact.Invitations.InvitationsTest do
       nb_invites = 10
       requests = insert_list(nb_invites, :invitation_request)
       Invitations.send_invites(nb_invites)
+
       Enum.each(requests, fn req ->
-        assert_delivered_email CaptainFactMailer.Email.invitation_to_register(req)
+        assert_delivered_email(CaptainFactMailer.Email.invitation_to_register(req))
       end)
     end
 

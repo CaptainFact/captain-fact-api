@@ -1,5 +1,5 @@
 defmodule CaptainFact.Speakers do
-  @moduledoc"""
+  @moduledoc """
   Speakers utils
   """
 
@@ -9,8 +9,7 @@ defmodule CaptainFact.Speakers do
   alias DB.Schema.Speaker
   alias DB.Type.SpeakerPicture
 
-
-  @doc"""
+  @doc """
   Fetch speaker's picture, overriding the existing picture if there's one
   Returns {:ok, speaker} if success, {:error, reason} otherwise
   """
@@ -18,13 +17,15 @@ defmodule CaptainFact.Speakers do
     case SpeakerPicture.store({picture_url, speaker}) do
       {:ok, picture} ->
         speaker
-        |> Ecto.Changeset.change(picture: %{file_name: picture, updated_at: DateTime.utc_now})
+        |> Ecto.Changeset.change(picture: %{file_name: picture, updated_at: DateTime.utc_now()})
         |> Repo.update()
-      error -> error
+
+      error ->
+        error
     end
   end
 
-  @doc"""
+  @doc """
   Set given speaker `is_user_defined` field to false which will prevent modifications. Also generates a slug.
   """
   def validate_speaker(speaker) do
@@ -33,7 +34,7 @@ defmodule CaptainFact.Speakers do
     |> Repo.update()
   end
 
-  @doc"""
+  @doc """
   Generate slugs for all speakers with `is_user_defined` set to false
   """
   def generate_slugs() do

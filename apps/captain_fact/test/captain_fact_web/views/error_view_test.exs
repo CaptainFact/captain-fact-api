@@ -16,10 +16,10 @@ defmodule CaptainFact.ErrorViewTest do
 
   test "renders 403.json with PermissionsError" do
     assert render_to_string(ErrorView, "403.json", %{reason: %PermissionsError{message: "xxx"}}) =~
-      "xxx"
+             "xxx"
   end
 
- test "renders 404.json" do
+  test "renders 404.json" do
     assert render_to_string(ErrorView, "404.json", []) =~ "not_found"
   end
 

@@ -1,15 +1,17 @@
 defmodule CaptainFactJobs.Moderation do
-  @moduledoc"""
+  @moduledoc """
   This job analyze moderation feebacks and ban or unreport comments accordingly.
   """
 
   use GenServer
   require Logger
   import Ecto.Query
-  import CaptainFactWeb.CommentsChannel, only: [
-    broadcast_comment_update: 2,
-    broadcast_comment_remove: 1
-  ]
+
+  import CaptainFactWeb.CommentsChannel,
+    only: [
+      broadcast_comment_update: 2,
+      broadcast_comment_remove: 1
+    ]
 
   alias DB.Repo
   alias DB.Schema.ModerationUserFeedback
@@ -21,13 +23,12 @@ defmodule CaptainFactJobs.Moderation do
   alias CaptainFact.Actions.Recorder
   alias CaptainFact.Comments
 
-
   @name __MODULE__
   @min_nb_feedbacks_to_process_entry 3
   @refute_ban_under -0.66
   @confirm_ban_above 0.66
 
-  @action_create  UserAction.type(:create)
+  @action_create UserAction.type(:create)
   @entity_comment UserAction.entity(:comment)
 
   # --- Client API ---
@@ -40,12 +41,13 @@ defmodule CaptainFactJobs.Moderation do
     {:ok, args}
   end
 
-  @timeout 60_000 # 1 minute
+  # 1 minute
+  @timeout 60_000
   def update() do
     GenServer.call(@name, :update, @timeout)
   end
 
-  @doc"""
+  @doc """
   Calculate the strenght of the consensus from score (which is between -1.0 and 1.0) as a value between 0.0 and 1.0
   with 0.0 being the weakest consensus acceptable and 1.0 the strongest
 
@@ -65,10 +67,12 @@ defmodule CaptainFactJobs.Moderation do
   """
   def consensus_strength(score) when score <= @refute_ban_under,
     do: consensus_strength(abs(score), abs(@refute_ban_under))
+
   def consensus_strength(score) when score >= @confirm_ban_above,
     do: consensus_strength(score, @confirm_ban_above)
+
   def consensus_strength(abs_score, min_val),
-    do: Float.round (abs_score - min_val) * (1 / (1 - min_val)), 1
+    do: Float.round((abs_score - min_val) * (1 / (1 - min_val)), 1)
 
   # Static accessors
   def min_nb_feedbacks_to_process_entry, do: @min_nb_feedbacks_to_process_entry
@@ -81,18 +85,19 @@ defmodule CaptainFactJobs.Moderation do
     UserAction
     |> join(:inner, [a], uf in ModerationUserFeedback, uf.action_id == a.id)
     |> select([a, uf], %{
-        action: %{
-          id: a.id,
-          user_id: a.user_id,
-          type: a.type,
-          context: a.context,
-          entity: a.entity,
-          entity_id: a.entity_id,
-        }, results: %{
-          nb_feedbacks: count(uf.id),
-          feedbacks_sum: sum(uf.value)
-        }
-       })
+      action: %{
+        id: a.id,
+        user_id: a.user_id,
+        type: a.type,
+        context: a.context,
+        entity: a.entity,
+        entity_id: a.entity_id
+      },
+      results: %{
+        nb_feedbacks: count(uf.id),
+        feedbacks_sum: sum(uf.value)
+      }
+    })
     |> having([_, uf], count(uf.id) >= @min_nb_feedbacks_to_process_entry)
     |> group_by([a, _], a.id)
     |> Repo.all(log: false)
@@ -101,9 +106,10 @@ defmodule CaptainFactJobs.Moderation do
     |> Enum.map(&put_flag_reason_in_results/1)
     |> log_update()
     |> Enum.map(&process_entry/1)
+
     # credo:disable-for-previous-line
 
-    {:reply, :ok , :ok}
+    {:reply, :ok, :ok}
   end
 
   defp log_update(actions) do
@@ -114,6 +120,7 @@ defmodule CaptainFactJobs.Moderation do
   # Score = sum of feedbacks values / number of feedbacks
   defp put_score_in_results(entry = %{results: %{nb_feedbacks: 0}}),
     do: put_in(entry, [:results, :score], 0)
+
   defp put_score_in_results(entry = %{results: res}),
     do: put_in(entry, [:results, :score], res.feedbacks_sum / res.nb_feedbacks)
 
@@ -124,26 +131,33 @@ defmodule CaptainFactJobs.Moderation do
   # Check which flag is most present. If there is an equality, which flag type
   # will be chosen is uncertain.
   defp put_flag_reason_in_results(entry = %{action: action}) do
-    put_in(entry, [:results, :flag_reason], Repo.one(
-      from(f in ModerationUserFeedback,
-        where: f.action_id == ^action.id,
-        group_by: f.flag_reason,
-        select: f.flag_reason,
-        order_by: [desc: count(f.id)],
-        limit: 1
-      ))
+    put_in(
+      entry,
+      [:results, :flag_reason],
+      Repo.one(
+        from(
+          f in ModerationUserFeedback,
+          where: f.action_id == ^action.id,
+          group_by: f.flag_reason,
+          select: f.flag_reason,
+          order_by: [desc: count(f.id)],
+          limit: 1
+        )
+      )
     )
   end
 
   # We can only moderate comment at the moment
   defp process_entry(entry = %{action: %{type: @action_create, entity: @entity_comment}}) do
     comment = Repo.get(Comment.with_statement(Comment), entry.action.entity_id)
+
     if comment do
       confirm_refute_dispatch(entry, comment)
     else
       Logger.warn("[ModerationUpdater] Can't find comment ##{entry.action.entity_id} for delete")
     end
   end
+
   defp process_entry(%{action: %{type: type, entity: entity}}) do
     Logger.warn("[ModerationUpdater] Got an unknown type/entity as Feedback: #{type}/#{entity}")
   end
@@ -153,8 +167,10 @@ defmodule CaptainFactJobs.Moderation do
     cond do
       results.score >= @confirm_ban_above ->
         confirm_ban(action, entity, results)
-      results.score <= @refute_ban_under  ->
+
+      results.score <= @refute_ban_under ->
         refute_ban(action, entity, results)
+
       true ->
         nil
     end
@@ -170,7 +186,7 @@ defmodule CaptainFactJobs.Moderation do
       |> Repo.all()
 
     # Delete comment, all linked actions and flags
-    Comments.admin_delete_comment comment, UserAction.moderation_context(action.context)
+    Comments.admin_delete_comment(comment, UserAction.moderation_context(action.context))
 
     # Record ban action
     Recorder.admin_record!(ban_reason(results.flag_reason), :comment, %{
@@ -192,9 +208,9 @@ defmodule CaptainFactJobs.Moderation do
 
   defp ban_reason(reason) do
     case FlagReason.label(reason) do
-      "bad_language" ->     :action_banned_bad_language
-      "spam" ->             :action_banned_spam
-      "irrelevant" ->       :action_banned_irrelevant
+      "bad_language" -> :action_banned_bad_language
+      "spam" -> :action_banned_spam
+      "irrelevant" -> :action_banned_irrelevant
       "not_constructive" -> :action_banned_not_constructive
     end
   end
@@ -211,8 +227,9 @@ defmodule CaptainFactJobs.Moderation do
     Flag
     |> where([f], f.action_id == ^action.id)
     |> Repo.delete_all(returning: [:source_user_id])
-    |> elem(1) # Repo.delete_all returns a tuple like {nb_updated, entries}
-    |> Enum.map(&(Map.get(&1, :source_user_id)))
+    # Repo.delete_all returns a tuple like {nb_updated, entries}
+    |> elem(1)
+    |> Enum.map(&Map.get(&1, :source_user_id))
     |> record_flags_results(:comment, :abused_flag)
 
     # Delete all feedbacks
@@ -221,7 +238,7 @@ defmodule CaptainFactJobs.Moderation do
 
   # Record the flag result for all users
   defp record_flags_results(flagging_users_ids, entity_type, result) do
-    targets = Enum.map(flagging_users_ids, &(%{target_user_id: &1}))
+    targets = Enum.map(flagging_users_ids, &%{target_user_id: &1})
     Recorder.admin_record_all!(result, entity_type, targets)
   end
 end

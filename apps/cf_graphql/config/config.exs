@@ -9,7 +9,7 @@ use Mix.Config
 config :cf_graphql,
   namespace: CF.GraphQL,
   ecto_repos: [DB.Repo],
-  env: Mix.env,
+  env: Mix.env(),
   basic_auth: [
     username: "captain",
     password: "Will be replaced by config runtime, see weave.ex",
@@ -30,4 +30,4 @@ config :logger, :console,
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
-import_config "#{Mix.env}.exs"
+import_config "#{Mix.env()}.exs"

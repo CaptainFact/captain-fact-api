@@ -2,7 +2,6 @@ defmodule CaptainFact.Sources.Fetcher do
   require Logger
   alias CaptainFact.Sources.Fetcher
 
-
   @request_timeout 15_000
   @max_connections 4
 
@@ -13,13 +12,19 @@ defmodule CaptainFact.Sources.Fetcher do
 
   def start_link() do
     import Supervisor.Spec
-    Supervisor.start_link([
-      :hackney_pool.child_spec(pool_name(), [
-        timeout: @request_timeout,
-        max_connections: @max_connections
-      ]),
-      worker(CaptainFact.Sources.Fetcher.LinkChecker, [])
-    ], strategy: :one_for_all, name: __MODULE__)
+
+    Supervisor.start_link(
+      [
+        :hackney_pool.child_spec(
+          pool_name(),
+          timeout: @request_timeout,
+          max_connections: @max_connections
+        ),
+        worker(CaptainFact.Sources.Fetcher.LinkChecker, [])
+      ],
+      strategy: :one_for_all,
+      name: __MODULE__
+    )
   end
 
   @doc """
@@ -28,7 +33,9 @@ defmodule CaptainFact.Sources.Fetcher do
   def fetch_source_metadata(url, callback) do
     case Fetcher.LinkChecker.reserve_url(url) do
       :error ->
-        :error # Already started, it's ok
+        # Already started, it's ok
+        :error
+
       :ok ->
         Task.start(fn ->
           try do
@@ -52,13 +59,22 @@ defmodule CaptainFact.Sources.Fetcher do
   end
 
   defp do_fetch_source_metadata(url) do
-    case HTTPoison.get(url, [], [follow_redirect: true, max_redirect: 5, hackney: [pool: pool_name()]]) do
+    case HTTPoison.get(
+           url,
+           [],
+           follow_redirect: true,
+           max_redirect: 5,
+           hackney: [pool: pool_name()]
+         ) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         {:ok, source_params_from_tree(Floki.parse(body))}
+
       {:ok, %HTTPoison.Response{status_code: 404}} ->
         {:error, :not_found}
+
       {:ok, %HTTPoison.Response{status_code: _}} ->
         {:error, :unknown}
+
       {:error, %HTTPoison.Error{reason: reason}} ->
         {:error, reason}
     end
@@ -66,6 +82,7 @@ defmodule CaptainFact.Sources.Fetcher do
 
   defp source_params_from_tree(tree) do
     head = Floki.find(tree, "head")
+
     %{
       title: attribute(head, "meta[property='og:title']", "content"),
       title_alt: attribute(head, "meta[name='abstract']", "content"),
@@ -74,17 +91,18 @@ defmodule CaptainFact.Sources.Fetcher do
       site_name: attribute(head, "meta[property='og:site_name']", "content"),
       og_url: attribute(head, "meta[property='og:url']", "content")
     }
-    |> Enum.filter(fn({_, value}) -> value != nil && value != "" end)
+    |> Enum.filter(fn {_, value} -> value != nil && value != "" end)
     |> select_best_title()
-    |> Enum.map(fn(entry = {key, value}) ->
+    |> Enum.map(fn entry = {key, value} ->
       if key in [:title, :site_name],
         do: {key, HtmlEntities.decode(value)},
         else: entry
-      end)
+    end)
     |> Enum.into(%{})
   end
 
-  defp attribute(head, anchor, attribute), do: List.first(Floki.attribute(head, anchor, attribute))
+  defp attribute(head, anchor, attribute),
+    do: List.first(Floki.attribute(head, anchor, attribute))
 
   # Select the best title between meta abstract and og:title then truncate it if needed
   defp select_best_title(attrs) do
@@ -109,7 +127,7 @@ defmodule CaptainFact.Sources.Fetcher do
     Agent that record which links are currently fetched
     """
     def start_link() do
-      Agent.start_link(fn -> MapSet.new end, name: Fetcher.link_checker_name())
+      Agent.start_link(fn -> MapSet.new() end, name: Fetcher.link_checker_name())
     end
 
     def reserve_url(url) do
@@ -126,6 +144,6 @@ defmodule CaptainFact.Sources.Fetcher do
       do: Agent.cast(Fetcher.link_checker_name(), &MapSet.delete(&1, url))
 
     def get_queue,
-      do: Agent.get(Fetcher.link_checker_name(), &(&1))
+      do: Agent.get(Fetcher.link_checker_name(), & &1)
   end
 end

@@ -3,7 +3,11 @@ defmodule DB.Schema.SourceTest do
 
   alias DB.Schema.Source
 
-  @valid_attrs %{title: "some content", url: "http://www.lemonde.fr/idees/article/2017/04/24/les-risques-d-une-explosion_5116380_3232.html"}
+  @valid_attrs %{
+    title: "some content",
+    url:
+      "http://www.lemonde.fr/idees/article/2017/04/24/les-risques-d-une-explosion_5116380_3232.html"
+  }
   @invalid_attrs %{}
 
   test "changeset with valid attributes" do

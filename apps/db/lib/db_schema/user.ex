@@ -11,39 +11,38 @@ defmodule DB.Schema.User do
   alias DB.Type.{Achievement, UserPicture}
   alias DB.Schema.{UserAction, Comment, Vote, Flag, Speaker}
 
-
   schema "users" do
-    field :username, :string
-    field :email, :string
-    field :encrypted_password, :string
-    field :name, :string
-    field :picture_url, UserPicture.Type
-    field :reputation, :integer, default: 0
-    field :today_reputation_gain, :integer, default: 0
-    field :locale, :string
-    field :achievements, {:array, :integer}, default: []
-    field :newsletter, :boolean, default: true
-    field :newsletter_subscription_token, :string
-    field :is_publisher, :boolean, default: false
-    field :completed_onboarding_steps, {:array, :integer}, default: []
+    field(:username, :string)
+    field(:email, :string)
+    field(:encrypted_password, :string)
+    field(:name, :string)
+    field(:picture_url, UserPicture.Type)
+    field(:reputation, :integer, default: 0)
+    field(:today_reputation_gain, :integer, default: 0)
+    field(:locale, :string)
+    field(:achievements, {:array, :integer}, default: [])
+    field(:newsletter, :boolean, default: true)
+    field(:newsletter_subscription_token, :string)
+    field(:is_publisher, :boolean, default: false)
+    field(:completed_onboarding_steps, {:array, :integer}, default: [])
 
     # Social networks profiles
-    field :fb_user_id, :string
+    field(:fb_user_id, :string)
 
     # Email Confirmation
-    field :email_confirmed, :boolean, default: false
-    field :email_confirmation_token, :string
+    field(:email_confirmed, :boolean, default: false)
+    field(:email_confirmation_token, :string)
 
     # Virtual
-    field :password, :string, virtual: true
+    field(:password, :string, virtual: true)
 
     # Assocs
-    has_many :actions, UserAction, on_delete: :nilify_all
-    has_many :comments, Comment, on_delete: :nilify_all
-    has_many :votes, Vote, on_delete: :delete_all
-    has_many :flags_posted, Flag, foreign_key: :source_user_id, on_delete: :delete_all
+    has_many(:actions, UserAction, on_delete: :nilify_all)
+    has_many(:comments, Comment, on_delete: :nilify_all)
+    has_many(:votes, Vote, on_delete: :delete_all)
+    has_many(:flags_posted, Flag, foreign_key: :source_user_id, on_delete: :delete_all)
 
-    belongs_to :speaker, Speaker
+    belongs_to(:speaker, Speaker)
 
     timestamps()
   end
@@ -58,9 +57,10 @@ defmodule DB.Schema.User do
       iex> DB.Schema.User.user_appelation(%{username: "Zappa", name: "Frank"})
       "Frank (@Zappa)"
   """
-  def user_appelation(%{username: username, name: nil}), 
+  def user_appelation(%{username: username, name: nil}),
     do: "@#{username}"
-  def user_appelation(%{username: username, name: name}), 
+
+  def user_appelation(%{username: username, name: name}),
     do: "#{name} (@#{username})"
 
   @email_regex ~r/\A([\w+\-].?)+@[a-z\d\-]+(\.[a-z]+)*\.[a-z]+\z/i
@@ -82,13 +82,17 @@ defmodule DB.Schema.User do
     |> put_encrypted_pw
   end
 
-  @doc"""
+  @doc """
   Generate a changeset to update `reputation` and `today_reputation_gain` without verifying daily limits
   """
-  def reputation_changeset(model = %{reputation: reputation, today_reputation_gain: today_gain}, change)
-  when is_integer(change) do
+  def reputation_changeset(
+        model = %{reputation: reputation, today_reputation_gain: today_gain},
+        change
+      )
+      when is_integer(change) do
     change(model, %{reputation: reputation + change, today_reputation_gain: today_gain + change})
   end
+
   def reputation_changeset(model, 0) do
     change(model)
   end
@@ -98,7 +102,8 @@ defmodule DB.Schema.User do
     |> common_changeset(params)
     |> password_changeset(params)
     |> generate_email_verification_token(false)
-    |> put_change(:achievements, [Achievement.get(:welcome)]) # Default to "welcome" achievement
+    # Default to "welcome" achievement
+    |> put_change(:achievements, [Achievement.get(:welcome)])
   end
 
   def changeset_confirm_email(model, is_confirmed) do
@@ -120,9 +125,10 @@ defmodule DB.Schema.User do
   end
 
   def changeset_achievement(model, achievement) do
-    updated_achievements = if achievement in model.achievements,
-      do: model.achievements,
-      else: Enum.uniq([achievement | model.achievements])
+    updated_achievements =
+      if achievement in model.achievements,
+        do: model.achievements,
+        else: Enum.uniq([achievement | model.achievements])
 
     Ecto.Changeset.change(model, achievements: updated_achievements)
   end
@@ -151,17 +157,17 @@ defmodule DB.Schema.User do
   @doc """
   an Ecto changeset to add one step or a list of steps in user's completed steps
   """
-  @spec changeset_completed_onboarding_steps(%__MODULE__{}, (integer | list))::Changeset.t
+  @spec changeset_completed_onboarding_steps(%__MODULE__{}, integer | list) :: Changeset.t()
   def changeset_completed_onboarding_steps(model = %__MODULE__{}, to_complete) do
     updated_completed_onboarding_steps =
       case to_complete do
         _ when is_integer(to_complete) ->
           [to_complete | model.completed_onboarding_steps]
-          |> Enum.uniq
+          |> Enum.uniq()
 
         _ when is_list(to_complete) ->
           (to_complete ++ model.completed_onboarding_steps)
-          |> Enum.uniq
+          |> Enum.uniq()
       end
 
     model
@@ -172,18 +178,19 @@ defmodule DB.Schema.User do
   @doc """
   an Ecto changeset to reinit user's onboarding's step
   """
-  @spec changeset_delete_onboarding(%__MODULE__{})::Changeset.t
+  @spec changeset_delete_onboarding(%__MODULE__{}) :: Changeset.t()
   def changeset_delete_onboarding(model = %__MODULE__{}) do
     change(model, completed_onboarding_steps: [])
   end
 
   @token_length 32
   defp generate_email_verification_token(changeset, false),
-    do: put_change(
-      changeset,
-      :email_confirmation_token,
-      DB.Utils.TokenGenerator.generate(@token_length)
-    )
+    do:
+      put_change(
+        changeset,
+        :email_confirmation_token,
+        DB.Utils.TokenGenerator.generate(@token_length)
+      )
 
   defp generate_email_verification_token(changeset, true),
     do: put_change(changeset, :email_confirmation_token, nil)
@@ -210,6 +217,7 @@ defmodule DB.Schema.User do
         changeset
         |> put_change(:encrypted_password, Bcrypt.hash_pwd_salt(pass))
         |> delete_change(:password)
+
       _ ->
         changeset
     end
@@ -222,17 +230,21 @@ defmodule DB.Schema.User do
           true -> add_error(changeset, :email, "forbidden_provider")
           false -> changeset
         end
-      false -> add_error(changeset, :email, "invalid_format")
+
+      false ->
+        add_error(changeset, :email, "invalid_format")
     end
   end
+
   def validate_email(changeset), do: changeset
 
-  @doc"""
+  @doc """
   Validate locale change by checking for `locale` in `changes` key. If locale
   is invalid or unknown, it will be set to the default (en).
   """
   def validate_locale(changeset = %{changes: %{locale: _}}) do
     changeset = update_change(changeset, :locale, &String.downcase/1)
+
     if changeset.changes.locale in @valid_locales do
       changeset
     else
@@ -243,16 +255,20 @@ defmodule DB.Schema.User do
   def validate_locale(changeset), do: changeset
 
   @forbidden_username_keywords ~w(captainfact captain admin newuser temporary anonymous)
-  @username_regex ~r/^[a-zA-Z0-9-_]+$/ # Only alphanum, '-' and '_'
+  # Only alphanum, '-' and '_'
+  @username_regex ~r/^[a-zA-Z0-9-_]+$/
   defp validate_username(changeset = %{changes: %{username: username}}) do
     lower_username = String.downcase(username)
+
     case Enum.find(@forbidden_username_keywords, &String.contains?(lower_username, &1)) do
       nil ->
         validate_format(changeset, :username, @username_regex)
+
       keyword ->
         add_error(changeset, :username, "contains a foridden keyword: #{keyword}")
     end
   end
+
   defp validate_username(changeset), do: changeset
 
   # Format name

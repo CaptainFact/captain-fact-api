@@ -4,7 +4,6 @@ defmodule CaptainFactMailer.View do
 
   import CaptainFact.Gettext
 
-
   def frontend_url do
     Application.fetch_env!(:captain_fact, :frontend_url)
   end

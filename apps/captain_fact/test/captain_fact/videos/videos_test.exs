@@ -4,12 +4,12 @@ defmodule CaptainFact.VideosTest do
   alias CaptainFact.Videos
   alias CaptainFact.Accounts.UserPermissions.PermissionsError
 
-
   defp test_url, do: "__TEST__/#{DB.Utils.TokenGenerator.generate(8)}"
 
   describe "Add video" do
     test "without enough reputation" do
       user = insert(:user, reputation: 0, is_publisher: false)
+
       assert_raise PermissionsError, fn ->
         Videos.create!(user, test_url())
       end

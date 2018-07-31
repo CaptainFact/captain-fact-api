@@ -2,7 +2,6 @@ defmodule CaptainFactWeb.AuthControllerTest do
   use CaptainFactWeb.ConnCase
   import DB.Factory
 
-
   @identity_auth_path "/auth/identity/callback"
 
   describe "identity" do

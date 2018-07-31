@@ -7,10 +7,9 @@ defmodule CF.AtomFeed.Comments do
 
   alias Atomex.{Feed, Entry}
 
-
   @nb_items_max 50
 
-  @doc"""
+  @doc """
   Get an ATOM feed containing all site's comments in reverse chronological
   order (newest first)
   """
@@ -38,7 +37,7 @@ defmodule CF.AtomFeed.Comments do
           },
           statement: %{
             id: statement.id,
-            video_id: statement.video_id,
+            video_id: statement.video_id
           }
         }
       )
@@ -47,6 +46,7 @@ defmodule CF.AtomFeed.Comments do
 
   defp last_update(_comments = [comment | _]),
     do: DateTime.from_naive!(comment.inserted_at, "Etc/UTC")
+
   defp last_update(_),
     do: DateTime.utc_now()
 
@@ -69,19 +69,23 @@ defmodule CF.AtomFeed.Comments do
     |> Entry.new(insert_datetime, title)
     |> Entry.link(link)
     |> Entry.published(insert_datetime)
-    |> Entry.content("""
-          <div>ID: #{comment.id}</div>
-          <div>User: #{comment.user_id}</div>
-          <div>Text: #{comment.text}</div>
-          <div>Statement: #{comment.statement.id}</div>
-          <div>Posted at: #{comment.inserted_at}</div>
-          <div>#{source(comment)}</div>
-    """, type: "html")
+    |> Entry.content(
+      """
+            <div>ID: #{comment.id}</div>
+            <div>User: #{comment.user_id}</div>
+            <div>Text: #{comment.text}</div>
+            <div>Statement: #{comment.statement.id}</div>
+            <div>Posted at: #{comment.inserted_at}</div>
+            <div>#{source(comment)}</div>
+      """,
+      type: "html"
+    )
     |> Entry.build()
   end
 
   defp source(%{source: nil}),
     do: "None"
+
   defp source(%{source: %{url: url, site_name: site_name}}),
     do: "<a href='#{url}'>[Source] #{site_name}</a>"
 

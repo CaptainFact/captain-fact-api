@@ -25,7 +25,7 @@ defmodule DB.Factory do
       username: "User-#{random_string(10)}",
       email: Faker.Internet.email(),
       encrypted_password: "$2b$12$fe55IfCdqNzKp1wMIJDwVeG3f7guOduEE5HS2C9IJyfkuk3avbjQG",
-      fb_user_id: Integer.to_string(Enum.random(10_000..999_999_999_999_999)),
+      fb_user_id: nil,
       reputation: 0,
       email_confirmation_token: random_string(64),
       # Users are always created with the "Welcome" achievement
@@ -33,6 +33,13 @@ defmodule DB.Factory do
       today_reputation_gain: 0,
       newsletter_subscription_token: random_string(32),
       is_publisher: false
+    }
+  end
+
+  def with_fb_user_id(user = %User{}) do
+    %{
+      user
+      | fb_user_id: Kaur.Secure.generate_api_key()
     }
   end
 

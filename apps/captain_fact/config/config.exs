@@ -22,18 +22,25 @@ config :captain_fact, CaptainFactWeb.Endpoint,
 
 # Configure scheduler
 config :captain_fact, CaptainFact.Scheduler,
-  global: true, # Run only one instance across cluster
+  # Run only one instance across cluster
+  global: true,
   debug_logging: false,
   jobs: [
     # credo:disable-for-lines:10
     # Actions analysers
-    {{:extended, "*/5 * * * * *"}, {CaptainFactJobs.Votes, :update, []}}, # Every 5 seconds
-    {            "*/1 * * * *",    {CaptainFactJobs.Reputation, :update, []}}, # Every minute
-    {            "@daily",         {CaptainFactJobs.Reputation, :reset_daily_limits, []}}, # Every day
-    {            "*/1 * * * *",    {CaptainFactJobs.Flags, :update, []}}, # Every minute
-    {            "*/3 * * * *",    {CaptainFactJobs.Achievements, :update, []}}, # Every 3 minutes
+    # Every 5 seconds
+    {{:extended, "*/5 * * * * *"}, {CaptainFactJobs.Votes, :update, []}},
+    # Every minute
+    {"*/1 * * * *", {CaptainFactJobs.Reputation, :update, []}},
+    # Every day
+    {"@daily", {CaptainFactJobs.Reputation, :reset_daily_limits, []}},
+    # Every minute
+    {"*/1 * * * *", {CaptainFactJobs.Flags, :update, []}},
+    # Every 3 minutes
+    {"*/3 * * * *", {CaptainFactJobs.Achievements, :update, []}},
     # Various updaters
-    {            "*/5 * * * *",   {CaptainFactJobs.Moderation, :update, []}}, # Every 5 minutes
+    # Every 5 minutes
+    {"*/5 * * * *", {CaptainFactJobs.Moderation, :update, []}}
   ]
 
 # Configure mailer
