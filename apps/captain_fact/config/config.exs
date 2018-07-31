@@ -10,7 +10,8 @@ config :captain_fact,
   env: Mix.env(),
   ecto_repos: [DB.Repo],
   cors_origins: [],
-  oauth: [facebook: []]
+  oauth: [facebook: []],
+  invitation_system: false
 
 # Configures the endpoint
 config :captain_fact, CaptainFactWeb.Endpoint,

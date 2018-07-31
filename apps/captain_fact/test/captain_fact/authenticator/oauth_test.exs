@@ -1,6 +1,8 @@
 defmodule CaptainFact.Authenticator.OAuthTest do
   use CaptainFact.DataCase
+
   alias DB.Schema.User
+  alias CaptainFact.Accounts.Invitations
   alias CaptainFact.Authenticator.OAuth
   alias CaptainFact.Authenticator.ProviderInfos
 
@@ -31,19 +33,27 @@ defmodule CaptainFact.Authenticator.OAuthTest do
         |> build
         |> with_fb_user_id
       provider_infos = fb_provider_infos_from_user(user)
-      invitation_token = insert(:invitation_request).token
 
-      # Fail if not invitation token or invalid
+      result = OAuth.find_or_create_user!(provider_infos)
+      refute is_nil(result.id)
+      assert result.email == user.email
+      assert result.fb_user_id == user.fb_user_id
+    end
+
+    test "create account fails if invitation system is enabled and bad invitation token" do
+      # Enable invitation system just for this test
+      Invitations.enable()
+      on_exit fn -> Invitations.disable() end
+
+      # Mock user
+      user = build(:user)
+      provider_infos = fb_provider_infos_from_user(user)
+
+      # Fail if no invitation token or invalid
       assert OAuth.find_or_create_user!(provider_infos)
              == {:error, "invalid_invitation_token"}
       assert OAuth.find_or_create_user!(provider_infos, "BullshitInvitationToken")
              == {:error, "invalid_invitation_token"}
-
-      # Success otherwise
-      result = OAuth.find_or_create_user!(provider_infos, invitation_token)
-      refute is_nil(result.id)
-      assert result.email == user.email
-      assert result.fb_user_id == user.fb_user_id
     end
 
     test "return a proper error when trying to create account without email permission" do

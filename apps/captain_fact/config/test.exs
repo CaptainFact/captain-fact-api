@@ -6,7 +6,7 @@ config :captain_fact, frontend_url: "https://TEST_FRONTEND"
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
 config :captain_fact, CaptainFactWeb.Endpoint,
-  http: [port: 4001],
+  http: [port: 10001],
   server: false,
   force_ssl: false,
   secret_key_base: "psZ6n/fq0b444U533yKtve2R0rpjk/IxRGpuanNE92phSDy8/Z2I8lHaIugCMOY7"

@@ -8,7 +8,7 @@ defmodule CF.AtomFeed.Statements do
 
   @url "https://captainfact.io"
 
-  @doc"""
+  @doc """
   Get an RSS feed containing all site's statements in reverse chronological
   order (newest first)
   """
@@ -22,15 +22,23 @@ defmodule CF.AtomFeed.Statements do
     |> join(:inner, [s], v in assoc(s, :video))
     |> join(:left, [s, v], sp in assoc(s, :speaker))
     |> order_by([s, v, sp], desc: [s.id])
-    |> select([s, v, sp], %{id: s.id, time_code: s.time, content: s.text, creation_time: s.inserted_at,
-                         speaker_id: sp.id, speaker: sp.full_name,
-                         video_id: v.id, video_title: v.title})
-    |> limit(50)
+    |> select([s, v, sp], %{
+      id: s.id,
+      time_code: s.time,
+      content: s.text,
+      creation_time: s.inserted_at,
+      speaker_id: sp.id,
+      speaker: sp.full_name,
+      video_id: v.id,
+      video_title: v.title
+    })
+    |> limit(@nb_items_max)
     |> DB.Repo.all()
   end
 
-  defp last_update(_statements = [statement| _]),
+  defp last_update(_statements = [statement | _]),
     do: DateTime.from_naive!(statement.creation_time, "Etc/UTC")
+
   defp last_update(_),
     do: DateTime.utc_now()
 
@@ -52,46 +60,56 @@ defmodule CF.AtomFeed.Statements do
     Entry.new(link_statement, insert_datetime, title)
     |> Entry.link(link_statement)
     |> Entry.published(insert_datetime)
-    |> Entry.content("""
+    |> Entry.content(
+      """
           <div>ID: #{statement.id}</div>
           <div>Time code: #{timecode_to_time(statement.time_code)}</div>
           <div>Text: #{statement.content}</div>
           <div>Posted at: #{insert_datetime}</div>
           <div>Video title: #{statement.video_title}</div>
-      """<> speaker_info(statement) <>
-      """
-          <div>#{source(link_video, "Video link")}</div>
-          <div>#{source(link_statement, "Statement link")}</div>
-    """, type: "html")
+      """ <>
+        speaker_info(statement) <>
+        """
+              <div>#{link(link_video, "Video link")}</div>
+              <div>#{link(link_statement, "Statement link")}</div>
+        """,
+      type: "html"
+    )
     |> Entry.build()
   end
 
-
   defp timecode_to_time(timecode) do
-    hours_time_code = div(timecode, 3600)
-                      |> Integer.to_string
-                      |> String.pad_leading(2, "0")
-    minutes_time_code = div(rem(timecode, 3600), 60)
-                        |> Integer.to_string
-                        |> String.pad_leading(2, "0")
-    seconds_time_code = rem(rem(timecode, 3600), 60)
-                        |> Integer.to_string
-                        |> String.pad_leading(2, "0")
+    hours_time_code =
+      div(timecode, 3600)
+      |> Integer.to_string()
+      |> String.pad_leading(2, "0")
+
+    minutes_time_code =
+      div(rem(timecode, 3600), 60)
+      |> Integer.to_string()
+      |> String.pad_leading(2, "0")
+
+    seconds_time_code =
+      rem(rem(timecode, 3600), 60)
+      |> Integer.to_string()
+      |> String.pad_leading(2, "0")
+
     "#{hours_time_code}:#{minutes_time_code}:#{seconds_time_code}"
   end
 
-  defp speaker_info(%{speaker_id: nil}), do:
-    ""
+  defp speaker_info(%{speaker_id: nil}), do: ""
+
   defp speaker_info(statement) do
     link_speaker = speaker_url(statement)
+
     """
     <div>Speaker : #{statement.speaker}</div>
-    <div>#{source(link_speaker, "Speaker profile")}</div>
+    <div>#{link(link_speaker, "Speaker profile")}</div>
     """
   end
 
-  defp source(url, site_name),
-       do: "<a href='#{url}'>[Source] #{site_name}</a>"
+  defp link(url, text),
+    do: "<a href='#{url}'>#{text}</a>"
 
   defp statement_url(nil) do
     "#{@url}/"
@@ -110,5 +128,4 @@ defmodule CF.AtomFeed.Statements do
     video_hash_id = DB.Type.VideoHashId.encode(statement.video_id)
     "#{@url}/videos/#{video_hash_id}"
   end
-
 end
