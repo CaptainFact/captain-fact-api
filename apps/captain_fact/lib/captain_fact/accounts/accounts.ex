@@ -137,6 +137,15 @@ defmodule CaptainFact.Accounts do
     |> (fn res -> "temporary-#{res}" end).()
   end
 
+  @doc """
+  (!) Delete user's account. All user's actions and comments will be nilified.
+  This action is irreversible.
+  """
+  @spec delete_user!(%User{}) :: %User{}
+  def delete_user!(user = %User{}) do
+    Repo.delete!(user)
+  end
+
   # ---- Picture ----
 
   @doc """

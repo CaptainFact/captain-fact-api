@@ -86,8 +86,10 @@ defmodule CaptainFactWeb.UserController do
   end
 
   def delete(conn, _params) do
-    # TODO Soft delete, do the real delete after 1 week to avoid user mistakes
-    Repo.delete!(Guardian.Plug.current_resource(conn))
+    conn
+    |> Guardian.Plug.current_resource()
+    |> Accounts.delete_user!()
+
     send_resp(conn, :no_content, "")
   end
 
