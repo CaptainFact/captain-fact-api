@@ -142,28 +142,26 @@ defmodule CaptainFact.Accounts do
 
   # ---- Picture ----
 
-  @doc"""
+  @doc """
   Fetch a user picture from given URL.
 
   Returns `{:ok, updated_user}` or `{:error, error}`
   """
   def fetch_picture(_, picture_url) when picture_url in [nil, ""],
     do: {:error, :invalid_path}
+
   def fetch_picture(user, picture_url) do
     if Application.get_env(:captain_fact, :env) != :test do
       case DB.Type.UserPicture.store({picture_url, user}) do
-        {:ok, picture} -> update_user_picture(user, picture)
-        error -> error
+        {:ok, picture} -> 
+          Repo.update(User.changeset_picture(user, picture))
+        error -> 
+          error
       end
     else
-      update_user_picture(user, picture_url) # Don't store files in tests
+      # Don't store files in tests
+      Repo.update(User.changeset_picture(user, picture_url))
     end
-  end
-
-  defp update_user_picture(user, picture) do
-    user
-    |> Ecto.Changeset.change(picture_url: %{file_name: picture, updated_at: Ecto.DateTime.utc})
-    |> Repo.update()
   end
 
   # ---- Confirm email ----
