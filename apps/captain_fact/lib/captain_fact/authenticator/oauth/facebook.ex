@@ -21,9 +21,6 @@ defmodule CaptainFact.Authenticator.OAuth.Facebook do
     user_fields: "id,email,locale,name,verified,picture"
   ]
 
-  @app_id Application.get_env(:captain_fact, :oauth)[:facebook][:client_id]
-  @app_secret Application.get_env(:captain_fact, :oauth)[:facebook][:client_secret]
-
   @doc """
   Construct a client for requests to Facebook.
   """
@@ -64,7 +61,9 @@ defmodule CaptainFact.Authenticator.OAuth.Facebook do
     |> Client.delete("/#{fb_user_id}/permissions")
     |> Result.either(
       fn _error ->
-        Result.error("A problem with facebook permissions revocation happened with user #{fb_user_id}")
+        Result.error(
+          "A problem with facebook permissions revocation happened with user #{fb_user_id}"
+        )
       end,
       fn _ -> Result.ok(user) end
     )
@@ -141,14 +140,21 @@ defmodule CaptainFact.Authenticator.OAuth.Facebook do
     |> Keyword.get(key)
   end
 
-
-  #Construct a client with captain fact credentials to request Facebook
+  # Construct a client with captain fact credentials to request Facebook
   @spec app_client(list()) :: Client.t()
   defp app_client(opts \\ []) do
-    token = OAuth2.AccessToken.new("#{@app_id}|#{@app_secret}")
+    token = OAuth2.AccessToken.new("#{app_id()}|#{app_secret()}")
 
     opts
     |> client
     |> Map.put(:token, token)
+  end
+
+  defp app_id do
+    Application.get_env(:captain_fact, :oauth)[:facebook][:client_id]
+  end
+
+  defp app_secret do
+    Application.get_env(:captain_fact, :oauth)[:facebook][:client_secret]
   end
 end
