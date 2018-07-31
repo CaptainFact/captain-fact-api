@@ -13,11 +13,10 @@ defmodule CaptainFactWeb.CommentView do
   end
 
   def render("comment.json", %{comment: comment}) do
-    user = if Ecto.assoc_loaded?(comment.user) do
-      UserView.render("show_public.json", %{user: comment.user})
-    else
-      nil
-    end
+    user = if Ecto.assoc_loaded?(comment.user) and comment.user.id != nil,
+      do: UserView.render("show_public.json", %{user: comment.user}),
+      else: nil
+    
     %{
       id: comment.id,
       reply_to_id: comment.reply_to_id,
