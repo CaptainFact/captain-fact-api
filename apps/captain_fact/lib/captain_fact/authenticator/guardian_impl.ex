@@ -16,7 +16,10 @@ defmodule CaptainFact.Authenticator.GuardianImpl do
   def resource_from_claims(claims) do
     "User:" <> user_id = claims["sub"]
 
-    Repo.get(%User{}, user_id)
+    %User{}
+    |> Repo.get(user_id)
+    |> Result.from_value()
+    |> Result.map_error(fn :no_value -> :user_not_found end)
   end
 
 end
