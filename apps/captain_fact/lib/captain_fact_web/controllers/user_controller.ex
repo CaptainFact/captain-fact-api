@@ -5,6 +5,7 @@ defmodule CaptainFactWeb.UserController do
   alias DB.Type.Achievement
 
   alias CaptainFact.Accounts
+  alias CaptainFact.Accounts.Invitations
   alias CaptainFact.Accounts.UserPermissions
   alias CaptainFactWeb.UserView
 
@@ -194,8 +195,7 @@ defmodule CaptainFactWeb.UserController do
 
   def request_invitation(conn, params = %{"email" => email}) do
     connected_user = Guardian.Plug.current_resource(conn)
-
-    case Accounts.request_invitation(email, connected_user, params["locale"]) do
+    case Invitations.request_invitation(email, connected_user, params["locale"]) do
       {:ok, _} ->
         send_resp(conn, :no_content, "")
 
