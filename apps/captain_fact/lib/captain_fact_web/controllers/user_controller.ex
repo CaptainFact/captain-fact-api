@@ -195,16 +195,7 @@ defmodule CaptainFactWeb.UserController do
 
   def request_invitation(conn, params = %{"email" => email}) do
     connected_user = Guardian.Plug.current_resource(conn)
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-    case Accounts.request_invitation(email, connected_user, params["locale"]) do
-=======
     case Invitations.request_invitation(email, connected_user, params["locale"]) do
->>>>>>> c2c1041d4a302edf2ccf88f97d224ce8aa1b5a99
-=======
-    case Invitations.request_invitation(email, connected_user, params["locale"]) do
->>>>>>> de0cf4cb0d6f2678fee8dde52cbfd80854a2b602
       {:ok, _} ->
         send_resp(conn, :no_content, "")
 
