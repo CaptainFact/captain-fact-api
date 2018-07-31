@@ -149,7 +149,6 @@ defmodule CaptainFactWeb.VideoDebateChannel do
     query = "%#{params["query"]}%"
     speakers_query =
       from s in Speaker,
-      where: s.is_user_defined == false,
       where: fragment("unaccent(?) ILIKE unaccent(?)", s.full_name, ^query),
       group_by: s.id,
       select: %{id: s.id, full_name: s.full_name},

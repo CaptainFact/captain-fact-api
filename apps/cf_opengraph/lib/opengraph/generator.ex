@@ -1,5 +1,6 @@
 defmodule CF.Opengraph.Generator do
   alias DB.Schema.User
+  alias DB.Schema.Video
 
   require EEx
 
@@ -42,14 +43,15 @@ defmodule CF.Opengraph.Generator do
   render open graph metadata for given user
   """
   def render_user(user = %User{}, path) do
-    encoded_url = URI.encode("captainfact.io#{path}")
+    encoded_url = URI.encode(canonical_url(path))
     escaped_username = Plug.HTML.html_escape(user.username)
+    escaped_appellation = Plug.HTML.html_escape(User.user_appelation(user))
 
     render(%{
-      title: "le profil de : #{escaped_username} sur CaptainFact",
+      title: "Le profil de #{escaped_appellation} sur CaptainFact",
       url: encoded_url,
       description: "Découvrez le profil de #{escaped_username} sur CaptainFact",
-      image: DB.Type.UserPicture.url({user.picture_url, user}, :thumb)
+      image: nil # User picture doesn't have a large enough resolution
     })
   end
 
@@ -61,22 +63,22 @@ defmodule CF.Opengraph.Generator do
   def render_videos_list(path) do
     render(%{
       title: "Les vidéos sourcées et vérifiées sur CaptainFact",
-      url: "captainfact.io#{path}",
+      url: canonical_url(path),
       description:
         "Découvrez diverses vidéos sourcées et vérifiées par la communauté CaptainFact",
-      image: "captainfact.io/assets/img/logo.png"
+      image: nil
     })
   end
 
   @doc """
   generate open graph tags for the given video
   """
-  def render_video(video = %DB.Schema.Video{}, path) do
+  def render_video(video = %Video{}, path) do
     render(%{
       title: "Vérification complète de : #{video.title}",
-      url: "captainfact.io#{path}",
+      url: canonical_url(path),
       description: "#{video.title} vérifiée citation par citation par la communauté CaptainFact",
-      image: CaptainFact.Videos.image_url(video)
+      image: Video.image_url(video)
     })
   end
 
@@ -89,8 +91,15 @@ defmodule CF.Opengraph.Generator do
     render(%{
       title: speaker.full_name,
       description: "Les interventions de #{speaker.full_name} sur CaptainFact",
-      url: "captainfact.io#{path}",
-      image: speaker.image_url
+      url: canonical_url(path),
+      image: nil # Speaker picture doesn't have a large enough resolution
     })
+  end
+
+  # Build the URL, ensure it ends with a /
+  defp canonical_url(path) do
+    "https://captainfact.io#{path}"
+    |> String.trim_trailing("/")
+    |> Kernel.<>("/")
   end
 end

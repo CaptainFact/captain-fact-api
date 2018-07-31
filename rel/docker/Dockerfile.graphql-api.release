@@ -1,4 +1,4 @@
-FROM bitwalker/alpine-elixir:1.6.0
+FROM bitwalker/alpine-elixir:1.6.6
 RUN apk add bash imagemagick curl && rm -rf /var/cache/apk/*
 
 ENV HOME=/opt/app/ SHELL=/bin/bash MIX_ENV=prod
@@ -8,4 +8,4 @@ COPY graphql-api_release.tar .
 RUN tar x -f graphql-api_release.tar && rm graphql-api_release.tar
 
 EXPOSE 80
-ENTRYPOINT ["bin/captain_fact_graphql"]
+ENTRYPOINT ["bin/cf_graphql"]

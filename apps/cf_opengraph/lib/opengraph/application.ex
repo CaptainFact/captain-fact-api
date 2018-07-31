@@ -4,10 +4,12 @@ defmodule CF.Opengraph.Application do
   alias CF.Opengraph.Router
 
   def start(_, _) do
+    port = Application.get_env(:cf_opengraph, :port)
+
     children = [
       %{
         id: CF.Opengraph.Router,
-        start: {Router, :start_link, []}
+        start: {Router, :start_link, [port]}
       }
     ]
 

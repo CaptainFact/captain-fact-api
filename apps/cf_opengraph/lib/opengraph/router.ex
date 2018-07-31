@@ -1,6 +1,7 @@
 defmodule CF.Opengraph.Router do
   use Plug.Router
   alias DB.Repo
+  alias DB.Schema.Video
   alias Kaur.Result
   alias CF.Opengraph.Generator
   require Logger
@@ -9,10 +10,7 @@ defmodule CF.Opengraph.Router do
   plug(:match)
   plug(:dispatch)
 
-  def start_link do
-    # TODO load config
-    port = 4005
-
+  def start_link(port) do
     success_logging = fn _ ->
       Logger.info("Running CF.Opengraph.Router with cowboy on port #{port}")
     end
@@ -57,7 +55,7 @@ defmodule CF.Opengraph.Router do
   get "/videos/:video_id/*_" do
     conn.params["video_id"]
     |> DB.Type.VideoHashId.decode()
-    |> Result.map(&CaptainFact.Videos.get_video_by_id/1)
+    |> Result.map(fn id -> Repo.get(Video, id) end)
     |> Result.and_then(&Result.from_value/1)
     |> Result.map(&Generator.render_video(&1, conn.request_path))
     |> Result.either(

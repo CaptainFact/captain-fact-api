@@ -4,7 +4,7 @@ defmodule DB.Mixfile do
   def project do
     [
       app: :db,
-      version: "0.8.11",
+      version: "0.8.12",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
@@ -48,6 +48,7 @@ defmodule DB.Mixfile do
       {:bcrypt_elixir, "~> 1.0"},
       {:burnex, "~> 1.0"},
       {:hashids, "~> 2.0"},
+      {:kaur, "~> 1.1"},
       {:ex_machina, "~> 2.0", only: [:dev, :test]},
       {:faker, "~> 0.7", only: [:dev, :test]},
       {:stream_data, "~> 0.1", only: :test}

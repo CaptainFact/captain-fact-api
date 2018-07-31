@@ -39,15 +39,15 @@ release :captain_fact do
   ]
 end
 
-release :captain_fact_graphql do
-  set version: current_version(:captain_fact_graphql)
-  set applications: [:captain_fact_graphql]
+release :cf_graphql do
+  set version: current_version(:cf_graphql)
+  set applications: [:cf_graphql]
   set commands: ["migrate": "rel/commands/migrate.sh"]
 end
 
-release :captain_fact_atom_feed do
-  set version: current_version(:captain_fact_atom_feed)
-  set applications: [:captain_fact_atom_feed]
+release :cf_atom_feed do
+  set version: current_version(:cf_atom_feed)
+  set applications: [:cf_atom_feed]
 end
 
 release :cf_opengraph do
