@@ -109,7 +109,7 @@ defmodule CaptainFact.Authenticator.OAuth do
 
     user
     |> User.provider_changeset(%{fb_user_id: nil})
-    |> Repo.update!()
+    |> Repo.update()
   end
 
   # Converts provider infos to a struct ready to be given for User changesets

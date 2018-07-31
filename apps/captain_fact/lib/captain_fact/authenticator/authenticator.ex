@@ -55,7 +55,6 @@ defmodule CaptainFact.Authenticator do
   def dissociate_third_party(user, provider) do
     user
     |> OAuth.unlink_provider(provider)
-    |> Result.ok
   end
 
   defp validate_pass(_encrypted, password) when password in [nil, ""],
