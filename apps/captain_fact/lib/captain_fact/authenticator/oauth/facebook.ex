@@ -59,14 +59,14 @@ defmodule CaptainFact.Authenticator.OAuth.Facebook do
   @doc """
   revoke token on token on facebook
   """
-  def revoke_permissions(_user = %User{fb_user_id: fb_user_id}) do
+  def revoke_permissions(user = %User{fb_user_id: fb_user_id}) do
     app_client()
     |> Client.delete("/#{fb_user_id}/permissions")
     |> Result.either(
       fn _error ->
         Result.error("A problem with facebook permissions revocation happened with user #{fb_user_id}")
       end,
-      fn _ -> :ok end
+      fn _ -> Result.ok(user) end
     )
   end
 

@@ -178,19 +178,15 @@ defmodule CaptainFact.Accounts do
   def fetch_picture(user, picture_url) do
     if Application.get_env(:captain_fact, :env) != :test do
       case DB.Type.UserPicture.store({picture_url, user}) do
-        {:ok, picture} -> update_user_picture(user, picture)
-        error -> error
+        {:ok, picture} ->
+          Repo.update(User.changeset_picture(user, picture))
+        error ->
+          error
       end
     else
       # Don't store files in tests
-      update_user_picture(user, picture_url)
+      Repo.update(User.changeset_picture(user, picture_url))
     end
-  end
-
-  defp update_user_picture(user, picture) do
-    user
-    |> Ecto.Changeset.change(picture_url: %{file_name: picture, updated_at: Ecto.DateTime.utc()})
-    |> Repo.update()
   end
 
   # ---- Confirm email ----
