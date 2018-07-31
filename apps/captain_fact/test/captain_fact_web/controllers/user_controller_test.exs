@@ -9,6 +9,8 @@ defmodule CaptainFactWeb.UserControllerTest do
   alias DB.Schema.Comment
   alias DB.Schema.ResetPasswordRequest
 
+  alias CaptainFact.Accounts.Invitations
+
 
   describe "Get user" do
     test "displays sensitive info (email...) when requesting /me" do
@@ -51,7 +53,10 @@ defmodule CaptainFactWeb.UserControllerTest do
       Guardian.decode_and_verify!(response["token"])
     end
 
-    test "must not work without an invitation" do
+    test "must not work without an invitation if invitation system is enabled" do
+      Invitations.enable()
+      on_exit fn -> Invitations.disable() end
+
       user =
         build(:user)
         |> Map.take([:email, :username])
