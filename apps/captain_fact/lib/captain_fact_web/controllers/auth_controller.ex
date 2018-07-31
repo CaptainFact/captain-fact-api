@@ -9,6 +9,8 @@ defmodule CaptainFactWeb.AuthController do
   alias CaptainFact.Authenticator
   alias CaptainFactWeb.{ErrorView, UserView, AuthController}
 
+  alias Kaur.Result
+
   plug Guardian.Plug.EnsureAuthenticated, [handler: AuthController]
     when action in [:logout, :unlink_provider]
 
@@ -61,8 +63,10 @@ defmodule CaptainFactWeb.AuthController do
   def unlink_provider(conn, %{"provider" => provider_str}) do
     user = Guardian.Plug.current_resource(conn)
     provider = provider_atom!(provider_str)
-    updated_user = Authenticator.disscociate_third_party(user, provider)
-    render(conn, UserView, :show, user: updated_user)
+    Authenticator.dissociate_third_party(user, provider)
+    |> Result.and_then(fn updated_user ->
+      render(conn, UserView, :show, user: updated_user)
+    end)
   end
 
   @doc"""
