@@ -5,6 +5,7 @@ defmodule CaptainFactWeb.UserSocket do
   import Guardian.Phoenix.Socket
   alias CaptainFactWeb.{ErrorView, ChangesetView}
   alias CaptainFact.Accounts.UserPermissions
+  alias CaptainFact.Authenticator.GuardianImpl
 
   ## Channels
   channel("video_debate:*", CaptainFactWeb.VideoDebateChannel)
@@ -18,7 +19,7 @@ defmodule CaptainFactWeb.UserSocket do
 
   # Connect with token
   def connect(%{"token" => token}, socket) do
-    case sign_in(socket, token) do
+    case authenticate(socket, GuardianImpl, token) do
       {:ok, authed_socket, _guardian_params} ->
         user_id =
           case Guardian.Phoenix.Socket.current_resource(authed_socket) do
