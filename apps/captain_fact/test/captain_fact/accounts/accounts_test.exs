@@ -31,25 +31,28 @@ defmodule CaptainFact.AccountsTest do
       Accounts.reset_password!(user.email, "127.0.0.1")
 
       assert Repo.aggregate(ResetPasswordRequest, :count, :token) == 1
+
       req =
         ResetPasswordRequest
         |> preload(:user)
         |> Repo.get_by!(user_id: user.id)
 
       refute is_nil(req.token) or String.length(req.token) < 128
-      assert_delivered_email CaptainFactMailer.Email.reset_password_request(req)
+      assert_delivered_email(CaptainFactMailer.Email.reset_password_request(req))
     end
 
     test "a single ip cannot make too much requests" do
       # With a single user
       Repo.delete_all(ResetPasswordRequest)
       user = insert(:user)
+
       assert_raise PermissionsError, fn ->
         for _ <- 0..10, do: Accounts.reset_password!(user.email, "127.0.0.1")
       end
 
       # With changing users
       Repo.delete_all(ResetPasswordRequest)
+
       assert_raise PermissionsError, fn ->
         for _ <- 0..10, do: Accounts.reset_password!(insert(:user).email, "127.0.0.1")
       end
@@ -58,6 +61,7 @@ defmodule CaptainFact.AccountsTest do
     # Verify
     test "verify token" do
       user = insert(:user)
+
       req =
         %ResetPasswordRequest{}
         |> ResetPasswordRequest.changeset(%{user_id: user.id, source_ip: "127.0.0.1"})
@@ -66,19 +70,20 @@ defmodule CaptainFact.AccountsTest do
       assert_raise Ecto.NoResultsError, fn ->
         Accounts.check_reset_password_token!("InvalidToken")
       end
+
       user_from_token = Accounts.check_reset_password_token!(req.token)
       assert user_from_token.id == user.id
     end
 
     test "verify token after expired" do
       user = insert(:user)
+
       req =
         %ResetPasswordRequest{}
         |> ResetPasswordRequest.changeset(%{user_id: user.id, source_ip: "127.0.0.1"})
         |> Repo.insert!()
         |> Ecto.Changeset.change(inserted_at: ~N[2012-12-12 12:12:12])
         |> Repo.update!()
-
 
       assert_raise Ecto.NoResultsError, fn ->
         Accounts.check_reset_password_token!(req.token)
@@ -90,6 +95,7 @@ defmodule CaptainFact.AccountsTest do
     test "changes user password and delete all user's requests'" do
       user = insert(:user)
       new_password = "iHaveBeé€nChangeeeeed!"
+
       req =
         %ResetPasswordRequest{}
         |> ResetPasswordRequest.changeset(%{user_id: user.id, source_ip: "127.0.0.1"})
@@ -103,6 +109,7 @@ defmodule CaptainFact.AccountsTest do
         ResetPasswordRequest
         |> where([u], u.user_id == ^user.id)
         |> Repo.aggregate(:count, :token)
+
       assert nb_requests == 0
     end
   end
@@ -110,9 +117,9 @@ defmodule CaptainFact.AccountsTest do
   describe "create_account with invitation system enabled" do
     setup do
       Invitations.enable()
-      on_exit fn -> Invitations.disable() end
+      on_exit(fn -> Invitations.disable() end)
     end
-    
+
     test "requires a valid invitation token" do
       assert Accounts.create_account(%{}, nil) == {:error, "invalid_invitation_token"}
       assert Accounts.create_account(%{}, "") == {:error, "invalid_invitation_token"}
@@ -133,11 +140,14 @@ defmodule CaptainFact.AccountsTest do
       invit = insert(:invitation_request)
       user_params = Map.delete(build_user_params(), :username)
 
-      {:error, %Ecto.Changeset{}} = # Without username, no allow_empty_username
-        Accounts.create_account(user_params, invit.token)
-      {:error, %Ecto.Changeset{}} = # With empty username, no allow_empty_username
+      # Without username, no allow_empty_username
+      {:error, %Ecto.Changeset{}} = Accounts.create_account(user_params, invit.token)
+      # With empty username, no allow_empty_username
+      {:error, %Ecto.Changeset{}} =
         Accounts.create_account(Map.put(user_params, :username, ""), invit.token)
-      {:ok, created} = # Without username, allow_empty_username
+
+      # Without username, allow_empty_username
+      {:ok, created} =
         Accounts.create_account(user_params, invit.token, allow_empty_username: true)
 
       assert user_params.email == created.email
@@ -164,7 +174,7 @@ defmodule CaptainFact.AccountsTest do
       invit = insert(:invitation_request)
       user_params = build_user_params()
       {:ok, user} = Accounts.create_account(user_params, invit.token)
-      assert_delivered_email CaptainFactMailer.Email.welcome(user)
+      assert_delivered_email(CaptainFactMailer.Email.welcome(user))
     end
 
     defp build_user_params() do
@@ -230,7 +240,6 @@ defmodule CaptainFact.AccountsTest do
         |> insert(completed_onboarding_steps: [])
         |> Accounts.complete_onboarding_step(72)
 
-
       assert Result.error?(error)
     end
   end
@@ -259,7 +268,6 @@ defmodule CaptainFact.AccountsTest do
         :user
         |> insert(completed_onboarding_steps: [])
         |> Accounts.complete_onboarding_steps([1, 72])
-
 
       assert Result.error?(error)
     end

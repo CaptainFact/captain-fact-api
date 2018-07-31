@@ -7,24 +7,27 @@ defmodule CaptainFactWeb.UserSocket do
   alias CaptainFact.Accounts.UserPermissions
 
   ## Channels
-  channel "video_debate:*", CaptainFactWeb.VideoDebateChannel
-  channel "video_debate_history:*", CaptainFactWeb.VideoDebateHistoryChannel
-  channel "statement_history:*", CaptainFactWeb.VideoDebateHistoryChannel
-  channel "statements:video:*", CaptainFactWeb.StatementsChannel
-  channel "comments:video:*", CaptainFactWeb.CommentsChannel
+  channel("video_debate:*", CaptainFactWeb.VideoDebateChannel)
+  channel("video_debate_history:*", CaptainFactWeb.VideoDebateHistoryChannel)
+  channel("statement_history:*", CaptainFactWeb.VideoDebateHistoryChannel)
+  channel("statements:video:*", CaptainFactWeb.StatementsChannel)
+  channel("comments:video:*", CaptainFactWeb.CommentsChannel)
 
   ## Transports
-  transport :websocket, Phoenix.Transports.WebSocket
+  transport(:websocket, Phoenix.Transports.WebSocket)
 
   # Connect with token
   def connect(%{"token" => token}, socket) do
     case sign_in(socket, token) do
       {:ok, authed_socket, _guardian_params} ->
-        user_id = case Guardian.Phoenix.Socket.current_resource(authed_socket) do
-          nil -> nil
-          user -> user.id
-        end
+        user_id =
+          case Guardian.Phoenix.Socket.current_resource(authed_socket) do
+            nil -> nil
+            user -> user.id
+          end
+
         {:ok, assign(authed_socket, :user_id, user_id)}
+
       _ ->
         # Fallback on default socket
         {:ok, assign(socket, :user_id, nil)}
@@ -37,7 +40,7 @@ defmodule CaptainFactWeb.UserSocket do
   end
 
   def multi_assign(socket, assigns_list) do
-    Enum.reduce(assigns_list, socket, fn ({key, value}, socket) ->
+    Enum.reduce(assigns_list, socket, fn {key, value}, socket ->
       assign(socket, key, value)
     end)
   end
@@ -55,15 +58,20 @@ defmodule CaptainFactWeb.UserSocket do
     rescue
       e in UserPermissions.PermissionsError ->
         reply_error(socket, Phoenix.View.render(ErrorView, "403.json", %{reason: e}))
+
       e in Ecto.InvalidChangesetError ->
         reply_error(socket, ChangesetView.render("error.json", %{changeset: e.changeset}))
+
       _ in Ecto.NoResultsError ->
         reply_error(socket, Phoenix.View.render(ErrorView, "404.json", []))
+
       e ->
         Logger.error("[RescueChannel] An unknown error just popped : #{inspect(e)}")
+
         Logger.debug(fn ->
           "Stacktrace: #{inspect(System.stacktrace(), pretty: true)}"
         end)
+
         reply_error(socket, Phoenix.View.render(ErrorView, "error.json", []))
     catch
       e ->

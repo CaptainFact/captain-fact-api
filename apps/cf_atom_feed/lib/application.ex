@@ -9,7 +9,7 @@ defmodule CF.AtomFeed.Application do
     # Define workers and child supervisors to be supervised
     children = [
       # Start the endpoint when the application starts
-      supervisor(CF.AtomFeed.Router, []),
+      supervisor(CF.AtomFeed.Router, [])
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

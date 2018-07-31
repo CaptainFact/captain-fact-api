@@ -9,7 +9,6 @@ defmodule CaptainFact.Actions.FlaggerTest do
   alias CaptainFactJobs.{Flags, Reputation}
   alias CaptainFact.Moderation
 
-
   @nb_flags_to_report Moderation.nb_flags_to_report(:create, :comment)
 
   setup do

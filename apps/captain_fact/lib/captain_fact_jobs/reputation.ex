@@ -18,13 +18,11 @@ defmodule CaptainFactJobs.Reputation do
   alias CaptainFact.Actions.ReputationChange
   alias CaptainFactJobs.ReportManager
 
-
   @name __MODULE__
   @analyser_id UsersActionsReport.analyser_id(:reputation)
 
   @daily_gain_limit ReputationChange.daily_gain_limit()
   @daily_loss_limit ReputationChange.daily_loss_limit()
-
 
   # --- Client API ---
 
@@ -36,7 +34,8 @@ defmodule CaptainFactJobs.Reputation do
     {:ok, args}
   end
 
-  @timeout 120_000 # 2 minutes
+  # 2 minutes
+  @timeout 120_000
   def update() do
     GenServer.call(@name, :update_reputations, @timeout)
   end
@@ -45,7 +44,7 @@ defmodule CaptainFactJobs.Reputation do
     GenServer.call(@name, :reset_daily_limits, @timeout)
   end
 
-  @doc"""
+  @doc """
   Adjust reputation change based on user's today reputation changes
 
   ## Examples
@@ -84,12 +83,12 @@ defmodule CaptainFactJobs.Reputation do
     do: 0
 
   def calculate_adjusted_diff(change, today_change)
-  when change > 0 and today_change >= @daily_gain_limit,
-    do: 0
+      when change > 0 and today_change >= @daily_gain_limit,
+      do: 0
 
   def calculate_adjusted_diff(change, today_change)
-  when change < 0 and today_change <= @daily_loss_limit,
-    do: 0
+      when change < 0 and today_change <= @daily_loss_limit,
+      do: 0
 
   def calculate_adjusted_diff(change, today_change) when change > 0,
     do: min(change, @daily_gain_limit - today_change)
@@ -101,25 +100,30 @@ defmodule CaptainFactJobs.Reputation do
 
   def handle_call(:update_reputations, _from, _state) do
     last_action_id = ReportManager.get_last_action_id(@analyser_id)
+
     unless last_action_id == -1 do
       UserAction
       |> where([a], a.id > ^last_action_id)
-      |> Actions.query_matching_types(ReputationChange.actions_types)
+      |> Actions.query_matching_types(ReputationChange.actions_types())
       |> Repo.all(log: false)
       |> start_analysis()
     end
-    {:reply, :ok , :ok}
+
+    {:reply, :ok, :ok}
   end
 
   def handle_call(:reset_daily_limits, _from, _state) do
     Logger.info("[Jobs.Reputation] Reset daily limits")
+
     User
     |> where([u], u.today_reputation_gain != 0)
     |> Repo.update_all(set: [today_reputation_gain: 0])
-    {:reply, :ok , :ok}
+
+    {:reply, :ok, :ok}
   end
 
   defp start_analysis([]), do: {:noreply, :ok}
+
   defp start_analysis(actions) do
     Logger.info("[Jobs.Reputation] Update reputations")
     report = ReportManager.create_report!(@analyser_id, :running, actions)
@@ -137,6 +141,7 @@ defmodule CaptainFactJobs.Reputation do
 
   def group_changes_by_user(action, changes) do
     {source_change, target_change} = ReputationChange.for_action(action)
+
     changes
     |> changes_updater(action.user_id, source_change)
     |> changes_updater(action.target_user_id, target_change)
@@ -155,14 +160,17 @@ defmodule CaptainFactJobs.Reputation do
   # User may have deleted its account. Ignore him/her
   defp apply_adjusted_reputation_diff(nil, _),
     do: false
+
   # Ignore null reputation changes
   defp apply_adjusted_reputation_diff(_, 0),
     do: false
+
   # Ignore update if limit has already been reached
   defp apply_adjusted_reputation_diff(%{today_reputation_gain: today_gain}, change)
-  when (change > 0 and today_gain >= @daily_gain_limit)
-  or (change < 0 and today_gain <= @daily_loss_limit),
-    do: false
+       when (change > 0 and today_gain >= @daily_gain_limit) or
+              (change < 0 and today_gain <= @daily_loss_limit),
+       do: false
+
   # Limit gains to `@daily_gain_limit` or `@daily_loss_limid`
   defp apply_adjusted_reputation_diff(user = %{today_reputation_gain: today_change}, change) do
     adjusted_diff = calculate_adjusted_diff(change, today_change)
@@ -175,8 +183,10 @@ defmodule CaptainFactJobs.Reputation do
 
   defp changes_updater(changes, nil, _),
     do: changes
+
   defp changes_updater(changes, _, 0),
     do: changes
+
   defp changes_updater(changes, key, diff),
     do: Map.update(changes, key, diff, &(&1 + diff))
 end

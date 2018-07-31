@@ -7,19 +7,22 @@ defmodule CaptainFact.Support.MetaPage do
     only_once = Keyword.get(opts, :only_once, false)
 
     meta_attributes =
-      if Map.has_key?(meta_attributes, :url) and not String.starts_with?(Map.get(meta_attributes, :url), "http"),
-      do: Map.put(meta_attributes, :url, endpoint_url(bypass, Map.get(meta_attributes, :url))),
-      else: meta_attributes
+      if Map.has_key?(meta_attributes, :url) and
+           not String.starts_with?(Map.get(meta_attributes, :url), "http"),
+         do: Map.put(meta_attributes, :url, endpoint_url(bypass, Map.get(meta_attributes, :url))),
+         else: meta_attributes
 
     func = plug_response(response_status, meta_attributes)
+
     if only_once,
       do: Bypass.expect_once(bypass, "GET", url, func),
       else: Bypass.expect(bypass, "GET", url, func)
+
     bypass
   end
 
   def serve(url, response_status, meta_attributes, opts \\ []) do
-    serve(Bypass.open, url, response_status, meta_attributes, opts)
+    serve(Bypass.open(), url, response_status, meta_attributes, opts)
   end
 
   def plug_response(response_status, meta_attributes),
@@ -42,7 +45,8 @@ defmodule CaptainFact.Support.MetaPage do
   defp lang_attribute(%{language: locale}), do: "lang=\"#{locale}\""
   defp lang_attribute(_), do: ""
 
-  defp meta_anchor({name, value}), do: """
-    <meta property="og:#{name}" content="#{value}" />
-  """
+  defp meta_anchor({name, value}),
+    do: """
+      <meta property="og:#{name}" content="#{value}" />
+    """
 end

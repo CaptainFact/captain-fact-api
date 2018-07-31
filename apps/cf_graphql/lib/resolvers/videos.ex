@@ -3,7 +3,6 @@ defmodule CF.GraphQL.Resolvers.Videos do
   Resolver for `DB.Schema.Video`
   """
 
-
   alias Kaur.Result
 
   import Ecto.Query

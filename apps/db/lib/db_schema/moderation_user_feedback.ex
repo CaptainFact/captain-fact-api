@@ -3,12 +3,11 @@ defmodule DB.Schema.ModerationUserFeedback do
   import Ecto.Changeset
   alias DB.Schema.ModerationUserFeedback
 
-
   schema "moderation_users_feedbacks" do
-    field :value, :integer
-    field :user_id, :id
-    field :action_id, :id
-    field :flag_reason, DB.Type.FlagReason
+    field(:value, :integer)
+    field(:user_id, :id)
+    field(:action_id, :id)
+    field(:flag_reason, DB.Type.FlagReason)
 
     timestamps()
   end

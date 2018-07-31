@@ -4,17 +4,17 @@ defmodule DB.Schema.Flag do
 
   alias DB.Schema.{User, UserAction}
 
-
   schema "flags" do
-    belongs_to :source_user, User # Source user
-    belongs_to :action, UserAction
-    field :reason, DB.Type.FlagReason
+    # Source user
+    belongs_to(:source_user, User)
+    belongs_to(:action, UserAction)
+    field(:reason, DB.Type.FlagReason)
     timestamps()
   end
 
   @required_fields ~w(source_user_id action_id reason)a
 
-  @doc"""
+  @doc """
   Builds a changeset based on an `UserAction`
   """
   def changeset(struct, params) do

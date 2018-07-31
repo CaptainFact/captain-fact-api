@@ -2,11 +2,10 @@ defmodule DB.Schema.VideoSpeaker do
   use Ecto.Schema
   import Ecto.Changeset
 
-
   @primary_key false
   schema "videos_speakers" do
-    belongs_to :video, DB.Schema.Video, primary_key: true
-    belongs_to :speaker, DB.Schema.Speaker, primary_key: true
+    belongs_to(:video, DB.Schema.Video, primary_key: true)
+    belongs_to(:speaker, DB.Schema.Speaker, primary_key: true)
 
     timestamps()
   end

@@ -24,7 +24,6 @@ defmodule CaptainFactJobs.Flags do
   @name __MODULE__
   @analyser_id UsersActionsReport.analyser_id(:flags)
 
-
   # --- Client API ---
 
   def start_link() do
@@ -35,7 +34,8 @@ defmodule CaptainFactJobs.Flags do
     {:ok, args}
   end
 
-  @timeout 60_000 # 1 minute
+  # 1 minute
+  @timeout 60_000
   def update() do
     GenServer.call(@name, :update_flags, @timeout)
   end
@@ -44,6 +44,7 @@ defmodule CaptainFactJobs.Flags do
 
   def handle_call(:update_flags, _from, _state) do
     last_action_id = ReportManager.get_last_action_id(@analyser_id)
+
     unless last_action_id == -1 do
       UserAction
       |> where([a], a.id > ^last_action_id)
@@ -51,10 +52,12 @@ defmodule CaptainFactJobs.Flags do
       |> Repo.all(log: false)
       |> start_analysis()
     end
-    {:reply, :ok , :ok}
+
+    {:reply, :ok, :ok}
   end
 
   defp start_analysis([]), do: :ok
+
   defp start_analysis(actions) do
     Logger.info("[Analyser.Flags] Update flags")
     report = ReportManager.create_report!(@analyser_id, :running, actions)
@@ -65,13 +68,13 @@ defmodule CaptainFactJobs.Flags do
   # Update flags, return the number of updated users
   defp do_update_flags(actions) do
     actions
-    |> Enum.group_by(&(&1.entity))
+    |> Enum.group_by(& &1.entity)
     |> Enum.map(fn {entity, actions} ->
-         actions
-         |> Enum.uniq_by(&(&1.entity_id))
-         |> Enum.map(&(update_entity_flags(entity, &1)))
-         |> Enum.sum()
-       end)
+      actions
+      |> Enum.uniq_by(& &1.entity_id)
+      |> Enum.map(&update_entity_flags(entity, &1))
+      |> Enum.sum()
+    end)
     |> Enum.sum()
   end
 
@@ -79,21 +82,29 @@ defmodule CaptainFactJobs.Flags do
   @entity_comment UserAction.entity(:comment)
   defp update_entity_flags(@entity_comment, %UserAction{entity_id: comment_id}) do
     nb_flags = Flagger.get_nb_flags(:create, :comment, comment_id)
+
     if nb_flags >= Moderation.nb_flags_to_report(:create, :comment) do
       # Ban comment
-      {nb_updated, _} = Repo.update_all((
-        from c in Comment,
-          where: c.id == ^comment_id,
-          where: c.is_reported == false
-        ), [set: [is_reported: true]]
-      )
+      {nb_updated, _} =
+        Repo.update_all(
+          from(
+            c in Comment,
+            where: c.id == ^comment_id,
+            where: c.is_reported == false
+          ),
+          set: [is_reported: true]
+        )
+
       if nb_updated == 1 do
         broadcast_comment_update(comment_id, [:is_reported])
       end
+
       nb_updated
     else
       0
     end
   end
-  defp update_entity_flags(_, _), do: 0 # Ignore other flags
+
+  # Ignore other flags
+  defp update_entity_flags(_, _), do: 0
 end

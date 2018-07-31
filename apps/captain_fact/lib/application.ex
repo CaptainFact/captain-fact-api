@@ -48,6 +48,6 @@ defmodule CaptainFact.Application do
   deprecated, use Application.get_env(:captain_fact, :env)
   """
   def env() do
-    (Kernel.function_exported?(Mix, :env, 0) && Mix.env) || :prod
+    (Kernel.function_exported?(Mix, :env, 0) && Mix.env()) || :prod
   end
 end

@@ -56,9 +56,11 @@ defmodule CaptainFact.Authenticator.OAuth.Facebook do
     case OAuth2.Client.get(client, user_path(client, query_params)) do
       {:ok, %OAuth2.Response{status_code: 401, body: _body}} ->
         {:error, "Unauthorized"}
+
       {:ok, %OAuth2.Response{status_code: status_code, body: user}}
       when status_code in 200..399 ->
         {:ok, provider_infos(user)}
+
       {:error, %OAuth2.Error{reason: reason}} ->
         {:error, reason}
     end
@@ -110,7 +112,7 @@ defmodule CaptainFact.Authenticator.OAuth.Facebook do
     |> Map.put(:appsecret_proof, appsecret_proof(access_token))
     |> Map.merge(Enum.into(query_params, %{}))
     |> Enum.filter(fn {_, v} -> v != nil and v != "" end)
-    |> URI.encode_query
+    |> URI.encode_query()
   end
 
   defp query_value(key) do

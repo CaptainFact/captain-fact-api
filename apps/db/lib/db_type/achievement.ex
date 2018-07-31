@@ -2,19 +2,21 @@ defmodule DB.Type.Achievement do
   @moduledoc """
   Translate a user achievement from atom to integer.
   """
-  
-  @doc"""
+
+  @doc """
   Get an achievement id from an easy to use / remember atom. 
   You can add more at the end, but you CANNOT change
   existing identifiers, it would break existing achievements
   """
-  def get(:welcome),            do: 1
-  def get(:not_a_robot),        do: 2
-  def get(:help),               do: 3
-  def get(:bulletproof),        do: 4
-  def get(:you_are_fake_news),  do: 5
-  def get(:social_networks),    do: 6
-  def get(:ambassador),         do: 7
-  def get(:ghostbuster),        do: 8 # Made a bug report
-  def get(:famous),             do: 9 # Leaderboard
+  def get(:welcome), do: 1
+  def get(:not_a_robot), do: 2
+  def get(:help), do: 3
+  def get(:bulletproof), do: 4
+  def get(:you_are_fake_news), do: 5
+  def get(:social_networks), do: 6
+  def get(:ambassador), do: 7
+  # Made a bug report
+  def get(:ghostbuster), do: 8
+  # Leaderboard
+  def get(:famous), do: 9
 end

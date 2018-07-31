@@ -1,6 +1,5 @@
 use Mix.Config
 
-
 config :cf_graphql, CF.GraphQLWeb.Endpoint,
   http: [port: 4002],
   https: [
