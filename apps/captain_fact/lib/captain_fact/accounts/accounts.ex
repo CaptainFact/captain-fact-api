@@ -112,7 +112,7 @@ defmodule CaptainFact.Accounts do
   def delete_account(user = %User{}) do
     user
     |> Authenticator.dissociate_third_party(:facebook)
-    |> Result.map(&Repo.delete(&1,[]))
+    |> Result.map(&Repo.delete(&1, []))
   end
 
   @doc """
@@ -180,6 +180,7 @@ defmodule CaptainFact.Accounts do
       case DB.Type.UserPicture.store({picture_url, user}) do
         {:ok, picture} ->
           Repo.update(User.changeset_picture(user, picture))
+
         error ->
           error
       end
