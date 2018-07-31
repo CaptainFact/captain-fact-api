@@ -87,7 +87,7 @@ defmodule CaptainFactWeb.UserController do
   def delete(conn, _params) do
     conn
     |> Guardian.Plug.current_resource()
-    |> Accounts.delete_user()
+    |> Accounts.delete_user!()
 
     send_resp(conn, :no_content, "")
   end

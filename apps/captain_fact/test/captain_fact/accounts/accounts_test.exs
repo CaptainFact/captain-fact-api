@@ -313,7 +313,7 @@ defmodule CaptainFact.AccountsTest do
     test "nilify all user's comments" do
       user = insert(:user)
       comments = insert_list(3, :comment, user: user)
-      Accounts.delete_user(user)
+      Accounts.delete_user!(user)
 
       for comment <- comments do
         comment = Repo.get(DB.Schema.Comment, comment.id)

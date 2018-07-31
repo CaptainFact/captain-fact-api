@@ -144,7 +144,7 @@ defmodule CaptainFact.Accounts do
   (!) Delete user's account. All user's actions and comments will be nilified.
   This action is irreversible.
   """
-  def delete_user(user = %User{}) do
+  def delete_user!(user = %User{}) do
     Repo.delete!(user)
   end
 
