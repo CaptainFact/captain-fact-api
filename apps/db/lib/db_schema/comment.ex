@@ -26,7 +26,7 @@ defmodule DB.Schema.Comment do
   def full(query, only_facts \\ false) do
     query
     |> join(:inner, [c], s in assoc(c, :statement))
-    |> join(:inner, [c, _], u in assoc(c, :user))
+    |> join(:left, [c, _], u in assoc(c, :user))
     |> join(:left, [c, _, _], source in assoc(c, :source))
     |> join(:left, [c, _, _, _], v in fragment("
         SELECT sum(value) AS score, comment_id

@@ -58,17 +58,11 @@ defmodule CaptainFactWeb.CommentsChannel do
   def join("comments:video:" <> video_id_hash, _payload, socket) do
     user = Guardian.Phoenix.Socket.current_resource(socket)
     video_id = VideoHashId.decode!(video_id_hash)
-    response =
-      %{}
-      |> Map.put(:comments, CommentView.render("index.json", comments:
-          Comment
-          |> Comment.full()
-          |> where([c, s], s.video_id == ^video_id)
-          |> Repo.all()
-        ))
-      |> load_user_data(user, video_id)
-
+    comments = Comments.video_comments(video_id)
+    rendered_comments = CommentView.render("index.json", comments: comments)
+    response = load_user_data(%{comments: rendered_comments}, user, video_id)
     socket = assign(socket, :video_id, video_id)
+    
     {:ok, response, socket}
   end
 

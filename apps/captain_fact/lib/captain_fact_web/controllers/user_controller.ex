@@ -97,8 +97,9 @@ defmodule CaptainFactWeb.UserController do
     conn
     |> Guardian.Plug.current_resource()
     |> Accounts.delete_account()
-
-    send_resp(conn, :no_content, "")
+    |> Result.and_then(fn _ ->
+      send_resp(conn, :no_content, "")
+    end)
   end
 
   @user_unlockable_achievements [Achievement.get(:help), Achievement.get(:bulletproof)]
