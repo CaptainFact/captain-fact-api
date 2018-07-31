@@ -52,7 +52,7 @@ config :logger, :console,
   metadata: [:request_id]
 
 # Configure Guardian (authentication)
-config :guardian, Guardian,
+config :guardian, CaptainFact.Authenticator.Guardian,
   issuer: "CaptainFact",
   ttl: {30, :days},
   serializer: CaptainFact.Accounts.GuardianSerializer,
