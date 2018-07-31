@@ -112,7 +112,7 @@ defmodule CaptainFact.AccountsTest do
       Invitations.enable()
       on_exit fn -> Invitations.disable() end
     end
-    
+
     test "requires a valid invitation token" do
       assert Accounts.create_account(%{}, nil) == {:error, "invalid_invitation_token"}
       assert Accounts.create_account(%{}, "") == {:error, "invalid_invitation_token"}
@@ -269,7 +269,7 @@ defmodule CaptainFact.AccountsTest do
     test "nilify all user's comments" do
       user = insert(:user)
       comments = insert_list(3, :comment, user: user)
-      Accounts.delete_user!(user)
+      Accounts.delete_account(user)
 
       for comment <- comments do
         comment = Repo.get(DB.Schema.Comment, comment.id)

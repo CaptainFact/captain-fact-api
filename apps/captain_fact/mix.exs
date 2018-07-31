@@ -66,9 +66,10 @@ defmodule CaptainFact.Mixfile do
       {:db, in_umbrella: true},
       {:cf_utils, in_umbrella: true},
 
-      # ---- Test only ----
+      # Test only
       {:bypass, "~> 0.8", only: :test},
-    ]
+      {:mock, "~> 0.3.1", only: :test}
+   ]
   end
 
   defp aliases do

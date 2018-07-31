@@ -5,6 +5,9 @@ defmodule CaptainFact.Authenticator.OAuth.Facebook do
   """
   use OAuth2.Strategy
   alias CaptainFact.Authenticator.ProviderInfos
+  alias DB.Schema.User
+  alias Kaur.Result
+  alias OAuth2.Client
 
   @client_defaults [
     strategy: __MODULE__,
@@ -27,13 +30,13 @@ defmodule CaptainFact.Authenticator.OAuth.Facebook do
       |> Keyword.merge(config())
       |> Keyword.merge(opts)
 
-    OAuth2.Client.new(opts)
+    Client.new(opts)
   end
 
   def get_token!(params \\ [], opts \\ []) do
     opts
     |> client
-    |> OAuth2.Client.get_token!(params)
+    |> Client.get_token!(params)
   end
 
   # Strategy Callbacks
@@ -49,16 +52,35 @@ defmodule CaptainFact.Authenticator.OAuth.Facebook do
     |> OAuth2.Strategy.AuthCode.get_token(params, headers)
   end
 
+  # Specific to Facebook
+  @doc """
+  revoke token on token on facebook
+  """
+  def revoke_permissions(user = %User{fb_user_id: fb_user_id}) do
+    app_client()
+    |> Client.delete("/#{fb_user_id}/permissions")
+    |> Result.either(
+      fn _error ->
+        Result.error(
+          "A problem with facebook permissions revocation happened with user #{fb_user_id}"
+        )
+      end,
+      fn _ -> Result.ok(user) end
+    )
+  end
+
   @doc """
   Returns user information from Facebook graph's `/me` endpoint using the access_token.
   """
   def fetch_user(client, query_params \\ []) do
-    case OAuth2.Client.get(client, user_path(client, query_params)) do
+    case Client.get(client, user_path(client, query_params)) do
       {:ok, %OAuth2.Response{status_code: 401, body: _body}} ->
         {:error, "Unauthorized"}
+
       {:ok, %OAuth2.Response{status_code: status_code, body: user}}
       when status_code in 200..399 ->
         {:ok, provider_infos(user)}
+
       {:error, %OAuth2.Error{reason: reason}} ->
         {:error, reason}
     end
@@ -110,11 +132,29 @@ defmodule CaptainFact.Authenticator.OAuth.Facebook do
     |> Map.put(:appsecret_proof, appsecret_proof(access_token))
     |> Map.merge(Enum.into(query_params, %{}))
     |> Enum.filter(fn {_, v} -> v != nil and v != "" end)
-    |> URI.encode_query
+    |> URI.encode_query()
   end
 
   defp query_value(key) do
     @query_defaults
     |> Keyword.get(key)
+  end
+
+  # Construct a client with captain fact credentials to request Facebook
+  @spec app_client(list()) :: Client.t()
+  defp app_client(opts \\ []) do
+    token = OAuth2.AccessToken.new("#{app_id()}|#{app_secret()}")
+
+    opts
+    |> client
+    |> Map.put(:token, token)
+  end
+
+  defp app_id do
+    Application.get_env(:captain_fact, :oauth)[:facebook][:client_id]
+  end
+
+  defp app_secret do
+    Application.get_env(:captain_fact, :oauth)[:facebook][:client_secret]
   end
 end
