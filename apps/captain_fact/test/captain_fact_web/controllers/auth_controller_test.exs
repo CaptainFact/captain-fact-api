@@ -2,6 +2,8 @@ defmodule CaptainFactWeb.AuthControllerTest do
   use CaptainFactWeb.ConnCase
   import DB.Factory
 
+  alias CaptainFact.Authenticator.GuardianImpl
+
   @identity_auth_path "/auth/identity/callback"
 
   describe "identity" do
@@ -20,7 +22,7 @@ defmodule CaptainFactWeb.AuthControllerTest do
         |> post(@identity_auth_path, email: user.email, password: password)
         |> json_response(:ok)
 
-      Guardian.decode_and_verify!(response["token"])
+      {:ok, _claims} = GuardianImpl.decode_and_verify(response["token"])
     end
 
     # TODO Ensure token gets revoked
