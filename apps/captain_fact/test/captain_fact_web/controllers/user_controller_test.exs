@@ -53,7 +53,7 @@ defmodule CaptainFactWeb.UserControllerTest do
         |> post("/users", %{user: user, invitation_token: invit.token})
         |> json_response(:created)
 
-      GuardianImpl.decode_and_verify(response["token"])
+      {:ok, _claims} = GuardianImpl.decode_and_verify(response["token"])
     end
 
     test "must not work without an invitation if invitation system is enabled" do
