@@ -43,7 +43,9 @@ config :captain_fact, CaptainFactWeb.Endpoint,
   ]
 
 # Guardian
-config :guardian, Guardian, secret_key: dev_secret
+config :captain_fact,
+  CaptainFact.Authenticator.GuardianImpl,
+  secret_key: dev_secret
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
