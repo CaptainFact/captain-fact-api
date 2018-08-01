@@ -49,22 +49,6 @@ defmodule CaptainFact.Accounts.UserPermissionsTest do
     assert_raise PermissionsError, fn -> UserPermissions.check!(user, action_type, entity) end
   end
 
-  test "add video has a weekly limit", _ do
-    # User with 200 reputation should be able to add 1 video / week
-    user = insert(:user, %{reputation: 200, is_publisher: false})
-    action_type = :add
-    entity = :video
-    max_occurences = UserPermissions.limitation(user, action_type, entity)
-    actions = for _ <- 0..max_occurences, do: Recorder.record!(user, action_type, entity)
-    two_days_ago = NaiveDateTime.add(NaiveDateTime.utc_now(), -(2 * 24 * 60 * 60))
-
-    for action <- actions do
-      DB.Repo.update(Ecto.Changeset.change(action, inserted_at: two_days_ago))
-    end
-
-    assert_raise PermissionsError, fn -> UserPermissions.check!(user, action_type, entity) end
-  end
-
   test "running check! and record! concurrently isn't messing up with state", context do
     user = context[:new_user]
     action_type = :create
