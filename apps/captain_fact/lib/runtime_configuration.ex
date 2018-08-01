@@ -56,7 +56,9 @@ defmodule CaptainFact.RuntimeConfiguration do
     "secret_key_base",
     handler: fn v ->
       put_in_endpoint([:secret_key_base], v)
-      put_in_env(:captain_fact,
+
+      put_in_env(
+        :captain_fact,
         [
           CaptainFact.Authenticator.GuardianImpl,
           :secret_key

@@ -9,7 +9,7 @@ defmodule CaptainFact.Authenticator.GuardianImpl do
     Result.ok("User:#{id}")
   end
 
-  def subject_for_token(_,_) do
+  def subject_for_token(_, _) do
     Result.error("token is based on a user")
   end
 
@@ -34,7 +34,7 @@ defmodule CaptainFact.Authenticator.GuardianImpl do
 
     def auth_error(conn, {_type, _reason}, _opts) do
       %{error: "unauthorized"}
-      |> Poison.encode
+      |> Poison.encode()
       |> Result.and_then(fn body ->
         conn
         |> put_resp_content_type("application/json")

@@ -55,14 +55,14 @@ defmodule CaptainFactWeb.ModerationControllerTest do
   test "need to be authenticated to access moderation", %{conn: conn} do
     request = get(conn, "/moderation/random")
 
-    assert json_response(request, 401) == %{ "error" => "unauthorized" }
+    assert json_response(request, 401) == %{"error" => "unauthorized"}
   end
 
   test "need to be authenticated to feedback on moderation", %{conn: conn} do
     args = %{"value" => 1, "action_id" => 1, "reason" => 1}
     request = post(conn, "/moderation/feedback", args)
 
-    assert json_response(request, 401) == %{ "error" => "unauthorized" }
+    assert json_response(request, 401) == %{"error" => "unauthorized"}
   end
 
   test "need to have enough reputation to access moderation" do
