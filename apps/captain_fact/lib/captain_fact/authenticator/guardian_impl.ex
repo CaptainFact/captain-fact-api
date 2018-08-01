@@ -5,7 +5,7 @@ defmodule CaptainFact.Authenticator.GuardianImpl do
   alias DB.Schema.User
   alias Kaur.Result
 
-  @aud "captain_fact_#{Mix.env}"
+  @aud "captain_fact_#{Mix.env()}"
 
   def subject_for_token(%User{id: id}, _claims) do
     Result.ok("User:#{id}")
@@ -51,7 +51,7 @@ defmodule CaptainFact.Authenticator.GuardianImpl do
   def build_claims(claims, _resource, _opts) do
     claims
     |> Map.put("aud", @aud)
-    |> Result.ok
+    |> Result.ok()
   end
 
   defmodule Pipeline do

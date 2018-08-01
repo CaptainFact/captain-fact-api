@@ -58,8 +58,7 @@ config :captain_fact, CaptainFact.Authenticator.Guardian,
   serializer: CaptainFact.Accounts.GuardianSerializer,
   permissions: %{default: [:read, :write]}
 
-config :guardian, Guardian.DB,
-  repo: DB.Repo
+config :guardian, Guardian.DB, repo: DB.Repo
 
 config :weave,
   environment_prefix: "CF_",
