@@ -52,28 +52,44 @@ defmodule CaptainFactWeb.ModerationControllerTest do
     assert Repo.get_by(ModerationUserFeedback, action_id: action.id).value == value
   end
 
-  test "need to be authenticated and have enough reputation for all collective moderation actions",
-       %{conn: conn} do
-    requests = [
-      {&get/3, "random", nil},
-      {&post/3, "feedback", %{"value" => 1, "action_id" => 1, "reason" => 1}}
-    ]
+  test "need to be authenticated to access moderation", %{conn: conn} do
+    request = get(conn, "/moderation/random")
 
-    # Ensure we need to be authenticated
-    Enum.map(requests, fn {method, path, args} ->
-      assert json_response(method.(conn, "/moderation/" <> path, args), 401) == %{
-               "error" => "unauthorized"
-             }
-    end)
+    assert json_response(request, 401) == %{ "error" => "unauthorized" }
+  end
 
-    # Ensure we need enough reputation
+  test "need to be authenticated to feedback on moderation", %{conn: conn} do
+    args = %{"value" => 1, "action_id" => 1, "reason" => 1}
+    request = post(conn, "/moderation/feedback", args)
+
+    assert json_response(request, 401) == %{ "error" => "unauthorized" }
+  end
+
+  test "need to have enough reputation to access moderation" do
     new_user = insert(:user, %{reputation: 30})
     authed_conn = build_authenticated_conn(new_user)
 
-    Enum.map(requests, fn {method, path, args} ->
-      assert_raise CaptainFact.Accounts.UserPermissions.PermissionsError, fn ->
-        method.(authed_conn, "/moderation/" <> path, args)
-      end
-    end)
+    make_request = fn ->
+      get(authed_conn, "/moderation/random")
+    end
+
+    assert_raise(
+      CaptainFact.Accounts.UserPermissions.PermissionsError,
+      make_request
+    )
+  end
+
+  test "need to have enough reputation to feedback on moderation" do
+    new_user = insert(:user, %{reputation: 30})
+    authed_conn = build_authenticated_conn(new_user)
+
+    make_request = fn ->
+      post(authed_conn, "moderation/feedback", %{"value" => 1, "action_id" => 1, "reason" => 1})
+    end
+
+    assert_raise(
+      CaptainFact.Accounts.UserPermissions.PermissionsError,
+      make_request
+    )
   end
 end
