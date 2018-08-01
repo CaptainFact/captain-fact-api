@@ -32,8 +32,8 @@ defmodule CaptainFact.Authenticator.GuardianImpl do
   defmodule ErrorHandler do
     import Plug.Conn
 
-    def auth_error(conn, {type, _reason}, _opts) do
-      %{error: "#{type}"}
+    def auth_error(conn, {_type, _reason}, _opts) do
+      %{error: "unauthorized"}
       |> Poison.encode
       |> Result.and_then(fn body ->
         conn
