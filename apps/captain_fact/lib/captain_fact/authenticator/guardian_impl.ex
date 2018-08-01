@@ -5,6 +5,8 @@ defmodule CaptainFact.Authenticator.GuardianImpl do
   alias DB.Schema.User
   alias Kaur.Result
 
+  @aud "captain_fact_#{Mix.env}"
+
   def subject_for_token(%User{id: id}, _claims) do
     Result.ok("User:#{id}")
   end
@@ -31,15 +33,25 @@ defmodule CaptainFact.Authenticator.GuardianImpl do
   end
 
   def on_verify(claims, token, _options) do
-    with {:ok, _} <- Guardian.DB.on_verify(claims, token) do
-      {:ok, claims}
-    end
+    Guardian.DB.on_verify(claims, token)
+    |> Result.and_then(fn {claims, _token} ->
+      case claims do
+        %{"aud" => @aud} -> Result.ok(claims)
+        _ -> Result.error(:wrong_audience_in_jwt)
+      end
+    end)
   end
 
   def on_revoke(claims, token, _options) do
     with {:ok, _} <- Guardian.DB.on_revoke(claims, token) do
       {:ok, claims}
     end
+  end
+
+  def build_claims(claims, _resource, _opts) do
+    claims
+    |> Map.put("aud", @aud)
+    |> Result.ok
   end
 
   defmodule Pipeline do
