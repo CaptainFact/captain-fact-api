@@ -33,9 +33,9 @@ release :captain_fact do
   set applications: [:captain_fact]
   set post_start_hook: "rel/hooks/post_start.sh"
   set commands: [
-    "migrate": "rel/commands/migrate.sh",
-    "seed": "rel/commands/seed.sh",
-    "seed_politicians": "rel/commands/seed_politicians.sh"
+    migrate: "rel/commands/migrate.sh",
+    seed: "rel/commands/seed.sh",
+    seed_politicians: "rel/commands/seed_politicians.sh"
   ]
 end
 
