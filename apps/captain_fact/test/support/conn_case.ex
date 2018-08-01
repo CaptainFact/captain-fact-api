@@ -24,10 +24,11 @@ defmodule CaptainFactWeb.ConnCase do
       # The default endpoint for testing
       @endpoint CaptainFactWeb.Endpoint
 
+      alias CaptainFact.Authenticator.GuardianImpl
       alias DB.Repo
 
       def build_authenticated_conn(user) do
-        {:ok, token, _} = Guardian.encode_and_sign(user)
+        {:ok, token, _} = GuardianImpl.encode_and_sign(user)
 
         Phoenix.ConnTest.build_conn()
         |> Plug.Conn.put_req_header("authorization", "Bearer #{token}")
