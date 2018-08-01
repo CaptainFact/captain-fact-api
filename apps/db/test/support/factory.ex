@@ -38,7 +38,8 @@ defmodule DB.Factory do
 
   def with_fb_user_id(user = %User{}) do
     %{
-      user | fb_user_id: Kaur.Secure.generate_api_key
+      user
+      | fb_user_id: Kaur.Secure.generate_api_key()
     }
   end
 

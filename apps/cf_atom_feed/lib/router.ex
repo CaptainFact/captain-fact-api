@@ -2,8 +2,8 @@ defmodule CF.AtomFeed.Router do
   use Plug.Router
   require Logger
 
-  plug :match
-  plug :dispatch
+  plug(:match)
+  plug(:dispatch)
 
   def start_link do
     config = Application.get_env(:cf_atom_feed, CF.AtomFeed.Router)

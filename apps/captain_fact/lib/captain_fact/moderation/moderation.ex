@@ -1,5 +1,5 @@
 defmodule CaptainFact.Moderation do
-  @moduledoc"""
+  @moduledoc """
   Collective moderation methods.
   A few concepts are necessary to understand what happens here:
 
@@ -27,13 +27,11 @@ defmodule CaptainFact.Moderation do
   alias CaptainFact.Moderation.ModerationEntry
   alias CaptainFact.Accounts.UserPermissions
 
-
   @nb_flags_to_report %{
     {UserAction.type(:create), UserAction.entity(:comment)} => 3
   }
 
-
-  @doc"""
+  @doc """
   Get the number of flags necessary for action to be considered as "reported"
 
   ## Examples
@@ -43,16 +41,18 @@ defmodule CaptainFact.Moderation do
   """
   def nb_flags_to_report(action, entity) when is_atom(action) and is_atom(entity),
     do: nb_flags_to_report(UserAction.type(action), UserAction.entity(entity))
+
   def nb_flags_to_report(action, entity),
     do: Map.get(@nb_flags_to_report, {action, entity})
 
-  @doc"""
+  @doc """
   Get a random action for which number of flags is above the limit and for which
   user hasn't voted yet. Will raise if `user` doesn't have permission
   to moderate.
   """
   def random!(user) do
     UserPermissions.check!(user, :collective_moderation)
+
     UserAction
     |> where([a], a.user_id != ^user.id)
     |> without_user_feedback(user)
@@ -67,7 +67,7 @@ defmodule CaptainFact.Moderation do
     |> moderation_entry()
   end
 
-  @doc"""
+  @doc """
   Record user feedback for a flagged action
   Will raise if `user` doesn't have permission to moderate
   """
@@ -90,7 +90,6 @@ defmodule CaptainFact.Moderation do
     |> Repo.insert()
   end
 
-
   # ---- Private -----
 
   defp without_user_feedback(query, user) do
@@ -104,25 +103,30 @@ defmodule CaptainFact.Moderation do
   end
 
   defp being_reported(base_query) do
-    Enum.reduce(@nb_flags_to_report, base_query,
-      fn {{action_type, entity}, nb_flags_to_report}, query ->
-        having(query, [a, _, f],
-          a.type == ^action_type and
-          a.entity == ^entity and
-          count(f.id) >= ^nb_flags_to_report
-        )
+    Enum.reduce(@nb_flags_to_report, base_query, fn {{action_type, entity}, nb_flags_to_report},
+                                                    query ->
+      having(
+        query,
+        [a, _, f],
+        a.type == ^action_type and a.entity == ^entity and count(f.id) >= ^nb_flags_to_report
+      )
     end)
   end
 
   defp moderation_entry(action = %UserAction{}) do
     %ModerationEntry{
       action: action,
-      flags: Repo.all(from(f in Flag,
-        where: f.action_id == ^action.id,
-        preload: [:source_user]
-      ))
+      flags:
+        Repo.all(
+          from(
+            f in Flag,
+            where: f.action_id == ^action.id,
+            preload: [:source_user]
+          )
+        )
     }
   end
+
   defp moderation_entry(nil) do
     nil
   end

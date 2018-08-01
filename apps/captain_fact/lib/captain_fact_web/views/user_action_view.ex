@@ -5,7 +5,6 @@ defmodule CaptainFactWeb.UserActionView do
   alias CaptainFactWeb.UserView
   alias CaptainFactWeb.UserActionView
 
-
   def render("index.json", %{users_actions: actions}) do
     render_many(actions, UserActionView, "user_action.json")
   end
@@ -22,7 +21,7 @@ defmodule CaptainFactWeb.UserActionView do
       entity: action.entity,
       entity_id: action.entity_id,
       changes: action.changes,
-      time: action.inserted_at,
+      time: action.inserted_at
     }
   end
 
@@ -48,6 +47,7 @@ defmodule CaptainFactWeb.UserActionView do
       statement_id: action.changes[:statement_id]
     }
   end
+
   defp context_expander(_) do
     nil
   end

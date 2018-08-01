@@ -1,9 +1,9 @@
 defmodule DB.Utils.String do
-  @moduledoc"""
+  @moduledoc """
   String utils not included in base library
   """
 
-  @doc"""
+  @doc """
   Convert a string like "     aaa     bbb ccc  " into "aaa bbb ccc"
 
   ## Examples

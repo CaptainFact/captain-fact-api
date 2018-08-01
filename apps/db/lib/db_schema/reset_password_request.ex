@@ -2,11 +2,10 @@ defmodule DB.Schema.ResetPasswordRequest do
   use Ecto.Schema
   import Ecto.Changeset
 
-
   @primary_key {:token, :string, []}
   schema "accounts_reset_password_requests" do
-    field :source_ip, :string
-    belongs_to :user, DB.Schema.User
+    field(:source_ip, :string)
+    belongs_to(:user, DB.Schema.User)
 
     timestamps(updated_at: false)
   end

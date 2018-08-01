@@ -1,5 +1,5 @@
 defmodule DB.Type.UserPicture do
-  @moduledoc"""
+  @moduledoc """
   User profile picture. Map the Ecto type to an URL using ARC
   """
 
@@ -9,7 +9,7 @@ defmodule DB.Type.UserPicture do
   @versions [:thumb, :mini_thumb]
   # TODO  @extension_whitelist ~w(.jpg .jpeg .png)
 
-  @doc"""
+  @doc """
   Validate file extension.
   """
   def validate({_file, _}) do
@@ -19,7 +19,7 @@ defmodule DB.Type.UserPicture do
     #
     # As we only use this upload with Facebook API, we can avoid checking file extension (Facebook already
     # did it for us) but this should be fixed before considering uploading user's pictures
-    #--------------------------------------
+    # --------------------------------------
     true
   end
 

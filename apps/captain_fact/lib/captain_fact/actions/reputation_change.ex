@@ -99,7 +99,7 @@ defmodule CaptainFact.Actions.ReputationChange do
   Return a list of all actions types known by reputation change calculator.
   """
   def actions_types, do: @actions_types
-  
+
   def daily_gain_limit, do: @daily_gain_limit
 
   def daily_loss_limit, do: @daily_loss_limit

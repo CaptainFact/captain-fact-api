@@ -1,5 +1,4 @@
 defmodule CaptainFact.Actions.Flagger do
-
   require Logger
   import Ecto.Query
 
@@ -12,18 +11,19 @@ defmodule CaptainFact.Actions.Flagger do
   alias CaptainFact.Accounts.UserPermissions
   alias CaptainFact.Actions.Recorder
 
-
-  @doc"""
+  @doc """
   Record a new flag on `comment` requested by given user `user_id`
   """
   @action_create UserAction.type(:create)
   @entity_comment UserAction.entity(:comment)
   def flag!(source_user_id, %Comment{id: comment_id}, reason),
     do: flag!(source_user_id, comment_id, reason)
+
   def flag!(source_user_id, comment_id, reason) do
     user = Repo.get!(User, source_user_id)
     UserPermissions.check!(user, :flag, :comment)
     action_id = get_action_id!(@action_create, @entity_comment, comment_id)
+
     try do
       user
       |> Ecto.build_assoc(:flags_posted)
@@ -31,23 +31,26 @@ defmodule CaptainFact.Actions.Flagger do
       |> Repo.insert!()
     rescue
       # Ignore if flag already exist
-      Ecto.ConstraintError -> :ok
+      Ecto.ConstraintError ->
+        :ok
     else
       _ -> Recorder.record!(user, :flag, :comment, %{entity_id: comment_id})
     end
   end
 
-
-  @doc"""
+  @doc """
   Get the total number of flags for given entity.
   `entity` can be passed as an integer or an atom (converted with UserAction.entity)
   """
   def get_nb_flags(%Comment{id: id}),
     do: get_nb_flags(:create, :comment, id)
+
   def get_nb_flags(action_type, entity, id) when is_atom(action_type),
     do: get_nb_flags(UserAction.type(action_type), entity, id)
+
   def get_nb_flags(action_type, entity, id) when is_atom(entity),
     do: get_nb_flags(action_type, UserAction.entity(entity), id)
+
   def get_nb_flags(action_type, entity, id) when is_integer(entity) do
     Flag
     |> join(:inner, [f], a in assoc(f, :action))

@@ -51,7 +51,7 @@ defmodule CaptainFact.Authenticator do
   @doc """
   Dissociate given third party from user's account
   """
-  @spec dissociate_third_party(%User{}, %ProviderInfos{})::Result.t
+  @spec dissociate_third_party(%User{}, %ProviderInfos{}) :: Result.t()
   def dissociate_third_party(user, provider) do
     OAuth.unlink_provider(user, provider)
   end

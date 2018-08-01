@@ -1,8 +1,7 @@
 defmodule CaptainFact.ModerationTest do
   use CaptainFact.DataCase
-#  import CaptainFact.TestUtils, only: [flag_comments: 2]
+  #  import CaptainFact.TestUtils, only: [flag_comments: 2]
   doctest CaptainFact.Moderation
-
 
   # TODO can only give one feedback
   # TODO cannot give feedback on an action which is not reported

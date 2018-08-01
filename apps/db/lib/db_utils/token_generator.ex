@@ -1,5 +1,5 @@
 defmodule DB.Utils.TokenGenerator do
-  @moduledoc"""
+  @moduledoc """
   Generate base64 unique tokens using :crypto.strong_rand_bytes/1
   """
 

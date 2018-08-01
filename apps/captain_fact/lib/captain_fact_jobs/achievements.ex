@@ -31,7 +31,8 @@ defmodule CaptainFactJobs.Achievements do
     {:ok, args}
   end
 
-  @timeout 120_000 # 2 minute
+  # 2 minute
+  @timeout 120_000
   def update() do
     GenServer.call(@name, :update_flags, @timeout)
   end
@@ -40,6 +41,7 @@ defmodule CaptainFactJobs.Achievements do
 
   def handle_call(:update_flags, _from, _state) do
     last_action_id = ReportManager.get_last_action_id(@analyser_id)
+
     unless last_action_id == -1 do
       UserAction
       |> where([a], a.id > ^last_action_id)
@@ -47,10 +49,12 @@ defmodule CaptainFactJobs.Achievements do
       |> Repo.all(log: false)
       |> start_analysis()
     end
-    {:reply, :ok , :ok}
+
+    {:reply, :ok, :ok}
   end
 
   defp start_analysis([]), do: :ok
+
   defp start_analysis(actions) do
     Logger.info("[Jobs.Achievements] Updating achievements")
     report = ReportManager.create_report!(@analyser_id, :running, actions)
@@ -59,6 +63,7 @@ defmodule CaptainFactJobs.Achievements do
   end
 
   defp check_action(nil), do: nil
+
   defp check_action(%{type: @action_email_confirmed, target_user_id: id}),
     do: unlock_achievement(Repo.get!(User, id), :not_a_robot)
 end

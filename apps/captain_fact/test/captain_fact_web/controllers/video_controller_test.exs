@@ -8,6 +8,7 @@ defmodule CaptainFactWeb.VideoControllerTest do
     test "Returns all videos", %{conn: conn} do
       DB.Repo.delete_all(Video)
       videos = insert_list(5, :video)
+
       response =
         conn
         |> get("/videos")
@@ -15,7 +16,9 @@ defmodule CaptainFactWeb.VideoControllerTest do
 
       random_video = List.first(videos)
       assert Enum.count(videos) == Enum.count(response)
-      assert random_video.title == Enum.find(response, &(&1["provider_id"] == random_video.provider_id))["title"]
+
+      assert random_video.title ==
+               Enum.find(response, &(&1["provider_id"] == random_video.provider_id))["title"]
     end
 
     test "filter on language", %{conn: conn} do

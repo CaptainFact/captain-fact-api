@@ -13,7 +13,7 @@ defmodule CF.GraphQL.Application do
     # Define workers and child supervisors to be supervised
     children = [
       # Start the endpoint when the application starts
-      supervisor(CF.GraphQLWeb.Endpoint, []),
+      supervisor(CF.GraphQLWeb.Endpoint, [])
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

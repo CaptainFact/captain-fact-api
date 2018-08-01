@@ -16,16 +16,16 @@ defmodule CF.AtomFeed.StatementsTest do
 
     # Check feed info
     assert String.starts_with?(feed, """
-    <?xml version="1.0" encoding="UTF-8"?>
-    <feed xmlns="http://www.w3.org/2005/Atom">
-      <link href="https://feed.captainfact.io/statements/" rel="self"/>
-      <author>
-        <name>Captain Fact</name>
-        <email>atom-feed@captainfact.io</email>
-      </author>
-      <id>https://captainfact.io/</id>
-      <title>[CaptainFact] All Statements</title>
-    """)
+           <?xml version="1.0" encoding="UTF-8"?>
+           <feed xmlns="http://www.w3.org/2005/Atom">
+             <link href="https://feed.captainfact.io/statements/" rel="self"/>
+             <author>
+               <name>Captain Fact</name>
+               <email>atom-feed@captainfact.io</email>
+             </author>
+             <id>https://captainfact.io/</id>
+             <title>[CaptainFact] All Statements</title>
+           """)
 
     # Check comment entries
     for statement <- statements do

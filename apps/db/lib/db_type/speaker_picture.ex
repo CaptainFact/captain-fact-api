@@ -1,5 +1,5 @@
 defmodule DB.Type.SpeakerPicture do
-  @moduledoc"""
+  @moduledoc """
   Speaker picture. Map the Ecto type to an URL using ARC
   """
 
@@ -11,7 +11,7 @@ defmodule DB.Type.SpeakerPicture do
 
   # Whitelist file extensions:
   def validate({file, _}) do
-    file_extension = file.file_name |> Path.extname |> String.downcase
+    file_extension = file.file_name |> Path.extname() |> String.downcase()
     Enum.member?(@extension_whitelist, file_extension)
   end
 
