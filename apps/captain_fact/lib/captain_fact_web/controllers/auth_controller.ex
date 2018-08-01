@@ -23,8 +23,12 @@ defmodule CaptainFactWeb.AuthController do
 
   @doc """
   Auth with identity (email + password)
+
+  Auth with third party provider (OAuth, only Facebook for now).
+  If user is connected -> associate account with third party
+  If not -> get or create account from third party infos
   """
-  def callback(conn, %{"provider" => "identity", "email" => email, "password" => password}) do
+  def callback(conn, _params = %{"provider" => "identity", "email" => email, "password" => password}) do
     case Authenticator.get_user_for_email_password(email, password) do
       nil ->
         conn
@@ -36,11 +40,6 @@ defmodule CaptainFactWeb.AuthController do
     end
   end
 
-  @doc """
-  Auth with third party provider (OAuth, only Facebook for now).
-  If user is connected -> associate account with third party
-  If not -> get or create account from third party infos
-  """
   def callback(conn, params = %{"provider" => provider_str, "code" => code}) do
     user = GuardianImpl.Plug.current_resource(conn)
     provider = provider_atom!(provider_str)

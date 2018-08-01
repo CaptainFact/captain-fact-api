@@ -36,7 +36,9 @@ defmodule CaptainFactWeb.VideoDebateChannel do
   end
 
   @doc """
-  Register a public connection in presence tracker
+  Register a public connection in presence tracker if no user_id in socket assigns
+
+  Register a user connection in presence tracker if a user_id is present in socket assigns
   """
   def handle_info(:after_join, socket = %{assigns: %{user_id: nil}}) do
     push(socket, "presence_state", Presence.list(socket))
@@ -44,9 +46,6 @@ defmodule CaptainFactWeb.VideoDebateChannel do
     {:noreply, socket}
   end
 
-  @doc """
-  Register a user connection in presence tracker
-  """
   def handle_info(:after_join, socket = %{assigns: %{user_id: user_id}}) do
     push(socket, "presence_state", Presence.list(socket))
     {:ok, _} = Presence.track(socket, :users, %{user_id: user_id})
