@@ -10,6 +10,7 @@ defmodule CaptainFactWeb.UserControllerTest do
   alias DB.Schema.ResetPasswordRequest
 
   alias CaptainFact.Accounts.Invitations
+  alias CaptainFact.Authenticator.GuardianImpl
 
   describe "Get user" do
     test "displays sensitive info (email...) when requesting /me" do
@@ -52,7 +53,7 @@ defmodule CaptainFactWeb.UserControllerTest do
         |> post("/users", %{user: user, invitation_token: invit.token})
         |> json_response(:created)
 
-      Guardian.decode_and_verify!(response["token"])
+      {:ok, _claims} = GuardianImpl.decode_and_verify(response["token"])
     end
 
     test "must not work without an invitation if invitation system is enabled" do

@@ -7,6 +7,7 @@ defmodule CaptainFactWeb.AuthController do
   require Logger
 
   alias CaptainFact.Authenticator
+  alias CaptainFact.Authenticator.GuardianImpl
   alias CaptainFactWeb.{ErrorView, UserView, AuthController}
 
   alias Kaur.Result
@@ -41,7 +42,7 @@ defmodule CaptainFactWeb.AuthController do
   If not -> get or create account from third party infos
   """
   def callback(conn, params = %{"provider" => provider_str, "code" => code}) do
-    user = Guardian.Plug.current_resource(conn)
+    user = GuardianImpl.Plug.current_resource(conn)
     provider = provider_atom!(provider_str)
 
     result =
@@ -66,7 +67,7 @@ defmodule CaptainFactWeb.AuthController do
   Unlink given provider from user's account
   """
   def unlink_provider(conn, %{"provider" => provider_str}) do
-    user = Guardian.Plug.current_resource(conn)
+    user = GuardianImpl.Plug.current_resource(conn)
     provider = provider_atom!(provider_str)
 
     Authenticator.dissociate_third_party(user, provider)
@@ -80,8 +81,8 @@ defmodule CaptainFactWeb.AuthController do
   """
   def logout(conn, _params) do
     conn
-    |> Guardian.Plug.current_token()
-    |> Guardian.revoke!()
+    |> GuardianImpl.Plug.current_token()
+    |> GuardianImpl.revoke()
 
     send_resp(conn, 204, "")
   end
@@ -107,8 +108,8 @@ defmodule CaptainFactWeb.AuthController do
   # Render a user_with token `%{user, token}`
   defp signin_user(conn, user) do
     conn
-    |> Guardian.Plug.api_sign_in(user)
-    |> Guardian.Plug.current_token()
+    |> GuardianImpl.Plug.sign_in(user)
+    |> GuardianImpl.Plug.current_token()
     |> case do
       nil ->
         conn
