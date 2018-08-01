@@ -22,4 +22,24 @@ defmodule CaptainFact.Authenticator.GuardianImpl do
     |> Result.map_error(fn :no_value -> :user_not_found end)
   end
 
+  defmodule Pipeline do
+    use Guardian.Plug.Pipeline,
+      otp_app: :captain_fact,
+      module: CaptainFact.Authenticator.GuardianImpl,
+      error_handler: CaptainFact.Authenticator.GuardianImpl.ErrorHandler
+  end
+
+  defmodule ErrorHandler do
+    import Plug.Conn
+
+    def auth_error(conn, {type, _reason}, _opts) do
+      %{error: "#{type}"}
+      |> Poison.encode
+      |> Result.and_then(fn body ->
+        conn
+        |> put_resp_content_type("application/json")
+        |> send_resp(401, body)
+      end)
+    end
+  end
 end
