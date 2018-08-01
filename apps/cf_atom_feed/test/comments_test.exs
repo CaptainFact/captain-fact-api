@@ -16,21 +16,26 @@ defmodule CF.AtomFeed.CommentsTest do
 
     # Check feed info
     assert String.starts_with?(feed, """
-    <?xml version="1.0" encoding="UTF-8"?>
-    <feed xmlns="http://www.w3.org/2005/Atom">
-      <link href="https://feed.captainfact.io/comments/" rel="self"/>
-      <author>
-        <name>Captain Fact</name>
-        <email>atom-feed@captainfact.io</email>
-      </author>
-      <id>https://captainfact.io/</id>
-      <title>[CaptainFact] All Comments</title>
-    """)
+           <?xml version="1.0" encoding="UTF-8"?>
+           <feed xmlns="http://www.w3.org/2005/Atom">
+             <link href="https://feed.captainfact.io/comments/" rel="self"/>
+             <author>
+               <name>Captain Fact</name>
+               <email>atom-feed@captainfact.io</email>
+             </author>
+             <id>https://captainfact.io/</id>
+             <title>[CaptainFact] All Comments</title>
+           """)
 
     # Check comment entries
     for comment <- comments do
-      assert feed =~ ~r(<link href="https://captainfact\.io/videos/[a-zA-Z0-9]+\?statement=#{comment.statement_id}"/>)
-      assert feed =~ ~r(<title>New Comment from user ##{comment.user_id} on ##{comment.statement_id}</title>)
+      assert feed =~
+               ~r(<link href="https://captainfact\.io/videos/[a-zA-Z0-9]+\?statement=#{
+                 comment.statement_id
+               }"/>)
+
+      assert feed =~
+               ~r(<title>New Comment from user ##{comment.user_id} on ##{comment.statement_id}</title>)
     end
   end
 end

@@ -4,9 +4,10 @@ defmodule CaptainFact.Gettext do
   defmacro with_user_locale(user, do: expression) do
     quote do
       locale = Map.get(unquote(user), :locale) || "en"
-      Gettext.with_locale CaptainFact.Gettext, locale, fn ->
+
+      Gettext.with_locale(CaptainFact.Gettext, locale, fn ->
         unquote(expression)
-      end
+      end)
     end
   end
 
@@ -19,9 +20,10 @@ defmodule CaptainFact.Gettext do
   defmacro gettext_mail_user(user, msgid, vars \\ []) do
     quote do
       locale = Map.get(unquote(user), :locale) || "en"
-      Gettext.with_locale CaptainFact.Gettext, locale, fn ->
+
+      Gettext.with_locale(CaptainFact.Gettext, locale, fn ->
         CaptainFact.Gettext.dgettext("mail", unquote(msgid), unquote(vars))
-      end
+      end)
     end
   end
 end

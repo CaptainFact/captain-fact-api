@@ -9,10 +9,12 @@ defmodule CaptainFactWeb.UserControllerTest do
   alias DB.Schema.Comment
   alias DB.Schema.ResetPasswordRequest
 
+  alias CaptainFact.Accounts.Invitations
 
   describe "Get user" do
     test "displays sensitive info (email...) when requesting /me" do
       user = insert(:user)
+
       returned_user =
         user
         |> build_authenticated_conn()
@@ -25,6 +27,7 @@ defmodule CaptainFactWeb.UserControllerTest do
     test "displays limited info if someone else" do
       requesting_user = insert(:user)
       requested_user = insert(:user)
+
       returned_user =
         requesting_user
         |> build_authenticated_conn()
@@ -38,6 +41,7 @@ defmodule CaptainFactWeb.UserControllerTest do
   describe "create account" do
     test "must work if joined a valid invitation" do
       invit = insert(:invitation_request)
+
       user =
         build(:user)
         |> Map.take([:email, :username])
@@ -51,7 +55,10 @@ defmodule CaptainFactWeb.UserControllerTest do
       Guardian.decode_and_verify!(response["token"])
     end
 
-    test "must not work without an invitation" do
+    test "must not work without an invitation if invitation system is enabled" do
+      Invitations.enable()
+      on_exit(fn -> Invitations.disable() end)
+
       user =
         build(:user)
         |> Map.take([:email, :username])
@@ -78,10 +85,12 @@ defmodule CaptainFactWeb.UserControllerTest do
 
       # Verify token
       req = Repo.get_by!(ResetPasswordRequest, user_id: user.id)
+
       resp =
         build_conn()
         |> get("/users/reset_password/verify/#{req.token}")
         |> json_response(200)
+
       assert Map.has_key?(resp, "username")
 
       # Confirm (change password)
@@ -92,6 +101,7 @@ defmodule CaptainFactWeb.UserControllerTest do
           password: new_password
         })
         |> json_response(200)
+
       assert Map.has_key?(resp, "email")
     end
 
@@ -109,6 +119,7 @@ defmodule CaptainFactWeb.UserControllerTest do
 
     test "work for bulletproof / help" do
       achievement = Enum.random(@allowed_achievements)
+
       updated_achievements =
         :user
         |> insert()
@@ -123,6 +134,7 @@ defmodule CaptainFactWeb.UserControllerTest do
     test "returns 400 for all the other achievements and invalids" do
       forbidden = Enum.into(1..20, []) -- @allowed_achievements
       user = insert(:user)
+
       for achievement <- forbidden do
         user
         |> build_authenticated_conn()
@@ -141,7 +153,11 @@ defmodule CaptainFactWeb.UserControllerTest do
 
     test "should inform the user if email is not valid" do
       assert json_response(request_invite("xxx"), 400) == %{"error" => "invalid_email"}
-      assert json_response(request_invite("toto@yopmail.fr"), 400) == %{"error" => "invalid_email"}
+
+      assert json_response(request_invite("toto@yopmail.fr"), 400) == %{
+               "error" => "invalid_email"
+             }
+
       assert json_response(request_invite("x@xx"), 400) == %{"error" => "invalid_email"}
     end
 
@@ -174,6 +190,7 @@ defmodule CaptainFactWeb.UserControllerTest do
     test "unsubscribe with invalid token returns an error" do
       user = insert(:user)
       assert user.newsletter == true
+
       build_conn()
       |> get("/newsletter/unsubscribe/NotAValidToken")
       |> response(:bad_request)
@@ -182,6 +199,7 @@ defmodule CaptainFactWeb.UserControllerTest do
     test "unsubscribe with a valid token returns 204" do
       user = insert(:user)
       assert user.newsletter == true
+
       build_conn()
       |> get("/newsletter/unsubscribe/#{user.newsletter_subscription_token}")
       |> response(204)
@@ -199,7 +217,8 @@ defmodule CaptainFactWeb.UserControllerTest do
     user = insert(:user)
     refute user.email_confirmed
 
-    build_conn() # No need to be authenticated to validate email
+    # No need to be authenticated to validate email
+    build_conn()
     |> put("/users/me/confirm_email/#{user.email_confirmation_token}")
     |> response(:no_content)
 
@@ -207,13 +226,15 @@ defmodule CaptainFactWeb.UserControllerTest do
   end
 
   test "confirm email with bad token returns 404" do
-    build_conn() # No need to be authenticated to validate email
+    # No need to be authenticated to validate email
+    build_conn()
     |> put("/users/me/confirm_email/-----TotallyBullshitToken-----")
     |> response(:not_found)
   end
 
   test "GET /users/me/available_flags" do
     user = build(:user) |> Map.put(:reputation, 4200) |> insert()
+
     available =
       user
       |> build_authenticated_conn()
@@ -270,7 +291,7 @@ defmodule CaptainFactWeb.UserControllerTest do
   describe "delete onboarding" do
     test "returns 200" do
       :user
-      |> insert(completed_onboarding_steps: [1,2])
+      |> insert(completed_onboarding_steps: [1, 2])
       |> build_authenticated_conn
       |> delete("/users/me/onboarding")
       |> json_response(:ok)

@@ -9,17 +9,15 @@ defmodule DB.Type.FlagReason do
   def type, do: :integer
 
   @reasons %{
-    "bad_language"     => 1,
-    "spam"             => 2,
-    "irrelevant"       => 3,
+    "bad_language" => 1,
+    "spam" => 2,
+    "irrelevant" => 3,
     "not_constructive" => 4
   }
   @nb_reasons Enum.count(@reasons)
 
   defguard is_valid_identifier(identifier)
-    when is_integer(identifier) 
-    and identifier >= 1 
-    and identifier <= @nb_reasons
+           when is_integer(identifier) and identifier >= 1 and identifier <= @nb_reasons
 
   # ---- Ecto.Type implementation ----
 
@@ -47,6 +45,7 @@ defmodule DB.Type.FlagReason do
   def dump(integer) when is_valid_identifier(integer) do
     {:ok, integer}
   end
+
   def dump(_) do
     :error
   end

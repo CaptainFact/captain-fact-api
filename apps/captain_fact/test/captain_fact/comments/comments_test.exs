@@ -14,7 +14,6 @@ defmodule CaptainFact.Comments.CommentsTest do
   alias CaptainFact.Comments
   alias CaptainFact.Sources.Fetcher
 
-
   @valid_source_attributes %{
     language: "FR",
     title: "The article of the year",
@@ -32,12 +31,21 @@ defmodule CaptainFact.Comments.CommentsTest do
       user = insert(:user)
       statement = insert(:statement)
       context = video_debate_context(statement.video_id)
-      comment = Comments.add_comment(user, context, %{statement_id: statement.id}, url, fn updated_comment ->
-        assert updated_comment.source.url == url
-        assert updated_comment.source.title == attributes.title
-        assert updated_comment.source.site_name == attributes.site_name
-        assert updated_comment.source.language == attributes.language
-      end)
+
+      comment =
+        Comments.add_comment(
+          user,
+          context,
+          %{statement_id: statement.id},
+          url,
+          fn updated_comment ->
+            assert updated_comment.source.url == url
+            assert updated_comment.source.title == attributes.title
+            assert updated_comment.source.site_name == attributes.site_name
+            assert updated_comment.source.language == attributes.language
+          end
+        )
+
       wait_fetcher()
 
       assert comment.source.title == nil
@@ -48,6 +56,7 @@ defmodule CaptainFact.Comments.CommentsTest do
     test "doesn't call callback if no updates required" do
       # Start a server to provide a valid page
       sub_url = unique_url()
+
       url =
         sub_url
         |> serve(200, %{})
@@ -56,15 +65,24 @@ defmodule CaptainFact.Comments.CommentsTest do
       # Add comment
       user = insert(:user)
       statement = insert(:statement)
-      Comments.add_comment(user, video_debate_context(statement.video_id), %{statement_id: statement.id}, url, fn _ ->
-        raise "callback shouldn't be called if there's nothing to update"
-      end)
+
+      Comments.add_comment(
+        user,
+        video_debate_context(statement.video_id),
+        %{statement_id: statement.id},
+        url,
+        fn _ ->
+          raise "callback shouldn't be called if there's nothing to update"
+        end
+      )
+
       wait_fetcher()
     end
 
     test "source only fetched one time" do
       # Start a server to provide a valid page
       attributes = Map.put(@valid_source_attributes, :url, unique_url())
+
       url =
         attributes.url
         |> serve(200, attributes, only_once: true)
@@ -74,10 +92,25 @@ defmodule CaptainFact.Comments.CommentsTest do
       user = insert(:user)
       statement = insert(:statement)
       comment_params = %{statement_id: statement.id}
-      Comments.add_comment(user, video_debate_context(statement.video_id), comment_params, url, fn update_comment ->
-        assert update_comment.source.title === attributes.title
-      end)
-      Comments.add_comment(user, video_debate_context(statement.video_id), comment_params, url, fn _ -> raise "source is re-fetched" end)
+
+      Comments.add_comment(
+        user,
+        video_debate_context(statement.video_id),
+        comment_params,
+        url,
+        fn update_comment ->
+          assert update_comment.source.title === attributes.title
+        end
+      )
+
+      Comments.add_comment(
+        user,
+        video_debate_context(statement.video_id),
+        comment_params,
+        url,
+        fn _ -> raise "source is re-fetched" end
+      )
+
       wait_fetcher()
     end
   end
@@ -111,23 +144,28 @@ defmodule CaptainFact.Comments.CommentsTest do
     test "a user cannot delete a reported comment waiting for moderation" do
       comment = insert_reported_comment()
       assert_raise FunctionClauseError, fn -> Comments.delete_comment(comment.user, comment) end
-      refute_deleted comment
+      refute_deleted(comment)
     end
 
     test "but an admin can" do
       comment = insert_reported_comment()
       assert Comments.admin_delete_comment(comment) != nil
-      assert_deleted comment
+      assert_deleted(comment)
     end
 
     test "deleting a comment deletes its replies and their actions" do
       comment = insert(:comment) |> with_action()
       replies = insert_comments_list_with_action(5, %{reply_to: comment})
-      replies_replies = List.flatten(Enum.map(replies, fn c -> insert_comments_list_with_action(2, %{reply_to: c}) end))
+
+      replies_replies =
+        List.flatten(
+          Enum.map(replies, fn c -> insert_comments_list_with_action(2, %{reply_to: c}) end)
+        )
+
       Comments.delete_comment(comment.user, comment)
-      assert_deleted comment
-      Enum.map(replies, &(assert_deleted(&1, false)))
-      Enum.map(replies_replies, &(assert_deleted(&1, false)))
+      assert_deleted(comment)
+      Enum.map(replies, &assert_deleted(&1, false))
+      Enum.map(replies_replies, &assert_deleted(&1, false))
     end
   end
 
@@ -164,7 +202,12 @@ defmodule CaptainFact.Comments.CommentsTest do
   end
 
   defp insert_reported_comment() do
-    limit = CaptainFact.Moderation.nb_flags_to_report(UserAction.type(:create), UserAction.entity(:comment))
+    limit =
+      CaptainFact.Moderation.nb_flags_to_report(
+        UserAction.type(:create),
+        UserAction.entity(:comment)
+      )
+
     comment = insert(:comment) |> with_action() |> flag(limit)
     CaptainFactJobs.Flags.update()
 
@@ -182,7 +225,9 @@ defmodule CaptainFact.Comments.CommentsTest do
 
   defp wait_fetcher() do
     case MapSet.size(Fetcher.get_queue()) do
-      0 -> :ok
+      0 ->
+        :ok
+
       _ ->
         :timer.sleep(50)
         wait_fetcher()

@@ -4,7 +4,6 @@ defmodule CF.GraphQL.Resolvers.Comments do
   alias DB.Repo
   alias DB.Schema.Vote
 
-
   def score(comment, _args, _info) do
     batch({__MODULE__, :comments_scores}, comment.id, fn results ->
       {:ok, Map.get(results, comment.id) || 0}

@@ -5,17 +5,17 @@ defmodule CaptainFact.Authenticator.OAuth do
   alias CaptainFact.Accounts
   alias CaptainFact.Authenticator.OAuth.Facebook
   alias CaptainFact.Authenticator.ProviderInfos
+  alias Kaur.Result
+  require Logger
 
-
-  @doc"""
+  @doc """
   Fetch user infos from third party
   """
   def fetch_user_from_third_party(:facebook, code) do
-    client = Facebook.get_token!([code: code])
+    client = Facebook.get_token!(code: code)
 
     with %{token: %{access_token: token}} when not is_nil(token) <- client,
-         {:ok, provider_infos} <- Facebook.fetch_user(client)
-    do
+         {:ok, provider_infos} <- Facebook.fetch_user(client) do
       provider_infos
     else
       %{token: %{access_token: nil}} -> {:error, "invalid_token"}
@@ -23,7 +23,7 @@ defmodule CaptainFact.Authenticator.OAuth do
     end
   end
 
-  @doc"""
+  @doc """
   Return existing user if there's on for this email or FB account,
   create it otherwise.
 
@@ -34,22 +34,28 @@ defmodule CaptainFact.Authenticator.OAuth do
       nil ->
         # User doesn't exist, create it
         user_infos = provider_info_to_user_info(infos)
-        with {:ok, user} <- Accounts.create_account(user_infos, invitation_token, [
-          provider_params: Map.from_struct(infos),
-          allow_empty_username: true
-        ]) do
+
+        with {:ok, user} <-
+               Accounts.create_account(
+                 user_infos,
+                 invitation_token,
+                 provider_params: Map.from_struct(infos),
+                 allow_empty_username: true
+               ) do
           link_provider!(user, infos)
         end
+
       user = %User{fb_user_id: nil} ->
         # A user for this account already exists, link its Facebook
         link_provider!(user, infos)
+
       user ->
         # User exist and its account is already linked, just return it
         user
     end
   end
 
-  @doc"""
+  @doc """
   In case we have two accounts for this FB / email we match on FB first
   """
   def find_existing_user(%{provider: :facebook, uid: fb_user_id, email: email}) do
@@ -59,12 +65,12 @@ defmodule CaptainFact.Authenticator.OAuth do
     |> Repo.all()
     |> Enum.reduce(nil, fn user, best_fit ->
       if user.fb_user_id == fb_user_id or is_nil(best_fit),
-         do: user,
-         else: best_fit
+        do: user,
+        else: best_fit
     end)
   end
 
-  @doc"""
+  @doc """
   Link profider specified in provider_infos to current user
   """
   def link_provider!(user, provider_infos) do
@@ -80,20 +86,30 @@ defmodule CaptainFact.Authenticator.OAuth do
 
     # Try to fetch picture
     picture_url = provider_infos.picture_url
+
     case picture_url && Accounts.fetch_picture(updated_user, picture_url) do
-      {:ok, final_user} -> final_user
-      _ -> updated_user # Don't fail if we didn't get the picture
+      {:ok, final_user} ->
+        final_user
+
+      # Don't fail if we didn't get the picture
+      _ ->
+        updated_user
     end
   end
 
-  @doc"""
+  @doc """
   Unlink provider from given user account
   """
-  def unlink_provider(user, :facebook) do
-    # TODO Send a request to facebook to unlink on their side too
+  def unlink_provider(user = %User{fb_user_id: fb_user_id}, :facebook) do
+    user
+    |> Facebook.revoke_permissions()
+    |> Result.tap_error(fn _error ->
+      Logger.info("A problem happened with facebook permissions revocation #{fb_user_id}")
+    end)
+
     user
     |> User.provider_changeset(%{fb_user_id: nil})
-    |> Repo.update!()
+    |> Repo.update()
   end
 
   # Converts provider infos to a struct ready to be given for User changesets

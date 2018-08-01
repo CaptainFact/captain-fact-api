@@ -40,17 +40,19 @@ defmodule CaptainFact.Actions.ReputationChangeTest do
     test "correctly sum up the total" do
       # Create user with 2 actions with previsible results
       user = insert(:user)
-      
+
       # Self action
       self_entity = UserAction.entity(:comment)
       self_action_type = UserAction.type(:vote_down)
       self_action = insert(:user_action, user: user, type: self_action_type, entity: self_entity)
-      
+
       # Target action
       target_entity = UserAction.entity(:user)
       target_action_type = UserAction.type(:email_confirmed)
-      target_action = insert(:user_action, target_user: user, type: target_action_type, entity: target_entity)
-      
+
+      target_action =
+        insert(:user_action, target_user: user, type: target_action_type, entity: target_entity)
+
       # Calculate expected total
       {expected_source_change, _} = for_action(self_action_type, self_entity)
       {_, expected_target_change} = for_action(target_action_type)

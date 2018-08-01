@@ -5,14 +5,13 @@ defmodule DB.Schema.InvitationRequest do
   alias DB.Schema.User
   alias DB.Schema.InvitationRequest
 
-
   schema "invitation_requests" do
-    field :email, :string
-    field :invitation_sent, :boolean, default: false
-    field :token, :string
-    field :locale, :string
+    field(:email, :string)
+    field(:invitation_sent, :boolean, default: false)
+    field(:token, :string)
+    field(:locale, :string)
 
-    belongs_to :invited_by, User
+    belongs_to(:invited_by, User)
 
     timestamps()
   end

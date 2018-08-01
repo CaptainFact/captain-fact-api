@@ -10,7 +10,7 @@ defmodule CaptainFactWeb.Presence do
   def fetch(_topic, entries) do
     %{
       "viewers" => %{"count" => count_presences(entries, "viewers")},
-      "users" => %{"count" => count_presences(entries, "users")},
+      "users" => %{"count" => count_presences(entries, "users")}
     }
   end
 

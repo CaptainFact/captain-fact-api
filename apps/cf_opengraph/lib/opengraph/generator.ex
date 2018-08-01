@@ -10,11 +10,12 @@ defmodule CF.Opengraph.Generator do
 
   @template_path fn ->
     # In case of a non umbrella deployment
-    root = if Mix.Project.umbrella?() do
-      "./apps/opengraph"
-    else
-      "."
-    end
+    root =
+      if Mix.Project.umbrella?() do
+        "./apps/opengraph"
+      else
+        "."
+      end
 
     Path.join(root, "lib/opengraph/template.html.eex")
   end
@@ -51,7 +52,8 @@ defmodule CF.Opengraph.Generator do
       title: "Le profil de #{escaped_appellation} sur CaptainFact",
       url: encoded_url,
       description: "Découvrez le profil de #{escaped_username} sur CaptainFact",
-      image: nil # User picture doesn't have a large enough resolution
+      # User picture doesn't have a large enough resolution
+      image: nil
     })
   end
 
@@ -92,7 +94,8 @@ defmodule CF.Opengraph.Generator do
       title: speaker.full_name,
       description: "Les interventions de #{speaker.full_name} sur CaptainFact",
       url: canonical_url(path),
-      image: nil # Speaker picture doesn't have a large enough resolution
+      # Speaker picture doesn't have a large enough resolution
+      image: nil
     })
   end
 

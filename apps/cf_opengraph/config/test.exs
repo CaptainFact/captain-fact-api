@@ -1,3 +1,4 @@
 use Mix.Config
 
-config :cf_opengraph, port: 4005
+# Use a different port in test to avoid conflicting with dev server
+config :cf_opengraph, port: 10005

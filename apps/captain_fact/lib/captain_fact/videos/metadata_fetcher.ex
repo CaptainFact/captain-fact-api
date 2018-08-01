@@ -28,13 +28,18 @@ defmodule CaptainFact.Videos.MetadataFetcher do
     case Application.get_env(:captain_fact, :youtube_api_key) do
       nil ->
         fetch_video_metadata_html("youtube", provider_id)
+
       api_key ->
         fetch_video_metadata_api("youtube", provider_id, api_key)
     end
   end
 
   defp fetch_video_metadata_api("youtube", provider_id, api_key) do
-    case HTTPoison.get("https://www.googleapis.com/youtube/v3/videos?id=#{provider_id}&part=snippet&key=#{api_key}") do
+    case HTTPoison.get(
+           "https://www.googleapis.com/youtube/v3/videos?id=#{provider_id}&part=snippet&key=#{
+             api_key
+           }"
+         ) do
       {:ok, %HTTPoison.Response{body: body}} ->
         # Parse JSON and extract intresting info
         full_metadata =
@@ -46,12 +51,16 @@ defmodule CaptainFact.Videos.MetadataFetcher do
         if full_metadata == nil do
           {:error, "Video doesn't exist"}
         else
-          {:ok, %{
-            title: full_metadata["snippet"]["title"],
-            language: full_metadata["snippet"]["defaultLanguage"] || full_metadata["snippet"]["defaultAudioLanguage"],
-            url: Video.build_url(%{provider: "youtube", provider_id: provider_id})
-          }}
+          {:ok,
+           %{
+             title: full_metadata["snippet"]["title"],
+             language:
+               full_metadata["snippet"]["defaultLanguage"] ||
+                 full_metadata["snippet"]["defaultAudioLanguage"],
+             url: Video.build_url(%{provider: "youtube", provider_id: provider_id})
+           }}
         end
+
       {_, _} ->
         {:error, "Remote URL didn't respond correctly"}
     end
@@ -59,13 +68,16 @@ defmodule CaptainFact.Videos.MetadataFetcher do
 
   defp fetch_video_metadata_html(provider, id) do
     url = Video.build_url(%{provider: provider, provider_id: id})
+
     case HTTPoison.get(url) do
       {:ok, %HTTPoison.Response{body: body}} ->
         meta = Floki.attribute(body, "meta[property='og:title']", "content")
+
         case meta do
           [] -> {:error, "Page does not contains an OpenGraph title attribute"}
           [title] -> {:ok, %{title: HtmlEntities.decode(title), url: url}}
         end
+
       {_, _} ->
         {:error, "Remote URL didn't respond correctly"}
     end

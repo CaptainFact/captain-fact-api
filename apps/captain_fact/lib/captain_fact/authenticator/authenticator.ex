@@ -7,6 +7,7 @@ defmodule CaptainFact.Authenticator do
   alias DB.Schema.User
   alias CaptainFact.Authenticator.ProviderInfos
   alias CaptainFact.Authenticator.OAuth
+  alias Kaur.Result
 
   @doc """
   Get user from its email address and check password.
@@ -28,6 +29,7 @@ defmodule CaptainFact.Authenticator do
     case OAuth.fetch_user_from_third_party(provider, code) do
       provider_infos = %ProviderInfos{} ->
         OAuth.find_or_create_user!(provider_infos, invitation_token)
+
       error ->
         error
     end
@@ -40,6 +42,7 @@ defmodule CaptainFact.Authenticator do
     case OAuth.fetch_user_from_third_party(provider, code) do
       provider_infos = %ProviderInfos{} ->
         OAuth.link_provider!(user, provider_infos)
+
       error ->
         error
     end
@@ -48,11 +51,12 @@ defmodule CaptainFact.Authenticator do
   @doc """
   Dissociate given third party from user's account
   """
-  def disscociate_third_party(user, provider) do
+  @spec dissociate_third_party(%User{}, %ProviderInfos{}) :: Result.t()
+  def dissociate_third_party(user, provider) do
     OAuth.unlink_provider(user, provider)
   end
 
-  defp validate_pass(_encrypted, password) when password in [nil, ""], 
+  defp validate_pass(_encrypted, password) when password in [nil, ""],
     do: false
 
   defp validate_pass(encrypted, password),

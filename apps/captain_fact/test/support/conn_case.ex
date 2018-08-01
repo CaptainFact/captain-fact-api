@@ -28,6 +28,7 @@ defmodule CaptainFactWeb.ConnCase do
 
       def build_authenticated_conn(user) do
         {:ok, token, _} = Guardian.encode_and_sign(user)
+
         Phoenix.ConnTest.build_conn()
         |> Plug.Conn.put_req_header("authorization", "Bearer #{token}")
       end
@@ -36,9 +37,11 @@ defmodule CaptainFactWeb.ConnCase do
 
   setup tags do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(DB.Repo)
+
     unless tags[:async] do
       Ecto.Adapters.SQL.Sandbox.mode(DB.Repo, {:shared, self()})
     end
+
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 end

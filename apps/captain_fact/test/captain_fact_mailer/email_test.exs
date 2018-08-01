@@ -56,8 +56,12 @@ defmodule CaptainFactMailer.EmailTest do
 
     assert email_fr.to == @user_fr
     assert email_fr.subject == "A propos de votre récente perte de réputation sur CaptainFact"
-    assert email_fr.html_body =~ "Votre réputation sur CaptainFact est récemment passée en dessous de -5"
-    assert email_fr.text_body =~ "Votre réputation sur CaptainFact est récemment passée en dessous de -5"
+
+    assert email_fr.html_body =~
+             "Votre réputation sur CaptainFact est récemment passée en dessous de -5"
+
+    assert email_fr.text_body =~
+             "Votre réputation sur CaptainFact est récemment passée en dessous de -5"
   end
 
   test "reset password" do
@@ -75,8 +79,12 @@ defmodule CaptainFactMailer.EmailTest do
     assert email_en.text_body =~ "You recently asked to reset your password on CaptainFact."
 
     assert email_fr.subject == "CaptainFact.io - Réinitialisation du mot de passe"
-    assert email_fr.html_body =~ "Vous avez demandé la réinitialisation de votre mot de passe sur CaptainFact."
-    assert email_fr.text_body =~ "Vous avez demandé la réinitialisation de votre mot de passe sur CaptainFact."
+
+    assert email_fr.html_body =~
+             "Vous avez demandé la réinitialisation de votre mot de passe sur CaptainFact."
+
+    assert email_fr.text_body =~
+             "Vous avez demandé la réinitialisation de votre mot de passe sur CaptainFact."
   end
 
   test "newsletter" do
@@ -84,6 +92,7 @@ defmodule CaptainFactMailer.EmailTest do
     <h1>Hello World</h1>
     <p>This is an awesome test mail</p>
     """
+
     subject = "Hellowww"
     email_en = Email.newsletter(@user_en, subject, html_content)
     email_fr = Email.newsletter(@user_fr, subject, html_content)
@@ -103,14 +112,22 @@ defmodule CaptainFactMailer.EmailTest do
     assert email.html_body =~ html_content
     assert email.text_body =~ "Hello World"
     assert email.text_body =~ "This is an awesome test mail"
-    assert email.html_body =~ "https://TEST_FRONTEND/newsletter/unsubscribe/#{user.newsletter_subscription_token}"
-    assert email.text_body =~ "https://TEST_FRONTEND/newsletter/unsubscribe/#{user.newsletter_subscription_token}"
+
+    assert email.html_body =~
+             "https://TEST_FRONTEND/newsletter/unsubscribe/#{user.newsletter_subscription_token}"
+
+    assert email.text_body =~
+             "https://TEST_FRONTEND/newsletter/unsubscribe/#{user.newsletter_subscription_token}"
   end
 
   defp common_welcome_test(user, email) do
     assert email.to == user
-    assert email.html_body =~ "https://TEST_FRONTEND/confirm_email/#{user.email_confirmation_token}"
-    assert email.text_body =~ "https://TEST_FRONTEND/confirm_email/#{user.email_confirmation_token}"
+
+    assert email.html_body =~
+             "https://TEST_FRONTEND/confirm_email/#{user.email_confirmation_token}"
+
+    assert email.text_body =~
+             "https://TEST_FRONTEND/confirm_email/#{user.email_confirmation_token}"
   end
 
   defp common_reset_password_test(request, email) do

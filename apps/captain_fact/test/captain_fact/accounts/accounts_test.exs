@@ -3,9 +3,10 @@ defmodule CaptainFact.AccountsTest do
   use Bamboo.Test
 
   alias CaptainFact.Accounts
+  alias CaptainFact.Accounts.Invitations
   alias CaptainFactJobs.{Reputation, Achievements}
 
-  alias DB.Schema.{InvitationRequest, User}
+  alias DB.Schema.User
 
   alias Kaur.Result
 
@@ -30,25 +31,28 @@ defmodule CaptainFact.AccountsTest do
       Accounts.reset_password!(user.email, "127.0.0.1")
 
       assert Repo.aggregate(ResetPasswordRequest, :count, :token) == 1
+
       req =
         ResetPasswordRequest
         |> preload(:user)
         |> Repo.get_by!(user_id: user.id)
 
       refute is_nil(req.token) or String.length(req.token) < 128
-      assert_delivered_email CaptainFactMailer.Email.reset_password_request(req)
+      assert_delivered_email(CaptainFactMailer.Email.reset_password_request(req))
     end
 
     test "a single ip cannot make too much requests" do
       # With a single user
       Repo.delete_all(ResetPasswordRequest)
       user = insert(:user)
+
       assert_raise PermissionsError, fn ->
         for _ <- 0..10, do: Accounts.reset_password!(user.email, "127.0.0.1")
       end
 
       # With changing users
       Repo.delete_all(ResetPasswordRequest)
+
       assert_raise PermissionsError, fn ->
         for _ <- 0..10, do: Accounts.reset_password!(insert(:user).email, "127.0.0.1")
       end
@@ -57,6 +61,7 @@ defmodule CaptainFact.AccountsTest do
     # Verify
     test "verify token" do
       user = insert(:user)
+
       req =
         %ResetPasswordRequest{}
         |> ResetPasswordRequest.changeset(%{user_id: user.id, source_ip: "127.0.0.1"})
@@ -65,19 +70,20 @@ defmodule CaptainFact.AccountsTest do
       assert_raise Ecto.NoResultsError, fn ->
         Accounts.check_reset_password_token!("InvalidToken")
       end
+
       user_from_token = Accounts.check_reset_password_token!(req.token)
       assert user_from_token.id == user.id
     end
 
     test "verify token after expired" do
       user = insert(:user)
+
       req =
         %ResetPasswordRequest{}
         |> ResetPasswordRequest.changeset(%{user_id: user.id, source_ip: "127.0.0.1"})
         |> Repo.insert!()
         |> Ecto.Changeset.change(inserted_at: ~N[2012-12-12 12:12:12])
         |> Repo.update!()
-
 
       assert_raise Ecto.NoResultsError, fn ->
         Accounts.check_reset_password_token!(req.token)
@@ -89,6 +95,7 @@ defmodule CaptainFact.AccountsTest do
     test "changes user password and delete all user's requests'" do
       user = insert(:user)
       new_password = "iHaveBeé€nChangeeeeed!"
+
       req =
         %ResetPasswordRequest{}
         |> ResetPasswordRequest.changeset(%{user_id: user.id, source_ip: "127.0.0.1"})
@@ -102,70 +109,26 @@ defmodule CaptainFact.AccountsTest do
         ResetPasswordRequest
         |> where([u], u.user_id == ^user.id)
         |> Repo.aggregate(:count, :token)
+
       assert nb_requests == 0
     end
   end
 
-  describe "invitation_requests" do
-    test "invitation request get created with given invited_by user" do
-      email = "test@email.com"
-      user = insert(:user)
-      {:ok, req} = Accounts.request_invitation(email, user)
-      assert is_nil(req.token), "don't generate token before necessary"
-      assert user.id == req.invited_by_id
-      assert email == req.email
+  describe "create_account with invitation system enabled" do
+    setup do
+      Invitations.enable()
+      on_exit(fn -> Invitations.disable() end)
     end
 
-    test "send a mail when calling send_invite/1" do
-      req = insert(:invitation_request)
-      Accounts.send_invite(req)
-      assert_delivered_email CaptainFactMailer.Email.invitation_to_register(req)
-    end
-
-    test "send mails when calling send_invites/1" do
-      Repo.delete_all(InvitationRequest)
-      nb_invites = 10
-      requests = insert_list(nb_invites, :invitation_request)
-      Accounts.send_invites(nb_invites)
-      Enum.each(requests, fn req ->
-        assert_delivered_email CaptainFactMailer.Email.invitation_to_register(req)
-      end)
-    end
-
-    test "multiple requests only insert one time but doesn't crash" do
-      email = "test@email.com"
-      user = insert(:user)
-      {:ok, req} = Accounts.request_invitation(email)
-      {:ok, req2} = Accounts.request_invitation(email)
-      {:ok, req3} = Accounts.request_invitation(email, user)
-
-      assert req.id == req2.id
-      assert req2.id == req3.id
-    end
-
-    test "cannot insert with bad email" do
-      assert {:error, "invalid_email"} == Accounts.request_invitation("toto@yopmail.fr")
-      assert {:error, "invalid_email"} == Accounts.request_invitation("toto@")
-      assert {:error, "invalid_email"} == Accounts.request_invitation("xxxxxxxxx")
-    end
-
-    test "re-asking for an invitation reset invitation_sent boolean to false" do
-      req = insert(:invitation_request, %{invitation_sent: true})
-      {:ok, req_updated} = Accounts.request_invitation(req.email)
-      assert req_updated.invitation_sent == false
-    end
-
-    # TODO What if user already have an account and request an invitation ?
-  end
-
-  describe "create_account" do
     test "requires a valid invitation token" do
       assert Accounts.create_account(%{}, nil) == {:error, "invalid_invitation_token"}
       assert Accounts.create_account(%{}, "") == {:error, "invalid_invitation_token"}
       assert Accounts.create_account(%{}, "zzzzz") == {:error, "invalid_invitation_token"}
     end
+  end
 
-    test "create an account if a valid user is given" do
+  describe "create_account without invitation system (default)" do
+    test "if a valid user is given" do
       invit = insert(:invitation_request)
       user_params = build_user_params()
       {:ok, created} = Accounts.create_account(user_params, invit.token)
@@ -173,15 +136,18 @@ defmodule CaptainFact.AccountsTest do
       assert user_params.email == created.email
     end
 
-    test "can create an account with auto-generated username only if explicitly requested" do
+    test "with auto-generated username only if explicitly requested" do
       invit = insert(:invitation_request)
       user_params = Map.delete(build_user_params(), :username)
 
-      {:error, %Ecto.Changeset{}} = # Without username, no allow_empty_username
-        Accounts.create_account(user_params, invit.token)
-      {:error, %Ecto.Changeset{}} = # With empty username, no allow_empty_username
+      # Without username, no allow_empty_username
+      {:error, %Ecto.Changeset{}} = Accounts.create_account(user_params, invit.token)
+      # With empty username, no allow_empty_username
+      {:error, %Ecto.Changeset{}} =
         Accounts.create_account(Map.put(user_params, :username, ""), invit.token)
-      {:ok, created} = # Without username, allow_empty_username
+
+      # Without username, allow_empty_username
+      {:ok, created} =
         Accounts.create_account(user_params, invit.token, allow_empty_username: true)
 
       assert user_params.email == created.email
@@ -208,7 +174,7 @@ defmodule CaptainFact.AccountsTest do
       invit = insert(:invitation_request)
       user_params = build_user_params()
       {:ok, user} = Accounts.create_account(user_params, invit.token)
-      assert_delivered_email CaptainFactMailer.Email.welcome(user)
+      assert_delivered_email(CaptainFactMailer.Email.welcome(user))
     end
 
     defp build_user_params() do
@@ -274,7 +240,6 @@ defmodule CaptainFact.AccountsTest do
         |> insert(completed_onboarding_steps: [])
         |> Accounts.complete_onboarding_step(72)
 
-
       assert Result.error?(error)
     end
   end
@@ -304,8 +269,21 @@ defmodule CaptainFact.AccountsTest do
         |> insert(completed_onboarding_steps: [])
         |> Accounts.complete_onboarding_steps([1, 72])
 
-
       assert Result.error?(error)
+    end
+  end
+
+  describe "delete account" do
+    test "nilify all user's comments" do
+      user = insert(:user)
+      comments = insert_list(3, :comment, user: user)
+      Accounts.delete_account(user)
+
+      for comment <- comments do
+        comment = Repo.get(DB.Schema.Comment, comment.id)
+        assert not is_nil(comment), "User's comment should not be deleted"
+        assert comment.user_id == nil, "Comment should be anonymized"
+      end
     end
   end
 end

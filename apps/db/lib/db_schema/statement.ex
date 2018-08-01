@@ -2,16 +2,15 @@ defmodule DB.Schema.Statement do
   use Ecto.Schema
   import Ecto.Changeset
 
-
   schema "statements" do
-    field :text, :string
-    field :time, :integer
-    field :is_removed, :boolean, default: false
+    field(:text, :string)
+    field(:time, :integer)
+    field(:is_removed, :boolean, default: false)
 
-    belongs_to :video, DB.Schema.Video
-    belongs_to :speaker, DB.Schema.Speaker
+    belongs_to(:video, DB.Schema.Video)
+    belongs_to(:speaker, DB.Schema.Speaker)
 
-    has_many :comments, DB.Schema.Comment, on_delete: :delete_all
+    has_many(:comments, DB.Schema.Comment, on_delete: :delete_all)
 
     timestamps()
   end

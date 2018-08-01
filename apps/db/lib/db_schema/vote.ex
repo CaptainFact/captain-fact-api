@@ -4,27 +4,32 @@ defmodule DB.Schema.Vote do
 
   alias DB.Schema.{User, Statement, Comment}
 
-
   @primary_key false
   schema "votes" do
-    belongs_to :user, User, primary_key: true
-    belongs_to :comment, Comment, primary_key: true
+    belongs_to(:user, User, primary_key: true)
+    belongs_to(:comment, Comment, primary_key: true)
 
-    field :value, :integer, null: false
+    field(:value, :integer, null: false)
 
     timestamps()
   end
 
   def user_votes(query, %{id: user_id}) do
-    from v in query,
-    where: v.user_id == ^user_id
+    from(
+      v in query,
+      where: v.user_id == ^user_id
+    )
   end
 
   def video_votes(query, %{id: video_id}) do
-    from v in query,
-    join: c in Comment, on: c.id == v.comment_id,
-    join: s in Statement, on: c.statement_id == s.id,
-    where: s.video_id == ^video_id
+    from(
+      v in query,
+      join: c in Comment,
+      on: c.id == v.comment_id,
+      join: s in Statement,
+      on: c.statement_id == s.id,
+      where: s.video_id == ^video_id
+    )
   end
 
   def vote_type(user, entity, value) do
@@ -35,7 +40,8 @@ defmodule DB.Schema.Vote do
     end
   end
 
-  @required_fields ~w(value comment_id)a #TODO user_id ?
+  # TODO user_id ?
+  @required_fields ~w(value comment_id)a
 
   @doc """
   Builds a changeset based on the `struct` and `params`.

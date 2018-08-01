@@ -8,9 +8,11 @@ defmodule CaptainFactJobs.ModerationTest do
   alias DB.Schema.Flag
   alias DB.Schema.UserAction
 
-  import CaptainFactJobs.Moderation, only: [
-    min_nb_feedbacks_to_process_entry: 0
-  ]
+  import CaptainFactJobs.Moderation,
+    only: [
+      min_nb_feedbacks_to_process_entry: 0
+    ]
+
   alias CaptainFact.Moderation
 
   @feedback_confirm 1
@@ -23,11 +25,12 @@ defmodule CaptainFactJobs.ModerationTest do
     CaptainFactJobs.Moderation.update()
     CaptainFactJobs.Reputation.update()
 
-    assert_deleted comment
+    assert_deleted(comment)
     # Lower action's source user reputation
     assert Repo.get!(User, action.user_id).reputation < action.user.reputation
     # Flaggers gain reputation
-    flags = Repo.all from(f in Flag, where: f.action_id == ^action.id, preload: :source_user)
+    flags = Repo.all(from(f in Flag, where: f.action_id == ^action.id, preload: :source_user))
+
     Enum.map(flags, fn f ->
       assert Repo.get(User, f.source_user.id).reputation > f.source_user.reputation
     end)
@@ -36,12 +39,12 @@ defmodule CaptainFactJobs.ModerationTest do
   test "Report refuted (if score <= -0.66)" do
     {comment, action} = insert_reported_comment_with_action()
     generate_feedback(action, @feedback_refute, min_nb_feedbacks_to_process_entry())
-    flags = Repo.all from(f in Flag, where: f.action_id == ^action.id, preload: :source_user)
+    flags = Repo.all(from(f in Flag, where: f.action_id == ^action.id, preload: :source_user))
     CaptainFactJobs.Flags.update()
     CaptainFactJobs.Moderation.update()
     CaptainFactJobs.Reputation.update()
 
-    refute_deleted comment
+    refute_deleted(comment)
     # Un-report comment
     assert Repo.get!(Comment, comment.id).is_reported == false
     # Flags are cleared
@@ -60,7 +63,7 @@ defmodule CaptainFactJobs.ModerationTest do
     CaptainFactJobs.Moderation.update()
     CaptainFactJobs.Reputation.update()
 
-    refute_deleted comment
+    refute_deleted(comment)
     # Stays reported
     assert Repo.get!(Comment, comment.id).is_reported == true
     # Doesn't clear flags
@@ -88,8 +91,15 @@ defmodule CaptainFactJobs.ModerationTest do
 
   defp insert_reported_comment_with_action() do
     comment = insert_reported_comment()
-    action = Repo.get_by! UserAction,
-      entity: UserAction.entity(:comment), type: UserAction.type(:create), entity_id: comment.id
+
+    action =
+      Repo.get_by!(
+        UserAction,
+        entity: UserAction.entity(:comment),
+        type: UserAction.type(:create),
+        entity_id: comment.id
+      )
+
     {comment, Repo.preload(action, :user)}
   end
 
@@ -101,7 +111,12 @@ defmodule CaptainFactJobs.ModerationTest do
   end
 
   defp insert_reported_comment() do
-    limit = CaptainFact.Moderation.nb_flags_to_report(UserAction.type(:create), UserAction.entity(:comment))
+    limit =
+      CaptainFact.Moderation.nb_flags_to_report(
+        UserAction.type(:create),
+        UserAction.entity(:comment)
+      )
+
     comment = insert(:comment) |> with_action() |> flag(limit)
     CaptainFactJobs.Flags.update()
 

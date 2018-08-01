@@ -5,16 +5,16 @@ defmodule CaptainFactJobs.ReportManager do
   alias DB.Repo
   alias DB.Schema.UsersActionsReport
 
-
   def get_last_report(analyser_id) do
     UsersActionsReport
     |> where([r], r.analyser_id == ^analyser_id)
     |> order_by([r], desc: r.id)
     |> limit(1)
-    |> Repo.one(log: false) # Don't log queries as report queries happen very often
+    # Don't log queries as report queries happen very often
+    |> Repo.one(log: false)
   end
 
-  @doc"""
+  @doc """
   Return last treated action id. If an analyser is already `:running` for this `analyser_id`, return value will be -1.
   If not report exists, returns 0
   """
@@ -27,12 +27,20 @@ defmodule CaptainFactJobs.ReportManager do
   end
 
   def create_report!(analyser_id, status, actions, params \\ %{}) do
-    Repo.insert! UsersActionsReport.changeset(%UsersActionsReport{}, Map.merge(%{
-      analyser_id: analyser_id,
-      last_action_id: Enum.max(actions, &(&1.id)).id,
-      status: UsersActionsReport.status(status),
-      nb_actions: Enum.count(actions)
-    }, params))
+    Repo.insert!(
+      UsersActionsReport.changeset(
+        %UsersActionsReport{},
+        Map.merge(
+          %{
+            analyser_id: analyser_id,
+            last_action_id: Enum.max(actions, & &1.id).id,
+            status: UsersActionsReport.status(status),
+            nb_actions: Enum.count(actions)
+          },
+          params
+        )
+      )
+    )
   end
 
   def update_report!(report, params \\ %{}) do

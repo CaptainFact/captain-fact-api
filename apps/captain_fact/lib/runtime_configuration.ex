@@ -35,6 +35,7 @@ defmodule CaptainFact.RuntimeConfiguration do
     handler: fn url ->
       fb_redirect_uri = Path.join(url, "/login/callback/facebook")
       put_in_oauth_fb([:redirect_uri], fb_redirect_uri)
+
       [
         {:captain_fact, :cors_origins, [url]},
         {:captain_fact, :frontend_url, url},

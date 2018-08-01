@@ -11,10 +11,10 @@ defmodule DB.Type.VideoHashId do
   end
 
   @coder Hashids.new(
-    min_len: 4,
-    alphabet: "123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
-    salt: "C4pt41nV1d€0"
-  )
+           min_len: 4,
+           alphabet: "123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+           salt: "C4pt41nV1d€0"
+         )
 
   @doc """
   Encode a given id
@@ -22,7 +22,7 @@ defmodule DB.Type.VideoHashId do
       iex> DB.Type.VideoHashId.encode(42)
       "4VyJ"
   """
-  @spec encode(Integer.t) :: String.t
+  @spec encode(Integer.t()) :: String.t()
   def encode(id) do
     Hashids.encode(@coder, id)
   end
@@ -35,7 +35,7 @@ defmodule DB.Type.VideoHashId do
       iex> DB.Type.VideoHashId.decode("€€€€€€€€€€€€€€€€€")
       {:error, :invalid_input_data}
   """
-  @spec decode(String.t) :: Integer.t
+  @spec decode(String.t()) :: Integer.t()
   def decode(hash) do
     case do_decode(hash) do
       {:ok, [id]} -> {:ok, id}
@@ -51,11 +51,11 @@ defmodule DB.Type.VideoHashId do
       iex> catch_throw(DB.Type.VideoHashId.decode!("€€€"))
       DB.Type.VideoHashId.InvalidVideoHashError
   """
-  @spec decode!(String.t) :: Integer.t
+  @spec decode!(String.t()) :: Integer.t()
   def decode!(hash) do
     case do_decode(hash) do
       {:ok, [id]} -> id
-      _error -> throw InvalidVideoHashError
+      _error -> throw(InvalidVideoHashError)
     end
   end
 

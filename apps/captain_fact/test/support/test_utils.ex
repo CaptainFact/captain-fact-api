@@ -7,9 +7,9 @@ defmodule CaptainFact.TestUtils do
   alias DB.Schema.Comment
   alias DB.Schema.UserAction
 
-
   def flag_comments(comments, nb_flags, reason \\ 1) do
     users = insert_list(nb_flags, :user, %{reputation: 1000})
+
     flags =
       Enum.map(comments, fn comment ->
         Enum.map(users, fn user ->
@@ -23,6 +23,7 @@ defmodule CaptainFact.TestUtils do
   def assert_deleted(%Comment{id: id}, check_actions \\ true) do
     {comment, actions} = get_comment_and_actions(id)
     assert is_nil(comment)
+
     if check_actions do
       assert Enum.count(actions) == 1
       assert hd(actions).type == UserAction.type(:delete)
@@ -32,7 +33,13 @@ defmodule CaptainFact.TestUtils do
   def refute_deleted(%Comment{id: id}) do
     {comment, _} = get_comment_and_actions(id)
     assert comment != nil
-    assert Repo.get_by(UserAction, entity: UserAction.entity(:comment), type: UserAction.type(:delete), entity_id: id) == nil
+
+    assert Repo.get_by(
+             UserAction,
+             entity: UserAction.entity(:comment),
+             type: UserAction.type(:delete),
+             entity_id: id
+           ) == nil
   end
 
   defp get_comment_and_actions(id) do

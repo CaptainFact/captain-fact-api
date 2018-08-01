@@ -1,5 +1,5 @@
 defmodule CaptainFactMailer.Email do
-  @moduledoc"""
+  @moduledoc """
   Generate emails using templates in `templates` folder. All files must have two
   versions: `.html.eex` and `.text.eex`.
 
@@ -18,16 +18,15 @@ defmodule CaptainFactMailer.Email do
 
   alias CaptainFact.Actions.ReputationChange
 
-
   @sender_no_reply {"CaptainFact", "no-reply@captainfact.io"}
   @supported_locales ~w(fr en)
 
-
-  @doc"""
+  @doc """
   Generate a welcome email to user, with a link to confirm his email address.
   """
   def welcome(user) do
     reputation_change = ReputationChange.for_admin_action(:email_confirmed)
+
     user
     |> user_email()
     |> subject(gettext_mail_user(user, "Welcome to CaptainFact.io!"))
@@ -35,13 +34,14 @@ defmodule CaptainFactMailer.Email do
     |> render_i18n(:welcome)
   end
 
-  @doc"""
+  @doc """
   Generate a newsletter email to user with a button to unsubscribe. If user is
   already unsubscribed, return nil.
 
   [Library] A HTML to Markdown converter would help to generate text_content
   """
   def newsletter(%{newsletter: false}, _, _), do: nil
+
   def newsletter(user, subject, html_message) do
     user
     |> user_email()
@@ -51,7 +51,7 @@ defmodule CaptainFactMailer.Email do
     |> render_i18n(:newsletter)
   end
 
-  @doc"""
+  @doc """
   Generate a reset password email from a ResetPasswordRequest
   """
   def reset_password_request(%ResetPasswordRequest{user: user, token: token, source_ip: ip}) do
@@ -63,7 +63,7 @@ defmodule CaptainFactMailer.Email do
     |> render_i18n(:reset_password)
   end
 
-  @doc"""
+  @doc """
   Generate an email for when users fall under a certain reputation threshold
   with the community guidelines.
   """
@@ -87,8 +87,14 @@ defmodule CaptainFactMailer.Email do
 
   defp invitation_subject(nil),
     do: gettext_mail("Your invitation to try CaptainFact.io is ready!")
+
   defp invitation_subject(user = %User{}),
-    do: gettext_mail_user(user, "%{name} invited you to try CaptainFact.io!", name: User.user_appelation(user))
+    do:
+      gettext_mail_user(
+        user,
+        "%{name} invited you to try CaptainFact.io!",
+        name: User.user_appelation(user)
+      )
 
   # Build a base email with `from` set and default layout
   defp base_email() do
@@ -107,9 +113,8 @@ defmodule CaptainFactMailer.Email do
   # If a user is available use his locale for rendering email. Otherwise just
   # render with default locale
   defp render_i18n(email = %{assigns: %{user: %{locale: locale}}}, view)
-  when locale in @supported_locales
-  do
-    Gettext.with_locale CaptainFact.Gettext, locale, fn ->
+       when locale in @supported_locales do
+    Gettext.with_locale(CaptainFact.Gettext, locale, fn ->
       try do
         render(email, String.to_atom(Atom.to_string(view) <> ".#{locale}"))
       rescue
@@ -119,8 +124,9 @@ defmodule CaptainFactMailer.Email do
         _ in Phoenix.Template.UndefinedError ->
           render(email, String.to_atom(Atom.to_string(view) <> ".en"))
       end
-    end
+    end)
   end
+
   defp render_i18n(email, view) do
     render(email, String.to_atom(Atom.to_string(view) <> ".en"))
   end

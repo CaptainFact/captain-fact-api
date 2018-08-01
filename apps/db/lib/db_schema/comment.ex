@@ -8,25 +8,24 @@ defmodule DB.Schema.Comment do
 
   alias DB.Schema.{Comment, User, Statement, Source}
 
-
   schema "comments" do
-    field :text, :string
-    field :approve, :boolean
-    field :is_reported, :boolean, default: false
+    field(:text, :string)
+    field(:approve, :boolean)
+    field(:is_reported, :boolean, default: false)
 
-    field :score, :integer, virtual: true, default: 0
+    field(:score, :integer, virtual: true, default: 0)
 
-    belongs_to :source, Source
-    belongs_to :user, User
-    belongs_to :statement, Statement
-    belongs_to :reply_to, Comment
+    belongs_to(:source, Source)
+    belongs_to(:user, User)
+    belongs_to(:statement, Statement)
+    belongs_to(:reply_to, Comment)
     timestamps()
   end
 
   def full(query, only_facts \\ false) do
     query
     |> join(:inner, [c], s in assoc(c, :statement))
-    |> join(:inner, [c, _], u in assoc(c, :user))
+    |> join(:left, [c, _], u in assoc(c, :user))
     |> join(:left, [c, _, _], source in assoc(c, :source))
     |> join(:left, [c, _, _, _], v in fragment("
         SELECT sum(value) AS score, comment_id
@@ -35,38 +34,39 @@ defmodule DB.Schema.Comment do
        "), v.comment_id == c.id)
     |> filter_facts(only_facts)
     |> select([c, s, u, source, v], %{
-        id: c.id,
-        reply_to_id: c.reply_to_id,
-        approve: c.approve,
-        source: source,
-        statement_id: c.statement_id,
-        text: c.text,
-        is_reported: c.is_reported,
-        inserted_at: c.inserted_at,
-        updated_at: c.updated_at,
-        score: v.score,
-        user: %{
-          id: u.id,
-          name: u.name,
-          username: u.username,
-          reputation: u.reputation,
-          inserted_at: u.inserted_at,
-          picture_url: u.picture_url,
-          achievements: u.achievements,
-          speaker_id: u.speaker_id
-        }
-      })
+      id: c.id,
+      reply_to_id: c.reply_to_id,
+      approve: c.approve,
+      source: source,
+      statement_id: c.statement_id,
+      text: c.text,
+      is_reported: c.is_reported,
+      inserted_at: c.inserted_at,
+      updated_at: c.updated_at,
+      score: v.score,
+      user: %{
+        id: u.id,
+        name: u.name,
+        username: u.username,
+        reputation: u.reputation,
+        inserted_at: u.inserted_at,
+        picture_url: u.picture_url,
+        achievements: u.achievements,
+        speaker_id: u.speaker_id
+      }
+    })
   end
 
   def with_source(query, true) do
-    from c in query, join: source in Source, on: [id: c.source_id]
+    from(c in query, join: source in Source, on: [id: c.source_id])
   end
+
   def with_source(query, false) do
-    from c in query, left_join: source in Source, on: [id: c.source_id]
+    from(c in query, left_join: source in Source, on: [id: c.source_id])
   end
 
   def with_statement(query) do
-    from c in query, preload: [:statement]
+    from(c in query, preload: [:statement])
   end
 
   @required_fields ~w(statement_id user_id)a
@@ -95,6 +95,7 @@ defmodule DB.Schema.Comment do
     text = get_field(changeset, :text)
     has_source = (source && source.url && String.length(source.url) > 0) || false
     has_text = text || false
+
     if has_text || has_source do
       changeset
     else
@@ -116,6 +117,7 @@ defmodule DB.Schema.Comment do
   end
 
   defp filter_facts(query, false), do: query
+
   defp filter_facts(query, true),
     do: where(query, [c, _, _, _, _], not is_nil(c.source_id))
 end

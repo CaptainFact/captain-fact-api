@@ -3,19 +3,24 @@ defmodule DB.Schema.Speaker do
   use Arc.Ecto.Schema
   import Ecto.Changeset
 
-
   schema "speakers" do
-    field :full_name, :string
-    field :title, :string
-    field :slug, :string
-    field :country, :string
-    field :wikidata_item_id, :integer
-    field :is_user_defined, :boolean, default: true
-    field :picture, DB.Type.SpeakerPicture.Type
-    field :is_removed, :boolean, default: false
+    field(:full_name, :string)
+    field(:title, :string)
+    field(:slug, :string)
+    field(:country, :string)
+    field(:wikidata_item_id, :integer)
+    field(:is_user_defined, :boolean, default: true)
+    field(:picture, DB.Type.SpeakerPicture.Type)
+    field(:is_removed, :boolean, default: false)
 
-    has_many :statements, DB.Schema.Statement, on_delete: :nilify_all
-    many_to_many :videos, DB.Schema.Video, join_through: "videos_speakers", on_delete: :delete_all
+    has_many(:statements, DB.Schema.Statement, on_delete: :nilify_all)
+
+    many_to_many(
+      :videos,
+      DB.Schema.Video,
+      join_through: "videos_speakers",
+      on_delete: :delete_all
+    )
 
     timestamps()
   end
