@@ -7,6 +7,7 @@ defmodule CaptainFactWeb.UserController do
   alias CaptainFact.Accounts
   alias CaptainFact.Accounts.Invitations
   alias CaptainFact.Accounts.UserPermissions
+  alias CaptainFact.Authenticator.GuardianImpl
   alias CaptainFactWeb.UserView
 
   alias Kaur.Result
@@ -30,7 +31,7 @@ defmodule CaptainFactWeb.UserController do
   def create(conn, params = %{"user" => user_params}) do
     case Accounts.create_account(user_params, Map.get(params, "invitation_token")) do
       {:ok, user} ->
-        {:ok, token, _claims} = Guardian.encode_and_sign(user, :token)
+        {:ok, token, _claims} = GuardianImpl.encode_and_sign(user, [])
 
         conn
         |> put_status(:created)
@@ -56,12 +57,12 @@ defmodule CaptainFactWeb.UserController do
   end
 
   def show_me(conn, _params) do
-    render(conn, UserView, :show, user: Guardian.Plug.current_resource(conn))
+    render(conn, UserView, :show, user: GuardianImpl.Plug.current_resource(conn))
   end
 
   def update(conn, params) do
     conn
-    |> Guardian.Plug.current_resource()
+    |> GuardianImpl.Plug.current_resource()
     |> Accounts.update(params)
     |> case do
       {:ok, user} ->
@@ -75,7 +76,7 @@ defmodule CaptainFactWeb.UserController do
   end
 
   def available_flags(conn, _) do
-    current_user = Guardian.Plug.current_resource(conn)
+    current_user = GuardianImpl.Plug.current_resource(conn)
 
     case UserPermissions.check(current_user, :flag, :comment) do
       {:ok, num_available} -> json(conn, %{flags_available: num_available})
@@ -95,7 +96,7 @@ defmodule CaptainFactWeb.UserController do
   def delete(conn, _params) do
     # TODO Soft delete, do the real delete after 1 week to avoid user mistakes
     conn
-    |> Guardian.Plug.current_resource()
+    |> GuardianImpl.Plug.current_resource()
     |> Accounts.delete_account()
     |> Result.and_then(fn _ ->
       send_resp(conn, :no_content, "")
@@ -107,7 +108,7 @@ defmodule CaptainFactWeb.UserController do
     with {achievement_id, _} <- Integer.parse(achievement),
          true <- achievement_id in @user_unlockable_achievements,
          {:ok, user} <-
-           Accounts.unlock_achievement(Guardian.Plug.current_resource(conn), achievement_id) do
+           Accounts.unlock_achievement(GuardianImpl.Plug.current_resource(conn), achievement_id) do
       render(conn, UserView, :show, user: user)
     else
       _ ->
@@ -123,7 +124,7 @@ defmodule CaptainFactWeb.UserController do
 
   def complete_onboarding_step(conn, %{"step" => step}) do
     conn
-    |> Guardian.Plug.current_resource()
+    |> GuardianImpl.Plug.current_resource()
     |> Accounts.complete_onboarding_step(step)
     |> Result.either(
       fn reason ->
@@ -140,7 +141,7 @@ defmodule CaptainFactWeb.UserController do
 
   def complete_onboarding_steps(conn, %{"steps" => steps} = _params) do
     conn
-    |> Guardian.Plug.current_resource()
+    |> GuardianImpl.Plug.current_resource()
     |> Accounts.complete_onboarding_steps(steps)
     |> Result.either(
       fn reason ->
@@ -157,7 +158,7 @@ defmodule CaptainFactWeb.UserController do
 
   def delete_onboarding(conn, _params) do
     conn
-    |> Guardian.Plug.current_resource()
+    |> GuardianImpl.Plug.current_resource()
     |> Accounts.delete_onboarding()
     |> Result.either(
       fn _reason ->
@@ -195,7 +196,7 @@ defmodule CaptainFactWeb.UserController do
   # ---- Invitations ----
 
   def request_invitation(conn, params = %{"email" => email}) do
-    connected_user = Guardian.Plug.current_resource(conn)
+    connected_user = GuardianImpl.Plug.current_resource(conn)
 
     case Invitations.request_invitation(email, connected_user, params["locale"]) do
       {:ok, _} ->
