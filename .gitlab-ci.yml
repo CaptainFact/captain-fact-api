@@ -25,6 +25,7 @@ test_api:
   services: ["postgres:9.6"]
   cache: {paths: ["_build", "deps"]}
   variables:
+    DB_HOSTNAME: postgres
     DB_NAME: captain_fact_test
     DB_PASSWORD: postgres
   before_script:
@@ -38,7 +39,7 @@ test_api:
 
 build_api:
   stage: build
-  only: [tags, triggers, schedules, pushes, /^(master|staging)$/]
+  only: [tags, triggers, schedules, /^(master|staging)$/]
   tags: [docker, captainfact, api]
   script:
     - docker build -t ${CF_API_BUILD_IMAGE} -f ./rel/docker/Dockerfile.build .
