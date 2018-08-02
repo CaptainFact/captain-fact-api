@@ -1,4 +1,4 @@
-# ---- Config ----
+# ----- Config -----
 
 stages:
   - test
@@ -15,7 +15,7 @@ variables:
   CF_API_ATOM_FEED: captainfact/atom-feed:$CI_COMMIT_REF_SLUG
   CF_API_OPENGRAPH_IMAGE: captainfact/opengraph:$CI_COMMIT_REF_SLUG
 
-# ---- Jobs ----
+# ----- Jobs -----
 
 test_api:
   stage: test
