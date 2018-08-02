@@ -36,7 +36,7 @@ test_api:
 
 build_api:
   stage: build
-  only: [tags, triggers, schedules, pushes, /^(master|staging)$/]]
+  only: [tags, triggers, schedules, pushes, /^(master|staging)$/]
   tags: [docker, captainfact, api]
   script:
     - docker build -t ${CF_API_BUILD_IMAGE} -f ./rel/docker/Dockerfile.build .
