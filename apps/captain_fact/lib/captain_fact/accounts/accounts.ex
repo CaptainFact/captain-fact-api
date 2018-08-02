@@ -182,7 +182,6 @@ defmodule CaptainFact.Accounts do
     if Application.get_env(:captain_fact, :env) != :test do
       case DB.Type.UserPicture.store({picture_url, user}) do
         {:ok, picture} ->
-          IO.puts "picture url"
           Repo.update(User.changeset_picture(user, picture))
 
         error ->
