@@ -20,7 +20,7 @@ variables:
 test_api:
   stage: test
   only: [tags, triggers, schedules, pushes]
-  tags: [docker, captainfact, api]
+  tags: [docker]
   image: elixir:1.6
   services: ["postgres:9.6"]
   cache: {paths: ["_build", "deps"]}
