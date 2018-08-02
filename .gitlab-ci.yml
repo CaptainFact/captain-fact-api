@@ -21,7 +21,7 @@ test_api:
   stage: test
   only: [tags, triggers, schedules, pushes]
   tags: [docker, captainfact, api]
-  image: bitwalker/alpine-elixir:1.6.6
+  image: elixir:1.6
   services: ["postgres:9.6"]
   cache: {paths: ["_build", "deps"]}
   variables:
