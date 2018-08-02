@@ -75,6 +75,13 @@ defmodule CaptainFact.Accounts do
       confirm_email!(user)
     end
 
+    if user.picture_url == nil do
+      Task.start(fn ->
+        pic_url = DB.Type.UserPicture.default_url(:thumb, user)
+        fetch_picture(user, pic_url)
+      end)
+    end
+
     # Return final result
     result
   end
@@ -171,9 +178,11 @@ defmodule CaptainFact.Accounts do
     do: {:error, :invalid_path}
 
   def fetch_picture(user, picture_url) do
+    # TODO config instead of matching env
     if Application.get_env(:captain_fact, :env) != :test do
       case DB.Type.UserPicture.store({picture_url, user}) do
         {:ok, picture} ->
+          IO.puts "picture url"
           Repo.update(User.changeset_picture(user, picture))
 
         error ->
