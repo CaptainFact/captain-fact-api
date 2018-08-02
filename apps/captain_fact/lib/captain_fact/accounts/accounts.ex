@@ -83,6 +83,7 @@ defmodule CaptainFact.Accounts do
   Update user
   """
   def update(user, params) do
+    # TODO bang function name or unbang check
     UserPermissions.check!(user, :update, :user)
 
     user
