@@ -1,8 +1,8 @@
-# ---- Config ----
+# ----- Config -----
 
 stages:
-  - build
   - test
+  - build
   - package
   - release
 
@@ -15,45 +15,33 @@ variables:
   CF_API_ATOM_FEED: captainfact/atom-feed:$CI_COMMIT_REF_SLUG
   CF_API_OPENGRAPH_IMAGE: captainfact/opengraph:$CI_COMMIT_REF_SLUG
 
-# ---- Jobs ----
-
-build_api:
-  stage: build
-  only: [tags, triggers, schedules, pushes]
-  tags: [docker, captainfact, api]
-  script:
-    - docker build 
-      -t ${CF_API_BUILD_IMAGE} 
-      -f ./rel/docker/Dockerfile.build
-      .
+# ----- Jobs -----
 
 test_api:
   stage: test
   only: [tags, triggers, schedules, pushes]
-  tags: [docker, captainfact, api]
+  tags: [docker]
+  image: elixir:1.6
+  services: ["postgres:9.6"]
+  cache: {paths: ["_build", "deps"]}
   variables:
-    TEST_NETWORK: network_api_testing
-    TEST_DB: api_postgres_testing
+    MIX_ENV: test
+    CF_DB_HOSTNAME: postgres
   before_script:
-    - (docker network rm $TEST_NETWORK || /bin/true) && docker network create $TEST_NETWORK
-    - ((docker stop $TEST_DB && docker rm $TEST_DB) || /bin/true) &&
-      docker run -d
-      --name $TEST_DB 
-      --network $TEST_NETWORK
-      -e POSTGRES_DB=captain_fact_test 
-      -e POSTGRES_PASSWORD=postgres
-      postgres:9.6
+    - mix local.hex --force
+    - mix local.rebar --force
+    - mix deps.get
+    - mix ecto.create
+    - mix ecto.migrate
   script:
-    - docker run 
-      --rm 
-      --network $TEST_NETWORK 
-      -e MIX_ENV=test 
-      -e CF_DB_HOSTNAME=$TEST_DB
-      $CF_API_BUILD_IMAGE 
-      /bin/sh -c "mix ecto.reset && mix coveralls --umbrella"
-  after_script:
-    - (docker stop $TEST_DB && docker rm $TEST_DB) || /bin/true
-    - docker network rm $TEST_NETWORK || /bin/true
+    - mix coveralls --umbrella
+
+build_api:
+  stage: build
+  only: [tags, triggers, schedules, /^(master|staging)$/]
+  tags: [docker, captainfact, api]
+  script:
+    - docker build -t ${CF_API_BUILD_IMAGE} -f ./rel/docker/Dockerfile.build .
 
 package_api:
   stage: package
