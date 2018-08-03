@@ -27,7 +27,9 @@ defmodule CaptainFact.Application do
       worker(CaptainFactJobs.Votes, []),
       worker(CaptainFactJobs.Moderation, []),
       # Misc workers
-      worker(CaptainFact.Accounts.UsernameGenerator, [])
+      worker(CaptainFact.Accounts.UsernameGenerator, []),
+      # Sweep tokens from db
+      worker(Guardian.DB.Token.SweeperServer, [])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
