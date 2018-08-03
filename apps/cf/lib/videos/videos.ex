@@ -27,7 +27,20 @@ defmodule CF.Videos do
     * language: two characters identifier string (fr,en,es...etc) or
                 "unknown" to list videos with unknown language
   """
-  def videos_list(filters \\ [], with_speakers \\ true)
+  def videos_list(filters \\ [], with_speakers \\ true, with_categories \\ true) do
+    with_speakers = fn q ->
+      if with_speakers, do: Video.with_speakers(q), else: q
+    end
+
+    with_categories = fn q ->
+      if with_categories, do: Video.with_categories(q), else: q
+    end
+
+    Video
+    |> Video.query_list(filters)
+    |> with_speakers.()
+    |> with_categories.()
+  end
 
   def videos_list(filters, true),
     do: Repo.all(Video.query_list(Video.with_speakers(Video), filters))
