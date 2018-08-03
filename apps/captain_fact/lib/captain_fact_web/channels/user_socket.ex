@@ -20,7 +20,7 @@ defmodule CaptainFactWeb.UserSocket do
   # Connect with token
   def connect(%{"token" => token}, socket) do
     case authenticate(socket, GuardianImpl, token) do
-      {:ok, authed_socket, _guardian_params} ->
+      {:ok, authed_socket} ->
         user_id =
           case Guardian.Phoenix.Socket.current_resource(authed_socket) do
             nil -> nil
