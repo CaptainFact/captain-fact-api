@@ -19,6 +19,7 @@ defmodule DB.Schema.Video do
     field(:unlisted, :boolean, null: false)
     field(:is_partner, :boolean, null: false)
 
+    many_to_many(:categories, Category, join_through: "categories_videos", on_delete: :delete_all)
     many_to_many(:speakers, Speaker, join_through: VideoSpeaker, on_delete: :delete_all)
     has_many(:statements, Statement, on_delete: :delete_all)
 
