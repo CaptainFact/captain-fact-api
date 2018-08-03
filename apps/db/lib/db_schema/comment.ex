@@ -8,6 +8,8 @@ defmodule DB.Schema.Comment do
 
   alias DB.Schema.{Comment, User, Statement, Source}
 
+  @max_length 512
+
   schema "comments" do
     field(:text, :string)
     field(:approve, :boolean)
@@ -69,6 +71,12 @@ defmodule DB.Schema.Comment do
     from(c in query, preload: [:statement])
   end
 
+  # Getters
+
+  def max_length, do: @max_length
+
+  # Changesets
+
   @required_fields ~w(statement_id user_id)a
   @optional_fields ~w(approve text reply_to_id)a
 
@@ -82,7 +90,7 @@ defmodule DB.Schema.Comment do
     |> validate_required(@required_fields)
     |> validate_source_or_text()
     |> validate_text()
-    |> validate_length(:text, min: 1, max: 255)
+    |> validate_length(:text, min: 1, max: @max_length)
   end
 
   def prepare_text(str) do
