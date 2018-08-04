@@ -18,7 +18,6 @@ COPY apps/cf_atom_feed/mix.exs apps/cf_atom_feed/
 COPY apps/db/mix.exs apps/db/
 COPY apps/cf_opengraph/mix.exs apps/cf_opengraph/
 RUN mix deps.get
-RUN mix deps.compile
 
 # Copy main project and build releases
 COPY . .
