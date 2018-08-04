@@ -22,6 +22,27 @@ defmodule CaptainFact.Comments.CommentsTest do
   }
 
   describe "add_comment" do
+    test "insert simple comment" do
+      user = insert(:user)
+      statement = insert(:statement)
+      context = video_debate_context(statement.video_id)
+      text = String.duplicate("x", Comment.max_length())
+      params = %{statement_id: statement.id, text: text}
+      comment = Comments.add_comment(user, context, params)
+      assert comment.text == params.text
+    end
+
+    test "returns an error if text is too long" do
+      user = insert(:user)
+      statement = insert(:statement)
+      context = video_debate_context(statement.video_id)
+      text = String.duplicate("x", Comment.max_length() + 1)
+      params = %{statement_id: statement.id, text: text}
+      assert_raise Ecto.InvalidChangesetError, fn ->
+        Comments.add_comment(user, context, params)
+      end
+    end
+
     test "returns comment and call callback once updated" do
       # Start a server to provide a valid page
       attributes = Map.put(@valid_source_attributes, :url, unique_url())
