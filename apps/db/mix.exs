@@ -41,7 +41,7 @@ defmodule DB.Mixfile do
       {:ecto, "~> 2.2.8"},
       {:postgrex, "~> 0.13.3"},
       {:weave, "3.1.2"},
-      {:ex_aws, "~> 1.1"},
+      {:ex_aws, "~> 2.1"},
       {:xml_builder, "~> 2.0", override: true},
       {:slugger, "~> 0.2"},
       {:comeonin, "~> 4.1.1"},
