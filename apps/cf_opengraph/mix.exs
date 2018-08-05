@@ -4,7 +4,7 @@ defmodule CF.Opengraph.MixProject do
   def project do
     [
       app: :cf_opengraph,
-      version: "0.8.12",
+      version: "0.8.13",
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
       deps: deps(),

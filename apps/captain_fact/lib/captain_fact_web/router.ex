@@ -1,6 +1,8 @@
 defmodule CaptainFactWeb.Router do
   use CaptainFactWeb, :router
 
+  alias CaptainFact.Authenticator.GuardianImpl
+
   # ---- Pipelines ----
 
   pipeline :api do
@@ -8,8 +10,9 @@ defmodule CaptainFactWeb.Router do
   end
 
   pipeline :api_auth do
+    plug(GuardianImpl.Pipeline)
     plug(Guardian.Plug.VerifyHeader, realm: "Bearer")
-    plug(Guardian.Plug.LoadResource)
+    plug(Guardian.Plug.LoadResource, allow_blank: true)
   end
 
   # -------- Routes --------

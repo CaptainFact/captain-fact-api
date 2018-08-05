@@ -12,8 +12,9 @@ config :captain_fact, CaptainFactWeb.Endpoint,
   secret_key_base: "psZ6n/fq0b444U533yKtve2R0rpjk/IxRGpuanNE92phSDy8/Z2I8lHaIugCMOY7"
 
 # Configure Guardian (authentication)
-config :guardian, Guardian,
-  secret_key: "psZ6n/fq0b444U533yKtve2R0rpjk/IxRGpuanNE92phSDy8/Z2I8lHaIugCMOY7"
+config :captain_fact,
+       CaptainFact.Authenticator.GuardianImpl,
+       secret_key: "psZ6n/fq0b444U533yKtve2R0rpjk/IxRGpuanNE92phSDy8/Z2I8lHaIugCMOY7"
 
 # Print only warnings and errors during test
 config :logger, level: :warn

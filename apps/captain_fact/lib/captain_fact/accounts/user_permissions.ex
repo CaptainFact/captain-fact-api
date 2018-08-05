@@ -16,8 +16,6 @@ defmodule CaptainFact.Accounts.UserPermissions do
 
   # 24 hours
   @daily_limit 24 * 60 * 60
-  # 1 week
-  @weekly_limit 7 * @daily_limit
 
   @error_not_enough_reputation "not_enough_reputation"
   @error_limit_reached "limit_reached"
@@ -116,9 +114,6 @@ defmodule CaptainFact.Accounts.UserPermissions do
   @doc """
   Count the number of occurences of this user / action type in limited perdiod.
   """
-  def action_count(user, :add, :video),
-    do: Actions.count(user, :add, :video, @weekly_limit)
-
   def action_count(user, action_type, entity) do
     if is_wildcard_limitation(action_type) do
       Actions.count_wildcard(user, action_type, @daily_limit)

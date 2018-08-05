@@ -52,11 +52,13 @@ config :logger, :console,
   metadata: [:request_id]
 
 # Configure Guardian (authentication)
-config :guardian, Guardian,
+config :captain_fact, CaptainFact.Authenticator.Guardian,
   issuer: "CaptainFact",
   ttl: {30, :days},
   serializer: CaptainFact.Accounts.GuardianSerializer,
   permissions: %{default: [:read, :write]}
+
+config :guardian, Guardian.DB, repo: DB.Repo
 
 config :weave,
   environment_prefix: "CF_",

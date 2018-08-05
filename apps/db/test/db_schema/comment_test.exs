@@ -37,13 +37,15 @@ defmodule DB.Schema.CommentTest do
     refute changeset.valid?
   end
 
-  test "comment text length must be less than 255 characters" do
-    attrs = %{text: String.duplicate("x", 256)}
-    assert {:text, "should be at most 255 character(s)"} in errors_on(%Comment{}, attrs)
+  test "comment text length has a limit" do
+    attrs = %{text: String.duplicate("x", Comment.max_length() + 1)}
+    expected_error = {:text, "should be at most #{Comment.max_length()} character(s)"}
+    assert expected_error in errors_on(%Comment{}, attrs)
   end
 
   test "comment text cannot contains urls" do
     attrs = %{text: "Hey check this out https://website.com/article it's awesome!"}
-    assert {:text, "Cannot include URL. Use source field instead"} in errors_on(%Comment{}, attrs)
+    expected_error = {:text, "Cannot include URL. Use source field instead"} 
+    assert expected_error in errors_on(%Comment{}, attrs)
   end
 end

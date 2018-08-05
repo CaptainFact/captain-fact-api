@@ -25,7 +25,7 @@ defmodule CaptainFact.Comments do
     |> Repo.all()
   end
 
-  def add_comment(user, context, params, source_url, source_fetch_callback \\ nil) do
+  def add_comment(user, context, params, source_url \\ nil, source_fetch_callback \\ nil) do
     # TODO [Security] What if reply_to_id refer to a comment that is on a different statement ?
     UserPermissions.check!(user, :create, :comment)
     source_url = source_url && Source.prepare_url(source_url)

@@ -106,7 +106,7 @@ defmodule CF.GraphQL.Schema.ContentTypes do
   object :comment do
     field(:id, non_null(:id))
     @desc "User who made the comment"
-    field :user, non_null(:user) do
+    field :user, :user do
       resolve(assoc(:user))
       complexity(join_complexity())
     end

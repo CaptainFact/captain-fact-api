@@ -4,7 +4,7 @@ defmodule DB.Mixfile do
   def project do
     [
       app: :db,
-      version: "0.8.12",
+      version: "0.8.13",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
@@ -41,7 +41,8 @@ defmodule DB.Mixfile do
       {:ecto, "~> 2.2.8"},
       {:postgrex, "~> 0.13.3"},
       {:weave, "3.1.2"},
-      {:ex_aws, "~> 1.1"},
+      {:ex_aws, "~> 2.1"},
+      {:ex_aws_s3, "~> 2.0"},
       {:xml_builder, "~> 2.0", override: true},
       {:slugger, "~> 0.2"},
       {:comeonin, "~> 4.1.1"},
