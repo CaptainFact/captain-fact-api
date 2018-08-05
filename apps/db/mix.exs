@@ -42,6 +42,7 @@ defmodule DB.Mixfile do
       {:postgrex, "~> 0.13.3"},
       {:weave, "3.1.2"},
       {:ex_aws, "~> 2.1"},
+      {:ex_aws_s3, "~> 2.0"},
       {:xml_builder, "~> 2.0", override: true},
       {:slugger, "~> 0.2"},
       {:comeonin, "~> 4.1.1"},
