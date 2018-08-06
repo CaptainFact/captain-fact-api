@@ -45,7 +45,7 @@ defmodule DB.Schema.CommentTest do
 
   test "comment text cannot contains urls" do
     attrs = %{text: "Hey check this out https://website.com/article it's awesome!"}
-    expected_error = {:text, "Cannot include URL. Use source field instead"} 
+    expected_error = {:text, "Cannot include URL. Use source field instead"}
     assert expected_error in errors_on(%Comment{}, attrs)
   end
 end
