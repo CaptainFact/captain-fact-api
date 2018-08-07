@@ -6,13 +6,19 @@ defmodule CaptainFactWeb.StatementsChannel do
   import CaptainFact.VideoDebate.ActionCreator,
     only: [action_create: 3, action_update: 3, action_delete: 3]
 
+  alias Ecto.Changeset
   alias Ecto.Multi
   alias CaptainFact.Videos
   alias DB.Type.VideoHashId
   alias CaptainFact.Accounts.UserPermissions
   alias CaptainFact.Actions.Recorder
   alias DB.Schema.Statement
-  alias CaptainFactWeb.{StatementView, ErrorView}
+
+  alias CaptainFactWeb.ChangesetView
+  alias CaptainFactWeb.ErrorView
+  alias CaptainFactWeb.StatementView
+
+  alias Kaur.Result
 
   def join("statements:video:" <> video_hash_id, _payload, socket) do
     video_id = VideoHashId.decode!(video_hash_id)
@@ -68,6 +74,11 @@ defmodule CaptainFactWeb.StatementsChannel do
         rendered_statement = StatementView.render("show.json", statement: statement)
         broadcast!(socket, "statement_added", rendered_statement)
         {:reply, {:ok, rendered_statement}, socket}
+
+      {:error, _operation, errored_changeset = %Changeset{}, _changes} ->
+        view = ChangesetView.render("error.json", %{changeset: errored_changeset})
+
+        {:reply, Result.error(view), socket}
 
       {:error, _operation, reason, _changes} ->
         {:reply, {:error, ErrorView.render("error.json", reason: reason)}, socket}
