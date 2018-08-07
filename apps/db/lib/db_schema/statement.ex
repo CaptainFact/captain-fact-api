@@ -15,15 +15,14 @@ defmodule DB.Schema.Statement do
     timestamps()
   end
 
-  @required_fields ~w(text time video_id)a
-  @optional_fields ~w(speaker_id)a
+  @required_fields ~w(text time video_id speaker_id)a
 
   @doc """
   Builds a changeset based on the `struct` and `params`.
   """
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, @required_fields ++ @optional_fields)
+    |> cast(params, @required_fields)
     |> validate_required(@required_fields)
     |> validate_number(:time, greater_than_or_equal_to: 0)
     |> validate_length(:text, min: 10, max: 255)
