@@ -26,7 +26,7 @@ defmodule CaptainFactAPI.Mixfile do
 
       # ---- Test and Dev
       {:excoveralls, "~> 0.8", only: :test},
-      {:credo, "~> 0.9.1", only: [:dev, :test], runtime: false},
+      {:credo, "~> 0.10.0", only: [:dev, :test], runtime: false},
       {:mix_test_watch, "~> 0.6", only: :dev, runtime: false}
     ]
   end
