@@ -38,6 +38,7 @@ defmodule CaptainFact.Comments.CommentsTest do
       context = video_debate_context(statement.video_id)
       text = String.duplicate("x", Comment.max_length() + 1)
       params = %{statement_id: statement.id, text: text}
+
       assert_raise Ecto.InvalidChangesetError, fn ->
         Comments.add_comment(user, context, params)
       end

@@ -35,6 +35,7 @@ test_api:
     - mix ecto.migrate
   script:
     - mix coveralls --umbrella
+    - mix format --check-formatted
 
 build_api:
   stage: build
