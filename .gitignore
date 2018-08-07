@@ -13,3 +13,6 @@ apps/*/cover
 
 # Misc
 until_fail.sh
+
+# Secrets
+**/secrets/

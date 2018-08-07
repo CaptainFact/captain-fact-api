@@ -7,37 +7,7 @@ defmodule CaptainFact.Actions do
 
   alias DB.Schema.{User, UserAction}
   alias DB.Repo
-
-  @doc """
-  Return all action concerning user, which is actions he made + actions he was
-  targeted by.
-  """
-  @spec query_about_user(Ecto.Queryable.t(), %User{}) :: Ecto.Queryable.t()
-  def query_about_user(query, %User{id: id}) do
-    query
-    |> where([a], a.user_id == ^id)
-    |> or_where([a], a.target_user_id == ^id)
-  end
-
-  @doc """
-  Filter given query on matching `types` only
-  """
-  @spec query_matching_types(Ecto.Queryable.t(), nonempty_list(integer)) :: Ecto.Queryable.t()
-  def query_matching_types(query, types) do
-    where(query, [a], a.type in ^types)
-  end
-
-  @doc """
-  Filter given query to return only actions that occured between `date_start`
-  and `date_end`.
-  """
-  @spec query_period(Ecto.Queryable.t(), NaiveDateTime.t(), NaiveDateTime.t()) ::
-          Ecto.Queryable.t()
-  def query_period(query, datetime_start, datetime_end) do
-    query
-    |> where([a], a.inserted_at >= ^datetime_start)
-    |> where([a], a.inserted_at <= ^datetime_end)
-  end
+  alias DB.Query.Actions, as: ActionsQuery
 
   @doc """
   Count all actions with `action_type` type for this entity
@@ -74,7 +44,7 @@ defmodule CaptainFact.Actions do
   defp age_filter(query, age) do
     datetime_now = NaiveDateTime.utc_now()
     datetime_start = NaiveDateTime.add(datetime_now, -age)
-    query_period(query, datetime_start, datetime_now)
+    ActionsQuery.for_period(query, datetime_start, datetime_now)
   end
 
   # Utils

@@ -149,6 +149,7 @@ defmodule CF.GraphQL.Schema.ContentTypes do
 
   @desc "A user registered on the website"
   object :user do
+    @desc "Unique user ID"
     field(:id, non_null(:id))
     @desc "Unique username"
     field(:username, non_null(:string))
@@ -164,6 +165,33 @@ defmodule CF.GraphQL.Schema.ContentTypes do
     field(:achievements, list_of(:integer))
     @desc "User's registration datetime"
     field(:registered_at, :string, do: fn u, _, _ -> {:ok, u.inserted_at} end)
+    @desc "User activity log"
+    field :actions, list_of(:user_action) do
+      complexity(join_complexity())
+      resolve(&Resolvers.Users.activity_log/3)
+    end
+  end
+
+  @desc "Describe a user action"
+  object :user_action do
+    @desc "Unique action ID"
+    field(:id, non_null(:id))
+    @desc "User who made the action"
+    field :user, :user do
+      resolve(assoc(:user))
+      complexity(join_complexity())
+    end
+    @desc "User targeted by the action"
+    field :targeted_user, :user do
+      resolve(assoc(:targeted_user))
+      complexity(join_complexity())
+    end
+    @desc "Action type"
+    field(:type, non_null(:integer))
+    @desc "Entity type"
+    field(:entity, non_null(:integer))
+    @desc "Datetime at which the action has been done"
+    field(:inserted_at, :string)
   end
 
   @desc "Information about the application"
