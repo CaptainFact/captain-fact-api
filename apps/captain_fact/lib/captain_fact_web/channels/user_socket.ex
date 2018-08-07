@@ -31,6 +31,7 @@ defmodule CaptainFactWeb.UserSocket do
 
       _ ->
         # Fallback on default socket
+        Logger.warn("The authenticated connexion has failed; falling back to default socket")
         {:ok, assign(socket, :user_id, nil)}
     end
   end
