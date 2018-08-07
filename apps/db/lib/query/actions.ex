@@ -43,11 +43,18 @@ defmodule DB.Query.Actions do
   end
 
   @doc """
+  Filter given query on matching entity types
+  """
+  @spec matching_entities(Ecto.Queryable.t(), nonempty_list(integer)) :: Ecto.Queryable.t()
+  def matching_entities(query, types) do
+    where(query, [a], a.entity in ^types)
+  end
+
+  @doc """
   Filter given query to return only actions that occured between `date_start`
   and `date_end`.
   """
-  @spec for_period(Ecto.Queryable.t(), NaiveDateTime.t(), NaiveDateTime.t()) ::
-          Ecto.Queryable.t()
+  @spec for_period(Ecto.Queryable.t(), NaiveDateTime.t(), NaiveDateTime.t()) :: Ecto.Queryable.t()
   def for_period(query, datetime_start, datetime_end) do
     query
     |> where([a], a.inserted_at >= ^datetime_start)

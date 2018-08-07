@@ -181,17 +181,19 @@ defmodule CF.GraphQL.Schema.ContentTypes do
       resolve(assoc(:user))
       complexity(join_complexity())
     end
+
     @desc "User targeted by the action"
     field :targeted_user, :user do
       resolve(assoc(:targeted_user))
       complexity(join_complexity())
     end
+
     @desc "Action type"
     field(:type, non_null(:integer))
     @desc "Entity type"
     field(:entity, non_null(:integer))
     @desc "Datetime at which the action has been done"
-    field(:inserted_at, :string)
+    field(:time, :string, do: resolve(fn a, _, _ -> {:ok, a.inserted_at} end))
   end
 
   @desc "Information about the application"
