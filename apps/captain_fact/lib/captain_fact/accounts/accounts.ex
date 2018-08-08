@@ -23,6 +23,9 @@ defmodule CaptainFact.Accounts do
   # 48 hours
   @request_validity 48 * 60 * 60
 
+  # Configure Fetching of user picture on adorable.io
+  @fetch_default_picture Application.get_env(:captain_fact, :fetch_default_user_picture, true)
+
   # ---- User creation ----
 
   @doc """
@@ -75,7 +78,7 @@ defmodule CaptainFact.Accounts do
       confirm_email!(user)
     end
 
-    if user.picture_url == nil do
+    if @fetch_default_picture && user.picture_url == nil do
       Task.start(fn ->
         pic_url = DB.Type.UserPicture.default_url(:thumb, user)
         fetch_picture(user, pic_url)
