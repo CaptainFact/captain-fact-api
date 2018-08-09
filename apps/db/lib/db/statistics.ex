@@ -1,39 +1,25 @@
 defmodule DB.Statistics do
-  alias DB.Schema.{
-    Comment,
-    InvitationRequest,
-    User,
-    Source,
-    Statement
-  }
-
-  alias DB.Repo
-
   import Ecto.Query
+
+  alias DB.Schema.User
+  alias DB.Repo
 
   @doc """
   A shortcut to returns the amount of user in the database
   """
-  @spec user_count() :: integer
-  def user_count, do: Repo.aggregate(User, :count, :id)
-
-  @doc """
-  A shortcut to returns the amount of comment in the database
-  """
-  @spec comment_count() :: integer
-  def comment_count, do: Repo.aggregate(Comment, :count, :id)
-
-  @doc """
-  A shortcut to returns the amount of statement in the database
-  """
-  @spec statement_count() :: integer
-  def statement_count, do: Repo.aggregate(Statement, :count, :id)
-
-  @doc """
-  A shortcut to returns the amount of source in the database
-  """
-  @spec source_count() :: integer
-  def source_count, do: Repo.aggregate(Source, :count, :id)
+  @spec all_totals() :: %{users: integer, comments: integer, statements: integer, sources: integer}
+  def all_totals() do
+    Repo
+    |> Ecto.Adapters.SQL.query!("""
+      SELECT  (select count(id) FROM users) as users, 
+              (select count(id) FROM comments) as comments,
+              (select count(id) FROM statements) as statements, 
+              (select count(id) FROM sources) as sources
+    """)
+    |> (fn %Postgrex.Result{rows: [[users, comments, statements, sources]]} ->
+          %{users: users, comments: comments, statements: statements, sources: sources}
+        end).()
+  end
 
   @doc """
   returns the 20 most active users
@@ -46,15 +32,5 @@ defmodule DB.Statistics do
       limit: 20
     )
     |> Repo.all()
-  end
-
-  @doc """
-  returns the amount of not yet treated invites
-  """
-  @spec pending_invites_count() :: integer
-  def pending_invites_count do
-    InvitationRequest
-    |> where([i], i.invitation_sent == false and not is_nil(i.email))
-    |> Repo.aggregate(:count, :id)
   end
 end
