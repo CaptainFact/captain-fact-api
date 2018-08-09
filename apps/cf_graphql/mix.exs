@@ -44,9 +44,9 @@ defmodule CF.GraphQL.Mixfile do
       {:weave, "3.1.2"},
       {:poison, "~> 3.1"},
       {:db, in_umbrella: true},
-      
+
       # Dev only
-      {:exsync, "~> 0.2", only: :dev},
+      {:exsync, "~> 0.2", only: :dev}
     ]
   end
 
