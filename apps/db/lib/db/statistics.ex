@@ -7,7 +7,12 @@ defmodule DB.Statistics do
   @doc """
   A shortcut to returns the amount of user in the database
   """
-  @spec all_totals() :: %{users: integer, comments: integer, statements: integer, sources: integer}
+  @spec all_totals() :: %{
+          users: integer,
+          comments: integer,
+          statements: integer,
+          sources: integer
+        }
   def all_totals() do
     Repo
     |> Ecto.Adapters.SQL.query!("""

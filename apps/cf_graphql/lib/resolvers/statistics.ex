@@ -7,7 +7,6 @@ defmodule CF.GraphQL.Resolvers.Statistics do
 
   alias Kaur.Result
 
-
   @doc """
   Get default statistic object
   """

@@ -58,24 +58,24 @@ defmodule DB.StatisticsTest do
 
   describe "statement_count/0" do
     test "it returns an integer" do
-      statement_count = Statistics.all_totals.statements
+      statement_count = Statistics.all_totals().statements
 
       assert is_integer(statement_count)
     end
 
     test "it is incremented by adding a statement" do
-      statement_count = Statistics.all_totals.statements
+      statement_count = Statistics.all_totals().statements
       insert(:statement)
-      diff = Statistics.all_totals.statements - statement_count
+      diff = Statistics.all_totals().statements - statement_count
 
       assert diff == 1
     end
 
     test "it is decremented by removing a statement" do
       statement = insert(:statement)
-      statement_count = Statistics.all_totals.statements
+      statement_count = Statistics.all_totals().statements
       Repo.delete(statement)
-      diff = Statistics.all_totals.statements - statement_count
+      diff = Statistics.all_totals().statements - statement_count
 
       assert diff == -1
     end
@@ -83,24 +83,24 @@ defmodule DB.StatisticsTest do
 
   describe "source_count/0" do
     test "it returns an integer" do
-      source_count = Statistics.all_totals.sources
+      source_count = Statistics.all_totals().sources
 
       assert is_integer(source_count)
     end
 
     test "it is incremented by adding a source" do
-      source_count = Statistics.all_totals.sources
+      source_count = Statistics.all_totals().sources
       insert(:source)
-      diff = Statistics.all_totals.sources - source_count
+      diff = Statistics.all_totals().sources - source_count
 
       assert diff == 1
     end
 
     test "it is decremented by removing a source" do
       source = insert(:source)
-      source_count = Statistics.all_totals.sources
+      source_count = Statistics.all_totals().sources
       Repo.delete(source)
-      diff = Statistics.all_totals.sources - source_count
+      diff = Statistics.all_totals().sources - source_count
 
       assert diff == -1
     end
