@@ -44,12 +44,12 @@ defmodule CF.GraphQL.Resolvers.Users do
   @doc """
   Resolve user actions history
   """
-  def activity_log(user, _, _) do
+  def activity_log(user, %{offset: offset, limit: limit}, _) do
     UserAction
     |> Actions.by_user(user)
     |> Actions.matching_entities(@watched_entities)
     |> DB.Query.order_by_last_inserted_desc()
-    |> Repo.all()
+    |> Repo.paginate(page: offset, page_size: limit)
     |> Result.ok()
   end
 end
