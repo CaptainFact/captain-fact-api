@@ -19,7 +19,7 @@ defmodule SeedPoliticians do
     })
   end
 
-  defp get_wikidata_item_id("http://www.wikidata.org/entity/Q" <> id), do: id
+  defp get_wikidata_item_id("http://www.wikidata.org/entity/" <> id), do: id
 
   defp seed_politician_with_picture(changes, names_filter) do
     {picture_url, changes} = Map.pop(changes, :picture)

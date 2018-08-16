@@ -69,7 +69,7 @@ defmodule CF.GraphQL.Schema.ContentTypes do
     @desc "Country code of the speaker's origin (from wikidata)"
     field(:country, :string)
     @desc "Wikidata unique identifier, without the 'Q' prefix"
-    field(:wikidata_item_id, :integer)
+    field(:wikidata_item_id, :string)
 
     @desc "True if speaker is user defined (editable), false if it comes from wikidata or has been validated"
     field(:is_user_defined, non_null(:boolean))
