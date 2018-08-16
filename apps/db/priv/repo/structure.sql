@@ -84,7 +84,7 @@ CREATE TABLE comments (
     statement_id integer NOT NULL,
     source_id integer,
     reply_to_id integer,
-    text character varying(255),
+    text character varying(512),
     approve boolean,
     is_reported boolean DEFAULT false NOT NULL,
     inserted_at timestamp without time zone NOT NULL,
@@ -142,6 +142,24 @@ CREATE SEQUENCE flags_id_seq
 --
 
 ALTER SEQUENCE flags_id_seq OWNED BY flags.id;
+
+
+--
+-- Name: guardian_tokens; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE guardian_tokens (
+    jti character varying(255) NOT NULL,
+    aud character varying(255) NOT NULL,
+    typ character varying(255),
+    iss character varying(255),
+    sub character varying(255),
+    exp bigint,
+    jwt text,
+    claims jsonb,
+    inserted_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
 
 
 --
@@ -266,14 +284,12 @@ CREATE TABLE speakers (
     id integer NOT NULL,
     full_name citext NOT NULL,
     title character varying(255),
-    is_user_defined boolean NOT NULL,
     picture character varying(255),
-    wikidata_item_id integer,
+    wikidata_item_id character varying(255),
     country character varying(255),
-    is_removed boolean DEFAULT false NOT NULL,
     inserted_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    slug character varying(255)
+    slug citext
 );
 
 
@@ -613,6 +629,14 @@ ALTER TABLE ONLY flags
 
 
 --
+-- Name: guardian_tokens guardian_tokens_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY guardian_tokens
+    ADD CONSTRAINT guardian_tokens_pkey PRIMARY KEY (jti, aud);
+
+
+--
 -- Name: invitation_requests invitation_requests_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -747,21 +771,21 @@ CREATE UNIQUE INDEX sources_url_index ON sources USING btree (url);
 -- Name: speakers_full_name_index; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX speakers_full_name_index ON speakers USING btree (full_name) WHERE (is_user_defined = false);
+CREATE INDEX speakers_full_name_index ON speakers USING btree (full_name);
 
 
 --
 -- Name: speakers_slug_index; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX speakers_slug_index ON speakers USING btree (slug) WHERE ((slug)::text <> NULL::text);
+CREATE UNIQUE INDEX speakers_slug_index ON speakers USING btree (slug) WHERE (slug IS NOT NULL);
 
 
 --
 -- Name: speakers_wikidata_item_id_index; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX speakers_wikidata_item_id_index ON speakers USING btree (wikidata_item_id) WHERE (is_user_defined = false);
+CREATE UNIQUE INDEX speakers_wikidata_item_id_index ON speakers USING btree (wikidata_item_id);
 
 
 --
@@ -1011,5 +1035,5 @@ ALTER TABLE ONLY votes
 -- PostgreSQL database dump complete
 --
 
-INSERT INTO public."schema_migrations" (version) VALUES (20170118223600), (20170118223631), (20170125235612), (20170206062334), (20170206063137), (20170221035619), (20170309214200), (20170309214307), (20170316233954), (20170428062411), (20170611075306), (20170726224741), (20170730064848), (20170928043353), (20171003220327), (20171003220416), (20171004100258), (20171005001838), (20171005215001), (20171009065840), (20171026222425), (20171105124655), (20171109105152), (20171110040302), (20171110212108), (20171117131508), (20171119075520), (20171205174328), (20180131002547), (20180302024059), (20180317062636), (20180330204602), (20180409035326), (20180503083056), (20180516170544), (20180605085958), (20180605144832), (20180730092029);
+INSERT INTO public."schema_migrations" (version) VALUES (20170118223600), (20170118223631), (20170125235612), (20170206062334), (20170206063137), (20170221035619), (20170309214200), (20170309214307), (20170316233954), (20170428062411), (20170611075306), (20170726224741), (20170730064848), (20170928043353), (20171003220327), (20171003220416), (20171004100258), (20171005001838), (20171005215001), (20171009065840), (20171026222425), (20171105124655), (20171109105152), (20171110040302), (20171110212108), (20171117131508), (20171119075520), (20171205174328), (20180131002547), (20180302024059), (20180317062636), (20180330204602), (20180409035326), (20180503083056), (20180516170544), (20180605085958), (20180605144832), (20180730092029), (20180801105246), (20180802155107), (20180803143819), (20180816112748), (20180816115534);
 

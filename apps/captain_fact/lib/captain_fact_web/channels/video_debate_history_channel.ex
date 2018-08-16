@@ -104,7 +104,6 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
       VideoSpeaker.changeset(%VideoSpeaker{speaker_id: speaker.id, video_id: video_id})
 
     Multi.new()
-    |> multi_undelete_speaker(speaker)
     |> Multi.insert(:video_speaker, video_speaker)
     |> Multi.insert(:action_restore, action_restore(user_id, video_id, speaker))
     |> Repo.transaction()
@@ -129,12 +128,5 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
       {:error, _reason} ->
         {:reply, :error, socket}
     end
-  end
-
-  # No need to do nothing if speaker is not user defined (cannot be removed)
-  defp multi_undelete_speaker(multi, %{is_user_defined: false}), do: multi
-
-  defp multi_undelete_speaker(multi, speaker) do
-    Multi.update(multi, :speaker, Speaker.changeset_restore(speaker))
   end
 end

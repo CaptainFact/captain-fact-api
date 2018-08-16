@@ -26,22 +26,21 @@ defmodule CaptainFact.Speakers do
   end
 
   @doc """
-  Set given speaker `is_user_defined` field to false which will prevent modifications. Also generates a slug.
+  Generate slug or update existing one for `speaker`
   """
-  def validate_speaker(speaker) do
+  def generate_slug(speaker = %Speaker{}) do
     speaker
-    |> Speaker.changeset_validate_speaker()
+    |> Speaker.changeset_generate_slug()
     |> Repo.update()
   end
 
   @doc """
-  Generate slugs for all speakers with `is_user_defined` set to false
+  Generate slugs for all speakers without one
   """
-  def generate_slugs() do
+  def generate_all_slugs() do
     Speaker
-    |> where([s], s.is_user_defined == false and is_nil(s.slug))
+    |> where([s], is_nil(s.slug))
     |> Repo.all()
-    |> Enum.map(&Speaker.changeset_validate_speaker/1)
-    |> Enum.map(&Repo.update/1)
+    |> Enum.map(&generate_slug/1)
   end
 end
