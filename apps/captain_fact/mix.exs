@@ -51,7 +51,7 @@ defmodule CaptainFact.Mixfile do
       {:floki, "~> 0.20.2"},
       {:html_entities, "~> 0.3"},
       {:httpoison, "~> 0.11"},
-      {:poison, "~> 2.2.0"},
+      {:poison, "~> 3.1"},
       {:csv, "~> 1.4.4"},
       {:quantum, github: "quantum-elixir/quantum-core"},
       {:timex, "~> 3.0"},
@@ -67,6 +67,9 @@ defmodule CaptainFact.Mixfile do
       # ---- Internal ----
       {:db, in_umbrella: true},
       {:cf_utils, in_umbrella: true},
+
+      # Dev only
+      {:exsync, "~> 0.2", only: :dev},
 
       # Test only
       {:bypass, "~> 0.8", only: :test},

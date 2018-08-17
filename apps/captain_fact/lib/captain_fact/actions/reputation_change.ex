@@ -4,7 +4,7 @@ defmodule CaptainFact.Actions.ReputationChange do
   """
 
   alias DB.Schema.{User, UserAction}
-  alias CaptainFact.Actions
+  alias DB.Query.Actions
   alias CaptainFact.Actions.ReputationChangeConfigLoader
 
   # Reputation changes definition
@@ -68,9 +68,9 @@ defmodule CaptainFact.Actions.ReputationChange do
   """
   def estimate_reputation_change_period(datetime_start, datetime_end, user) do
     UserAction
-    |> Actions.query_about_user(user)
-    |> Actions.query_matching_types(@actions_types)
-    |> Actions.query_period(datetime_start, datetime_end)
+    |> Actions.about_user(user)
+    |> Actions.matching_types(@actions_types)
+    |> Actions.for_period(datetime_start, datetime_end)
     |> DB.Repo.all()
     |> estimate_reputation_change(user)
   end

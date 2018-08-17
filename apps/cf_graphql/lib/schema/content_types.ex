@@ -2,6 +2,8 @@ defmodule CF.GraphQL.Schema.ContentTypes do
   use Absinthe.Schema.Notation
   use Absinthe.Ecto, repo: DB.Repo
 
+  alias Kaur.Result
+
   alias CF.GraphQL.Resolvers
   alias DB.Type.VideoHashId
 
@@ -25,6 +27,13 @@ defmodule CF.GraphQL.Schema.ContentTypes do
     quote do
       fn _, child_complexity -> unquote(complexity) + child_complexity end
     end
+  end
+
+  object :paginated do
+    field(:page_number, :integer)
+    field(:page_size, :integer)
+    field(:total_pages, :integer)
+    field(:total_entries, :integer)
   end
 
   @desc "Identifies a video. Only Youtube is supported at the moment"
@@ -149,6 +158,7 @@ defmodule CF.GraphQL.Schema.ContentTypes do
 
   @desc "A user registered on the website"
   object :user do
+    @desc "Unique user ID"
     field(:id, non_null(:id))
     @desc "Unique username"
     field(:username, non_null(:string))
@@ -164,6 +174,62 @@ defmodule CF.GraphQL.Schema.ContentTypes do
     field(:achievements, list_of(:integer))
     @desc "User's registration datetime"
     field(:registered_at, :string, do: fn u, _, _ -> {:ok, u.inserted_at} end)
+    @desc "User activity log"
+    field :actions, :activity_log do
+      complexity(join_complexity())
+      arg(:offset, :integer)
+      arg(:limit, :integer)
+      resolve(&Resolvers.Users.activity_log/3)
+    end
+  end
+
+  @desc "Describe a user action"
+  object :user_action do
+    @desc "Unique action ID"
+    field(:id, non_null(:id))
+    @desc "User who made the action"
+    field :user, :user do
+      resolve(assoc(:user))
+      complexity(join_complexity())
+    end
+
+    @desc "User targeted by the action"
+    field :target_user, :user do
+      resolve(assoc(:target_user))
+      complexity(join_complexity())
+    end
+
+    @desc "Actions context"
+    field(
+      :context,
+      :string,
+      do:
+        resolve(fn
+          %{context: "VD:" <> id}, _, _ ->
+            Result.ok("VD:" <> VideoHashId.encode(String.to_integer(id)))
+
+          _, _, _ ->
+            Result.ok(nil)
+        end)
+    )
+
+    @desc "Action type"
+    field(:type, non_null(:integer))
+    @desc "Entity type"
+    field(:entity, non_null(:integer))
+    @desc "Entity ID"
+    field(:entity_id, :integer)
+    @desc "Datetime at which the action has been done"
+    field(:time, :string, do: resolve(fn a, _, _ -> {:ok, a.inserted_at} end))
+    @desc "A map with all the changes made by this action"
+    field(
+      :changes,
+      :string,
+      do:
+        resolve(fn a, _, _ ->
+          {:ok, Poison.encode!(a.changes)}
+        end)
+    )
   end
 
   @desc "Information about the application"
@@ -190,5 +256,11 @@ defmodule CF.GraphQL.Schema.ContentTypes do
     field(:comments, non_null(:integer))
     field(:statements, non_null(:integer))
     field(:sources, non_null(:integer))
+  end
+
+  @desc "A paginated list of user actions"
+  object :activity_log do
+    import_fields(:paginated)
+    field(:entries, list_of(:user_action))
   end
 end

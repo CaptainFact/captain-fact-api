@@ -28,6 +28,13 @@ defmodule CF.GraphQL.Schema do
       resolve(&Resolvers.Videos.get/3)
     end
 
+    @desc "Get user public info"
+    field :user, :user do
+      arg(:id, :id)
+      arg(:username, :string)
+      resolve(&Resolvers.Users.get/3)
+    end
+
     @desc "Get app info"
     field :app_info, :app_info do
       resolve(&Resolvers.AppInfo.info/3)
