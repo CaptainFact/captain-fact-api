@@ -41,8 +41,8 @@ defmodule CF.GraphQL.Schema do
     end
 
     @desc "get all_statistics"
-    field :all_statistcs, :statistics do
-      resolve(&Resolvers.Statistics.get/2)
+    field :all_statistics, :statistics do
+      resolve(&Resolvers.Statistics.default/3)
     end
   end
 end

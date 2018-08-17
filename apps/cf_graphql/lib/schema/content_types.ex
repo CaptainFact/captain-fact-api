@@ -244,18 +244,18 @@ defmodule CF.GraphQL.Schema.ContentTypes do
 
   @desc "Statistics about the platform community"
   object :statistics do
-    @desc "the amount of user with a valid account"
-    field(:user_count, non_null(:integer))
-    @desc "the amount of comment"
-    field(:comment_count, non_null(:integer))
-    @desc "the amount of statements transcripted"
-    field(:statement_count, non_null(:integer))
-    @desc "the amount of sources given"
-    field(:source_count, non_null(:integer))
+    @desc "All totals"
+    field(:totals, :statistic_totals, do: resolve(&Resolvers.Statistics.all_totals/3))
     @desc "List the 20 best users"
-    field(:leaderboard, list_of(:user))
-    @desc "the amount of inviations request not validated yet"
-    field(:pending_invites_count, non_null(:integer))
+    field(:leaderboard, list_of(:user), do: resolve(&Resolvers.Statistics.leaderboard/2))
+  end
+
+  @desc "Counts for all public CF tables"
+  object :statistic_totals do
+    field(:users, non_null(:integer))
+    field(:comments, non_null(:integer))
+    field(:statements, non_null(:integer))
+    field(:sources, non_null(:integer))
   end
 
   @desc "A paginated list of user actions"

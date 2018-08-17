@@ -1,6 +1,6 @@
 defmodule DB.StatisticsTest do
   alias DB.{Repo, Statistics, Schema}
-  alias Schema.{InvitationRequest, User}
+  alias Schema.User
 
   import DB.Factory, only: [insert: 1, insert: 2]
 
@@ -8,24 +8,24 @@ defmodule DB.StatisticsTest do
 
   describe "user_count/0" do
     test "it returns an integer" do
-      user_count = Statistics.user_count()
+      user_count = Statistics.all_totals().users
 
       assert is_integer(user_count)
     end
 
     test "it is incremented by adding a user" do
-      user_count = Statistics.user_count()
+      user_count = Statistics.all_totals().users
       insert(:user)
-      diff = Statistics.user_count() - user_count
+      diff = Statistics.all_totals().users - user_count
 
       assert diff == 1
     end
 
     test "it is decremented by removing a user" do
       user = insert(:user)
-      user_count = Statistics.user_count()
+      user_count = Statistics.all_totals().users
       Repo.delete(user)
-      diff = Statistics.user_count() - user_count
+      diff = Statistics.all_totals().users - user_count
 
       assert diff == -1
     end
@@ -33,24 +33,24 @@ defmodule DB.StatisticsTest do
 
   describe "comment_count/0" do
     test "it returns an integer" do
-      comment_count = Statistics.comment_count()
+      comment_count = Statistics.all_totals().comments
 
       assert is_integer(comment_count)
     end
 
     test "it is incremented by adding a comment" do
-      comment_count = Statistics.comment_count()
+      comment_count = Statistics.all_totals().comments
       insert(:comment)
-      diff = Statistics.comment_count() - comment_count
+      diff = Statistics.all_totals().comments - comment_count
 
       assert diff == 1
     end
 
     test "it is decremented by removing a comment" do
       comment = insert(:comment)
-      comment_count = Statistics.comment_count()
+      comment_count = Statistics.all_totals().comments
       Repo.delete(comment)
-      diff = Statistics.comment_count() - comment_count
+      diff = Statistics.all_totals().comments - comment_count
 
       assert diff == -1
     end
@@ -58,24 +58,24 @@ defmodule DB.StatisticsTest do
 
   describe "statement_count/0" do
     test "it returns an integer" do
-      statement_count = Statistics.statement_count()
+      statement_count = Statistics.all_totals().statements
 
       assert is_integer(statement_count)
     end
 
     test "it is incremented by adding a statement" do
-      statement_count = Statistics.statement_count()
+      statement_count = Statistics.all_totals().statements
       insert(:statement)
-      diff = Statistics.statement_count() - statement_count
+      diff = Statistics.all_totals().statements - statement_count
 
       assert diff == 1
     end
 
     test "it is decremented by removing a statement" do
       statement = insert(:statement)
-      statement_count = Statistics.statement_count()
+      statement_count = Statistics.all_totals().statements
       Repo.delete(statement)
-      diff = Statistics.statement_count() - statement_count
+      diff = Statistics.all_totals().statements - statement_count
 
       assert diff == -1
     end
@@ -83,24 +83,24 @@ defmodule DB.StatisticsTest do
 
   describe "source_count/0" do
     test "it returns an integer" do
-      source_count = Statistics.source_count()
+      source_count = Statistics.all_totals().sources
 
       assert is_integer(source_count)
     end
 
     test "it is incremented by adding a source" do
-      source_count = Statistics.source_count()
+      source_count = Statistics.all_totals().sources
       insert(:source)
-      diff = Statistics.source_count() - source_count
+      diff = Statistics.all_totals().sources - source_count
 
       assert diff == 1
     end
 
     test "it is decremented by removing a source" do
       source = insert(:source)
-      source_count = Statistics.source_count()
+      source_count = Statistics.all_totals().sources
       Repo.delete(source)
-      diff = Statistics.source_count() - source_count
+      diff = Statistics.all_totals().sources - source_count
 
       assert diff == -1
     end
@@ -149,38 +149,6 @@ defmodule DB.StatisticsTest do
                name: ^name,
                reputation: ^reputation
              } = top_leader
-    end
-  end
-
-  def prepare_invites(_context) do
-    Repo.delete_all(InvitationRequest)
-
-    insert(:invitation_request)
-    :ok
-  end
-
-  describe "pending_invites_count/0" do
-    setup :prepare_invites
-
-    test "returns the invitation request count" do
-      assert Statistics.pending_invites_count() == 1
-    end
-
-    test "is incremented by adding a request" do
-      count = Statistics.pending_invites_count()
-      insert(:invitation_request)
-      diff = Statistics.pending_invites_count() - count
-
-      assert diff == 1
-    end
-
-    test "is decremented by removing a request" do
-      invitation_request = insert(:invitation_request)
-      count = Statistics.pending_invites_count()
-      Repo.delete(invitation_request)
-      diff = Statistics.pending_invites_count() - count
-
-      assert diff == -1
     end
   end
 end

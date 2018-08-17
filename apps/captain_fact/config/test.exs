@@ -3,6 +3,9 @@ use Mix.Config
 # General config
 config :captain_fact, frontend_url: "https://TEST_FRONTEND"
 
+# Don't fetch user picture on test environment
+config :captain_fact, fetch_default_user_picture: false
+
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
 config :captain_fact, CaptainFactWeb.Endpoint,
