@@ -14,7 +14,7 @@ defmodule CaptainFactJobs.Reputation do
   alias DB.Schema.UserAction
   alias DB.Schema.UsersActionsReport
   alias DB.Query.Actions
-  
+
   alias CaptainFact.Actions.ReputationChange
   alias CaptainFactJobs.ReportManager
 
