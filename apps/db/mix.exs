@@ -4,7 +4,7 @@ defmodule DB.Mixfile do
   def project do
     [
       app: :db,
-      version: "0.8.13",
+      version: "0.8.14",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
@@ -50,6 +50,12 @@ defmodule DB.Mixfile do
       {:burnex, "~> 1.0"},
       {:hashids, "~> 2.0"},
       {:kaur, "~> 1.1"},
+      {:scrivener_ecto, "~> 1.0"},
+
+      # Dev only
+      {:exsync, "~> 0.2", only: :dev},
+
+      # Test only
       {:ex_machina, "~> 2.0", only: [:dev, :test]},
       {:faker, "~> 0.7", only: [:dev, :test]},
       {:stream_data, "~> 0.1", only: :test}

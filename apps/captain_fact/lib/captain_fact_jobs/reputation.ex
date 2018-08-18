@@ -13,8 +13,8 @@ defmodule CaptainFactJobs.Reputation do
   alias DB.Schema.User
   alias DB.Schema.UserAction
   alias DB.Schema.UsersActionsReport
+  alias DB.Query.Actions
 
-  alias CaptainFact.Actions
   alias CaptainFact.Actions.ReputationChange
   alias CaptainFactJobs.ReportManager
 
@@ -104,7 +104,7 @@ defmodule CaptainFactJobs.Reputation do
     unless last_action_id == -1 do
       UserAction
       |> where([a], a.id > ^last_action_id)
-      |> Actions.query_matching_types(ReputationChange.actions_types())
+      |> Actions.matching_types(ReputationChange.actions_types())
       |> Repo.all(log: false)
       |> start_analysis()
     end

@@ -3,6 +3,14 @@ defmodule CaptainFact.Videos.MetadataFetcher do
   Methods to fetch metadata (title, language) from videos
   """
 
+  require Logger
+
+  alias Kaur.Result
+  alias GoogleApi.YouTube.V3.Connection, as: YouTubeConnection
+  alias GoogleApi.YouTube.V3.Api.Videos, as: YouTubeVideos
+  alias GoogleApi.YouTube.V3.Model.Video, as: YouTubeVideo
+  alias GoogleApi.YouTube.V3.Model.VideoListResponse, as: YouTubeVideoList
+
   alias DB.Schema.Video
 
   @doc """
@@ -27,6 +35,7 @@ defmodule CaptainFact.Videos.MetadataFetcher do
   def fetch_video_metadata({"youtube", provider_id}) do
     case Application.get_env(:captain_fact, :youtube_api_key) do
       nil ->
+        Logger.warn("No YouTube API key provided. Falling back to HTML fetcher")
         fetch_video_metadata_html("youtube", provider_id)
 
       api_key ->
@@ -35,35 +44,17 @@ defmodule CaptainFact.Videos.MetadataFetcher do
   end
 
   defp fetch_video_metadata_api("youtube", provider_id, api_key) do
-    case HTTPoison.get(
-           "https://www.googleapis.com/youtube/v3/videos?id=#{provider_id}&part=snippet&key=#{
-             api_key
-           }"
-         ) do
-      {:ok, %HTTPoison.Response{body: body}} ->
-        # Parse JSON and extract intresting info
-        full_metadata =
-          body
-          |> Poison.decode!()
-          |> Map.get("items")
-          |> List.first()
-
-        if full_metadata == nil do
-          {:error, "Video doesn't exist"}
-        else
-          {:ok,
-           %{
-             title: full_metadata["snippet"]["title"],
-             language:
-               full_metadata["snippet"]["defaultLanguage"] ||
-                 full_metadata["snippet"]["defaultAudioLanguage"],
-             url: Video.build_url(%{provider: "youtube", provider_id: provider_id})
-           }}
-        end
-
-      {_, _} ->
-        {:error, "Remote URL didn't respond correctly"}
-    end
+    YouTubeConnection.new()
+    |> YouTubeVideos.youtube_videos_list("snippet", id: provider_id, key: api_key)
+    |> Result.map_error(fn e -> "YouTube API Error: #{inspect(e)}" end)
+    |> Result.keep_if(&(!Enum.empty?(&1.items)), "Video doesn't exist")
+    |> Result.map(fn %YouTubeVideoList{items: [video = %YouTubeVideo{} | _]} ->
+      %{
+        title: video.snippet.title,
+        language: video.snippet.defaultLanguage || video.snippet.defaultAudioLanguage,
+        url: Video.build_url(%{provider: "youtube", provider_id: provider_id})
+      }
+    end)
   end
 
   defp fetch_video_metadata_html(provider, id) do
