@@ -24,7 +24,7 @@ jobs:
       elixir: '1.6'
       otp_release: '21.0'
       cache: {paths: ["_build", "deps"]}
-      services: [postgresql]
+      addons: {postgresql: "9.6"}
       env:
         - MIX_ENV=test
       before_script:
