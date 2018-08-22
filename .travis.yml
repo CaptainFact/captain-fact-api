@@ -37,4 +37,3 @@ jobs:
       script:
         - mix coveralls.travis --umbrella
         - mix format --check-formatted
-
