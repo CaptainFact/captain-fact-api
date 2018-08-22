@@ -2,8 +2,6 @@
 
 stages: 
   - name: test
-  - name: build
-  - name: package
   - name: release
 
 env:
@@ -36,3 +34,24 @@ jobs:
       script:
         - mix coveralls.travis --umbrella
         - mix format --check-formatted
+
+    - stage: release
+      if: branch IN (master, staging) AND type != pull_request
+      language: generic
+      sudo: required
+      services: [docker]
+      script:
+        - # ---- Build ----
+        - docker build -t ${CF_API_BUILD_IMAGE} -f ./rel/docker/Dockerfile.build .
+        - ./rel/docker/build_release.sh
+            ${CF_API_BUILD_IMAGE}
+            ${CF_API_REST_IMAGE}
+            ${CF_API_GRAPHQL_IMAGE}
+            ${CF_API_ATOM_FEED}
+            ${CF_API_OPENGRAPH_IMAGE}
+        - # ---- Push release ----
+        - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+        - docker push $CF_API_REST_IMAGE
+        - docker push $CF_API_GRAPHQL_IMAGE
+        - docker push $CF_API_ATOM_FEED
+        - docker push $CF_API_OPENGRAPH_IMAGE
