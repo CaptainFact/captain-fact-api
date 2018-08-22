@@ -6,12 +6,12 @@ stages:
 
 env:
   # Temporary build image
-  CF_API_BUILD_IMAGE: captain-fact-api-build:$CI_COMMIT_REF_SLUG
+  CF_API_BUILD_IMAGE: captain-fact-api-build:$TRAVIS_BRANCH
   # Releases
-  CF_API_REST_IMAGE: captainfact/rest-api:$CI_COMMIT_REF_SLUG
-  CF_API_GRAPHQL_IMAGE: captainfact/graphql-api:$CI_COMMIT_REF_SLUG
-  CF_API_ATOM_FEED: captainfact/atom-feed:$CI_COMMIT_REF_SLUG
-  CF_API_OPENGRAPH_IMAGE: captainfact/opengraph:$CI_COMMIT_REF_SLUG
+  CF_API_REST_IMAGE: captainfact/rest-api:$TRAVIS_BRANCH
+  CF_API_GRAPHQL_IMAGE: captainfact/graphql-api:$TRAVIS_BRANCH
+  CF_API_ATOM_FEED: captainfact/atom-feed:$TRAVIS_BRANCH
+  CF_API_OPENGRAPH_IMAGE: captainfact/opengraph:$TRAVIS_BRANCH
 
 # ---- Jobs ----
 
@@ -41,6 +41,7 @@ jobs:
       sudo: required
       services: [docker]
       script:
+        - set -e
         - # ---- Build ----
         - docker build -t ${CF_API_BUILD_IMAGE} -f ./rel/docker/Dockerfile.build .
         - ./rel/docker/build_release.sh
