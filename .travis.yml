@@ -27,7 +27,6 @@ jobs:
       services: [postgresql]
       env:
         - MIX_ENV=test
-        - CF_DB_HOSTNAME=travis_ci_test
       before_script:
         - mix local.hex --force
         - mix local.rebar --force
