@@ -1,4 +1,4 @@
-<p align="center"><img src="app/assets/assets/img/logo.png" height="100"/></p>
+<p align="center"><img src="https://avatars0.githubusercontent.com/u/28169525?s=200&v=4" height="100"/></p>
 <h1 align="center"><a href="https://captainfact.io">CaptainFact.io</a></h1>
 <p align="center"><a href="https://discord.gg/2Qd7hMz" title="Discord"><img src="https://discordapp.com/api/guilds/416782744748687361/widget.png" alt="Discord"></a>
 <a href="https://twitter.com/CaptainFact_io" title="Twitter"><img src="https://img.shields.io/twitter/follow/CaptainFact_io.svg?style=social&label=Follow"></a>
