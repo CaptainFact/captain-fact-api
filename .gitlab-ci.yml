@@ -10,7 +10,7 @@ variables:
   # Temporary build image
   CF_API_BUILD_IMAGE: captain-fact-api-build:$CI_COMMIT_REF_SLUG
   # Releases
-  CF_API_REST_IMAGE: registry.gitlab.com/captainfact/captain-fact-api/rest:$CI_COMMIT_REF_SLUG
+  CF_API_REST_IMAGE: captainfact/rest-api:$CI_COMMIT_REF_SLUG
   CF_API_GRAPHQL_IMAGE: captainfact/graphql-api:$CI_COMMIT_REF_SLUG
   CF_API_ATOM_FEED: captainfact/atom-feed:$CI_COMMIT_REF_SLUG
   CF_API_OPENGRAPH_IMAGE: captainfact/opengraph:$CI_COMMIT_REF_SLUG
