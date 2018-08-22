@@ -7,13 +7,13 @@
 <a href='https://coveralls.io/github/CaptainFact/captain-fact-api?branch=staging'><img src='https://coveralls.io/repos/github/CaptainFact/captain-fact-api/badge.svg?branch=staging' alt='Coverage Status' /></a>
 </p>
 <hr/>
-<br/>
 <p align="center">
 <a href="https://opencollective.com/captainfact_io/donate" target="_blank">
   <img src="https://opencollective.com/captainfact_io/donate/button@2x.png?color=white" width=300 />
 </a>
 </p>
 <hr/>
+<br/>
 
 ## Install & Run
 
