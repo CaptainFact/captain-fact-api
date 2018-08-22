@@ -6,7 +6,7 @@ stages:
   - name: package
   - name: release
 
-variables:
+env:
   # Temporary build image
   CF_API_BUILD_IMAGE: captain-fact-api-build:$CI_COMMIT_REF_SLUG
   # Releases
