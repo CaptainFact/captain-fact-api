@@ -8,10 +8,8 @@ defmodule DB.Schema.Speaker do
     field(:title, :string)
     field(:slug, :string)
     field(:country, :string)
-    field(:wikidata_item_id, :integer)
-    field(:is_user_defined, :boolean, default: true)
+    field(:wikidata_item_id, :string)
     field(:picture, DB.Type.SpeakerPicture.Type)
-    field(:is_removed, :boolean, default: false)
 
     has_many(:statements, DB.Schema.Statement, on_delete: :nilify_all)
 
@@ -41,30 +39,17 @@ defmodule DB.Schema.Speaker do
     |> validate_length(:full_name, min: 3, max: 60)
     |> validate_length(:title, min: 3, max: 60)
     |> validate_required(:full_name)
+    |> update_change(:wikidata_item_id, &String.upcase/1)
+    |> validate_format(:wikidata_item_id, ~r/Q[1-9]\d*/)
     |> unique_constraint(:wikidata_item_id)
   end
 
   @doc """
-  Builds a deletion changeset for `struct`
+  Builds a changeset to generate speaker slug
   """
-  def changeset_remove(struct) do
-    cast(struct, %{is_removed: true}, [:is_removed])
-  end
-
-  @doc """
-  Builds a restore changeset for `struct`
-  """
-  def changeset_restore(struct) do
-    cast(struct, %{is_removed: false}, [:is_removed])
-  end
-
-  @doc """
-  Builds a changeset to validate speaker, setting user_defined to false and generate a slug
-  """
-  def changeset_validate_speaker(struct = %{full_name: name}) do
+  def changeset_generate_slug(struct = %{full_name: name}) do
     struct
-    |> Ecto.Changeset.change(is_user_defined: false)
-    |> Ecto.Changeset.put_change(:slug, Slugger.slugify(name))
+    |> change(slug: Slugger.slugify(name))
     |> unique_constraint(:slug)
   end
 end

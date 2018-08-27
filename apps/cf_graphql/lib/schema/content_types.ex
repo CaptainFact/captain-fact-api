@@ -78,10 +78,7 @@ defmodule CF.GraphQL.Schema.ContentTypes do
     @desc "Country code of the speaker's origin (from wikidata)"
     field(:country, :string)
     @desc "Wikidata unique identifier, without the 'Q' prefix"
-    field(:wikidata_item_id, :integer)
-
-    @desc "True if speaker is user defined (editable), false if it comes from wikidata or has been validated"
-    field(:is_user_defined, non_null(:boolean))
+    field(:wikidata_item_id, :string)
     @desc "Speaker's picture URL. Format is 50x50"
     field(:picture, :string, do: resolve(&Resolvers.Speakers.picture/3))
     @desc "List of speaker's videos"

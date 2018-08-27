@@ -58,8 +58,7 @@ defmodule DB.Factory do
     %Speaker{
       full_name: Faker.Name.name(),
       title: Faker.Name.title(),
-      country: Faker.Address.country_code(),
-      is_user_defined: Enum.random([true, false])
+      country: Faker.Address.country_code()
     }
   end
 

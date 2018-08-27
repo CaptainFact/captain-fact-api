@@ -19,7 +19,7 @@ defmodule SeedPoliticians do
     })
   end
 
-  defp get_wikidata_item_id("http://www.wikidata.org/entity/Q" <> id), do: id
+  defp get_wikidata_item_id("http://www.wikidata.org/entity/" <> id), do: id
 
   defp seed_politician_with_picture(changes, names_filter) do
     {picture_url, changes} = Map.pop(changes, :picture)
@@ -35,7 +35,7 @@ defmodule SeedPoliticians do
         |> Map.delete(:picture)
         |> Map.put(:title, "Politician")
 
-      changeset = Speaker.changeset(%Speaker{is_user_defined: false}, changes)
+      changeset = Speaker.changeset(%Speaker{}, changes)
 
       if changeset.valid? do
         case Repo.get_by(Speaker, wikidata_item_id: changeset.changes.wikidata_item_id) do
