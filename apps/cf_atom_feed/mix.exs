@@ -41,7 +41,8 @@ defmodule CF.AtomFeed.Mixfile do
       {:kaur, "~> 1.1"},
 
       # ---- In Umbrella
-      {:db, in_umbrella: true}
+      {:db, in_umbrella: true},
+      {:cf_utils, in_umbrella: true}
     ]
   end
 end

@@ -25,7 +25,8 @@ defmodule CF.Utils.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:kaur, "~> 1.1"}
+      {:kaur, "~> 1.1"},
+      {:db, in_umbrella: true}
     ]
   end
 end
