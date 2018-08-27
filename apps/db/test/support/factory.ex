@@ -50,7 +50,8 @@ defmodule DB.Factory do
       url: "https://www.youtube.com/watch?v=#{youtube_id}",
       title: random_string(10),
       provider: "youtube",
-      provider_id: youtube_id
+      provider_id: youtube_id,
+      hash_id: random_string(10)
     }
   end
 

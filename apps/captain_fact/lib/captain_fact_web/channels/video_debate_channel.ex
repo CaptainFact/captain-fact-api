@@ -17,20 +17,23 @@ defmodule CaptainFactWeb.VideoDebateChannel do
   alias DB.Schema.Video
   alias DB.Schema.Speaker
   alias DB.Schema.VideoSpeaker
-  alias DB.Type.VideoHashId
 
   alias CaptainFact.Accounts.UserPermissions
   alias CaptainFact.Actions.Recorder
   alias CaptainFactWeb.{VideoView, SpeakerView, ChangesetView}
 
   def join("video_debate:" <> video_hash_id, _payload, socket) do
-    with {:ok, video_id} <- VideoHashId.decode(video_hash_id),
-         video when not is_nil(video) <- Repo.get(Video.with_speakers(Video), video_id),
-         rendered_video <- View.render_one(video, VideoView, "video.json") do
-      send(self(), :after_join)
-      {:ok, rendered_video, assign(socket, :video_id, video_id)}
-    else
-      _ -> {:error, "not_found"}
+    Video
+    |> Video.with_speakers()
+    |> Repo.get_by(hash_id: video_hash_id)
+    |> case do
+      nil ->
+        {:error, "not_found"}
+
+      video ->
+        rendered_video = View.render_one(video, VideoView, "video.json")
+        send(self(), :after_join)
+        {:ok, rendered_video, assign(socket, :video_id, video.id)}
     end
   end
 

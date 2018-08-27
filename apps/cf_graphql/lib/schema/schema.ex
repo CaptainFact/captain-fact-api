@@ -23,7 +23,7 @@ defmodule CF.GraphQL.Schema do
     @desc "Get a single video"
     field :video, :video do
       arg(:id, :id)
-      arg(:hash_id, :video_hash_id)
+      arg(:hash_id, :id)
       arg(:url, :string)
       resolve(&Resolvers.Videos.get/3)
     end
