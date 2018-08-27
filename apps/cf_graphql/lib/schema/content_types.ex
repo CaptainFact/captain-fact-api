@@ -7,20 +7,6 @@ defmodule CF.GraphQL.Schema.ContentTypes do
   alias CF.GraphQL.Resolvers
   alias DB.Type.VideoHashId
 
-  scalar :video_hash_id do
-    parse(fn input ->
-      with %Absinthe.Blueprint.Input.String{value: value} <- input do
-        VideoHashId.decode(value)
-      else
-        _ -> :error
-      end
-    end)
-
-    serialize(fn id ->
-      VideoHashId.encode(id)
-    end)
-  end
-
   @default_join_complexity 50
 
   defmacro join_complexity(complexity \\ @default_join_complexity) do
@@ -41,7 +27,7 @@ defmodule CF.GraphQL.Schema.ContentTypes do
     @desc "Unique identifier as an integer"
     field(:id, non_null(:id))
     @desc "Unique identifier as a hash (min length: 4) - used in URL"
-    field(:hash_id, non_null(:video_hash_id), do: resolve(fn v, _, _ -> {:ok, v.id} end))
+    field(:hash_id, non_null(:string))
     @desc "Video title as extracted from provider"
     field(:title, non_null(:string))
     @desc "Video URL"

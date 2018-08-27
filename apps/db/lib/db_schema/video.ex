@@ -6,10 +6,12 @@ defmodule DB.Schema.Video do
   use Ecto.Schema
   import Ecto.{Changeset, Query}
 
+  alias DB.Type.VideoHashId
   alias DB.Schema.{Speaker, Statement, VideoSpeaker}
 
   schema "videos" do
     field(:title, :string)
+    field(:hash_id, :string)
     field(:url, :string, virtual: true)
     field(:provider, :string, null: false)
     field(:provider_id, :string, null: false)
@@ -143,6 +145,18 @@ defmodule DB.Schema.Video do
     |> unique_constraint(:videos_provider_provider_id_index)
     # Change "en-US" to "en"
     |> update_change(:language, &hd(String.split(&1, "-")))
+  end
+
+  @doc """
+  Generate hash ID for video
+
+  ## Examples
+
+      iex> DB.Schema.Video.changeset_generate_hash_id(%DB.Schema.Video{id: 42, hash_id: nil})
+      #Ecto.Changeset<action: nil, changes: %{hash_id: \"4VyJ\"}, errors: [], data: #DB.Schema.Video<>, valid?: true>
+  """
+  def changeset_generate_hash_id(video = %{id: id}) do
+    change(video, hash_id: VideoHashId.encode(id))
   end
 
   @doc """

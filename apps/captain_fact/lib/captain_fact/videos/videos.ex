@@ -77,7 +77,12 @@ defmodule CaptainFact.Videos do
       base_video = %Video{is_partner: user.is_publisher && is_partner != false}
 
       Multi.new()
-      |> Multi.insert(:video, Video.changeset(base_video, metadata))
+      |> Multi.insert(:base_video, Video.changeset(base_video, metadata))
+      |> Multi.run(:video, fn %{base_video: video} ->
+        video
+        |> Video.changeset_generate_hash_id()
+        |> Repo.update()
+      end)
       |> Multi.run(:action, fn %{video: video} ->
         Recorder.record(user, :add, :video, %{
           entity_id: video.id,
