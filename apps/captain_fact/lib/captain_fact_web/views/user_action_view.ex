@@ -1,6 +1,7 @@
 defmodule CaptainFactWeb.UserActionView do
   use CaptainFactWeb, :view
 
+  alias DB.Type.VideoHashId
   alias CaptainFactWeb.UserView
   alias CaptainFactWeb.UserActionView
 
@@ -20,10 +21,11 @@ defmodule CaptainFactWeb.UserActionView do
       entity: action.entity,
       changes: action.changes,
       time: action.inserted_at,
-      video_id: action.video_id,
-      speaker_id: action.speaker_id,
-      statement_id: action.statement_id,
-      comment_id: action.comment_id
+      videoId: action.video_id,
+      videoHashId: action.video_id && VideoHashId.encode(action.video_id),
+      speakerId: action.speaker_id,
+      statementId: action.statement_id,
+      commentId: action.comment_id
     }
   end
 end
