@@ -6,7 +6,7 @@ defmodule CaptainFact.DemoFr do
   """
 
   import DB.Factory
-  import CaptainFact.VideoDebate.ActionCreator, only: [action_add: 3, action_create: 3]
+  import CaptainFact.Actions.ActionCreator, only: [action_add: 3, action_create: 3]
 
   alias Ecto.Multi
   alias DB.Repo

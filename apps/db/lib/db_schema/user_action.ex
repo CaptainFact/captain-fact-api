@@ -32,7 +32,7 @@ defmodule DB.Schema.UserAction do
   @doc false
   def changeset(action = %UserAction{}, attrs) do
     action
-    |> cast(attrs, [:context, :type, :entity, :entity_id, :changes, :user_id, :target_user_id])
+    |> cast(attrs, [:type, :entity, :changes, :user_id, :target_user_id])
     |> validate_required([:user_id, :type])
     |> cast_assoc(:user)
     |> cast_assoc(:target_user)

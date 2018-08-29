@@ -7,7 +7,7 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
   use CaptainFactWeb, :channel
   require Logger
 
-  import CaptainFact.VideoDebate.ActionCreator, only: [action_restore: 3]
+  import CaptainFact.Actions.ActionCreator, only: [action_restore: 2, action_restore: 3]
   import CaptainFactWeb.UserSocket, only: [handle_in_authenticated: 4]
 
   alias Phoenix.View
@@ -66,9 +66,7 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
 
     Multi.new()
     |> Multi.update(:statement, Statement.changeset_restore(statement))
-    |> Multi.run(:action_restore, fn %{statement: statement} ->
-      Recorder.record(action_restore(user_id, video_id, statement))
-    end)
+    |> Multi.insert(:action_restore, action_restore(user_id, statement))
     |> Repo.transaction()
     |> case do
       {:ok, %{action_restore: action, statement: statement}} ->

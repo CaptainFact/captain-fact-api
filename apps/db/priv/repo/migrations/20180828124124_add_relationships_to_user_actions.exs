@@ -4,8 +4,7 @@ defmodule DB.Repo.Migrations.AddRelationshipsToUserActions do
 
   You must ensure that:
     - All actions on statements, comments and facts have a context
-    - For all video, statement, comment, fact and speaker actions, entity
-      must still exist.
+    - For all statement actions, entity must still exist.
     - Ensure all users actions have a nil `entity_id`
     - Ensure all users actions have a nil `context`
     - Ensure there is no action in Moderation context
@@ -28,14 +27,14 @@ defmodule DB.Repo.Migrations.AddRelationshipsToUserActions do
 
     # Add relationships columns
     alter table(:users_actions) do
-      add(:statement_id, references(:statements, on_delete: :nilify_all))
-      add(:comment_id, references(:comments, on_delete: :nilify_all))
-      add(:speaker_id, references(:speakers, on_delete: :nilify_all))
+      add(:statement_id, references(:statements, on_delete: :delete_all))
+      add(:comment_id, references(:comments, on_delete: :delete_all))
+      add(:speaker_id, references(:speakers, on_delete: :delete_all))
 
       # TODO Make this a varchar(10)
       add(
         :video_hash_id,
-        references(:videos, column: :hash_id, type: :string, on_delete: :nilify_all)
+        references(:videos, column: :hash_id, type: :string, on_delete: :delete_all)
       )
     end
 

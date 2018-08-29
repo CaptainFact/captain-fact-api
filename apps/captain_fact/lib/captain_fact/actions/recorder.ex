@@ -1,4 +1,8 @@
 defmodule CaptainFact.Actions.Recorder do
+  @moduledoc """
+  A module to record all user actions.
+  """
+
   import Ecto.Query, warn: false
   import DB.Schema.UserAction, only: [type: 1, entity: 1]
 
@@ -11,6 +15,7 @@ defmodule CaptainFact.Actions.Recorder do
   Record an action for user. User can be a %User{} struct or a user_id integer
   Return {:ok, action} on success or {:error, action_changeset} on failure
   """
+  @deprecated "Actions must be created with ActionCreator and inserted manually"
   def record(user, action_type, entity, params \\ %{}) do
     Repo.insert(build_action_changeset(user, action_type, entity, params))
   end
@@ -18,6 +23,7 @@ defmodule CaptainFact.Actions.Recorder do
   @doc """
   A helper to make the transition from deprecated VideoDebateAction smoother
   """
+  @deprecated "Actions should be explicitely inserted"
   def record(changeset = %Ecto.Changeset{data: %UserAction{}}) do
     Repo.insert(changeset)
   end
@@ -26,6 +32,7 @@ defmodule CaptainFact.Actions.Recorder do
   Record an action for user. User can be a %User{} struct or a user_id integer
   Return action
   """
+  @deprecated "Actions must be created with ActionCreator and inserted manually"
   def record!(user, action_type, entity, params \\ %{}) do
     Repo.insert!(build_action_changeset(user, action_type, entity, params))
   end
@@ -33,6 +40,7 @@ defmodule CaptainFact.Actions.Recorder do
   @doc """
   ⚠️ Admin-only function. Record action as done by the system or an admin
   """
+  @deprecated "Actions must be created with ActionCreator and inserted manually"
   def admin_record!(action_type, entity, params \\ %{}) do
     params = Map.merge(params, %{type: type(action_type), entity: entity(entity)})
     Repo.insert!(UserAction.changeset_admin(%UserAction{}, params))
@@ -42,6 +50,7 @@ defmodule CaptainFact.Actions.Recorder do
   ⚠️ Admin-only function. Record multiples actions as done by the system or an admin as a single query.
   This is useful to log actions on multiple users at the same time
   """
+  @deprecated "Actions must be created with ActionCreator and inserted manually"
   def admin_record_all!(action_type, entity, actions_params) do
     Repo.insert_all(
       UserAction,
@@ -59,6 +68,7 @@ defmodule CaptainFact.Actions.Recorder do
   @doc """
   Same as record/4 but act on an Ecto.Multi object. Action is recorded under `:action_record` key
   """
+  @deprecated "Actions must be created with ActionCreator and inserted manually"
   def multi_record(multi, user, action_type, entity, params \\ %{}) do
     Multi.insert(multi, :action_record, build_action_changeset(user, action_type, entity, params))
   end

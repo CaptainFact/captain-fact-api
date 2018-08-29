@@ -18,6 +18,7 @@ defmodule DB.Repo.Migrations.AddFlagReasonToModerationUsersFeedback do
     UserAction
     |> where([a], a.type == ^UserAction.type(:email_confirmed))
     |> where([a], is_nil(a.target_user_id))
+    |> select([:id, :type, :user_id, :target_user_id])
     |> DB.Repo.all()
     |> Enum.map(&invert_source_and_target_users/1)
   end
