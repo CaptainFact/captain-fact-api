@@ -15,7 +15,6 @@ defmodule DB.Repo.Migrations.AddRelationshipsToUserActions do
   import Ecto.Query
 
   alias DB.Repo
-  alias DB.Type.VideoHashId
   alias DB.Schema.UserAction
   alias DB.Schema.Video
   alias DB.Schema.Comment
@@ -47,24 +46,24 @@ defmodule DB.Repo.Migrations.AddRelationshipsToUserActions do
     |> Enum.map(&Repo.update/1)
 
     # Remove deprecated `context` and `entity_id` columns
-    # alter table(:user_actions) do
-    #   remove :context
-    #   remove :entity_id
-    # end
+    alter table(:users_actions) do
+      remove :context
+      remove :entity_id
+    end
   end
 
   def down do
     # Re-add deprecated `context` and `entity_id` columns
-    # alter table(:users_actions) do
-    #   add(:context, :string, null: true)
-    #   add(:entity_id, :integer, null: true)
-    # end
+    alter table(:users_actions) do
+      add(:context, :string, null: true)
+      add(:entity_id, :integer, null: true)
+    end
 
     # Create index on context
-    # create(index(:users_actions, [:context]))
+    create(index(:users_actions, [:context]))
 
     # Apply previous alter table
-    # flush()
+    flush()
 
     # Migrate all existing actions
     UserAction
@@ -171,9 +170,7 @@ defmodule DB.Repo.Migrations.AddRelationshipsToUserActions do
   # -- Changeset to rollback existing actions to their old model --
 
   defp revert_changeset_migrate_action(action = %UserAction{entity: @video}) do
-    video_id = VideoHashId.decode!(action.video_id)
-    context = "VD:#{video_id}"
-    change(action, context: context, entity_id: video_id)
+    change(action, context: "VD:#{action.video_id}", entity_id: action.video_id)
   end
 
   defp revert_changeset_migrate_action(action = %UserAction{entity: @speaker}) do
