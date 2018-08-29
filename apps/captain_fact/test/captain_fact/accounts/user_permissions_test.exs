@@ -113,8 +113,7 @@ defmodule CaptainFact.Accounts.UserPermissionsTest do
   end
 
   defp insert_dummy_action(user_id, entity, action_type)
-  when is_integer(user_id)
-  do
+       when is_integer(user_id) do
     insert(
       :user_action,
       user: nil,

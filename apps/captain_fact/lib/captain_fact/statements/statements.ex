@@ -12,7 +12,6 @@ defmodule CaptainFact.Statements do
   alias CaptainFact.Accounts.UserPermissions
   import CaptainFact.Actions.ActionCreator, only: [action_update: 2]
 
-
   @doc """
   Update given statement. Will raise if user doesn't have
   permission to do that.

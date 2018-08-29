@@ -189,9 +189,15 @@ defmodule CF.GraphQL.Schema.ContentTypes do
     @desc "Video ID where the action took place"
     field(:video_id, :integer)
     @desc "Video hash ID where the action took place"
-    field(:video_hash_id, :string, do: resolve(fn a, _, _ ->
-      {:ok, a.video_id && VideoHashId.encode(a.video_id)}
-    end))
+    field(
+      :video_hash_id,
+      :string,
+      do:
+        resolve(fn a, _, _ ->
+          {:ok, a.video_id && VideoHashId.encode(a.video_id)}
+        end)
+    )
+
     @desc "Speaker impacted by this action"
     field(:speaker_id, :integer)
     @desc "Statement impacted by this action"

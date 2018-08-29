@@ -141,6 +141,7 @@ defmodule CaptainFact.Comments.CommentsTest do
       assert_raise FunctionClauseError, fn ->
         Comments.delete_comment(random_user, comment.statement.video_id, comment)
       end
+
       refute_deleted(comment)
 
       Comments.delete_comment(comment.user, comment.statement.video_id, comment)
@@ -163,9 +164,11 @@ defmodule CaptainFact.Comments.CommentsTest do
 
     test "a user cannot delete a reported comment waiting for moderation" do
       comment = Repo.preload(insert_reported_comment(), :statement)
+
       assert_raise FunctionClauseError, fn ->
         Comments.delete_comment(comment.user, comment.statement.video_id, comment)
       end
+
       refute_deleted(comment)
     end
 
