@@ -19,7 +19,6 @@ defmodule CaptainFactWeb.VideoDebateChannel do
   alias DB.Schema.VideoSpeaker
 
   alias CaptainFact.Accounts.UserPermissions
-  alias CaptainFact.Actions.Recorder
   alias CaptainFactWeb.{VideoView, SpeakerView, ChangesetView}
 
   def join("video_debate:" <> video_hash_id, _payload, socket) do
@@ -102,10 +101,10 @@ defmodule CaptainFactWeb.VideoDebateChannel do
       |> Repo.insert()
     end)
     |> Multi.run(:action_create, fn %{speaker: speaker} ->
-      Recorder.record(action_create(user_id, speaker))
+      Repo.insert(action_create(user_id, speaker))
     end)
     |> Multi.run(:action_add, fn %{speaker: speaker} ->
-      Recorder.record(action_add(user_id, video_id, speaker))
+      Repo.insert(action_add(user_id, video_id, speaker))
     end)
     |> Repo.transaction()
     |> case do

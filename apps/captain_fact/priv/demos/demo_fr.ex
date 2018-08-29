@@ -183,7 +183,6 @@ defmodule CaptainFact.DemoFr do
   end
 
   defp add_comment(users, video_id, statement_id, comment_base, reply_to_id \\ nil) do
-    context = DB.Schema.UserAction.video_debate_context(video_id)
     params =
       comment_base
       |> Map.take([:text, :approve])
@@ -194,7 +193,7 @@ defmodule CaptainFact.DemoFr do
     comment =
       users
       |> Enum.at(comment_base.user_idx)
-      |> Comments.add_comment(context, params, comment_base[:source], fn comment ->
+      |> Comments.add_comment(video_id, params, comment_base[:source], fn comment ->
         comment = Repo.preload(Repo.preload(comment, :source), :user)
         CaptainFactWeb.Endpoint.broadcast(
           "comments:video:#{VideoHashId.encode(video_id)}", "comment_updated",

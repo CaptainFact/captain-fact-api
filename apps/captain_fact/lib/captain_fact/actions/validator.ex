@@ -9,13 +9,13 @@ defmodule CaptainFact.Actions.Validator do
 
   @doc """
   Check all actions from DB.
-  
+
   Returns a list of errors like [{action_id, "message"}, ...].
   """
   def check_all() do
     UserAction
     |> DB.Repo.all()
-    |> Enum.map(&({&1.id, check_action(&1)}))
+    |> Enum.map(&{&1.id, check_action(&1)})
     |> Enum.filter(&(!match?({_, :ok}, &1)))
   end
 

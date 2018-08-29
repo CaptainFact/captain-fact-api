@@ -1,9 +1,10 @@
 defmodule CaptainFactWeb.VideoDebateChannelTest do
   use CaptainFactWeb.ChannelCase
+
   alias CaptainFactWeb.VideoDebateChannel
 
   test "Get video info when connecting" do
-    video = insert(:video)
+    video = insert(:video) |> with_video_hash_id()
 
     {:ok, returned_video, socket} =
       subscribe_and_join(
@@ -20,7 +21,7 @@ defmodule CaptainFactWeb.VideoDebateChannelTest do
 
   test "New speakers get broadcasted" do
     # Init
-    video = insert(:video)
+    video = insert(:video) |> with_video_hash_id()
     topic = "video_debate:#{video.hash_id}"
 
     {:ok, _, authed_socket} =

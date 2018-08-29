@@ -9,6 +9,7 @@ defmodule CaptainFactJobs.Votes do
   import Ecto.Query
 
   alias DB.Repo
+  alias DB.Type.VideoHashId
   alias DB.Schema.Comment
   alias DB.Schema.UserAction
   alias DB.Schema.UsersActionsReport
@@ -82,8 +83,10 @@ defmodule CaptainFactJobs.Votes do
 
   defp update_entity_votes(entity, actions) when entity in [@entity_comment, @entity_fact] do
     actions
-    |> Enum.group_by(& &1.context)
-    |> Enum.map(fn {context, actions} -> update_comments_votes(context, actions) end)
+    |> Enum.group_by(& &1.video_id)
+    |> Enum.map(fn {video_id, actions} ->
+      update_comments_votes(video_id, actions)
+    end)
     |> Enum.sum()
   end
 
@@ -95,10 +98,10 @@ defmodule CaptainFactJobs.Votes do
   # Should only happen in test
   defp update_comments_votes(nil, _), do: 0
 
-  defp update_comments_votes(context, actions) do
+  defp update_comments_votes(video_id, actions) do
     updated_comments_ids =
       actions
-      |> Enum.map(& &1.entity_id)
+      |> Enum.map(& &1.comment_id)
       |> Enum.uniq()
 
     scores =
@@ -118,7 +121,7 @@ defmodule CaptainFactJobs.Votes do
       |> Repo.all()
 
     # TODO Move broadcast to CommentChannel
-    case broadcast_channel(context) do
+    case broadcast_channel(video_id) do
       nil ->
         nil
 
@@ -129,9 +132,10 @@ defmodule CaptainFactJobs.Votes do
     Enum.count(scores)
   end
 
-  defp broadcast_channel("VD:" <> video_id) do
-    "comments:video:#{DB.Type.VideoHashId.encode(String.to_integer(video_id))}"
-  end
+  defp broadcast_channel(nil),
+    do: nil
 
-  defp broadcast_channel(_), do: nil
+  defp broadcast_channel(video_id) do
+    "comments:video:#{VideoHashId.encode(video_id)}"
+  end
 end

@@ -1,7 +1,6 @@
 defmodule CaptainFactWeb.UserActionView do
   use CaptainFactWeb, :view
 
-  alias DB.Schema.UserAction
   alias CaptainFactWeb.UserView
   alias CaptainFactWeb.UserActionView
 
@@ -19,36 +18,12 @@ defmodule CaptainFactWeb.UserActionView do
       user: UserView.render("show_public.json", %{user: action.user}),
       type: action.type,
       entity: action.entity,
-      entity_id: action.entity_id,
-      changes: action.changes,
-      time: action.inserted_at
-    }
-  end
-
-  def render("user_action_with_context.json", %{user_action: action}) do
-    %{
-      id: action.id,
-      user: UserView.render("show_public.json", %{user: action.user}),
-      type: action.type,
-      entity: action.entity,
-      entity_id: action.entity_id,
       changes: action.changes,
       time: action.inserted_at,
-      context: context_expander(action)
+      video_id: action.video_id,
+      speaker_id: action.speaker_id,
+      statement_id: action.statement_id,
+      comment_id: action.comment_id
     }
-  end
-
-  @create UserAction.type(:create)
-  @comment UserAction.entity(:comment)
-  defp context_expander(action = %{type: @create, entity: @comment, context: "VD:" <> video_id}) do
-    %{
-      type: "video",
-      hash_id: DB.Type.VideoHashId.encode(String.to_integer(video_id)),
-      statement_id: action.changes[:statement_id]
-    }
-  end
-
-  defp context_expander(_) do
-    nil
   end
 end

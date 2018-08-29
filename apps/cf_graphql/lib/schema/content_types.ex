@@ -2,10 +2,8 @@ defmodule CF.GraphQL.Schema.ContentTypes do
   use Absinthe.Schema.Notation
   use Absinthe.Ecto, repo: DB.Repo
 
-  alias Kaur.Result
-
-  alias CF.GraphQL.Resolvers
   alias DB.Type.VideoHashId
+  alias CF.GraphQL.Resolvers
 
   @default_join_complexity 50
 
@@ -182,28 +180,25 @@ defmodule CF.GraphQL.Schema.ContentTypes do
       complexity(join_complexity())
     end
 
-    @desc "Actions context"
-    field(
-      :context,
-      :string,
-      do:
-        resolve(fn
-          %{context: "VD:" <> id}, _, _ ->
-            Result.ok("VD:" <> VideoHashId.encode(String.to_integer(id)))
-
-          _, _, _ ->
-            Result.ok(nil)
-        end)
-    )
-
     @desc "Action type"
     field(:type, non_null(:integer))
     @desc "Entity type"
     field(:entity, non_null(:integer))
-    @desc "Entity ID"
-    field(:entity_id, :integer)
     @desc "Datetime at which the action has been done"
     field(:time, :string, do: resolve(fn a, _, _ -> {:ok, a.inserted_at} end))
+    @desc "Video ID where the action took place"
+    field(:video_id, :integer)
+    @desc "Video hash ID where the action took place"
+    field(:video_hash_id, :string, do: resolve(fn a, _, _ ->
+      {:ok, a.video_id && VideoHashId.encode(a.video_id)}
+    end))
+    @desc "Speaker impacted by this action"
+    field(:speaker_id, :integer)
+    @desc "Statement impacted by this action"
+    field(:statement_id, :integer)
+    @desc "Comment impacted by this action"
+    field(:comment_id, :integer)
+
     @desc "A map with all the changes made by this action"
     field(
       :changes,

@@ -14,7 +14,7 @@ defmodule CaptainFact.Videos do
   alias DB.Schema.Speaker
   alias DB.Schema.VideoSpeaker
 
-  alias CaptainFact.Actions.Recorder
+  alias CaptainFact.Actions.ActionCreator
   alias CaptainFact.Accounts.UserPermissions
 
   @doc """
@@ -77,18 +77,14 @@ defmodule CaptainFact.Videos do
       base_video = %Video{is_partner: user.is_publisher && is_partner != false}
 
       Multi.new()
-      |> Multi.insert(:base_video, Video.changeset(base_video, metadata))
-      |> Multi.run(:video, fn %{base_video: video} ->
+      |> Multi.insert(:video_without_hash_id, Video.changeset(base_video, metadata))
+      |> Multi.run(:video, fn %{video_without_hash_id: video} ->
         video
         |> Video.changeset_generate_hash_id()
         |> Repo.update()
       end)
       |> Multi.run(:action, fn %{video: video} ->
-        Recorder.record(user, :add, :video, %{
-          entity_id: video.id,
-          context: UserAction.video_debate_context(video),
-          changes: %{"url" => Video.build_url(video)}
-        })
+        Repo.insert(ActionCreator.action_add(user.id, video))
       end)
       |> Repo.transaction()
       |> case do
@@ -118,11 +114,16 @@ defmodule CaptainFact.Videos do
       [inc: [time: offset]],
       returning: [:id, :time]
     )
-    |> Recorder.multi_record(user, :update, :video, %{
-      entity_id: video_id,
-      changes: %{"statements_time" => offset},
-      context: UserAction.video_debate_context(video_id)
-    })
+    |> Multi.insert(
+      :action,
+      ActionCreator.action(
+        user.id,
+        UserAction.entity(:video),
+        UserAction.type(:update),
+        video_id: video_id,
+        changes: %{"statements_time" => offset}
+      )
+    )
     |> Repo.transaction()
     |> case do
       {:ok, %{statements_update: {_, statements}}} ->

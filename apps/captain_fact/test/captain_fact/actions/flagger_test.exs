@@ -24,7 +24,7 @@ defmodule CaptainFact.Actions.FlaggerTest do
     source = List.first(context[:source_users])
     comment = context[:comment]
 
-    Flagger.flag!(source.id, comment, 1)
+    Flagger.flag!(source.id, comment.statement.video_id, comment, 1)
     Reputation.update()
     Flags.update()
     assert Flagger.get_nb_flags(comment) == 1
@@ -33,7 +33,9 @@ defmodule CaptainFact.Actions.FlaggerTest do
   test "comment reported after x flags", context do
     comment = context[:comment]
 
-    for source <- context[:source_users], do: Flagger.flag!(source.id, comment, 1)
+    for source <- context[:source_users],
+        do: Flagger.flag!(source.id, comment.statement.video_id, comment, 1)
+
     Reputation.update()
     Flags.update()
     assert Repo.get(Comment, comment.id).is_reported == true

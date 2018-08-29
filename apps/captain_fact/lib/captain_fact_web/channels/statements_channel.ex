@@ -12,7 +12,6 @@ defmodule CaptainFactWeb.StatementsChannel do
   alias CaptainFact.Statements
   alias CaptainFact.Videos
   alias CaptainFact.Accounts.UserPermissions
-  alias CaptainFact.Actions.Recorder
 
   alias CaptainFactWeb.{StatementView, ErrorView}
 
@@ -62,7 +61,7 @@ defmodule CaptainFactWeb.StatementsChannel do
     Multi.new()
     |> Multi.insert(:statement, changeset)
     |> Multi.run(:action_create, fn %{statement: statement} ->
-      Recorder.record(action_create(user_id, statement))
+      Repo.insert(action_create(user_id, statement))
     end)
     |> Repo.transaction()
     |> case do

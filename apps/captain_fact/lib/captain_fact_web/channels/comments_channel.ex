@@ -75,7 +75,7 @@ defmodule CaptainFactWeb.CommentsChannel do
     user = Repo.get!(User, socket.assigns.user_id)
 
     comment =
-      Comments.add_comment(user, context(socket), params, source_url, fn comment ->
+      Comments.add_comment(user, socket.assigns.video_id, params, source_url, fn comment ->
         comment = Repo.preload(Repo.preload(comment, :source), :user)
         rendered_comment = CommentView.render("comment.json", comment: comment)
         broadcast!(socket, @event_comment_updated, rendered_comment)
@@ -89,7 +89,7 @@ defmodule CaptainFactWeb.CommentsChannel do
     comment = Repo.get!(Comment, id)
     user = Repo.get!(User, socket.assigns.user_id)
 
-    case Comments.delete_comment(user, comment, context(socket)) do
+    case Comments.delete_comment(user, socket.assigns.video_id, comment) do
       nil ->
         {:reply, :ok, socket}
 
@@ -100,16 +100,17 @@ defmodule CaptainFactWeb.CommentsChannel do
   end
 
   def handle_in_authenticated!("vote", %{"comment_id" => comment_id, "value" => value}, socket) do
-    Comments.vote(Repo.get!(User, socket.assigns.user_id), context(socket), comment_id, value)
+    User
+    |> Repo.get!(socket.assigns.user_id)
+    |> Comments.vote(socket.assigns.video_id, comment_id, value)
+
     {:reply, :ok, socket}
   end
 
   def handle_in_authenticated!("flag_comment", %{"id" => comment_id, "reason" => reason}, socket) do
-    Flagger.flag!(socket.assigns.user_id, comment_id, reason)
+    Flagger.flag!(socket.assigns.user_id, socket.assigns.video_id, comment_id, reason)
     {:reply, :ok, socket}
   end
-
-  defp context(socket), do: UserAction.video_debate_context(socket.assigns.video_id)
 
   defp load_user_data(response, nil, _), do: response
 
@@ -136,8 +137,8 @@ defmodule CaptainFactWeb.CommentsChannel do
       |> where([f], f.source_user_id == ^user.id)
       |> join(:inner, [f], a in assoc(f, :action))
       |> where([_, a], a.entity == ^UserAction.entity(:comment))
-      |> where([_, a], a.entity_id in ^comments_ids)
-      |> select([_, a], a.entity_id)
+      |> where([_, a], a.comment_id in ^comments_ids)
+      |> select([_, a], a.comment_id)
       |> Repo.all()
     )
   end

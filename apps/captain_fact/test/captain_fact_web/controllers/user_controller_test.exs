@@ -1,12 +1,9 @@
 defmodule CaptainFactWeb.UserControllerTest do
   use CaptainFactWeb.ConnCase
   import DB.Factory
-  import Ecto.Query
 
   alias DB.Repo
   alias DB.Schema.User
-  alias DB.Schema.UserAction
-  alias DB.Schema.Comment
   alias DB.Schema.ResetPasswordRequest
 
   alias CaptainFact.Accounts.Invitations
@@ -169,21 +166,15 @@ defmodule CaptainFactWeb.UserControllerTest do
   end
 
   describe "delete account" do
-    test "when deleting its account, all comments and user actions are deleted too" do
+    test "deletes account" do
       user = insert(:user)
-      Enum.map(insert_list(10, :comment, %{user: user}), &with_action/1)
-      insert_list(10, :user_action, %{user: user})
-
-      assert Enum.count(Repo.all(where(UserAction, [a], a.user_id == ^user.id))) != 0
-      assert Enum.count(Repo.all(where(Comment, [c], c.user_id == ^user.id))) != 0
 
       user
       |> build_authenticated_conn()
       |> delete("/users/me")
       |> response(204)
 
-      assert Enum.empty?(Repo.all(where(UserAction, [a], a.user_id == ^user.id)))
-      assert Enum.empty?(Repo.all(where(Comment, [c], c.user_id == ^user.id)))
+      assert Repo.get(User, user.id) == nil
     end
   end
 

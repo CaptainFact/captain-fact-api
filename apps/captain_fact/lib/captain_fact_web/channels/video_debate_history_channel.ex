@@ -13,25 +13,20 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
   alias Phoenix.View
   alias Ecto.Multi
   alias DB.Type.VideoHashId
-  alias DB.Schema.UserAction
   alias DB.Schema.Statement
   alias DB.Schema.Speaker
   alias DB.Schema.VideoSpeaker
-  alias DB.Schema.UserAction
-  alias DB.Schema.UserAction
 
   alias CaptainFact.Accounts.UserPermissions
-  alias CaptainFact.Actions.Recorder
   alias CaptainFact.VideoDebate.History
   alias CaptainFactWeb.{StatementView, SpeakerView, UserActionView}
 
-  def join("video_debate_history:" <> video_id_hash, _payload, socket) do
-    video_id = VideoHashId.decode!(video_id_hash)
+  def join("video_debate_history:" <> video_hash_id, _payload, socket) do
+    video_id = VideoHashId.decode!(video_hash_id)
 
     actions =
       video_id
-      |> UserAction.video_debate_context()
-      |> History.context_history()
+      |> History.video_history()
       |> View.render_many(UserActionView, "user_action.json")
 
     {:ok, %{actions: actions}, assign(socket, :video_id, video_id)}

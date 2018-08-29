@@ -10,7 +10,7 @@ defmodule CaptainFact.Comments do
   alias DB.Schema.UserAction
 
   alias CaptainFact.Accounts.UserPermissions
-  alias CaptainFact.Actions.Recorder
+  alias CaptainFact.Actions.ActionCreator
   alias CaptainFact.Sources
 
   # ---- Public API ----
@@ -25,7 +25,7 @@ defmodule CaptainFact.Comments do
     |> Repo.all()
   end
 
-  def add_comment(user, context, params, source_url \\ nil, source_fetch_callback \\ nil) do
+  def add_comment(user, video_id, params, source_url \\ nil, source_fetch_callback \\ nil) do
     # TODO [Security] What if reply_to_id refer to a comment that is on a different statement ?
     UserPermissions.check!(user, :create, :comment)
     source_url = source_url && Source.prepare_url(source_url)
@@ -49,15 +49,7 @@ defmodule CaptainFact.Comments do
       |> Map.put(:score, 0)
 
     # Record action
-    action_params =
-      Map.put(action_params(context, full_comment), :changes, %{
-        text: full_comment.text,
-        source: source_url,
-        statement_id: full_comment.statement_id,
-        reply_to_id: full_comment.reply_to_id
-      })
-
-    Recorder.record!(user, :create, :comment, action_params)
+    Repo.insert(ActionCreator.action_create(user.id, video_id, full_comment, source_url))
 
     # If new source, fetch metadata
     unless is_nil(source) || !is_nil(Map.get(source, :id)),
@@ -69,19 +61,19 @@ defmodule CaptainFact.Comments do
   # Delete
 
   @doc """
-  Delete a comment.
+  Delete a comment. Patern match will fail if `comment`'s owner is not `user`
 
   Returns delete action or nil if comment doesn't exist
   """
   def delete_comment(
         user = %{id: user_id},
-        comment = %{user_id: user_id, is_reported: false},
-        context \\ nil
+        video_id,
+        comment = %{user_id: user_id, is_reported: false}
       ) do
     UserPermissions.check!(user, :delete, :comment)
 
     if do_delete_comment(comment) != false,
-      do: Recorder.record!(user, :delete, :comment, %{entity_id: comment.id, context: context})
+      do: Repo.insert!(ActionCreator.action_delete(user_id, video_id, comment))
   end
 
   @doc """
@@ -89,14 +81,9 @@ defmodule CaptainFact.Comments do
 
   Returns delete action or nil if comment doesn't exist
   """
-  def admin_delete_comment(comment_id, context \\ nil)
-
-  def admin_delete_comment(comment_id, context) when is_integer(comment_id),
-    do: admin_delete_comment(%Comment{id: comment_id}, context)
-
-  def admin_delete_comment(comment = %Comment{}, context) do
+  def admin_delete_comment(comment = %Comment{}, video_id \\ nil) do
     if do_delete_comment(comment) != false,
-      do: Recorder.admin_record!(:delete, :comment, %{entity_id: comment.id, context: context})
+      do: Repo.insert!(ActionCreator.action_admin_delete(video_id, comment))
   end
 
   defp do_delete_comment(comment) do
@@ -114,7 +101,7 @@ defmodule CaptainFact.Comments do
     # Delete all actions linked to this comment
     UserAction
     |> where([a], a.entity == ^UserAction.entity(:comment))
-    |> where([a], a.entity_id in ^comments_ids)
+    |> where([a], a.comment_id in ^comments_ids)
     |> Repo.delete_all()
   end
 
@@ -137,74 +124,61 @@ defmodule CaptainFact.Comments do
 
   # ---- Comments voting ----
 
-  def vote(user, context, comment_id, 0),
-    do: delete_vote(user, context, Repo.get!(Comment, comment_id))
+  def vote(user, video_id, comment_id, 0),
+    do: delete_vote(user, video_id, Repo.get!(Comment, comment_id))
 
-  def vote(user, context, comment_id, value) do
+  def vote(user, video_id, comment_id, value) do
     comment = Repo.get!(Comment, comment_id)
     vote_type = Vote.vote_type(user, comment, value)
-    comment_type = comment_type(comment)
+    comment_type = Comment.type(comment)
     UserPermissions.check!(user, vote_type, comment_type)
 
-    # Delete prev vote if any
+    # Delete prev directly vote if any (without logging a delete action)
     prev_vote = Repo.get_by(Vote, user_id: user.id, comment_id: comment_id)
-    if prev_vote, do: delete_vote(user, context, comment, prev_vote)
+    if prev_vote, do: Repo.delete(prev_vote)
 
     # Record vote
-    return =
+    vote =
       user
       |> Ecto.build_assoc(:votes)
       |> Vote.changeset(%{comment_id: comment_id, value: value})
       |> Repo.insert!()
 
     # Insert action
-    action_params = action_params_with_target(context, comment)
-    Recorder.record!(user, vote_type, comment_type, action_params)
+    Repo.insert!(ActionCreator.action_vote(user.id, video_id, vote_type, comment))
 
-    return
+    # Return vote
+    vote
   end
 
-  def delete_vote(user, context, comment = %Comment{}),
-    do:
-      delete_vote(
-        user,
-        context,
-        comment,
-        Repo.get_by!(Vote, user_id: user.id, comment_id: comment.id)
-      )
+  def delete_vote(user, video_id, comment = %Comment{}) do
+    delete_vote(
+      user,
+      video_id,
+      comment,
+      Repo.get_by!(Vote, user_id: user.id, comment_id: comment.id)
+    )
+  end
 
   def delete_vote(
         user = %User{id: user_id},
-        context,
+        video_id,
         comment = %Comment{},
         vote = %Vote{user_id: user_id}
       ) do
     vote_type = reverse_vote_type(Vote.vote_type(user, comment, vote.value))
-    comment_type = comment_type(comment)
+    comment_type = Comment.type(comment)
     UserPermissions.check!(user, vote_type, comment_type)
     Repo.delete(vote)
-    action_params = action_params_with_target(context, comment)
-    Recorder.record!(user, vote_type, comment_type, action_params)
+
+    # Record action
+    action = ActionCreator.action_revert_vote(user.id, video_id, vote_type, comment)
+    Repo.insert!(action)
+
     %Vote{comment_id: comment.id}
   end
 
-  def comment_type(%Comment{source_id: nil}), do: :comment
-  def comment_type(%Comment{}), do: :fact
-
   # ---- Private ----
-
-  defp action_params(context, comment),
-    do: %{
-      context: context,
-      entity_id: comment.id
-    }
-
-  defp action_params_with_target(context, comment),
-    do: %{
-      context: context,
-      entity_id: comment.id,
-      target_user_id: comment.user_id
-    }
 
   defp reverse_vote_type(:vote_up), do: :revert_vote_up
   defp reverse_vote_type(:vote_down), do: :revert_vote_down

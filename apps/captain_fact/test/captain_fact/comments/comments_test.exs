@@ -4,7 +4,6 @@ defmodule CaptainFact.Comments.CommentsTest do
   import CaptainFact.TestUtils
 
   import CaptainFact.Support.MetaPage
-  import DB.Schema.UserAction, only: [video_debate_context: 1]
 
   alias DB.Schema.User
   alias DB.Schema.UserAction
@@ -25,22 +24,20 @@ defmodule CaptainFact.Comments.CommentsTest do
     test "insert simple comment" do
       user = insert(:user)
       statement = insert(:statement)
-      context = video_debate_context(statement.video_id)
       text = String.duplicate("x", Comment.max_length())
       params = %{statement_id: statement.id, text: text}
-      comment = Comments.add_comment(user, context, params)
+      comment = Comments.add_comment(user, statement.video_id, params)
       assert comment.text == params.text
     end
 
     test "returns an error if text is too long" do
       user = insert(:user)
       statement = insert(:statement)
-      context = video_debate_context(statement.video_id)
       text = String.duplicate("x", Comment.max_length() + 1)
       params = %{statement_id: statement.id, text: text}
 
       assert_raise Ecto.InvalidChangesetError, fn ->
-        Comments.add_comment(user, context, params)
+        Comments.add_comment(user, statement.video_id, params)
       end
     end
 
@@ -52,12 +49,11 @@ defmodule CaptainFact.Comments.CommentsTest do
       # Add comment
       user = insert(:user)
       statement = insert(:statement)
-      context = video_debate_context(statement.video_id)
 
       comment =
         Comments.add_comment(
           user,
-          context,
+          statement.video_id,
           %{statement_id: statement.id},
           url,
           fn updated_comment ->
@@ -90,7 +86,7 @@ defmodule CaptainFact.Comments.CommentsTest do
 
       Comments.add_comment(
         user,
-        video_debate_context(statement.video_id),
+        statement.video_id,
         %{statement_id: statement.id},
         url,
         fn _ ->
@@ -117,7 +113,7 @@ defmodule CaptainFact.Comments.CommentsTest do
 
       Comments.add_comment(
         user,
-        video_debate_context(statement.video_id),
+        statement.video_id,
         comment_params,
         url,
         fn update_comment ->
@@ -127,7 +123,7 @@ defmodule CaptainFact.Comments.CommentsTest do
 
       Comments.add_comment(
         user,
-        video_debate_context(statement.video_id),
+        statement.video_id,
         comment_params,
         url,
         fn _ -> raise "source is re-fetched" end
@@ -142,10 +138,12 @@ defmodule CaptainFact.Comments.CommentsTest do
       comment = insert(:comment) |> with_action()
       random_user = insert(:user)
 
-      assert_raise FunctionClauseError, fn -> Comments.delete_comment(random_user, comment) end
+      assert_raise FunctionClauseError, fn ->
+        Comments.delete_comment(random_user, comment.statement.video_id, comment)
+      end
       refute_deleted(comment)
 
-      Comments.delete_comment(comment.user, comment)
+      Comments.delete_comment(comment.user, comment.statement.video_id, comment)
       assert_deleted(comment)
     end
 
@@ -157,15 +155,17 @@ defmodule CaptainFact.Comments.CommentsTest do
 
     test "trying to delete the same comment multiple times returns nil" do
       comment = insert(:comment) |> with_action()
-      assert Comments.admin_delete_comment(comment) != nil
+      assert Comments.admin_delete_comment(comment, comment.statement.video_id) != nil
       assert_deleted(comment)
-      assert Comments.admin_delete_comment(comment) == nil
-      assert Comments.delete_comment(comment.user, comment) == nil
+      assert Comments.admin_delete_comment(comment, comment.statement.video_id) == nil
+      assert Comments.delete_comment(comment.user, comment.statement.video_id, comment) == nil
     end
 
     test "a user cannot delete a reported comment waiting for moderation" do
-      comment = insert_reported_comment()
-      assert_raise FunctionClauseError, fn -> Comments.delete_comment(comment.user, comment) end
+      comment = Repo.preload(insert_reported_comment(), :statement)
+      assert_raise FunctionClauseError, fn ->
+        Comments.delete_comment(comment.user, comment.statement.video_id, comment)
+      end
       refute_deleted(comment)
     end
 
@@ -184,7 +184,7 @@ defmodule CaptainFact.Comments.CommentsTest do
           Enum.map(replies, fn c -> insert_comments_list_with_action(2, %{reply_to: c}) end)
         )
 
-      Comments.delete_comment(comment.user, comment)
+      Comments.delete_comment(comment.user, comment.statement.video_id, comment)
       assert_deleted(comment)
       Enum.map(replies, &assert_deleted(&1, false))
       Enum.map(replies_replies, &assert_deleted(&1, false))
@@ -196,7 +196,7 @@ defmodule CaptainFact.Comments.CommentsTest do
       comment = insert(:comment)
       random_user = insert(:user, reputation: 1000)
 
-      Comments.vote(random_user, "TEST", comment.id, 1)
+      Comments.vote(random_user, comment.statement.video_id, comment.id, 1)
 
       CaptainFactJobs.Votes.update()
       CaptainFactJobs.Reputation.update()
@@ -209,7 +209,7 @@ defmodule CaptainFact.Comments.CommentsTest do
       comment = insert(:comment)
       random_user = insert(:user, reputation: 1000)
 
-      Comments.vote(random_user, "TEST", comment.id, -1)
+      Comments.vote(random_user, comment.statement.video_id, comment.id, -1)
 
       CaptainFactJobs.Votes.update()
       CaptainFactJobs.Reputation.update()

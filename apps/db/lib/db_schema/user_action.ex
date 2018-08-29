@@ -15,13 +15,15 @@ defmodule DB.Schema.UserAction do
     belongs_to(:user, User)
     belongs_to(:target_user, User)
 
-    field(:context, :string)
     field(:type, :integer)
     field(:entity, :integer)
-    field(:entity_id, :integer)
     field(:changes, :map)
 
-    belongs_to(:video, Video, foreign_key: :video_hash_id, references: :hash_id, type: :string)
+    # Deprecated fields
+    field(:entity_id, :integer)
+    field(:context, :string)
+
+    belongs_to(:video, Video)
     belongs_to(:statement, Statement)
     belongs_to(:comment, Comment)
     belongs_to(:speaker, Speaker)
@@ -29,28 +31,32 @@ defmodule DB.Schema.UserAction do
     timestamps(updated_at: false)
   end
 
+  @fields ~w(user_id target_user_id type entity changes video_id statement_id comment_id speaker_id)a
+
   @doc false
   def changeset(action = %UserAction{}, attrs) do
     action
-    |> cast(attrs, [:type, :entity, :changes, :user_id, :target_user_id])
-    |> validate_required([:user_id, :type])
-    |> cast_assoc(:user)
-    |> cast_assoc(:target_user)
+    |> cast(attrs, @fields)
     |> update_change(:entity, &entity/1)
     |> update_change(:type, &type/1)
+    |> cast_assoc(:user)
+    |> cast_assoc(:target_user)
+    |> validate_required([:user_id, :type, :entity])
   end
+
+  @admin_fields @fields -- [:user_id]
 
   @doc """
   ⚠️ Admin-only function
   """
   def changeset_admin(action = %UserAction{}, attrs) do
     action
-    |> cast(attrs, [:context, :type, :entity, :entity_id, :changes, :target_user_id])
-    |> validate_required([:type])
-    |> validate_inclusion(:user, [nil])
-    |> cast_assoc(:target_user)
+    |> cast(attrs, @admin_fields)
     |> update_change(:entity, &entity/1)
     |> update_change(:type, &type/1)
+    |> cast_assoc(:target_user)
+    |> validate_inclusion(:user, [nil])
+    |> validate_required([:type, :entity])
   end
 
   # Common actions
@@ -101,14 +107,4 @@ defmodule DB.Schema.UserAction do
   @spec entities(list(:atom)) :: list(:integer)
   def entities(entities),
     do: Enum.map(entities, &UserAction.entity/1)
-
-  # Context helpers
-  @deprecated "Context doesn't exist anymore"
-  def video_debate_context(%Video{id: id}), do: "VD:#{id}"
-  @deprecated "Context doesn't exist anymore"
-  def video_debate_context(video_id), do: "VD:#{video_id}"
-  @deprecated "Context doesn't exist anymore"
-  def moderation_context(nil), do: "MD"
-  @deprecated "Context doesn't exist anymore"
-  def moderation_context(old_context) when is_binary(old_context), do: "MD:#{old_context}"
 end
