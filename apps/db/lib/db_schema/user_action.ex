@@ -9,7 +9,7 @@ defmodule DB.Schema.UserAction do
 
   use Ecto.Schema
   import Ecto.Changeset
-  alias DB.Schema.{UserAction, User, Video}
+  alias DB.Schema.{UserAction, User, Video, Speaker, Comment, Statement}
 
   schema "users_actions" do
     belongs_to(:user, User)
@@ -20,6 +20,11 @@ defmodule DB.Schema.UserAction do
     field(:entity, :integer)
     field(:entity_id, :integer)
     field(:changes, :map)
+
+    belongs_to(:video, Video, foreign_key: :video_hash_id, references: :hash_id, type: :string)
+    belongs_to(:statement, Statement)
+    belongs_to(:comment, Comment)
+    belongs_to(:speaker, Speaker)
 
     timestamps(updated_at: false)
   end
@@ -98,8 +103,12 @@ defmodule DB.Schema.UserAction do
     do: Enum.map(entities, &UserAction.entity/1)
 
   # Context helpers
+  @deprecated "Context doesn't exist anymore"
   def video_debate_context(%Video{id: id}), do: "VD:#{id}"
+  @deprecated "Context doesn't exist anymore"
   def video_debate_context(video_id), do: "VD:#{video_id}"
+  @deprecated "Context doesn't exist anymore"
   def moderation_context(nil), do: "MD"
+  @deprecated "Context doesn't exist anymore"
   def moderation_context(old_context) when is_binary(old_context), do: "MD:#{old_context}"
 end
