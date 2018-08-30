@@ -21,7 +21,7 @@ defmodule CaptainFactWeb.ModerationControllerTest do
       |> get("/moderation/random")
       |> json_response(200)
 
-    assert response["action"]["comment_id"] == comment.id
+    assert response["action"]["commentId"] == comment.id
   end
 
   test "POST feedback" do

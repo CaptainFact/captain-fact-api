@@ -19,10 +19,6 @@ defmodule DB.Schema.UserAction do
     field(:entity, :integer)
     field(:changes, :map)
 
-    # Deprecated fields
-    field(:entity_id, :integer)
-    field(:context, :string)
-
     belongs_to(:video, Video)
     belongs_to(:statement, Statement)
     belongs_to(:comment, Comment)
