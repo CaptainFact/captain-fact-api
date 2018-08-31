@@ -42,7 +42,6 @@ defmodule CaptainFact.Actions.Validator do
   check_action_changes(@statement, @update, whitelist: ["speaker_id", "text", "time"])
   check_action_changes(@statement, @remove, has_changes: false)
   check_action_changes(@comment, @delete, has_changes: false)
-  check_action_changes(@fact, @delete, has_changes: false)
   check_action_changes(@comment, @vote_up, has_changes: false)
 
   ignore_others_actions()
