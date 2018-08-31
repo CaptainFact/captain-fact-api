@@ -25,6 +25,10 @@ defmodule DB.Schema.UserAction do
     belongs_to(:speaker, Speaker)
 
     timestamps(updated_at: false)
+
+    # Deprecated fields
+    field(:context, :string)
+    field(:entity_id, :integer)
   end
 
   @fields ~w(user_id target_user_id type entity changes video_id statement_id comment_id speaker_id)a

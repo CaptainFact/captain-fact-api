@@ -78,11 +78,7 @@ defmodule CaptainFact.Actions.ActionCreator do
       @speaker,
       @add,
       video_id: video_id,
-      speaker_id: speaker.id,
-      changes: %{
-        full_name: speaker.full_name,
-        title: speaker.title
-      }
+      speaker_id: speaker.id
     )
   end
 

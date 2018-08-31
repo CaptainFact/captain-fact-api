@@ -17,8 +17,9 @@ defmodule DB.Repo.Migrations.AddRelationshipsToUserActions do
   alias DB.Repo
   alias DB.Schema.UserAction
   alias DB.Schema.Video
-  alias DB.Schema.Comment
   alias DB.Schema.Speaker
+  alias DB.Schema.Statement
+  alias DB.Schema.Comment
 
   def up do
     # Remove actions that cannot be migrated
@@ -40,32 +41,18 @@ defmodule DB.Repo.Migrations.AddRelationshipsToUserActions do
     flush()
 
     # Migrate all existing actions
-    UserAction
-    |> Repo.all()
-    |> Enum.map(&changeset_migrate_action/1)
-    |> Enum.map(&Repo.update/1)
+    nb_actions =
+      UserAction
+      |> Repo.all()
+      |> Enum.map(&changeset_migrate_action/1)
+      |> Enum.map(&(Repo.update(&1, log: false)))
+      |> Enum.count()
 
-    # Remove deprecated `context` and `entity_id` columns
-    alter table(:users_actions) do
-      remove :context
-      remove :entity_id
-    end
+    IO.puts("#{nb_actions} actions successfully migrated")
   end
 
   def down do
-    # Re-add deprecated `context` and `entity_id` columns
-    alter table(:users_actions) do
-      add(:context, :string, null: true)
-      add(:entity_id, :integer, null: true)
-    end
-
-    # Create index on context
-    create(index(:users_actions, [:context]))
-
-    # Apply previous alter table
-    flush()
-
-    # Migrate all existing actions
+    # Un-migrate all existing actions
     UserAction
     |> Repo.all()
     |> Enum.map(&revert_changeset_migrate_action/1)
@@ -88,16 +75,20 @@ defmodule DB.Repo.Migrations.AddRelationshipsToUserActions do
   @comment UserAction.entity(:comment)
   @fact UserAction.entity(:fact)
 
+  @add UserAction.type(:add)
+
   defp remove_non_migrable_actions() do
+    delete_without_log = &(Repo.delete(&1, log: false))
+
     # Delete all actions made on deleted speakers
     nb_actions_speakers =
       UserAction
       |> where([a], a.entity == @speaker)
-      |> join(:left, [a], s in Speaker, a.entity_id == s.id)
+      |> join(:left, [a], s in Speaker, fragment("u0.entity_id") == s.id)
       |> where([a, s], is_nil(s.id))
       |> select([:id])
       |> Repo.all()
-      |> Enum.map(&Repo.delete/1)
+      |> Enum.map(delete_without_log)
       |> Enum.count()
 
     # Delete all actions made on deleted videos
@@ -108,28 +99,43 @@ defmodule DB.Repo.Migrations.AddRelationshipsToUserActions do
       |> where([a, v], is_nil(v.id))
       |> select([:id])
       |> Repo.all()
-      |> Enum.map(&Repo.delete/1)
+      |> Enum.map(delete_without_log)
       |> Enum.count()
 
     # Delete all actions made on delete comments
     nb_actions_comments =
       UserAction
       |> where([a], a.entity == @comment or a.entity == @fact)
-      |> join(:left, [a], c in Comment, a.entity_id == c.id)
+      |> join(:left, [a], c in Comment, fragment("u0.entity_id") == c.id)
       |> where([a, c], is_nil(c.id))
       |> select([:id])
       |> Repo.all()
-      |> Enum.map(&Repo.delete/1)
+      |> Enum.map(delete_without_log)
       |> Enum.count()
 
-    total = nb_actions_speakers + nb_actions_videos + nb_actions_comments
-    IO.puts("Deleted #{total} non migrable actions")
+    IO.puts("Deleted #{nb_actions_speakers} speakers non migrable actions")
+    IO.puts("Deleted #{nb_actions_videos} videos non migrable actions")
+    IO.puts("Deleted #{nb_actions_comments} comments non migrable actions")
   end
 
   # --  Changeset to migrate existing actions to new model --
 
   defp changeset_migrate_action(action = %UserAction{entity: @video}) do
-    change(action, video_id: action.entity_id)
+    base_update = [video_id: action.entity_id]
+    full_update =
+      if action.changes do
+        base_update
+      else
+        video = Repo.get!(Video, action.entity_id)
+        [{:changes, %{"url" => Video.build_url(video)}} | base_update]
+      end
+
+    change(action, full_update)
+  end
+
+  defp changeset_migrate_action(action = %UserAction{type: @add, entity: @speaker}) do
+    video_id = get_video_id_from_context(action.context)
+    change(action, video_id: video_id, speaker_id: action.entity_id, changes: nil)
   end
 
   defp changeset_migrate_action(action = %UserAction{entity: @speaker}) do
@@ -142,13 +148,13 @@ defmodule DB.Repo.Migrations.AddRelationshipsToUserActions do
     change(action, video_id: video_id, statement_id: action.entity_id)
   end
 
-  defp changeset_migrate_action(action = %UserAction{entity: entity})
+  defp changeset_migrate_action(action = %UserAction{entity: entity, context: context})
        when entity in [@comment, @fact] do
     comment = Repo.get(Comment, action.entity_id, log: false)
 
     change(
       action,
-      video_id: get_video_id_from_context(action.context),
+      video_id: get_video_id_from_context(context) || get_comment_video_id!(comment),
       comment_id: comment && comment.id,
       statement_id: comment && comment.statement_id
     )
@@ -157,6 +163,16 @@ defmodule DB.Repo.Migrations.AddRelationshipsToUserActions do
   # Ignore action by creating an empty changeset
   defp changeset_migrate_action(action),
     do: change(action)
+
+
+  defp get_comment_video_id!(nil),
+    do: nil
+
+  defp get_comment_video_id!(comment) do
+    Statement
+    |> select([s], s.video_id)
+    |> DB.Repo.get!(comment.statement_id)
+  end
 
   defp get_video_id_from_context(nil),
     do: nil
