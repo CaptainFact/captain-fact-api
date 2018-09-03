@@ -20,7 +20,7 @@ defmodule CF.AtomFeed.StatementsTest do
            <feed xmlns="http://www.w3.org/2005/Atom">
              <link href="https://feed.captainfact.io/statements/" rel="self"/>
              <author>
-               <name>Captain Fact</name>
+               <name>CaptainFact</name>
                <email>atom-feed@captainfact.io</email>
              </author>
              <id>https://captainfact.io/</id>
@@ -29,10 +29,9 @@ defmodule CF.AtomFeed.StatementsTest do
 
     # Check comment entries
     for statement <- statements do
-      video_id = DB.Type.VideoHashId.encode(statement.video_id)
-      statement_url = "https://captainfact\.io/videos/#{video_id}?statement=#{statement.id}"
-      assert feed =~ "<link href=\"#{statement_url}\"/>"
-      assert feed =~ "<title>New statement on ##{statement.video.id}</title>"
+      statement_url = "https://captainfact\.io/videos/#{statement.video.hash_id}?statement=#{statement.id}"
+      assert feed =~ statement_url
+      assert feed =~ "<title>New statement for video #{statement.video.title}</title>"
     end
   end
 end
