@@ -3,10 +3,9 @@ defmodule CF.AtomFeed.Statements do
 
   alias Atomex.{Feed, Entry}
   alias DB.Schema.Statement
+  alias CF.Utils.FrontendRouter
 
   @nb_items_max 50
-
-  @url "https://captainfact.io"
 
   @doc """
   Get an RSS feed containing all site's statements in reverse chronological
@@ -24,27 +23,32 @@ defmodule CF.AtomFeed.Statements do
     |> order_by([s, v, sp], desc: [s.id])
     |> select([s, v, sp], %{
       id: s.id,
-      time_code: s.time,
-      content: s.text,
-      creation_time: s.inserted_at,
-      speaker_id: sp.id,
-      speaker: sp.full_name,
-      video_id: v.id,
-      video_title: v.title
+      time: s.time,
+      text: s.text,
+      inserted_at: s.inserted_at,
+      speaker: %{
+        id: sp.id,
+        slug: sp.slug,
+        full_name: sp.full_name
+      },
+      video: %{
+        hash_id: v.hash_id,
+        title: v.title
+      }
     })
     |> limit(@nb_items_max)
     |> DB.Repo.all()
   end
 
   defp last_update(_statements = [statement | _]),
-    do: DateTime.from_naive!(statement.creation_time, "Etc/UTC")
+    do: DateTime.from_naive!(statement.inserted_at, "Etc/UTC")
 
   defp last_update(_),
     do: DateTime.utc_now()
 
   defp generate_feed(statements, last_update) do
     Feed.new("https://captainfact.io/", last_update, "[CaptainFact] All Statements")
-    |> Feed.author("Captain Fact", email: "atom-feed@captainfact.io")
+    |> Feed.author("CaptainFact", email: "atom-feed@captainfact.io")
     |> Feed.link("https://feed.captainfact.io/statements/", rel: "self")
     |> Feed.entries(Enum.map(statements, &get_entry/1))
     |> Feed.build()
@@ -52,29 +56,19 @@ defmodule CF.AtomFeed.Statements do
   end
 
   defp get_entry(statement) do
-    title = "New statement on ##{statement.video_id}"
-    insert_datetime = DateTime.from_naive!(statement.creation_time, "Etc/UTC")
-    link_statement = statement_url(statement)
-    link_video = video_url(statement)
+    title = "New statement for video #{statement.video.title}"
+    insert_datetime = DateTime.from_naive!(statement.inserted_at, "Etc/UTC")
+    link_statement = FrontendRouter.statement_url(statement.video.hash_id, statement.id)
 
     Entry.new(link_statement, insert_datetime, title)
     |> Entry.link(link_statement)
     |> Entry.published(insert_datetime)
-    |> Entry.content(
-      """
-          <div>ID: #{statement.id}</div>
-          <div>Time code: #{timecode_to_time(statement.time_code)}</div>
-          <div>Text: #{statement.content}</div>
-          <div>Posted at: #{insert_datetime}</div>
-          <div>Video title: #{statement.video_title}</div>
-      """ <>
-        speaker_info(statement) <>
-        """
-              <div>#{link(link_video, "Video link")}</div>
-              <div>#{link(link_statement, "Statement link")}</div>
-        """,
-      type: "html"
-    )
+    |> Entry.content("""
+    At #{timecode_to_time(statement.time)}:
+    ```
+    #{statement.text}
+    ```
+    """)
     |> Entry.build()
   end
 
@@ -95,37 +89,5 @@ defmodule CF.AtomFeed.Statements do
       |> String.pad_leading(2, "0")
 
     "#{hours_time_code}:#{minutes_time_code}:#{seconds_time_code}"
-  end
-
-  defp speaker_info(%{speaker_id: nil}), do: ""
-
-  defp speaker_info(statement) do
-    link_speaker = speaker_url(statement)
-
-    """
-    <div>Speaker : #{statement.speaker}</div>
-    <div>#{link(link_speaker, "Speaker profile")}</div>
-    """
-  end
-
-  defp link(url, text),
-    do: "<a href='#{url}'>#{text}</a>"
-
-  defp statement_url(nil) do
-    "#{@url}/"
-  end
-
-  defp statement_url(statement) do
-    video_hash_id = DB.Type.VideoHashId.encode(statement.video_id)
-    "#{@url}/videos/#{video_hash_id}?statement=#{statement.id}"
-  end
-
-  defp speaker_url(statement) do
-    "#{@url}/s/#{statement.speaker_id}"
-  end
-
-  defp video_url(statement) do
-    video_hash_id = DB.Type.VideoHashId.encode(statement.video_id)
-    "#{@url}/videos/#{video_hash_id}"
   end
 end
