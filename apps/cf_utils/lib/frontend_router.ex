@@ -4,6 +4,7 @@ defmodule CF.Utils.FrontendRouter do
   """
 
   alias DB.Schema.User
+  alias DB.Schema.Speaker
   alias DB.Schema.Comment
 
   @doc """
@@ -26,6 +27,18 @@ defmodule CF.Utils.FrontendRouter do
   @doc """
   Comment's URL
   """
+  def statement_url(video_hash_id, statement_id),
+    do: video_url(video_hash_id) <> "?statement=#{statement_id}"
+
+  @doc """
+  Comment's URL
+  """
   def comment_url(video_hash_id, %Comment{statement: statement}),
-    do: video_url(video_hash_id) <> "?statement=#{statement.id}"
+    do: statement_url(video_hash_id, statement.id)
+
+  @doc """
+  Speaker URL
+  """
+  def speaker_url(%Speaker{slug: slug, id: id}),
+    do: base_url() <> "s/#{slug || id}"
 end
