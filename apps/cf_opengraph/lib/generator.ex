@@ -12,12 +12,12 @@ defmodule CF.Opengraph.Generator do
     # In case of a non umbrella deployment
     root =
       if Mix.Project.umbrella?() do
-        "./apps/opengraph"
+        "./apps/cf_opengraph"
       else
         "."
       end
 
-    Path.join(root, "lib/opengraph/template.html.eex")
+    Path.join(root, "lib/template.html.eex")
   end
 
   EEx.function_from_file(
