@@ -1,6 +1,6 @@
 defmodule CF.Utils do
   @moduledoc """
-  Helpers / utils functions 
+  Helpers / utils functions
   """
 
   @doc """
@@ -39,7 +39,7 @@ defmodule CF.Utils do
   # Convert key to atom if key is in binary format
 
   defp convert_key_to_atom(key) when is_binary(key),
-    do: String.to_existing_atom(key)
+    do: String.to_atom(key)
 
   defp convert_key_to_atom(key) when is_atom(key),
     do: key
