@@ -29,7 +29,7 @@ defmodule CF.AtomFeed.Statements do
       speaker: %{
         id: sp.id,
         slug: sp.slug,
-        full_name: sp.full_name,
+        full_name: sp.full_name
       },
       video: %{
         hash_id: v.hash_id,
@@ -63,14 +63,12 @@ defmodule CF.AtomFeed.Statements do
     Entry.new(link_statement, insert_datetime, title)
     |> Entry.link(link_statement)
     |> Entry.published(insert_datetime)
-    |> Entry.content(
-      """
-      At #{timecode_to_time(statement.time)}:
-      ```
-      #{statement.text}
-      ```
-      """
-    )
+    |> Entry.content("""
+    At #{timecode_to_time(statement.time)}:
+    ```
+    #{statement.text}
+    ```
+    """)
     |> Entry.build()
   end
 

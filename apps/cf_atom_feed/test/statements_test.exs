@@ -29,7 +29,9 @@ defmodule CF.AtomFeed.StatementsTest do
 
     # Check comment entries
     for statement <- statements do
-      statement_url = "https://captainfact\.io/videos/#{statement.video.hash_id}?statement=#{statement.id}"
+      statement_url =
+        "https://captainfact\.io/videos/#{statement.video.hash_id}?statement=#{statement.id}"
+
       assert feed =~ statement_url
       assert feed =~ "<title>New statement for video #{statement.video.title}</title>"
     end
