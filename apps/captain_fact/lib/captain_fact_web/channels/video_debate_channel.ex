@@ -2,11 +2,11 @@ defmodule CaptainFactWeb.VideoDebateChannel do
   use CaptainFactWeb, :channel
   alias CaptainFactWeb.Presence
 
-  import CaptainFact.VideoDebate.ActionCreator,
+  import CaptainFact.Actions.ActionCreator,
     only: [
       action_add: 3,
-      action_create: 3,
-      action_update: 3,
+      action_create: 2,
+      action_update: 2,
       action_remove: 3
     ]
 
@@ -19,7 +19,6 @@ defmodule CaptainFactWeb.VideoDebateChannel do
   alias DB.Schema.VideoSpeaker
 
   alias CaptainFact.Accounts.UserPermissions
-  alias CaptainFact.Actions.Recorder
   alias CaptainFactWeb.{VideoView, SpeakerView, ChangesetView}
 
   def join("video_debate:" <> video_hash_id, _payload, socket) do
@@ -86,7 +85,7 @@ defmodule CaptainFactWeb.VideoDebateChannel do
   end
 
   @doc """
-  Create a new speaker for this video
+  Create a new speaker and add it to the video
   """
   def handle_in_authenticated!("new_speaker", params, socket) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
@@ -102,7 +101,10 @@ defmodule CaptainFactWeb.VideoDebateChannel do
       |> Repo.insert()
     end)
     |> Multi.run(:action_create, fn %{speaker: speaker} ->
-      Recorder.record(action_create(user_id, video_id, speaker))
+      Repo.insert(action_create(user_id, speaker))
+    end)
+    |> Multi.run(:action_add, fn %{speaker: speaker} ->
+      Repo.insert(action_add(user_id, video_id, speaker))
     end)
     |> Repo.transaction()
     |> case do
@@ -118,7 +120,8 @@ defmodule CaptainFactWeb.VideoDebateChannel do
   end
 
   def handle_in_authenticated!("update_speaker", params, socket) do
-    UserPermissions.check!(socket.assigns.user_id, :update, :speaker)
+    user_id = socket.assigns.user_id
+    UserPermissions.check!(user_id, :update, :speaker)
     speaker = Repo.get!(Speaker, params["id"])
     changeset = Speaker.changeset(speaker, params)
 
@@ -129,10 +132,7 @@ defmodule CaptainFactWeb.VideoDebateChannel do
       _ ->
         Multi.new()
         |> Multi.update(:speaker, changeset)
-        |> Multi.insert(
-          :action_update,
-          action_update(socket.assigns.user_id, socket.assigns.video_id, changeset)
-        )
+        |> Multi.insert(:action_update, action_update(user_id, changeset))
         |> Repo.transaction()
         |> case do
           {:ok, %{speaker: speaker}} ->

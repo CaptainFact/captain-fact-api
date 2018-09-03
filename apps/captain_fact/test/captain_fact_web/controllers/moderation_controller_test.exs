@@ -21,7 +21,7 @@ defmodule CaptainFactWeb.ModerationControllerTest do
       |> get("/moderation/random")
       |> json_response(200)
 
-    assert response["action"]["entity_id"] == comment.id
+    assert response["action"]["commentId"] == comment.id
   end
 
   test "POST feedback" do
@@ -34,7 +34,7 @@ defmodule CaptainFactWeb.ModerationControllerTest do
         UserAction,
         entity: UserAction.entity(:comment),
         type: UserAction.type(:create),
-        entity_id: comment.id
+        comment_id: comment.id
       )
 
     value = 1

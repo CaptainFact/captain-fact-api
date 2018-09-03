@@ -385,10 +385,12 @@ CREATE TABLE users_actions (
     target_user_id bigint,
     type integer NOT NULL,
     entity integer NOT NULL,
-    context character varying(255),
-    entity_id integer,
     changes jsonb,
-    inserted_at timestamp without time zone NOT NULL
+    inserted_at timestamp without time zone NOT NULL,
+    statement_id bigint,
+    comment_id bigint,
+    speaker_id bigint,
+    video_id bigint
 );
 
 
@@ -479,7 +481,8 @@ CREATE TABLE videos (
     updated_at timestamp without time zone NOT NULL,
     language character varying(2),
     unlisted boolean DEFAULT false NOT NULL,
-    is_partner boolean DEFAULT false NOT NULL
+    is_partner boolean DEFAULT false NOT NULL,
+    hash_id character varying(10)
 );
 
 
@@ -817,10 +820,10 @@ CREATE UNIQUE INDEX user_flags_unique_index ON flags USING btree (source_user_id
 
 
 --
--- Name: users_actions_context_index; Type: INDEX; Schema: public; Owner: -
+-- Name: users_actions_statement_id_index; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX users_actions_context_index ON users_actions USING btree (context);
+CREATE INDEX users_actions_statement_id_index ON users_actions USING btree (statement_id);
 
 
 --
@@ -828,6 +831,13 @@ CREATE INDEX users_actions_context_index ON users_actions USING btree (context);
 --
 
 CREATE INDEX users_actions_user_id_index ON users_actions USING btree (user_id);
+
+
+--
+-- Name: users_actions_video_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX users_actions_video_id_index ON users_actions USING btree (video_id);
 
 
 --
@@ -856,6 +866,13 @@ CREATE UNIQUE INDEX users_newsletter_subscription_token_index ON users USING btr
 --
 
 CREATE UNIQUE INDEX users_username_index ON users USING btree (username);
+
+
+--
+-- Name: videos_hash_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX videos_hash_id_index ON videos USING btree (hash_id);
 
 
 --
@@ -976,6 +993,30 @@ ALTER TABLE ONLY statements
 
 
 --
+-- Name: users_actions users_actions_comment_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY users_actions
+    ADD CONSTRAINT users_actions_comment_id_fkey FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE;
+
+
+--
+-- Name: users_actions users_actions_speaker_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY users_actions
+    ADD CONSTRAINT users_actions_speaker_id_fkey FOREIGN KEY (speaker_id) REFERENCES speakers(id) ON DELETE CASCADE;
+
+
+--
+-- Name: users_actions users_actions_statement_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY users_actions
+    ADD CONSTRAINT users_actions_statement_id_fkey FOREIGN KEY (statement_id) REFERENCES statements(id) ON DELETE CASCADE;
+
+
+--
 -- Name: users_actions users_actions_target_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -989,6 +1030,14 @@ ALTER TABLE ONLY users_actions
 
 ALTER TABLE ONLY users_actions
     ADD CONSTRAINT users_actions_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
+
+
+--
+-- Name: users_actions users_actions_video_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY users_actions
+    ADD CONSTRAINT users_actions_video_id_fkey FOREIGN KEY (video_id) REFERENCES videos(id) ON DELETE CASCADE;
 
 
 --
@@ -1035,5 +1084,5 @@ ALTER TABLE ONLY votes
 -- PostgreSQL database dump complete
 --
 
-INSERT INTO public."schema_migrations" (version) VALUES (20170118223600), (20170118223631), (20170125235612), (20170206062334), (20170206063137), (20170221035619), (20170309214200), (20170309214307), (20170316233954), (20170428062411), (20170611075306), (20170726224741), (20170730064848), (20170928043353), (20171003220327), (20171003220416), (20171004100258), (20171005001838), (20171005215001), (20171009065840), (20171026222425), (20171105124655), (20171109105152), (20171110040302), (20171110212108), (20171117131508), (20171119075520), (20171205174328), (20180131002547), (20180302024059), (20180317062636), (20180330204602), (20180409035326), (20180503083056), (20180516170544), (20180605085958), (20180605144832), (20180730092029), (20180801105246), (20180802155107), (20180803143819), (20180816112748), (20180816115534);
+INSERT INTO public."schema_migrations" (version) VALUES (20170118223600), (20170118223631), (20170125235612), (20170206062334), (20170206063137), (20170221035619), (20170309214200), (20170309214307), (20170316233954), (20170428062411), (20170611075306), (20170726224741), (20170730064848), (20170928043353), (20171003220327), (20171003220416), (20171004100258), (20171005001838), (20171005215001), (20171009065840), (20171026222425), (20171105124655), (20171109105152), (20171110040302), (20171110212108), (20171117131508), (20171119075520), (20171205174328), (20180131002547), (20180302024059), (20180317062636), (20180330204602), (20180409035326), (20180503083056), (20180516170544), (20180605085958), (20180605144832), (20180730092029), (20180801105246), (20180802155107), (20180803143819), (20180816112748), (20180816115534), (20180827123706), (20180828124124);
 

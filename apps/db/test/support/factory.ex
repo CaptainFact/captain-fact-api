@@ -7,6 +7,7 @@ defmodule DB.Factory do
   import Ecto.Query
 
   alias DB.Repo
+  alias DB.Type.VideoHashId
   alias DB.Schema.Source
   alias DB.Schema.User
   alias DB.Schema.InvitationRequest
@@ -48,11 +49,15 @@ defmodule DB.Factory do
 
     %Video{
       url: "https://www.youtube.com/watch?v=#{youtube_id}",
-      title: random_string(10),
+      title: Faker.Lorem.sentence(3..8),
       provider: "youtube",
       provider_id: youtube_id,
-      hash_id: random_string(10)
+      hash_id: nil
     }
+  end
+
+  def with_video_hash_id(video = %Video{id: id}) do
+    Repo.update!(Ecto.Changeset.change(video, hash_id: VideoHashId.encode(id)))
   end
 
   def speaker_factory do
@@ -110,10 +115,8 @@ defmodule DB.Factory do
     %UserAction{
       user: build(:user),
       target_user: build(:user),
-      context: "FACTORY",
       type: UserAction.type(:create),
       entity: UserAction.entity(:comment),
-      entity_id: nil,
       changes: nil
     }
   end
@@ -137,14 +140,15 @@ defmodule DB.Factory do
   # ---- Helpers ----
 
   def with_action(comment = %Comment{}) do
-    comment = DB.Repo.preload(comment, [:user, :source])
+    comment = DB.Repo.preload(comment, [:user, :source, :statement])
 
     insert(:user_action, %{
       user: comment.user,
       type: UserAction.type(:create),
-      context: UserAction.video_debate_context(comment.statement.video_id),
       entity: UserAction.entity(:comment),
-      entity_id: comment.id,
+      video_id: comment.statement.video_id,
+      statement_id: comment.statement.id,
+      comment_id: comment.id,
       changes: %{
         text: comment.text,
         source: comment.source && comment.source.url,
@@ -165,7 +169,7 @@ defmodule DB.Factory do
       user: flag.source_user,
       type: @action_flag,
       entity: flag.action.entity,
-      entity_id: flag.action.entity_id
+      comment_id: flag.action.comment_id
     })
 
     flag
@@ -178,7 +182,7 @@ defmodule DB.Factory do
       UserAction
       |> where([a], a.type == ^@action_create)
       |> where([a], a.entity == ^@entity_comment)
-      |> where([a], a.entity_id == ^comment.id)
+      |> where([a], a.comment_id == ^comment.id)
       |> Repo.one!()
 
     # credo:disable-for-next-line

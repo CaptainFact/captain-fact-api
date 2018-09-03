@@ -75,6 +75,16 @@ defmodule DB.Schema.Comment do
 
   def max_length, do: @max_length
 
+  # Utils
+
+  @doc """
+  Returns `:comment` or `:fact` to tell if comment is a sourced comment or a
+  regular comment.
+  """
+  def type(%{source_id: nil}), do: :comment
+
+  def type(%{}), do: :fact
+
   # Changesets
 
   @required_fields ~w(statement_id user_id)a

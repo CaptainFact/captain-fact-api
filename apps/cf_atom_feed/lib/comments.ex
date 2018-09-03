@@ -41,7 +41,7 @@ defmodule CF.AtomFeed.Comments do
     do: DateTime.utc_now()
 
   defp generate_feed(comments, last_update) do
-    Feed.new("https://captainfact.io/", last_update, "[CaptainFact] All Comments")
+    Feed.new(FrontendRouter.base_url(), last_update, "[CaptainFact] All Comments")
     |> Feed.author("CaptainFact", email: "atom-feed@captainfact.io")
     |> Feed.link("https://feed.captainfact.io/comments/", rel: "self")
     |> Feed.entries(Enum.map(comments, &get_entry/1))
@@ -82,6 +82,6 @@ defmodule CF.AtomFeed.Comments do
 
   defp comment_url(comment) do
     video_hash_id = DB.Type.VideoHashId.encode(comment.statement.video_id)
-    "https://captainfact.io/videos/#{video_hash_id}?statement=#{comment.statement.id}"
+    FrontendRouter.comment_url(video_hash_id, comment)
   end
 end

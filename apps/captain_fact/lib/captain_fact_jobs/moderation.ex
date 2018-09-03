@@ -20,7 +20,7 @@ defmodule CaptainFactJobs.Moderation do
   alias DB.Schema.Flag
   alias DB.Type.FlagReason
 
-  alias CaptainFact.Actions.Recorder
+  alias CaptainFact.Actions.ActionCreator
   alias CaptainFact.Comments
 
   @name __MODULE__
@@ -89,9 +89,8 @@ defmodule CaptainFactJobs.Moderation do
         id: a.id,
         user_id: a.user_id,
         type: a.type,
-        context: a.context,
         entity: a.entity,
-        entity_id: a.entity_id
+        comment_id: a.comment_id
       },
       results: %{
         nb_feedbacks: count(uf.id),
@@ -149,12 +148,12 @@ defmodule CaptainFactJobs.Moderation do
 
   # We can only moderate comment at the moment
   defp process_entry(entry = %{action: %{type: @action_create, entity: @entity_comment}}) do
-    comment = Repo.get(Comment.with_statement(Comment), entry.action.entity_id)
+    comment = Repo.get(Comment.with_statement(Comment), entry.action.comment_id)
 
     if comment do
       confirm_refute_dispatch(entry, comment)
     else
-      Logger.warn("[ModerationUpdater] Can't find comment ##{entry.action.entity_id} for delete")
+      Logger.warn("[ModerationUpdater] Can't find comment ##{entry.action.comment_id} for delete")
     end
   end
 
@@ -186,18 +185,17 @@ defmodule CaptainFactJobs.Moderation do
       |> Repo.all()
 
     # Delete comment, all linked actions and flags
-    Comments.admin_delete_comment(comment, UserAction.moderation_context(action.context))
+    Comments.admin_delete_comment(comment)
 
     # Record ban action
-    Recorder.admin_record!(ban_reason(results.flag_reason), :comment, %{
-      target_user_id: comment.user_id,
-      changes: %{
+    Repo.insert(
+      ActionCreator.action_ban(comment, ban_reason(results.flag_reason), %{
         "score" => results.score,
         "flag_reason" => results.flag_reason,
         "nb_feedbacks" => results.nb_feedbacks,
         "consensus_strength" => consensus_strength(results.score)
-      }
-    })
+      })
+    )
 
     # Broadcast ban to web channel
     broadcast_comment_remove(comment)
@@ -237,8 +235,19 @@ defmodule CaptainFactJobs.Moderation do
   end
 
   # Record the flag result for all users
-  defp record_flags_results(flagging_users_ids, entity_type, result) do
+  defp record_flags_results(flagging_users_ids, entity_type, action_type) do
     targets = Enum.map(flagging_users_ids, &%{target_user_id: &1})
-    Recorder.admin_record_all!(result, entity_type, targets)
+
+    Repo.insert_all(
+      UserAction,
+      Enum.map(targets, fn params ->
+        Map.merge(params, %{
+          user_id: nil,
+          type: UserAction.type(action_type),
+          entity: UserAction.entity(entity_type),
+          inserted_at: Ecto.DateTime.utc()
+        })
+      end)
+    )
   end
 end

@@ -7,31 +7,26 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
   use CaptainFactWeb, :channel
   require Logger
 
-  import CaptainFact.VideoDebate.ActionCreator, only: [action_restore: 3]
+  import CaptainFact.Actions.ActionCreator, only: [action_restore: 2, action_restore: 3]
   import CaptainFactWeb.UserSocket, only: [handle_in_authenticated: 4]
 
   alias Phoenix.View
   alias Ecto.Multi
   alias DB.Type.VideoHashId
-  alias DB.Schema.UserAction
   alias DB.Schema.Statement
   alias DB.Schema.Speaker
   alias DB.Schema.VideoSpeaker
-  alias DB.Schema.UserAction
-  alias DB.Schema.UserAction
 
   alias CaptainFact.Accounts.UserPermissions
-  alias CaptainFact.Actions.Recorder
   alias CaptainFact.VideoDebate.History
   alias CaptainFactWeb.{StatementView, SpeakerView, UserActionView}
 
-  def join("video_debate_history:" <> video_id_hash, _payload, socket) do
-    video_id = VideoHashId.decode!(video_id_hash)
+  def join("video_debate_history:" <> video_hash_id, _payload, socket) do
+    video_id = VideoHashId.decode!(video_hash_id)
 
     actions =
       video_id
-      |> UserAction.video_debate_context()
-      |> History.context_history()
+      |> History.video_history()
       |> View.render_many(UserActionView, "user_action.json")
 
     {:ok, %{actions: actions}, assign(socket, :video_id, video_id)}
@@ -66,9 +61,7 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
 
     Multi.new()
     |> Multi.update(:statement, Statement.changeset_restore(statement))
-    |> Multi.run(:action_restore, fn %{statement: statement} ->
-      Recorder.record(action_restore(user_id, video_id, statement))
-    end)
+    |> Multi.insert(:action_restore, action_restore(user_id, statement))
     |> Repo.transaction()
     |> case do
       {:ok, %{action_restore: action, statement: statement}} ->

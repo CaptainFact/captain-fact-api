@@ -46,16 +46,11 @@ defmodule CaptainFact.Accounts.UserPermissions do
 
   ## Examples
       iex> alias CaptainFact.Accounts.UserPermissions
-      iex> alias CaptainFact.Actions.Recorder
       iex> user = DB.Factory.insert(:user, %{reputation: 45})
       iex> UserPermissions.check(user, :create, :comment)
       {:ok, 20}
       iex> UserPermissions.check(%{user | reputation: -42}, :remove, :statement)
       {:error, "not_enough_reputation"}
-      iex> limitation = UserPermissions.limitation(user, :create, :comment)
-      iex> for _ <- 1..limitation, do: Recorder.record!(user, :create, :comment)
-      iex> UserPermissions.check(user, :create, :comment)
-      {:error, "limit_reached"}
   """
   def check(%User{is_publisher: true}, _, _),
     do: {:ok, -1}

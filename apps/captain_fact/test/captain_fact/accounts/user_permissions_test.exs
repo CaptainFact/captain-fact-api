@@ -1,8 +1,8 @@
 defmodule CaptainFact.Accounts.UserPermissionsTest do
   use CaptainFact.DataCase
 
+  alias DB.Schema.UserAction
   alias CaptainFact.Actions
-  alias CaptainFact.Actions.Recorder
   alias CaptainFact.Accounts.UserPermissions
   alias UserPermissions.PermissionsError
 
@@ -45,7 +45,11 @@ defmodule CaptainFact.Accounts.UserPermissionsTest do
     action_type = :create
     entity = :comment
     max_occurences = UserPermissions.limitation(user, action_type, entity)
-    for _ <- 0..max_occurences, do: Recorder.record!(user, action_type, entity)
+
+    for _ <- 1..max_occurences do
+      insert_dummy_action(user.id, entity, action_type)
+    end
+
     assert_raise PermissionsError, fn -> UserPermissions.check!(user, action_type, entity) end
   end
 
@@ -64,7 +68,7 @@ defmodule CaptainFact.Accounts.UserPermissionsTest do
       Task.async(fn ->
         try do
           UserPermissions.check!(user, action_type, entity)
-          Recorder.record!(user, action_type, entity)
+          insert_dummy_action(user.id, entity, action_type)
         rescue
           e in PermissionsError -> e
         end
@@ -106,6 +110,17 @@ defmodule CaptainFact.Accounts.UserPermissionsTest do
     assert UserPermissions.check(user, :add, :speaker) == {:ok, -1}
     assert UserPermissions.check!(user.id, :create, :speaker) == -1
     assert UserPermissions.check!(user.id, :add, :speaker) == -1
+  end
+
+  defp insert_dummy_action(user_id, entity, action_type)
+       when is_integer(user_id) do
+    insert(
+      :user_action,
+      user: nil,
+      user_id: user_id,
+      type: UserAction.type(action_type),
+      entity: UserAction.entity(entity)
+    )
   end
 
   defp each_limitation(func) do
