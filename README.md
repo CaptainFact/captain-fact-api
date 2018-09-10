@@ -2,8 +2,8 @@
 <h1 align="center"><a href="https://captainfact.io">CaptainFact.io</a></h1>
 <p align="center"><a href="https://discord.gg/2Qd7hMz" title="Discord"><img src="https://discordapp.com/api/guilds/416782744748687361/widget.png" alt="Discord"></a>
 <a href="https://twitter.com/CaptainFact_io" title="Twitter"><img src="https://img.shields.io/twitter/follow/CaptainFact_io.svg?style=social&label=Follow"></a>
+<a href="https://opencollective.com/captainfact_io" title="Backers on Open Collective"><img src="https://opencollective.com/captainfact_io/backers/badge.svg"></a>
 <a href="./LICENSE"><img src="https://img.shields.io/github/license/CaptainFact/captain-fact-api.svg" alt="AGPL3"></a>
-<a href="https://trello.com/b/5s6F5iTv/development"><img src="https://img.shields.io/badge/Trello-Development-blue.svg" alt="Trello"></a>
 <a href="https://travis-ci.com/CaptainFact/captain-fact-api"><img src="https://travis-ci.com/CaptainFact/captain-fact-api.svg?branch=staging"></a>
 <a href='https://coveralls.io/github/CaptainFact/captain-fact-api?branch=staging'><img src='https://coveralls.io/repos/github/CaptainFact/captain-fact-api/badge.svg?branch=staging' alt='Coverage Status' /></a>
 </p>
@@ -91,6 +91,13 @@ as much as possible.
 
 Avoid lines longer than 80 characters, **never** go beyond 110 characters.
 
-## Known problems and limitations
+## Linked projects
 
-- Error messages are not centralized
+* [Community discussions and documentation](https://github.com/CaptainFact/captain-fact/)
+* [Frontend](https://github.com/CaptainFact/captain-fact-frontend)
+* [Extension](https://github.com/CaptainFact/captain-fact-extension)
+* [Overlay injector](https://github.com/CaptainFact/captain-fact-overlay-injector)
+
+# Feature requests
+
+[![Feature Requests](http://feathub.com/CaptainFact/captain-fact?format=svg)](http://feathub.com/CaptainFact/captain-fact)
