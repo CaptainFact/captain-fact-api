@@ -47,8 +47,9 @@ defmodule CF.AtomFeed.Statements do
     do: DateTime.utc_now()
 
   defp generate_feed(statements, last_update) do
-    Feed.new("https://captainfact.io/", last_update, "[CaptainFact] All Statements")
-    |> Feed.author("CaptainFact", email: "atom-feed@captainfact.io")
+    FrontendRouter.base_url()
+    |> Feed.new(last_update, "[CaptainFact] All Statements")
+    |> CF.AtomFeed.Common.feed_author()
     |> Feed.link("https://feed.captainfact.io/statements/", rel: "self")
     |> Feed.entries(Enum.map(statements, &get_entry/1))
     |> Feed.build()

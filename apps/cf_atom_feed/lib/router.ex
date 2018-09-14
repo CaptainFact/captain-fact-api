@@ -25,15 +25,21 @@ defmodule CF.AtomFeed.Router do
 
   @feed_content_type "application/atom+xml"
 
-  get "/comments" do
+  defp render_feed(conn, feed_content) do
     conn
     |> put_resp_content_type(@feed_content_type)
-    |> send_resp(200, CF.AtomFeed.Comments.feed_all())
+    |> send_resp(200, feed_content)
+  end
+
+  get "/comments" do
+    render_feed(conn, CF.AtomFeed.Comments.feed_all())
   end
 
   get "/statements" do
-    conn
-    |> put_resp_content_type(@feed_content_type)
-    |> send_resp(200, CF.AtomFeed.Statements.feed_all())
+    render_feed(conn, CF.AtomFeed.Statements.feed_all())
+  end
+
+  get "/videos" do
+    render_feed(conn, CF.AtomFeed.Videos.feed_all())
   end
 end
