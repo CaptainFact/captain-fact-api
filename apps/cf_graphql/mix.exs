@@ -4,7 +4,7 @@ defmodule CF.GraphQL.Mixfile do
   def project do
     [
       app: :cf_graphql,
-      version: "0.8.14",
+      version: "0.8.15",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
