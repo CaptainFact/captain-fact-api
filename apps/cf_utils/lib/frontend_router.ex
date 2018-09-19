@@ -3,6 +3,8 @@ defmodule CF.Utils.FrontendRouter do
   Generate routes matching Frontend URL.
   """
 
+  alias DB.Type.VideoHashId
+
   alias DB.Schema.User
   alias DB.Schema.Speaker
   alias DB.Schema.Comment
@@ -25,8 +27,11 @@ defmodule CF.Utils.FrontendRouter do
   def video_url(video_hash_id), do: base_url() <> "videos/#{video_hash_id}"
 
   @doc """
-  Comment's URL
+  Statement's URL
   """
+  def statement_url(%{video_id: video_id, id: statement_id}),
+    do: statement_url(VideoHashId.encode(video_id), statement_id)
+
   def statement_url(video_hash_id, statement_id),
     do: video_url(video_hash_id) <> "?statement=#{statement_id}"
 

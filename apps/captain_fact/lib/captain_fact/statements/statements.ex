@@ -3,6 +3,8 @@ defmodule CaptainFact.Statements do
   Functions to manipulate statements
   """
 
+  import Ecto.Query
+
   alias Ecto.Multi
   alias Kaur.Result
 
@@ -35,5 +37,15 @@ defmodule CaptainFact.Statements do
           Result.error(reason)
       end
     end
+  end
+
+  @doc """
+  Get all statements without comments
+  """
+  def statements_without_comments() do
+    Statement
+    |> join(:left, [s], c in assoc(s, :comments))
+    |> where([_, c], is_nil(c.id))
+    |> Repo.all()
   end
 end
