@@ -45,7 +45,7 @@ defmodule DB.Repo.Migrations.AddRelationshipsToUserActions do
       UserAction
       |> Repo.all()
       |> Enum.map(&changeset_migrate_action/1)
-      |> Enum.map(&(Repo.update(&1, log: false)))
+      |> Enum.map(&Repo.update(&1, log: false))
       |> Enum.count()
 
     IO.puts("#{nb_actions} actions successfully migrated")
@@ -56,14 +56,14 @@ defmodule DB.Repo.Migrations.AddRelationshipsToUserActions do
     UserAction
     |> Repo.all()
     |> Enum.map(&revert_changeset_migrate_action/1)
-    |> Enum.map(&(Repo.update(&1, log: false)))
+    |> Enum.map(&Repo.update(&1, log: false))
 
     # Remove relationships columns
     alter table(:users_actions) do
-      remove :video_id
-      remove :statement_id
-      remove :comment_id
-      remove :speaker_id
+      remove(:video_id)
+      remove(:statement_id)
+      remove(:comment_id)
+      remove(:speaker_id)
     end
   end
 
@@ -78,7 +78,7 @@ defmodule DB.Repo.Migrations.AddRelationshipsToUserActions do
   @add UserAction.type(:add)
 
   defp remove_non_migrable_actions() do
-    delete_without_log = &(Repo.delete(&1, log: false))
+    delete_without_log = &Repo.delete(&1, log: false)
 
     # Delete all actions made on deleted speakers
     nb_actions_speakers =
@@ -95,7 +95,22 @@ defmodule DB.Repo.Migrations.AddRelationshipsToUserActions do
     nb_actions_videos =
       UserAction
       |> where([a], like(a.context, "VD:%"))
-      |> join(:left, [a], v in Video, v.id == fragment("CAST(substring(u0.context from 4) AS INTEGER)"))
+      |> join(
+        :left,
+        [a],
+        v in Video,
+        v.id == fragment("CAST(substring(u0.context from 4) AS INTEGER)")
+      )
+      |> where([a, v], is_nil(v.id))
+      |> select([:id])
+      |> Repo.all()
+      |> Enum.map(delete_without_log)
+      |> Enum.count()
+
+    nb_actions_videos_direct =
+      UserAction
+      |> where([a], a.entity == @video)
+      |> join(:left, [a], v in Video, fragment("u0.entity_id") == v.id)
       |> where([a, v], is_nil(v.id))
       |> select([:id])
       |> Repo.all()
@@ -114,7 +129,7 @@ defmodule DB.Repo.Migrations.AddRelationshipsToUserActions do
       |> Enum.count()
 
     IO.puts("Deleted #{nb_actions_speakers} speakers non migrable actions")
-    IO.puts("Deleted #{nb_actions_videos} videos non migrable actions")
+    IO.puts("Deleted #{nb_actions_videos + nb_actions_videos_direct} videos non migrable actions")
     IO.puts("Deleted #{nb_actions_comments} comments non migrable actions")
   end
 
@@ -122,6 +137,7 @@ defmodule DB.Repo.Migrations.AddRelationshipsToUserActions do
 
   defp changeset_migrate_action(action = %UserAction{entity: @video}) do
     base_update = [video_id: action.entity_id]
+
     full_update =
       if action.changes do
         base_update
@@ -163,7 +179,6 @@ defmodule DB.Repo.Migrations.AddRelationshipsToUserActions do
   # Ignore action by creating an empty changeset
   defp changeset_migrate_action(action),
     do: change(action)
-
 
   defp get_comment_video_id!(nil),
     do: nil
