@@ -1,7 +1,8 @@
 defmodule CF.GraphQL.Schema do
   use Absinthe.Schema
-  import_types(CF.GraphQL.Schema.ContentTypes)
   alias CF.GraphQL.Resolvers
+
+  import_types(CF.GraphQL.Schema.Types)
 
   # Actual API
 
