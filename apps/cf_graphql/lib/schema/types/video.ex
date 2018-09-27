@@ -8,7 +8,7 @@ defmodule CF.GraphQL.Schema.Types.Video do
   import CF.Graphql.Schema.Utils
   alias CF.GraphQL.Resolvers
 
-  import_types(CF.GraphQL.Schema.Types.{Statement, Speaker})
+  import_types(CF.GraphQL.Schema.Types.{Paginated, Statement, Speaker})
 
   @desc "Identifies a video. Only Youtube is supported at the moment"
   object :video do
@@ -37,5 +37,11 @@ defmodule CF.GraphQL.Schema.Types.Video do
       resolve(&Resolvers.Videos.statements/3)
       complexity(join_complexity())
     end
+  end
+
+  @desc "A list a paginated videos"
+  object :paginated_videos do
+    import_fields(:paginated)
+    field(:entries, list_of(:video))
   end
 end

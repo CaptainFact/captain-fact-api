@@ -42,6 +42,13 @@ defmodule CF.GraphQL.Resolvers.Videos do
     |> Result.ok()
   end
 
+  def paginated_list(_root, args = %{offset: offset, limit: limit}, _info) do
+    Video
+    |> Video.query_list(Map.get(args, :filters, []))
+    |> Repo.paginate(page: offset, page_size: limit)
+    |> Result.ok()
+  end
+
   # Fields
 
   def url(video, _, _) do
