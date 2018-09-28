@@ -9,6 +9,8 @@ defmodule CF.GraphQL.Schema.Types.User do
   import CF.Graphql.Schema.Utils
   alias CF.GraphQL.Resolvers
 
+  import_types(CF.GraphQL.Schema.Types.Paginated)
+
   @desc "A user registered on the website"
   object :user do
     @desc "Unique user ID"
