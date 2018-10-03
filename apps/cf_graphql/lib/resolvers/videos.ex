@@ -35,10 +35,18 @@ defmodule CF.GraphQL.Resolvers.Videos do
     end
   end
 
+  @deprecated "Use paginated_list/3"
   def list(_root, args, _info) do
     Video
     |> Video.query_list(Map.get(args, :filters, []), args[:limit])
     |> Repo.all()
+    |> Result.ok()
+  end
+
+  def paginated_list(_root, args = %{offset: offset, limit: limit}, _info) do
+    Video
+    |> Video.query_list(Map.get(args, :filters, []))
+    |> Repo.paginate(page: offset, page_size: limit)
     |> Result.ok()
   end
 
