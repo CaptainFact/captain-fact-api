@@ -26,6 +26,10 @@ defmodule CF.GraphQL.Schema.Types.Video do
     field(:provider_id, non_null(:string))
     @desc "Language of the video represented as a two letters locale"
     field(:language, :string)
+    @desc "Video insert datetime"
+    field(:inserted_at, :string)
+    @desc "Define if video has been added by a partner or a regular user"
+    field(:is_partner, :boolean)
     @desc "List all non-removed speakers for this video"
     field :speakers, list_of(:speaker) do
       resolve(assoc(:speakers))

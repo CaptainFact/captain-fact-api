@@ -11,6 +11,7 @@ defmodule CF.GraphQL.Schema do
     field(:min_id, :id)
     field(:speaker_id, :id)
     field(:speaker_slug, :string)
+    field(:is_partner, :boolean)
   end
 
   query do
