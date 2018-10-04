@@ -14,7 +14,7 @@ defmodule CaptainFact.Accounts do
 
   alias CaptainFactMailer.Email
   alias CaptainFact.Accounts.{UsernameGenerator, UserPermissions, Invitations}
-  alias CaptainFact.Actions.Recorder
+  alias CaptainFact.Actions.ActionCreator
   alias CaptainFact.Authenticator
 
   alias Kaur.Result
@@ -78,7 +78,7 @@ defmodule CaptainFact.Accounts do
       confirm_email!(user)
     end
 
-    if @fetch_default_picture && user.picture_url == nil do
+    if fetch_default_picture?() && user.picture_url == nil do
       Task.start(fn ->
         pic_url = DB.Type.UserPicture.default_url(:thumb, user)
         fetch_picture(user, pic_url)
@@ -95,17 +95,18 @@ defmodule CaptainFact.Accounts do
   def update(user, params) do
     # TODO bang function name or unbang check
     UserPermissions.check!(user, :update, :user)
+    changeset = User.changeset(user, params)
 
-    user
-    |> User.changeset(params)
-    |> Repo.update()
+    Multi.new()
+    |> Multi.update(:user, changeset)
+    |> Multi.insert(:action, ActionCreator.action_update(user.id, changeset))
+    |> Repo.transaction()
     |> case do
-      {:ok, user} ->
-        Recorder.record(user, :update, :user)
+      {:ok, %{user: user}} ->
         {:ok, user}
 
-      {:error, changeset} ->
-        {:error, changeset}
+      {:error, _, error, _} ->
+        {:error, error}
     end
   end
 
@@ -208,13 +209,18 @@ defmodule CaptainFact.Accounts do
     do: nil
 
   def confirm_email!(user = %User{email_confirmed: false}) do
-    updated_user =
-      user
-      |> User.changeset_confirm_email(true)
-      |> Repo.update!()
+    Multi.new()
+    |> Multi.update(:user, User.changeset_confirm_email(user, true))
+    |> Multi.insert(:action, ActionCreator.action_email_confirmed(user.id))
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{user: updated_user}} ->
+        updated_user
 
-    Recorder.admin_record!(:email_confirmed, :user, %{target_user_id: user.id})
-    updated_user
+      {:error, _, reason, _} ->
+        Logger.error(reason)
+        raise reason
+    end
   end
 
   # ---- Achievements -----
@@ -381,6 +387,10 @@ defmodule CaptainFact.Accounts do
 
   defp filter_newsletter_targets(query, locale),
     do: where(query, [u], u.newsletter == true and u.locale == ^locale)
+
+  # ---- Getters ----
+
+  def fetch_default_picture?, do: @fetch_default_picture
 
   # ---- Private Utils ----
 

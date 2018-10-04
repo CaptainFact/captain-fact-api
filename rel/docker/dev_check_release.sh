@@ -10,6 +10,7 @@ CF_BUILD_IMAGE=captain-fact-builder:dev-test
 CF_REST_API_IMAGE=captain-fact-api:dev-test
 CF_GRAPHQL_API_IMAGE=captain-fact-api-graphql:dev-test
 CF_ATOM_FEED_IMAGE=captain-fact-atom-feed:dev-test
+CF_OPENGRAPH_IMAGE=captain-fact-opengraph:dev-test
 
 # If any command fails, exit
 set -e
@@ -17,7 +18,7 @@ set -e
 # Build
 cd -- "$(dirname $0)"
 docker build -t ${CF_BUILD_IMAGE} --build-arg MIX_ENV=dev -f Dockerfile.build ../../
-./build_release.sh ${CF_BUILD_IMAGE} ${CF_REST_API_IMAGE} ${CF_GRAPHQL_API_IMAGE} ${CF_ATOM_FEED_IMAGE}
+./build_release.sh ${CF_BUILD_IMAGE} ${CF_REST_API_IMAGE} ${CF_GRAPHQL_API_IMAGE} ${CF_ATOM_FEED_IMAGE} ${CF_OPENGRAPH_IMAGE}
 
 # Run server
 echo "Let's test REST API on port 4000 =>"

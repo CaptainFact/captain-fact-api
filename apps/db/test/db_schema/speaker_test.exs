@@ -4,7 +4,8 @@ defmodule DB.Schema.SpeakerTest do
   alias DB.Schema.Speaker
 
   @valid_attrs %{
-    full_name: "#{Faker.Name.first_name()} #{Faker.Name.last_name()}"
+    full_name: "#{Faker.Name.first_name()} #{Faker.Name.last_name()}",
+    wikidata_item_id: nil
   }
   @invalid_attrs %{}
 
@@ -46,5 +47,27 @@ defmodule DB.Schema.SpeakerTest do
       Speaker.changeset(%Speaker{}, Map.put(@valid_attrs, :title, "   King     of the world    "))
 
     assert changeset.changes.title == "King of the world"
+  end
+
+  describe "wikidata item id" do
+    test "reject if bad format" do
+      integer_id = %{@valid_attrs | wikidata_item_id: 42}
+      missing_q = %{@valid_attrs | wikidata_item_id: "42424242"}
+      missing_id = %{@valid_attrs | wikidata_item_id: "Q"}
+
+      assert {:wikidata_item_id, "is invalid"} in errors_on(%Speaker{}, integer_id)
+      assert {:wikidata_item_id, "has invalid format"} in errors_on(%Speaker{}, missing_q)
+      assert {:wikidata_item_id, "has invalid format"} in errors_on(%Speaker{}, missing_id)
+    end
+
+    test "accept correct format and uppercase Q if not already" do
+      valid_uppercase = %{@valid_attrs | wikidata_item_id: "Q42"}
+      assert Speaker.changeset(%Speaker{}, valid_uppercase).valid?
+
+      valid_lowercase = %{@valid_attrs | wikidata_item_id: "q42"}
+      changeset = Speaker.changeset(%Speaker{}, valid_lowercase)
+      assert changeset.valid?
+      assert changeset.changes.wikidata_item_id == "Q42"
+    end
   end
 end

@@ -7,31 +7,26 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
   use CaptainFactWeb, :channel
   require Logger
 
-  import CaptainFact.VideoDebate.ActionCreator, only: [action_restore: 3]
+  import CaptainFact.Actions.ActionCreator, only: [action_restore: 2, action_restore: 3]
   import CaptainFactWeb.UserSocket, only: [handle_in_authenticated: 4]
 
   alias Phoenix.View
   alias Ecto.Multi
   alias DB.Type.VideoHashId
-  alias DB.Schema.UserAction
   alias DB.Schema.Statement
   alias DB.Schema.Speaker
   alias DB.Schema.VideoSpeaker
-  alias DB.Schema.UserAction
-  alias DB.Schema.UserAction
 
   alias CaptainFact.Accounts.UserPermissions
-  alias CaptainFact.Actions.Recorder
   alias CaptainFact.VideoDebate.History
   alias CaptainFactWeb.{StatementView, SpeakerView, UserActionView}
 
-  def join("video_debate_history:" <> video_id_hash, _payload, socket) do
-    video_id = VideoHashId.decode!(video_id_hash)
+  def join("video_debate_history:" <> video_hash_id, _payload, socket) do
+    video_id = VideoHashId.decode!(video_hash_id)
 
     actions =
       video_id
-      |> UserAction.video_debate_context()
-      |> History.context_history()
+      |> History.video_history()
       |> View.render_many(UserActionView, "user_action.json")
 
     {:ok, %{actions: actions}, assign(socket, :video_id, video_id)}
@@ -66,9 +61,7 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
 
     Multi.new()
     |> Multi.update(:statement, Statement.changeset_restore(statement))
-    |> Multi.run(:action_restore, fn %{statement: statement} ->
-      Recorder.record(action_restore(user_id, video_id, statement))
-    end)
+    |> Multi.insert(:action_restore, action_restore(user_id, statement))
     |> Repo.transaction()
     |> case do
       {:ok, %{action_restore: action, statement: statement}} ->
@@ -104,7 +97,6 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
       VideoSpeaker.changeset(%VideoSpeaker{speaker_id: speaker.id, video_id: video_id})
 
     Multi.new()
-    |> multi_undelete_speaker(speaker)
     |> Multi.insert(:video_speaker, video_speaker)
     |> Multi.insert(:action_restore, action_restore(user_id, video_id, speaker))
     |> Repo.transaction()
@@ -129,12 +121,5 @@ defmodule CaptainFactWeb.VideoDebateHistoryChannel do
       {:error, _reason} ->
         {:reply, :error, socket}
     end
-  end
-
-  # No need to do nothing if speaker is not user defined (cannot be removed)
-  defp multi_undelete_speaker(multi, %{is_user_defined: false}), do: multi
-
-  defp multi_undelete_speaker(multi, speaker) do
-    Multi.update(multi, :speaker, Speaker.changeset_restore(speaker))
   end
 end

@@ -1,6 +1,7 @@
 defmodule CaptainFact.VideosTest do
   use CaptainFact.DataCase
 
+  alias DB.Type.VideoHashId
   alias CaptainFact.Videos
   alias CaptainFact.Accounts.UserPermissions.PermissionsError
 
@@ -47,6 +48,12 @@ defmodule CaptainFact.VideosTest do
 
       assert video.is_partner == false
       assert video_2.is_partner == false
+    end
+
+    test "properly insert VideoHashId" do
+      user = insert(:user, reputation: 50_000)
+      {:ok, video} = Videos.create!(user, test_url())
+      assert video.hash_id == VideoHashId.encode(video.id)
     end
   end
 end

@@ -16,3 +16,6 @@ until_fail.sh
 
 # Secrets
 **/secrets/
+
+# Elixir LS
+.elixir_ls

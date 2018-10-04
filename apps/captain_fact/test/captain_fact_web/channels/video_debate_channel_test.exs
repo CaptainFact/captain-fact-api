@@ -1,27 +1,28 @@
 defmodule CaptainFactWeb.VideoDebateChannelTest do
   use CaptainFactWeb.ChannelCase
+
   alias CaptainFactWeb.VideoDebateChannel
-  alias DB.Type.VideoHashId
 
   test "Get video info when connecting" do
-    video = insert(:video)
-    encoded_id = VideoHashId.encode(video.id)
+    video = insert(:video) |> with_video_hash_id()
 
     {:ok, returned_video, socket} =
       subscribe_and_join(
         socket("", %{user_id: nil}),
         VideoDebateChannel,
-        "video_debate:#{encoded_id}"
+        "video_debate:#{video.hash_id}"
       )
 
-    assert returned_video.id == encoded_id
+    assert returned_video.id == video.id
+    assert returned_video.hash_id == video.hash_id
     assert returned_video.url == video.url
     leave(socket)
   end
 
   test "New speakers get broadcasted" do
     # Init
-    topic = "video_debate:#{VideoHashId.encode(insert(:video).id)}"
+    video = insert(:video) |> with_video_hash_id()
+    topic = "video_debate:#{video.hash_id}"
 
     {:ok, _, authed_socket} =
       subscribe_and_join(
@@ -31,7 +32,7 @@ defmodule CaptainFactWeb.VideoDebateChannelTest do
       )
 
     # Test
-    @endpoint.subscribe("video_debate:#{VideoHashId.encode(insert(:video).id)}")
+    @endpoint.subscribe("video_debate:#{video.hash_id}")
     speaker = %{full_name: "Titi Toto"}
     ref = push(authed_socket, "new_speaker", speaker)
     assert_reply(ref, :ok, _)

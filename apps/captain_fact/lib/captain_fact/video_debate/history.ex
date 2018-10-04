@@ -10,10 +10,10 @@ defmodule CaptainFact.VideoDebate.History do
     UserAction.entity(:video)
   ]
 
-  def context_history(context) do
+  def video_history(video_id) do
     UserAction
     |> preload(:user)
-    |> where([a], a.context == ^context)
+    |> where([a], a.video_id == ^video_id)
     |> where([a], a.entity in ^@allowed_entities)
     |> Repo.all()
   end
@@ -22,7 +22,7 @@ defmodule CaptainFact.VideoDebate.History do
     UserAction
     |> preload(:user)
     |> where([a], a.entity == ^UserAction.entity(:statement))
-    |> where([a], a.entity_id == ^statement_id)
+    |> where([a], a.statement_id == ^statement_id)
     |> Repo.all()
   end
 end

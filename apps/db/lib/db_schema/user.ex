@@ -63,6 +63,9 @@ defmodule DB.Schema.User do
   def user_appelation(%{username: username, name: name}),
     do: "#{name} (@#{username})"
 
+  def user_appelation(nil),
+    do: "Anonymous user"
+
   @email_regex ~r/\A([\w+\-].?)+@[a-z\d\-]+(\.[a-z]+)*\.[a-z]+\z/i
   @valid_locales ~w(en fr)
   @required_fields ~w(email username)a

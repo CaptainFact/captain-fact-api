@@ -12,8 +12,15 @@ defmodule CaptainFact.TestUtils do
 
     flags =
       Enum.map(comments, fn comment ->
+        full_comment = Repo.preload(comment, :statement)
+
         Enum.map(users, fn user ->
-          CaptainFact.Actions.Flagger.flag!(user.id, comment, reason)
+          CaptainFact.Actions.Flagger.flag!(
+            user.id,
+            full_comment.statement.video_id,
+            full_comment,
+            reason
+          )
         end)
       end)
 
@@ -25,8 +32,7 @@ defmodule CaptainFact.TestUtils do
     assert is_nil(comment)
 
     if check_actions do
-      assert Enum.count(actions) == 1
-      assert hd(actions).type == UserAction.type(:delete)
+      assert Enum.count(actions) == 0
     end
   end
 
@@ -38,14 +44,14 @@ defmodule CaptainFact.TestUtils do
              UserAction,
              entity: UserAction.entity(:comment),
              type: UserAction.type(:delete),
-             entity_id: id
+             comment_id: id
            ) == nil
   end
 
   defp get_comment_and_actions(id) do
     actions =
       UserAction
-      |> where([a], a.entity == ^UserAction.entity(:comment) and a.entity_id == ^id)
+      |> where([a], a.entity == ^UserAction.entity(:comment) and a.comment_id == ^id)
       |> Repo.all()
 
     {Repo.get(Comment, id), actions}

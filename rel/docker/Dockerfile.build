@@ -10,7 +10,7 @@ ENV HOME=/opt/app/
 WORKDIR /opt/app
 
 # Cache dependencies
-RUN mkdir -p apps/captain_fact apps/cf_graphql apps/cf_atom_feed apps/db apps/opengraph
+RUN mkdir -p apps/captain_fact apps/cf_graphql apps/cf_atom_feed apps/db apps/cf_opengraph
 COPY mix.exs mix.lock ./
 COPY apps/captain_fact/mix.exs apps/captain_fact/
 COPY apps/cf_graphql/mix.exs apps/cf_graphql/

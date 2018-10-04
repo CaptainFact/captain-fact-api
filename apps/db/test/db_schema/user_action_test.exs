@@ -5,9 +5,8 @@ defmodule DB.Schema.UserActionTest do
 
   @valid_attrs %{
     user_id: 1,
-    context: "VD:1",
     entity: UserAction.entity(:statement),
-    entity_id: 42,
+    comment_id: 42,
     type: UserAction.type(:update),
     changes: %{
       text: "Updated !"

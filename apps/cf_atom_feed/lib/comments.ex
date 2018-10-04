@@ -6,6 +6,8 @@ defmodule CF.AtomFeed.Comments do
   import Ecto.Query
 
   alias Atomex.{Feed, Entry}
+  alias DB.Schema.{Comment, User}
+  alias CF.Utils.FrontendRouter
 
   @nb_items_max 50
 
@@ -21,25 +23,13 @@ defmodule CF.AtomFeed.Comments do
   defp fetch_comments() do
     DB.Repo.all(
       from(
-        c in DB.Schema.Comment,
+        c in Comment,
         join: statement in assoc(c, :statement),
+        left_join: user in assoc(c, :user),
         left_join: source in assoc(c, :source),
+        preload: [:statement, :user, :source],
         order_by: [desc: c.inserted_at],
-        limit: @nb_items_max,
-        select: %{
-          id: c.id,
-          text: c.text,
-          user_id: c.user_id,
-          inserted_at: c.inserted_at,
-          source: %{
-            url: source.url,
-            site_name: source.site_name
-          },
-          statement: %{
-            id: statement.id,
-            video_id: statement.video_id
-          }
-        }
+        limit: @nb_items_max
       )
     )
   end
@@ -51,8 +41,9 @@ defmodule CF.AtomFeed.Comments do
     do: DateTime.utc_now()
 
   defp generate_feed(comments, last_update) do
-    Feed.new("https://captainfact.io/", last_update, "[CaptainFact] All Comments")
-    |> Feed.author("Captain Fact", email: "atom-feed@captainfact.io")
+    FrontendRouter.base_url()
+    |> Feed.new(last_update, "[CaptainFact] All Comments")
+    |> CF.AtomFeed.Common.feed_author()
     |> Feed.link("https://feed.captainfact.io/comments/", rel: "self")
     |> Feed.entries(Enum.map(comments, &get_entry/1))
     |> Feed.build()
@@ -60,8 +51,8 @@ defmodule CF.AtomFeed.Comments do
   end
 
   defp get_entry(comment) do
-    type = if comment.source.url, do: "Fact", else: "Comment"
-    title = "New #{type} from user ##{comment.user_id} on ##{comment.statement.id}"
+    user_appelation = User.user_appelation(comment.user)
+    title = entry_title(comment, user_appelation)
     link = comment_url(comment)
     insert_datetime = DateTime.from_naive!(comment.inserted_at, "Etc/UTC")
 
@@ -69,28 +60,29 @@ defmodule CF.AtomFeed.Comments do
     |> Entry.new(insert_datetime, title)
     |> Entry.link(link)
     |> Entry.published(insert_datetime)
-    |> Entry.content(
-      """
-            <div>ID: #{comment.id}</div>
-            <div>User: #{comment.user_id}</div>
-            <div>Text: #{comment.text}</div>
-            <div>Statement: #{comment.statement.id}</div>
-            <div>Posted at: #{comment.inserted_at}</div>
-            <div>#{source(comment)}</div>
-      """,
-      type: "html"
-    )
+    |> Entry.author(user_appelation, uri: comment.user && FrontendRouter.user_url(comment.user))
+    |> Entry.content("""
+    ```
+    #{comment.text}
+    ```
+    Source: #{source(comment)}
+    """)
     |> Entry.build()
+  end
+
+  defp entry_title(comment, user_appelation) do
+    type = if comment.source, do: "Sourced comment", else: "Comment"
+    "New #{type} from #{user_appelation} on ##{comment.statement.id}"
   end
 
   defp source(%{source: nil}),
     do: "None"
 
   defp source(%{source: %{url: url, site_name: site_name}}),
-    do: "<a href='#{url}'>[Source] #{site_name}</a>"
+    do: "[#{site_name || url}](#{url})"
 
   defp comment_url(comment) do
     video_hash_id = DB.Type.VideoHashId.encode(comment.statement.video_id)
-    "https://captainfact.io/videos/#{video_hash_id}?statement=#{comment.statement.id}"
+    FrontendRouter.comment_url(video_hash_id, comment)
   end
 end

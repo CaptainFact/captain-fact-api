@@ -2,12 +2,11 @@ defmodule CaptainFactWeb.VideoDebateChannel do
   use CaptainFactWeb, :channel
   alias CaptainFactWeb.Presence
 
-  import CaptainFact.VideoDebate.ActionCreator,
+  import CaptainFact.Actions.ActionCreator,
     only: [
       action_add: 3,
-      action_create: 3,
-      action_update: 3,
-      action_delete: 3,
+      action_create: 2,
+      action_update: 2,
       action_remove: 3
     ]
 
@@ -18,20 +17,22 @@ defmodule CaptainFactWeb.VideoDebateChannel do
   alias DB.Schema.Video
   alias DB.Schema.Speaker
   alias DB.Schema.VideoSpeaker
-  alias DB.Type.VideoHashId
 
   alias CaptainFact.Accounts.UserPermissions
-  alias CaptainFact.Actions.Recorder
   alias CaptainFactWeb.{VideoView, SpeakerView, ChangesetView}
 
   def join("video_debate:" <> video_hash_id, _payload, socket) do
-    with {:ok, video_id} <- VideoHashId.decode(video_hash_id),
-         video when not is_nil(video) <- Repo.get(Video.with_speakers(Video), video_id),
-         rendered_video <- View.render_one(video, VideoView, "video.json") do
-      send(self(), :after_join)
-      {:ok, rendered_video, assign(socket, :video_id, video_id)}
-    else
-      _ -> {:error, "not_found"}
+    Video
+    |> Video.with_speakers()
+    |> Repo.get_by(hash_id: video_hash_id)
+    |> case do
+      nil ->
+        {:error, "not_found"}
+
+      video ->
+        rendered_video = View.render_one(video, VideoView, "video.json")
+        send(self(), :after_join)
+        {:ok, rendered_video, assign(socket, :video_id, video.id)}
     end
   end
 
@@ -84,12 +85,12 @@ defmodule CaptainFactWeb.VideoDebateChannel do
   end
 
   @doc """
-  Create a new speaker for this video
+  Create a new speaker and add it to the video
   """
   def handle_in_authenticated!("new_speaker", params, socket) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
     UserPermissions.check!(user_id, :create, :speaker)
-    speaker_changeset = Speaker.changeset(%Speaker{is_user_defined: true}, params)
+    speaker_changeset = Speaker.changeset(%Speaker{}, params)
 
     Multi.new()
     |> Multi.insert(:speaker, speaker_changeset)
@@ -100,7 +101,10 @@ defmodule CaptainFactWeb.VideoDebateChannel do
       |> Repo.insert()
     end)
     |> Multi.run(:action_create, fn %{speaker: speaker} ->
-      Recorder.record(action_create(user_id, video_id, speaker))
+      Repo.insert(action_create(user_id, speaker))
+    end)
+    |> Multi.run(:action_add, fn %{speaker: speaker} ->
+      Repo.insert(action_add(user_id, video_id, speaker))
     end)
     |> Repo.transaction()
     |> case do
@@ -116,45 +120,38 @@ defmodule CaptainFactWeb.VideoDebateChannel do
   end
 
   def handle_in_authenticated!("update_speaker", params, socket) do
-    UserPermissions.check!(socket.assigns.user_id, :update, :speaker)
-    speaker = Repo.get_by!(Speaker, id: params["id"], is_removed: false)
+    user_id = socket.assigns.user_id
+    UserPermissions.check!(user_id, :update, :speaker)
+    speaker = Repo.get!(Speaker, params["id"])
+    changeset = Speaker.changeset(speaker, params)
 
-    if speaker.is_user_defined do
-      changeset = Speaker.changeset(speaker, params)
+    case changeset.changes do
+      changes when changes === %{} ->
+        {:reply, :ok, socket}
 
-      case changeset.changes do
-        changes when changes === %{} ->
-          {:reply, :ok, socket}
+      _ ->
+        Multi.new()
+        |> Multi.update(:speaker, changeset)
+        |> Multi.insert(:action_update, action_update(user_id, changeset))
+        |> Repo.transaction()
+        |> case do
+          {:ok, %{speaker: speaker}} ->
+            rendered_speaker = View.render_one(speaker, SpeakerView, "speaker.json")
+            broadcast!(socket, "speaker_updated", rendered_speaker)
+            {:reply, :ok, socket}
 
-        _ ->
-          Multi.new()
-          |> Multi.update(:speaker, changeset)
-          |> Multi.insert(
-            :action_update,
-            action_update(socket.assigns.user_id, socket.assigns.video_id, changeset)
-          )
-          |> Repo.transaction()
-          |> case do
-            {:ok, %{speaker: speaker}} ->
-              rendered_speaker = View.render_one(speaker, SpeakerView, "speaker.json")
-              broadcast!(socket, "speaker_updated", rendered_speaker)
-              {:reply, :ok, socket}
+          {:error, :speaker, changeset = %Ecto.Changeset{}, _} ->
+            {:reply, {:error, ChangesetView.render("error.json", %{changeset: changeset})},
+             socket}
 
-            {:error, :speaker, changeset = %Ecto.Changeset{}, _} ->
-              {:reply, {:error, ChangesetView.render("error.json", %{changeset: changeset})},
-               socket}
-
-            _ ->
-              {:reply, :error, socket}
-          end
-      end
-    else
-      {:reply, {:error, %{speaker: "forbidden"}}, socket}
+          _ ->
+            {:reply, :error, socket}
+        end
     end
   end
 
   def handle_in_authenticated!("remove_speaker", %{"id" => id}, socket) do
-    speaker = Repo.get_by!(Speaker, id: id, is_removed: false)
+    speaker = Repo.get!(Speaker, id)
     do_remove_speaker(socket, speaker)
     broadcast!(socket, "speaker_removed", %{id: id})
     {:reply, :ok, socket}
@@ -176,19 +173,7 @@ defmodule CaptainFactWeb.VideoDebateChannel do
     {:reply, {:ok, %{speakers: Repo.all(speakers_query)}}, socket}
   end
 
-  defp do_remove_speaker(socket, speaker = %{is_user_defined: true}) do
-    %{user_id: user_id, video_id: video_id} = socket.assigns
-    UserPermissions.check!(user_id, :remove, :speaker)
-    video_speaker = %VideoSpeaker{speaker_id: speaker.id, video_id: video_id}
-
-    Multi.new()
-    |> Multi.update(:speaker, Speaker.changeset_remove(speaker))
-    |> Multi.delete(:video_speaker, VideoSpeaker.changeset(video_speaker))
-    |> Multi.insert(:action_delete, action_delete(user_id, video_id, speaker))
-    |> Repo.transaction()
-  end
-
-  defp do_remove_speaker(socket, speaker = %{is_user_defined: false}) do
+  defp do_remove_speaker(socket, speaker) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
     UserPermissions.check!(user_id, :remove, :speaker)
     video_speaker = %VideoSpeaker{speaker_id: speaker.id, video_id: video_id}

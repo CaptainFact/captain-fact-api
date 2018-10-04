@@ -4,7 +4,7 @@ defmodule CF.AtomFeed.Mixfile do
   def project do
     [
       app: :cf_atom_feed,
-      version: "0.8.14",
+      version: "0.8.15",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
@@ -41,7 +41,8 @@ defmodule CF.AtomFeed.Mixfile do
       {:kaur, "~> 1.1"},
 
       # ---- In Umbrella
-      {:db, in_umbrella: true}
+      {:db, in_umbrella: true},
+      {:cf_utils, in_umbrella: true}
     ]
   end
 end

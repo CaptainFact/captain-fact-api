@@ -97,7 +97,7 @@ defmodule CaptainFactJobs.ModerationTest do
         UserAction,
         entity: UserAction.entity(:comment),
         type: UserAction.type(:create),
-        entity_id: comment.id
+        comment_id: comment.id
       )
 
     {comment, Repo.preload(action, :user)}

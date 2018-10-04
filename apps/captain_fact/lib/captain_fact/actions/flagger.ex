@@ -9,20 +9,20 @@ defmodule CaptainFact.Actions.Flagger do
   alias DB.Schema.Flag
 
   alias CaptainFact.Accounts.UserPermissions
-  alias CaptainFact.Actions.Recorder
+  alias CaptainFact.Actions.ActionCreator
 
   @doc """
   Record a new flag on `comment` requested by given user `user_id`
   """
   @action_create UserAction.type(:create)
   @entity_comment UserAction.entity(:comment)
-  def flag!(source_user_id, %Comment{id: comment_id}, reason),
-    do: flag!(source_user_id, comment_id, reason)
+  def flag!(source_user_id, video_id, comment_id, reason) when is_integer(comment_id),
+    do: flag!(source_user_id, video_id, Repo.get!(Comment, comment_id), reason)
 
-  def flag!(source_user_id, comment_id, reason) do
+  def flag!(source_user_id, video_id, comment = %Comment{}, reason) do
     user = Repo.get!(User, source_user_id)
     UserPermissions.check!(user, :flag, :comment)
-    action_id = get_action_id!(@action_create, @entity_comment, comment_id)
+    action_id = get_action_id!(@action_create, @entity_comment, comment.id)
 
     try do
       user
@@ -34,7 +34,8 @@ defmodule CaptainFact.Actions.Flagger do
       Ecto.ConstraintError ->
         :ok
     else
-      _ -> Recorder.record!(user, :flag, :comment, %{entity_id: comment_id})
+      _ ->
+        Repo.insert!(ActionCreator.action_flag(source_user_id, video_id, comment))
     end
   end
 
@@ -56,7 +57,7 @@ defmodule CaptainFact.Actions.Flagger do
     |> join(:inner, [f], a in assoc(f, :action))
     |> where([_, a], a.type == ^action_type)
     |> where([_, a], a.entity == ^entity)
-    |> where([_, a], a.entity_id == ^id)
+    |> where([_, a], a.comment_id == ^id)
     |> Repo.aggregate(:count, :id)
   end
 
@@ -64,7 +65,7 @@ defmodule CaptainFact.Actions.Flagger do
     UserAction
     |> where([a], a.type == ^action_type)
     |> where([a], a.entity == ^entity)
-    |> where([a], a.entity_id == ^id)
+    |> where([a], a.comment_id == ^id)
     |> select([a], a.id)
     |> Repo.one!()
   end
