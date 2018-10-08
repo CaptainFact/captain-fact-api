@@ -27,7 +27,7 @@ docker installed, you can use the pre-seed postgres docker image:
 
 ### Start API services
 
-* Without Docker
+* Without Docker (recommended if you want to make changes in the API)
   - `mix deps.get`
   - `mix ecto.migrate`
   - `iex -S mix`

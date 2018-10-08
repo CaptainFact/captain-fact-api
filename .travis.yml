@@ -5,9 +5,6 @@ stages:
   - name: release
 
 env:
-  # Temporary build image
-  CF_API_BUILD_IMAGE: captain-fact-api-build:$TRAVIS_BRANCH
-  # Releases
   CF_API_REST_IMAGE: captainfact/rest-api:$TRAVIS_BRANCH
   CF_API_GRAPHQL_IMAGE: captainfact/graphql-api:$TRAVIS_BRANCH
   CF_API_ATOM_FEED: captainfact/atom-feed:$TRAVIS_BRANCH
@@ -43,13 +40,10 @@ jobs:
       script:
         - set -e
         - # ---- Build ----
-        - docker build -t ${CF_API_BUILD_IMAGE} -f ./rel/docker/Dockerfile.build .
-        - ./rel/docker/build_release.sh
-            ${CF_API_BUILD_IMAGE}
-            ${CF_API_REST_IMAGE}
-            ${CF_API_GRAPHQL_IMAGE}
-            ${CF_API_ATOM_FEED}
-            ${CF_API_OPENGRAPH_IMAGE}
+        - docker build --build-arg APP=captain_fact -t ${CF_API_REST_IMAGE} .
+        - docker build --build-arg APP=cf_graphql   -t ${CF_API_GRAPHQL_IMAGE} .
+        - docker build --build-arg APP=cf_atom_feed -t ${CF_API_ATOM_FEED} .
+        - docker build --build-arg APP=cf_opengraph -t ${CF_API_OPENGRAPH_IMAGE} .
         - # ---- Push release ----
         - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
         - docker push $CF_API_REST_IMAGE
