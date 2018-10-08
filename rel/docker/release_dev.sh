@@ -2,12 +2,6 @@
 # Dev release is done manually, not from CI.
 # ------------------------------------------
 
-CF_BUILD_IMAGE=captain-fact-builder:dev-release
-CF_REST_API_IMAGE=captainfact/rest-api:dev
-CF_GRAPHQL_API_IMAGE=captainfact/graphql-api:dev
-CF_ATOM_FEED_IMAGE=captainfact/atom-feed:dev
-CF_OPENGRAPH_IMAGE=captainfact/opengraph:dev
-
 function confirm()
 {
     echo "$@"
@@ -26,17 +20,19 @@ function confirm()
 }
 
 # ---- Build ----
+
+CF_REST_API_IMAGE=captainfact/rest-api:dev
+CF_GRAPHQL_API_IMAGE=captainfact/graphql-api:dev
+CF_ATOM_FEED_IMAGE=captainfact/atom-feed:dev
+CF_OPENGRAPH_IMAGE=captainfact/opengraph:dev
+
 set -e
 cd -- "$(dirname $0)"
 
-docker build -t ${CF_BUILD_IMAGE} --build-arg MIX_ENV=dev -f Dockerfile.build ../../
-
-./build_release.sh \
-    ${CF_BUILD_IMAGE} \
-    ${CF_REST_API_IMAGE} \
-    ${CF_GRAPHQL_API_IMAGE} \
-    ${CF_ATOM_FEED_IMAGE} \
-    ${CF_OPENGRAPH_IMAGE}
+docker build -t $CF_REST_API_IMAGE --build-arg APP=captain_fact ../..
+docker build -t $CF_GRAPHQL_API_IMAGE --build-arg APP=cf_graphql ../..
+docker build -t $CF_ATOM_FEED_IMAGE --build-arg APP=cf_atom_feed ../..
+docker build -t $CF_OPENGRAPH_IMAGE --build-arg APP=cf_opengraph ../..
 
 # ---- Push ----
 set +e
@@ -46,7 +42,7 @@ echo "  * ${CF_REST_API_IMAGE}"
 echo "  * ${CF_GRAPHQL_API_IMAGE}"
 echo "  * ${CF_ATOM_FEED_IMAGE}"
 echo "  * ${CF_OPENGRAPH_IMAGE}"
-confirm "==> Are you sure?"
+confirm "==> Are you sure?" || exit
 
 docker push ${CF_REST_API_IMAGE}
 docker push ${CF_GRAPHQL_API_IMAGE}

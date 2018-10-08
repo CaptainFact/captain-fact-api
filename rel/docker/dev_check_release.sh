@@ -6,7 +6,6 @@
 # /!\ Obviously database must be started
 #---------------------------------------------------------------------------------------------------
 
-CF_BUILD_IMAGE=captain-fact-builder:dev-test
 CF_REST_API_IMAGE=captain-fact-api:dev-test
 CF_GRAPHQL_API_IMAGE=captain-fact-api-graphql:dev-test
 CF_ATOM_FEED_IMAGE=captain-fact-atom-feed:dev-test
@@ -17,8 +16,10 @@ set -e
 
 # Build
 cd -- "$(dirname $0)"
-docker build -t ${CF_BUILD_IMAGE} --build-arg MIX_ENV=dev -f Dockerfile.build ../../
-./build_release.sh ${CF_BUILD_IMAGE} ${CF_REST_API_IMAGE} ${CF_GRAPHQL_API_IMAGE} ${CF_ATOM_FEED_IMAGE} ${CF_OPENGRAPH_IMAGE}
+docker build -t $CF_REST_API_IMAGE --build-arg APP=captain_fact ../..
+docker build -t $CF_GRAPHQL_API_IMAGE --build-arg APP=cf_graphql ../..
+docker build -t $CF_ATOM_FEED_IMAGE --build-arg APP=cf_atom_feed ../..
+docker build -t $CF_OPENGRAPH_IMAGE --build-arg APP=cf_opengraph ../..
 
 # Run server
 echo "Let's test REST API on port 4000 =>"
