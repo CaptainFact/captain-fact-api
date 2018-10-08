@@ -14,7 +14,7 @@ COPY apps/cf_graphql/mix.exs ./apps/cf_graphql/
 COPY apps/cf_opengraph/mix.exs ./apps/cf_opengraph/
 COPY apps/cf_utils/mix.exs ./apps/cf_utils/
 COPY apps/db/mix.exs ./apps/db/
-RUN mix deps.get
+RUN HEX_HTTP_CONCURRENCY=4 HEX_HTTP_TIMEOUT=180 mix deps.get
 
 COPY . .
 RUN mix release --name ${APP} --env=$MIX_ENV
