@@ -20,7 +20,7 @@
 
 ### Start DB
 
-Create / launch a postrges instance on your local machine. If you have
+Create / launch a postgres instance on your local machine. If you have
 docker installed, you can use the pre-seed postgres docker image:
 
 `docker run -d --name cf_dev_db -p 5432:5432 captainfact/dev-db:latest`
