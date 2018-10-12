@@ -56,4 +56,13 @@ defmodule CaptainFact.VideosTest do
       assert video.hash_id == VideoHashId.encode(video.id)
     end
   end
+
+  describe "Fetch captions" do
+    test "fetch captions" do
+      video = DB.Factory.insert(:video, provider: "__TEST__")
+      {:ok, captions} = Videos.download_captions(video)
+
+      assert captions.content == "__TEST-CONTENT__"
+    end
+  end
 end

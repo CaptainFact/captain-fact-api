@@ -5,6 +5,7 @@ defmodule CaptainFact.Videos do
 
   import Ecto.Query, warn: false
   import CaptainFact.Videos.MetadataFetcher
+  import CaptainFact.Videos.CaptionsFetcher
 
   alias Ecto.Multi
   alias DB.Repo
@@ -13,9 +14,12 @@ defmodule CaptainFact.Videos do
   alias DB.Schema.Statement
   alias DB.Schema.Speaker
   alias DB.Schema.VideoSpeaker
+  alias DB.Schema.VideoCaption
 
   alias CaptainFact.Actions.ActionCreator
   alias CaptainFact.Accounts.UserPermissions
+
+  @captions_fetcher Application.get_env(:captain_fact, :captions_fetcher)
 
   @doc """
   TODO with_speakers param is only required by REST API
@@ -152,5 +156,23 @@ defmodule CaptainFact.Videos do
       )
 
     Enum.group_by(Repo.all(query), &elem(&1, 0), &elem(&1, 1))
+  end
+
+  @doc """
+  Download and store captions for a video.
+  Returns captions if success or {:error, reason} if something bad happend.
+
+  Usage:
+  iex> download_captions(video)
+  iex> download_captions(video)
+  """
+  def download_captions(video = %Video{}) do
+    with {:ok, captions} <- @captions_fetcher.fetch(video.provider_id, video.language) do
+      captions
+      |> VideoCaption.changeset(%{video_id: video.id})
+      |> Repo.insert()
+
+      {:ok, captions}
+    end
   end
 end
