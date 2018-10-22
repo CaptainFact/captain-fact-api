@@ -36,8 +36,10 @@ defmodule CaptainFactWeb.StatementsChannel do
   Shift all video's statements
   """
   def handle_in_authenticated!("shift_all", offset, socket) do
+    user = Repo.get(DB.Schema.User, socket.assigns.user_id)
+
     case Videos.shift_statements(
-           socket.assigns.user_id,
+           user,
            socket.assigns.video_id,
            String.to_integer(offset)
          ) do
