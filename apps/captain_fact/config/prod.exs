@@ -1,13 +1,15 @@
 use Mix.Config
 
 # --------------------------------------------------------------------------------------
-# Prod config / secrets are set at runtime using weave. See `lib/captain_fact/weave.ex`
+# Prod config / secrets are set at runtime using weave.
+# See `lib/captain_fact/weave.ex`
 # --------------------------------------------------------------------------------------
 
 config :captain_fact, CaptainFactWeb.Endpoint,
   url: [port: 80],
   http: [port: 80],
-  force_ssl: false
+  force_ssl: false,
+  check_origin: []
 
 # Do not print debug messages in production
 config :logger, level: :info
