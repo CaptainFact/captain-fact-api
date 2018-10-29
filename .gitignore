@@ -15,7 +15,8 @@ apps/*/cover
 until_fail.sh
 
 # Secrets
-**/secrets/
+apps/*/priv/secrets/*
+!apps/*/priv/secrets/.keep
 
 # Elixir LS
 .elixir_ls
