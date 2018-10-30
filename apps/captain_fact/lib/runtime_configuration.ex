@@ -53,7 +53,7 @@ defmodule CaptainFact.RuntimeConfiguration do
     end
   )
 
-  weave("chrome_extension_id", handler: &add_url_to_cors/1)
+  weave("chrome_extension_id", handler: fn value -> add_url_to_cors(value) end)
 
   # Endpoint
   weave("host", handler: fn v -> put_in_endpoint([:url, :host], v) end)
