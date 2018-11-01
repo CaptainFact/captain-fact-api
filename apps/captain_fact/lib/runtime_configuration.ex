@@ -38,6 +38,10 @@ defmodule CaptainFact.RuntimeConfiguration do
       put_in_oauth_fb([:redirect_uri], fb_redirect_uri)
       put_in_env(:captain_fact, [:frontend_url], url)
       add_url_to_cors(url)
+
+      if Application.get_env(:captain_fact, CaptainFactWeb.Endpoint)[:check_origin] != false do
+        put_in_env(:captain_fact, [CaptainFactWeb.Endpoint, :check_origin], url)
+      end
     end
   )
 
@@ -129,8 +133,6 @@ defmodule CaptainFact.RuntimeConfiguration do
     # Update CORS for websockets
     if new_cors == "*" do
       put_in_env(:captain_fact, [CaptainFactWeb.Endpoint, :check_origin], false)
-    else
-      put_in_env(:captain_fact, [CaptainFactWeb.Endpoint, :check_origin], [new_cors])
     end
   end
 
