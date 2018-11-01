@@ -43,18 +43,12 @@ defmodule CF.AtomFeed.Videos do
     insert_datetime = video_datetime(video)
 
     video_link
-    |> Entry.new(insert_datetime, entry_title(video))
+    |> Entry.new(insert_datetime, video.title)
     |> Entry.link(video_link)
     |> Entry.published(insert_datetime)
     |> Entry.content(entry_content(video))
     |> Entry.build()
   end
-
-  defp entry_title(video = %{is_partner: true}),
-    do: "New partner video: #{video.title}"
-
-  defp entry_title(video),
-    do: "New community video: #{video.title}"
 
   defp entry_content(video) do
     """

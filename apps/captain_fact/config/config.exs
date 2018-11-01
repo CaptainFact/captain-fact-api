@@ -58,6 +58,9 @@ config :captain_fact, CaptainFact.Authenticator.Guardian,
   serializer: CaptainFact.Accounts.GuardianSerializer,
   permissions: %{default: [:read, :write]}
 
+config :captain_fact,
+  captions_fetcher: CaptainFact.Videos.CaptionsFetcherYoutube
+
 config :guardian, Guardian.DB, repo: DB.Repo
 
 config :weave,

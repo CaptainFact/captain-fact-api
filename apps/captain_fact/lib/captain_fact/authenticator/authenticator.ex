@@ -2,6 +2,7 @@ defmodule CaptainFact.Authenticator do
   @moduledoc """
   Handle all authentication intelligence
   """
+  import Ecto.Query
 
   alias DB.Repo
   alias DB.Schema.User
@@ -10,11 +11,16 @@ defmodule CaptainFact.Authenticator do
   alias Kaur.Result
 
   @doc """
-  Get user from its email address and check password.
+  Get user from its email address or user name and check password.
   Returns nil if no User for email or if password is invalid.
   """
-  def get_user_for_email_password(email, password) do
-    with user when not is_nil(user) <- Repo.get_by(User, email: email),
+  def get_user_for_email_or_name_password(email_or_name, password) do
+    user =
+      User
+      |> where([u], u.email == ^email_or_name or u.username == ^email_or_name)
+      |> Repo.one()
+
+    with user when not is_nil(user) <- user,
          true <- validate_pass(user.encrypted_password, password) do
       user
     else

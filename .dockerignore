@@ -1,16 +1,23 @@
 .git
 .gitignore
-.gitlab-ci.yml
 .idea
+.travis.yml
 
+# Elixir
+.elixir_ls
+_build
+deps
+
+# Project-specific
+rel/docker
+resources
+dev
+
+# Secrets
+apps/*/priv/secrets/*
+!apps/*/priv/secrets/.keep
+
+# File types
 tmp
 erl_crash.dump
 *.ez
-
-_build
-
-rel/docker
-resources
-
-apps/*/priv/secrets/*
-!apps/*/priv/secrets/.keep

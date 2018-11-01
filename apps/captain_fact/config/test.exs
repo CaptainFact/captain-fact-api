@@ -30,3 +30,7 @@ config :captain_fact, CaptainFactMailer, adapter: Bamboo.TestAdapter
 
 # Reduce the number of round for encryption during tests
 config :bcrypt_elixir, :log_rounds, 4
+
+# Captions mock for testing
+config :captain_fact,
+  captions_fetcher: CaptainFact.Videos.CaptionsFetcherTest

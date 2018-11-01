@@ -22,10 +22,10 @@ defmodule CaptainFactWeb.AuthController do
   @err_invalid_email_password "invalid_email_password"
 
   @doc """
-  Auth with identity (email + password)
+  Auth with identity (name|email + password)
   """
   def callback(conn, %{"provider" => "identity", "email" => email, "password" => password}) do
-    case Authenticator.get_user_for_email_password(email, password) do
+    case Authenticator.get_user_for_email_or_name_password(email, password) do
       nil ->
         conn
         |> put_status(:unauthorized)
