@@ -1,6 +1,6 @@
 # ----- Config -----
 
-stages: 
+stages:
   - name: test
   - name: release
 
@@ -16,10 +16,10 @@ jobs:
   include:
     - stage: test
       language: elixir
-      elixir: '1.6'
-      otp_release: '21.0'
-      cache: {paths: ["_build", "deps"]}
-      addons: {postgresql: "9.6"}
+      elixir: "1.6"
+      otp_release: "21.0"
+      cache: { paths: ["_build", "deps"] }
+      addons: { postgresql: "9.6" }
       env:
         - MIX_ENV=test
       before_script:
@@ -39,12 +39,12 @@ jobs:
       services: [docker]
       script:
         - set -e
-        - # ---- Build ----
+        -  # ---- Build ----
         - docker build --build-arg APP=captain_fact -t ${CF_API_REST_IMAGE} .
         - docker build --build-arg APP=cf_graphql   -t ${CF_API_GRAPHQL_IMAGE} .
         - docker build --build-arg APP=cf_atom_feed -t ${CF_API_ATOM_FEED} .
         - docker build --build-arg APP=cf_opengraph -t ${CF_API_OPENGRAPH_IMAGE} .
-        - # ---- Push release ----
+        -  # ---- Push release ----
         - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
         - docker push $CF_API_REST_IMAGE
         - docker push $CF_API_GRAPHQL_IMAGE
