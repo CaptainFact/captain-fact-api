@@ -115,7 +115,7 @@ defmodule DB.Factory do
     %UserAction{
       user: build(:user),
       target_user: build(:user),
-      type: UserAction.type(:create),
+      type: :create,
       entity: UserAction.entity(:comment),
       changes: nil
     }
@@ -144,7 +144,7 @@ defmodule DB.Factory do
 
     insert(:user_action, %{
       user: comment.user,
-      type: UserAction.type(:create),
+      type: :create,
       entity: UserAction.entity(:comment),
       video_id: comment.statement.video_id,
       statement_id: comment.statement.id,
@@ -160,14 +160,13 @@ defmodule DB.Factory do
     comment
   end
 
-  @action_flag UserAction.type(:flag)
   def with_action(flag = %Flag{}) do
     flag = DB.Repo.preload(flag, :source_user)
     flag = DB.Repo.preload(flag, :action)
 
     insert(:user_action, %{
       user: flag.source_user,
-      type: @action_flag,
+      type: :flag,
       entity: flag.action.entity,
       comment_id: flag.action.comment_id
     })
@@ -175,12 +174,11 @@ defmodule DB.Factory do
     flag
   end
 
-  @action_create UserAction.type(:create)
   @entity_comment UserAction.entity(:comment)
   def flag(comment = %Comment{}, nb_flags, reason \\ 1) do
     action =
       UserAction
-      |> where([a], a.type == ^@action_create)
+      |> where([a], a.type == ^:create)
       |> where([a], a.entity == ^@entity_comment)
       |> where([a], a.comment_id == ^comment.id)
       |> Repo.one!()

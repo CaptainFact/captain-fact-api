@@ -28,7 +28,7 @@ defmodule CaptainFact.Moderation do
   alias CaptainFact.Accounts.UserPermissions
 
   @nb_flags_to_report %{
-    {UserAction.type(:create), UserAction.entity(:comment)} => 3
+    {:create, UserAction.entity(:comment)} => 3
   }
 
   @doc """
@@ -40,9 +40,9 @@ defmodule CaptainFact.Moderation do
     3
   """
   def nb_flags_to_report(action, entity) when is_atom(action) and is_atom(entity),
-    do: nb_flags_to_report(UserAction.type(action), UserAction.entity(entity))
+    do: nb_flags_to_report(action, UserAction.entity(entity))
 
-  def nb_flags_to_report(action, entity),
+  def nb_flags_to_report(action, entity) when is_atom(action) and is_integer(entity),
     do: Map.get(@nb_flags_to_report, {action, entity})
 
   @doc """

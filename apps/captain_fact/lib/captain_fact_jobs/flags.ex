@@ -48,7 +48,7 @@ defmodule CaptainFactJobs.Flags do
     unless last_action_id == -1 do
       UserAction
       |> where([a], a.id > ^last_action_id)
-      |> where([a], a.type == ^UserAction.type(:flag))
+      |> where([a], a.type == ^:flag)
       |> Repo.all(log: false)
       |> start_analysis()
     end

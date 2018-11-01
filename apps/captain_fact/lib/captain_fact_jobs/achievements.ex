@@ -18,8 +18,7 @@ defmodule CaptainFactJobs.Achievements do
 
   @name __MODULE__
   @analyser_id UsersActionsReport.analyser_id(:achievements)
-  @action_email_confirmed UserAction.type(:email_confirmed)
-  @watched_action_types [@action_email_confirmed]
+  @watched_action_types [:email_confirmed]
 
   # --- Client API ---
 
@@ -64,6 +63,6 @@ defmodule CaptainFactJobs.Achievements do
 
   defp check_action(nil), do: nil
 
-  defp check_action(%{type: @action_email_confirmed, target_user_id: id}),
+  defp check_action(%{type: :email_confirmed, target_user_id: id}),
     do: unlock_achievement(Repo.get!(User, id), :not_a_robot)
 end

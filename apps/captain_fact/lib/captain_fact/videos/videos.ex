@@ -123,7 +123,7 @@ defmodule CaptainFact.Videos do
       ActionCreator.action(
         user.id,
         UserAction.entity(:video),
-        UserAction.type(:update),
+        :update,
         video_id: video_id,
         changes: %{"statements_time" => offset}
       )

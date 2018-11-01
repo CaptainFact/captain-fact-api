@@ -75,8 +75,6 @@ defmodule DB.Repo.Migrations.AddRelationshipsToUserActions do
   @comment UserAction.entity(:comment)
   @fact UserAction.entity(:fact)
 
-  @add UserAction.type(:add)
-
   defp remove_non_migrable_actions() do
     delete_without_log = &Repo.delete(&1, log: false)
 
@@ -149,7 +147,7 @@ defmodule DB.Repo.Migrations.AddRelationshipsToUserActions do
     change(action, full_update)
   end
 
-  defp changeset_migrate_action(action = %UserAction{type: @add, entity: @speaker}) do
+  defp changeset_migrate_action(action = %UserAction{type: :add, entity: @speaker}) do
     video_id = get_video_id_from_context(action.context)
     change(action, video_id: video_id, speaker_id: action.entity_id, changes: nil)
   end

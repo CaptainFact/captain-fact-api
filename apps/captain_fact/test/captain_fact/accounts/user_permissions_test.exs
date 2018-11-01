@@ -118,7 +118,7 @@ defmodule CaptainFact.Accounts.UserPermissionsTest do
       :user_action,
       user: nil,
       user_id: user_id,
-      type: UserAction.type(action_type),
+      type: action_type,
       entity: UserAction.entity(entity)
     )
   end

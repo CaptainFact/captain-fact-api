@@ -229,7 +229,7 @@ defmodule CaptainFact.Comments.CommentsTest do
   defp insert_reported_comment() do
     limit =
       CaptainFact.Moderation.nb_flags_to_report(
-        UserAction.type(:create),
+        :create,
         UserAction.entity(:comment)
       )
 

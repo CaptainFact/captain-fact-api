@@ -39,6 +39,7 @@ defmodule DB.Mixfile do
       {:arc, github: "Betree/arc", override: true},
       {:arc_ecto, "~> 0.10.0"},
       {:ecto, "~> 2.2.8"},
+      {:ecto_enum, "~> 1.0"},
       {:postgrex, "~> 0.13.3"},
       {:weave, "3.1.2"},
       {:ex_aws, "~> 2.1"},

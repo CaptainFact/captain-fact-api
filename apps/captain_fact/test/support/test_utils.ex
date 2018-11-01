@@ -43,7 +43,7 @@ defmodule CaptainFact.TestUtils do
     assert Repo.get_by(
              UserAction,
              entity: UserAction.entity(:comment),
-             type: UserAction.type(:delete),
+             type: :delete,
              comment_id: id
            ) == nil
   end

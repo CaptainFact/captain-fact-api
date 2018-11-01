@@ -22,11 +22,15 @@ defmodule CaptainFact.Actions.ReputationChangeConfigLoader do
 
       iex> import CaptainFact.Actions.ReputationChangeConfigLoader, only: [convert: 1]
       iex> convert(%{abused_flag: [0,-5], vote_up: %{comment: [0, 2], fact: [0, 3]}})
-      %{9 => %{4 => {0, 2}, 5 => {0, 3}}, 103 => {0, -5}}
+      %{abused_flag: {0, -5}, vote_up: %{4 => {0, 2}, 5 => {0, 3}}}
   """
   def convert(base_config) do
     Enum.reduce(base_config, %{}, fn {atom_action_type, value}, actions_map ->
-      Map.put(actions_map, UserAction.type(atom_action_type), convert_value(value))
+      if DB.Type.UserActionType.valid_value?(atom_action_type) do
+        Map.put(actions_map, atom_action_type, convert_value(value))
+      else
+        raise "Unknown action type in YAML reputation changes config: #{atom_action_type}"
+      end
     end)
   end
 

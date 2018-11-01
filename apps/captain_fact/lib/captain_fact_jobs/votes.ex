@@ -20,17 +20,14 @@ defmodule CaptainFactJobs.Votes do
   @analyser_id UsersActionsReport.analyser_id(:votes)
   @entity_comment UserAction.entity(:comment)
   @entity_fact UserAction.entity(:fact)
-  @watched_actions Enum.map(
-                     [
-                       :vote_up,
-                       :vote_down,
-                       :self_vote,
-                       :revert_vote_up,
-                       :revert_vote_down,
-                       :revert_self_vote
-                     ],
-                     &UserAction.type/1
-                   )
+  @watched_actions [
+    :vote_up,
+    :vote_down,
+    :self_vote,
+    :revert_vote_up,
+    :revert_vote_down,
+    :revert_self_vote
+  ]
 
   # --- Client API ---
 

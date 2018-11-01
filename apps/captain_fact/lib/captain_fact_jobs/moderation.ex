@@ -28,7 +28,6 @@ defmodule CaptainFactJobs.Moderation do
   @refute_ban_under -0.66
   @confirm_ban_above 0.66
 
-  @action_create UserAction.type(:create)
   @entity_comment UserAction.entity(:comment)
 
   # --- Client API ---
@@ -147,7 +146,7 @@ defmodule CaptainFactJobs.Moderation do
   end
 
   # We can only moderate comment at the moment
-  defp process_entry(entry = %{action: %{type: @action_create, entity: @entity_comment}}) do
+  defp process_entry(entry = %{action: %{type: :create, entity: @entity_comment}}) do
     comment = Repo.get(Comment.with_statement(Comment), entry.action.comment_id)
 
     if comment do
@@ -243,7 +242,7 @@ defmodule CaptainFactJobs.Moderation do
       Enum.map(targets, fn params ->
         Map.merge(params, %{
           user_id: nil,
-          type: UserAction.type(action_type),
+          type: action_type,
           entity: UserAction.entity(entity_type),
           inserted_at: Ecto.DateTime.utc()
         })

@@ -25,7 +25,7 @@ defmodule CF.GraphQL.Schema.Types.UserAction do
     end
 
     @desc "Action type"
-    field(:type, non_null(:integer))
+    field(:type, non_null(:string))
     @desc "Entity type"
     field(:entity, non_null(:integer))
     @desc "Datetime at which the action has been done"
