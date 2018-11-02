@@ -130,7 +130,7 @@ defmodule CaptainFact.RuntimeConfiguration do
     if new_cors == "*" do
       put_in_env(:captain_fact, [CaptainFactWeb.Endpoint, :check_origin], false)
     else
-      put_in_env(:captain_fact, [CaptainFactWeb.Endpoint, :check_origin], [new_cors])
+      put_in_env(:captain_fact, [CaptainFactWeb.Endpoint, :check_origin], new_cors)
     end
   end
 
