@@ -5,26 +5,18 @@ defmodule CaptainFact.Actions.ActionCreator do
   match with `CaptainFact.Actions.Validator` checks.
   """
 
-  import DB.Schema.UserAction, only: [entity: 1]
-
   alias DB.Schema.UserAction
   alias DB.Schema.Video
   alias DB.Schema.Speaker
   alias DB.Schema.Statement
   alias DB.Schema.Comment
 
-  @user entity(:user)
-  @video entity(:video)
-  @statement entity(:statement)
-  @speaker entity(:speaker)
-  @comment entity(:comment)
-
   # Create
 
   def action_create(user_id, statement = %Statement{}) do
     action(
       user_id,
-      @statement,
+      :statement,
       :create,
       video_id: statement.video_id,
       statement_id: statement.id,
@@ -39,7 +31,7 @@ defmodule CaptainFact.Actions.ActionCreator do
   def action_create(user_id, speaker = %Speaker{}) do
     action(
       user_id,
-      @speaker,
+      :speaker,
       :create,
       speaker_id: speaker.id,
       changes: %{
@@ -52,7 +44,7 @@ defmodule CaptainFact.Actions.ActionCreator do
   def action_create(user_id, video_id, comment = %Comment{}, source_url \\ nil) do
     action(
       user_id,
-      @comment,
+      :comment,
       :create,
       video_id: video_id,
       statement_id: comment.statement_id,
@@ -71,7 +63,7 @@ defmodule CaptainFact.Actions.ActionCreator do
   def action_add(user_id, video_id, speaker = %Speaker{}) do
     action(
       user_id,
-      @speaker,
+      :speaker,
       :add,
       video_id: video_id,
       speaker_id: speaker.id
@@ -81,7 +73,7 @@ defmodule CaptainFact.Actions.ActionCreator do
   def action_add(user_id, video = %Video{}) do
     action(
       user_id,
-      @video,
+      :video,
       :add,
       video_id: video.id,
       changes: %{
@@ -95,7 +87,7 @@ defmodule CaptainFact.Actions.ActionCreator do
   def action_update(user_id, %{data: statement = %Statement{}, changes: changes}) do
     action(
       user_id,
-      @statement,
+      :statement,
       :update,
       video_id: statement.video_id,
       statement_id: statement.id,
@@ -106,7 +98,7 @@ defmodule CaptainFact.Actions.ActionCreator do
   def action_update(user_id, %{data: video = %Video{}, changes: changes}) do
     action(
       user_id,
-      @video,
+      :video,
       :update,
       video_id: video.video_id,
       changes: changes
@@ -114,22 +106,22 @@ defmodule CaptainFact.Actions.ActionCreator do
   end
 
   def action_update(user_id, %{data: %Speaker{id: id}, changes: changes}) do
-    action(user_id, @speaker, :update, speaker_id: id, changes: changes)
+    action(user_id, :speaker, :update, speaker_id: id, changes: changes)
   end
 
   def action_update(user_id, %{changes: changes}) do
     logged_changes = Map.take(changes, ~w(username name picture_url locale)a)
-    action(user_id, @user, :update, logged_changes)
+    action(user_id, :user, :update, logged_changes)
   end
 
   # Remove
 
   def action_remove(user_id, video_id, %Speaker{id: id}) do
-    action(user_id, @speaker, :remove, video_id: video_id, speaker_id: id)
+    action(user_id, :speaker, :remove, video_id: video_id, speaker_id: id)
   end
 
   def action_remove(user_id, %Statement{id: id, video_id: video_id}) do
-    action(user_id, @statement, :remove, video_id: video_id, statement_id: id)
+    action(user_id, :statement, :remove, video_id: video_id, statement_id: id)
   end
 
   # Delete
@@ -137,7 +129,7 @@ defmodule CaptainFact.Actions.ActionCreator do
   def action_delete(user_id, video_id, comment = %Comment{}) do
     action(
       user_id,
-      @comment,
+      :comment,
       :delete,
       video_id: video_id,
       statement_id: comment.statement_id
@@ -146,7 +138,7 @@ defmodule CaptainFact.Actions.ActionCreator do
 
   def action_admin_delete(video_id, comment = %Comment{}) do
     admin_action(
-      @comment,
+      :comment,
       :delete,
       video_id: video_id,
       statement_id: comment.statement_id
@@ -156,11 +148,11 @@ defmodule CaptainFact.Actions.ActionCreator do
   # Restore
 
   def action_restore(user_id, %Statement{id: id, video_id: video_id}) do
-    action(user_id, @statement, :restore, video_id: video_id, statement_id: id)
+    action(user_id, :statement, :restore, video_id: video_id, statement_id: id)
   end
 
   def action_restore(user_id, video_id, %Speaker{id: id}) do
-    action(user_id, @speaker, :restore, video_id: video_id, speaker_id: id)
+    action(user_id, :speaker, :restore, video_id: video_id, speaker_id: id)
   end
 
   # Votes
@@ -169,7 +161,7 @@ defmodule CaptainFact.Actions.ActionCreator do
       when vote_type in [:self_vote, :vote_up, :vote_down] do
     action(
       user_id,
-      entity(Comment.type(comment)),
+      Comment.type(comment),
       vote_type,
       video_id: video_id,
       statement_id: comment.statement_id,
@@ -182,7 +174,7 @@ defmodule CaptainFact.Actions.ActionCreator do
       when vote_type in [:revert_vote_up, :revert_vote_down, :revert_self_vote] do
     action(
       user_id,
-      entity(Comment.type(comment)),
+      Comment.type(comment),
       vote_type,
       video_id: video_id,
       statement_id: comment.statement_id,
@@ -196,7 +188,7 @@ defmodule CaptainFact.Actions.ActionCreator do
   def action_flag(user_id, video_id, comment = %Comment{}) do
     action(
       user_id,
-      entity(Comment.type(comment)),
+      Comment.type(comment),
       :flag,
       video_id: video_id,
       statement_id: comment.statement_id,
@@ -214,7 +206,7 @@ defmodule CaptainFact.Actions.ActionCreator do
              :action_banned_not_constructive
            ] do
     admin_action(
-      entity(Comment.type(comment)),
+      Comment.type(comment),
       ban_reason,
       target_user_id: comment.user_id,
       changes: changes
@@ -222,7 +214,7 @@ defmodule CaptainFact.Actions.ActionCreator do
   end
 
   def action_email_confirmed(user_id) do
-    admin_action(@user, :email_confirmed, target_user_id: user_id)
+    admin_action(:user, :email_confirmed, target_user_id: user_id)
   end
 
   @doc """

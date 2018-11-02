@@ -42,7 +42,7 @@ defmodule CaptainFact.TestUtils do
 
     assert Repo.get_by(
              UserAction,
-             entity: UserAction.entity(:comment),
+             entity: :comment,
              type: :delete,
              comment_id: id
            ) == nil
@@ -51,7 +51,7 @@ defmodule CaptainFact.TestUtils do
   defp get_comment_and_actions(id) do
     actions =
       UserAction
-      |> where([a], a.entity == ^UserAction.entity(:comment) and a.comment_id == ^id)
+      |> where([a], a.entity == ^:comment and a.comment_id == ^id)
       |> Repo.all()
 
     {Repo.get(Comment, id), actions}

@@ -116,7 +116,7 @@ defmodule DB.Factory do
       user: build(:user),
       target_user: build(:user),
       type: :create,
-      entity: UserAction.entity(:comment),
+      entity: :comment,
       changes: nil
     }
   end
@@ -145,7 +145,7 @@ defmodule DB.Factory do
     insert(:user_action, %{
       user: comment.user,
       type: :create,
-      entity: UserAction.entity(:comment),
+      entity: :comment,
       video_id: comment.statement.video_id,
       statement_id: comment.statement.id,
       comment_id: comment.id,
@@ -174,12 +174,11 @@ defmodule DB.Factory do
     flag
   end
 
-  @entity_comment UserAction.entity(:comment)
   def flag(comment = %Comment{}, nb_flags, reason \\ 1) do
     action =
       UserAction
       |> where([a], a.type == ^:create)
-      |> where([a], a.entity == ^@entity_comment)
+      |> where([a], a.entity == ^:comment)
       |> where([a], a.comment_id == ^comment.id)
       |> Repo.one!()
 

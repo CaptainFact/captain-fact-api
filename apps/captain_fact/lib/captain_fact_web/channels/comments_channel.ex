@@ -7,7 +7,6 @@ defmodule CaptainFactWeb.CommentsChannel do
 
   alias DB.Type.VideoHashId
   alias DB.Schema.User
-  alias DB.Schema.UserAction
   alias DB.Schema.Flag
   alias DB.Schema.Comment
   alias DB.Schema.Vote
@@ -136,7 +135,7 @@ defmodule CaptainFactWeb.CommentsChannel do
       Flag
       |> where([f], f.source_user_id == ^user.id)
       |> join(:inner, [f], a in assoc(f, :action))
-      |> where([_, a], a.entity == ^UserAction.entity(:comment))
+      |> where([_, a], a.entity == ^:comment)
       |> where([_, a], a.comment_id in ^comments_ids)
       |> select([_, a], a.comment_id)
       |> Repo.all()

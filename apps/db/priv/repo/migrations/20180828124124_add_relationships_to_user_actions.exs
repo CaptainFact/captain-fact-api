@@ -69,19 +69,13 @@ defmodule DB.Repo.Migrations.AddRelationshipsToUserActions do
 
   # ---- Private ----
 
-  @video UserAction.entity(:video)
-  @speaker UserAction.entity(:speaker)
-  @statement UserAction.entity(:statement)
-  @comment UserAction.entity(:comment)
-  @fact UserAction.entity(:fact)
-
   defp remove_non_migrable_actions() do
     delete_without_log = &Repo.delete(&1, log: false)
 
     # Delete all actions made on deleted speakers
     nb_actions_speakers =
       UserAction
-      |> where([a], a.entity == @speaker)
+      |> where([a], a.entity == ^:speaker)
       |> join(:left, [a], s in Speaker, fragment("u0.entity_id") == s.id)
       |> where([a, s], is_nil(s.id))
       |> select([:id])
@@ -107,7 +101,7 @@ defmodule DB.Repo.Migrations.AddRelationshipsToUserActions do
 
     nb_actions_videos_direct =
       UserAction
-      |> where([a], a.entity == @video)
+      |> where([a], a.entity == ^:video)
       |> join(:left, [a], v in Video, fragment("u0.entity_id") == v.id)
       |> where([a, v], is_nil(v.id))
       |> select([:id])
@@ -118,7 +112,7 @@ defmodule DB.Repo.Migrations.AddRelationshipsToUserActions do
     # Delete all actions made on delete comments
     nb_actions_comments =
       UserAction
-      |> where([a], a.entity == @comment or a.entity == @fact)
+      |> where([a], a.entity == ^:comment or a.entity == ^:fact)
       |> join(:left, [a], c in Comment, fragment("u0.entity_id") == c.id)
       |> where([a, c], is_nil(c.id))
       |> select([:id])
@@ -133,7 +127,7 @@ defmodule DB.Repo.Migrations.AddRelationshipsToUserActions do
 
   # --  Changeset to migrate existing actions to new model --
 
-  defp changeset_migrate_action(action = %UserAction{entity: @video}) do
+  defp changeset_migrate_action(action = %UserAction{entity: :video}) do
     base_update = [video_id: action.entity_id]
 
     full_update =
@@ -147,23 +141,23 @@ defmodule DB.Repo.Migrations.AddRelationshipsToUserActions do
     change(action, full_update)
   end
 
-  defp changeset_migrate_action(action = %UserAction{type: :add, entity: @speaker}) do
+  defp changeset_migrate_action(action = %UserAction{type: :add, entity: :speaker}) do
     video_id = get_video_id_from_context(action.context)
     change(action, video_id: video_id, speaker_id: action.entity_id, changes: nil)
   end
 
-  defp changeset_migrate_action(action = %UserAction{entity: @speaker}) do
+  defp changeset_migrate_action(action = %UserAction{entity: :speaker}) do
     video_id = get_video_id_from_context(action.context)
     change(action, video_id: video_id, speaker_id: action.entity_id)
   end
 
-  defp changeset_migrate_action(action = %UserAction{entity: @statement}) do
+  defp changeset_migrate_action(action = %UserAction{entity: :statement}) do
     video_id = get_video_id_from_context(action.context)
     change(action, video_id: video_id, statement_id: action.entity_id)
   end
 
   defp changeset_migrate_action(action = %UserAction{entity: entity, context: context})
-       when entity in [@comment, @fact] do
+       when entity in [:comment, :fact] do
     comment = Repo.get(Comment, action.entity_id, log: false)
 
     change(
@@ -198,22 +192,22 @@ defmodule DB.Repo.Migrations.AddRelationshipsToUserActions do
 
   # -- Changeset to rollback existing actions to their old model --
 
-  defp revert_changeset_migrate_action(action = %UserAction{entity: @video}) do
+  defp revert_changeset_migrate_action(action = %UserAction{entity: :video}) do
     change(action, context: "VD:#{action.video_id}", entity_id: action.video_id)
   end
 
-  defp revert_changeset_migrate_action(action = %UserAction{entity: @speaker}) do
+  defp revert_changeset_migrate_action(action = %UserAction{entity: :speaker}) do
     context = get_context_from_video_id(action.video_id)
     change(action, context: context, entity_id: action.speaker_id)
   end
 
-  defp revert_changeset_migrate_action(action = %UserAction{entity: @statement}) do
+  defp revert_changeset_migrate_action(action = %UserAction{entity: :statement}) do
     context = get_context_from_video_id(action.video_id)
     change(action, context: context, entity_id: action.statement_id)
   end
 
   defp revert_changeset_migrate_action(action = %UserAction{entity: entity})
-       when entity in [@comment, @fact] do
+       when entity in [:comment, :fact] do
     context = get_context_from_video_id(action.video_id)
     change(action, context: context, entity_id: action.comment_id)
   end

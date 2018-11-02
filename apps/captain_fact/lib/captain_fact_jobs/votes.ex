@@ -18,8 +18,6 @@ defmodule CaptainFactJobs.Votes do
 
   @name __MODULE__
   @analyser_id UsersActionsReport.analyser_id(:votes)
-  @entity_comment UserAction.entity(:comment)
-  @entity_fact UserAction.entity(:fact)
   @watched_actions [
     :vote_up,
     :vote_down,
@@ -78,7 +76,7 @@ defmodule CaptainFactJobs.Votes do
     ReportManager.set_success!(report, nb_entities_updated)
   end
 
-  defp update_entity_votes(entity, actions) when entity in [@entity_comment, @entity_fact] do
+  defp update_entity_votes(entity, actions) when entity in [:comment, :fact] do
     actions
     |> Enum.group_by(& &1.video_id)
     |> Enum.map(fn {video_id, actions} ->

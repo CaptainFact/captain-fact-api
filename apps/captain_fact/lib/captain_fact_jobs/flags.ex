@@ -79,8 +79,7 @@ defmodule CaptainFactJobs.Flags do
   end
 
   # Check for flags on comments
-  @entity_comment UserAction.entity(:comment)
-  defp update_entity_flags(@entity_comment, %UserAction{comment_id: comment_id}) do
+  defp update_entity_flags(:comment, %UserAction{comment_id: comment_id}) do
     nb_flags = Flagger.get_nb_flags(:create, :comment, comment_id)
 
     if nb_flags >= Moderation.nb_flags_to_report(:create, :comment) do

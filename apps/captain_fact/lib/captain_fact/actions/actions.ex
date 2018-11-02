@@ -31,7 +31,7 @@ defmodule CaptainFact.Actions do
     UserAction
     |> where([a], a.user_id == ^user_id(user))
     |> where([a], a.type == ^action_type)
-    |> where([a], a.entity == ^UserAction.entity(entity))
+    |> where([a], a.entity == ^entity)
     |> age_filter(max_age)
     |> Repo.aggregate(:count, :id)
   end

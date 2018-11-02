@@ -95,7 +95,7 @@ defmodule CaptainFactJobs.ModerationTest do
     action =
       Repo.get_by!(
         UserAction,
-        entity: UserAction.entity(:comment),
+        entity: :comment,
         type: :create,
         comment_id: comment.id
       )
@@ -114,7 +114,7 @@ defmodule CaptainFactJobs.ModerationTest do
     limit =
       CaptainFact.Moderation.nb_flags_to_report(
         :create,
-        UserAction.entity(:comment)
+        :comment
       )
 
     comment = insert(:comment) |> with_action() |> flag(limit)

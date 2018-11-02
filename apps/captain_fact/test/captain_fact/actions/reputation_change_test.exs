@@ -15,7 +15,7 @@ defmodule CaptainFact.Actions.ReputationChangeTest do
       # Create user and a single action with previsible results
       user = insert(:user)
       action_type = :vote_down
-      entity = UserAction.entity(:comment)
+      entity = :comment
       action = insert(:user_action, user: user, type: action_type, entity: entity)
 
       # Estimate change and ensure it matches the change for this action
@@ -28,7 +28,7 @@ defmodule CaptainFact.Actions.ReputationChangeTest do
       # Create user and a single action with previsible results
       user = insert(:user)
       action_type = :email_confirmed
-      entity = UserAction.entity(:user)
+      entity = :user
       action = insert(:user_action, target_user: user, type: action_type, entity: entity)
 
       # Estimate change and ensure it matches the change for this action
@@ -42,12 +42,12 @@ defmodule CaptainFact.Actions.ReputationChangeTest do
       user = insert(:user)
 
       # Self action
-      self_entity = UserAction.entity(:comment)
+      self_entity = :comment
       self_action_type = :vote_down
       self_action = insert(:user_action, user: user, type: self_action_type, entity: self_entity)
 
       # Target action
-      target_entity = UserAction.entity(:user)
+      target_entity = :user
       target_action_type = :email_confirmed
 
       target_action =
@@ -67,7 +67,7 @@ defmodule CaptainFact.Actions.ReputationChangeTest do
       # Create user and a single action with previsible results
       user = insert(:user)
       action_type = :email_confirmed
-      entity = UserAction.entity(:user)
+      entity = :user
       action = insert(:user_action, target_user: user, type: action_type, entity: entity)
 
       # Insert a random action that should not have any impact on calculation
@@ -87,7 +87,7 @@ defmodule CaptainFact.Actions.ReputationChangeTest do
   defp test_action(type, entity) do
     for_action(%UserAction{
       type: type,
-      entity: UserAction.entity(entity)
+      entity: entity
     })
   end
 end

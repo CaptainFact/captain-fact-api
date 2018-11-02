@@ -14,14 +14,13 @@ defmodule CaptainFact.Actions.Flagger do
   @doc """
   Record a new flag on `comment` requested by given user `user_id`
   """
-  @entity_comment UserAction.entity(:comment)
   def flag!(source_user_id, video_id, comment_id, reason) when is_integer(comment_id),
     do: flag!(source_user_id, video_id, Repo.get!(Comment, comment_id), reason)
 
   def flag!(source_user_id, video_id, comment = %Comment{}, reason) do
     user = Repo.get!(User, source_user_id)
     UserPermissions.check!(user, :flag, :comment)
-    action_id = get_action_id!(:create, @entity_comment, comment.id)
+    action_id = get_action_id!(:create, :comment, comment.id)
 
     try do
       user
@@ -45,10 +44,8 @@ defmodule CaptainFact.Actions.Flagger do
   def get_nb_flags(%Comment{id: id}),
     do: get_nb_flags(:create, :comment, id)
 
-  def get_nb_flags(action_type, entity, id) when is_atom(entity),
-    do: get_nb_flags(action_type, UserAction.entity(entity), id)
-
-  def get_nb_flags(action_type, entity, id) when is_integer(entity) do
+  @spec get_nb_flags(DB.Type.UserActionType.t(), atom(), integer()) :: integer()
+  def get_nb_flags(action_type, entity, id) do
     Flag
     |> join(:inner, [f], a in assoc(f, :action))
     |> where([_, a], a.type == ^action_type)

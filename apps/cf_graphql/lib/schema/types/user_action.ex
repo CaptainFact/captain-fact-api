@@ -27,7 +27,7 @@ defmodule CF.GraphQL.Schema.Types.UserAction do
     @desc "Action type"
     field(:type, non_null(:string))
     @desc "Entity type"
-    field(:entity, non_null(:integer))
+    field(:entity, non_null(:string))
     @desc "Datetime at which the action has been done"
     field(:time, :string, do: resolve(fn a, _, _ -> {:ok, a.inserted_at} end))
     @desc "Video ID where the action took place"

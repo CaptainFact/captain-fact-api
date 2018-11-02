@@ -16,7 +16,7 @@ defmodule DB.Schema.UserAction do
     belongs_to(:target_user, User)
 
     field(:type, DB.Type.UserActionType)
-    field(:entity, :integer)
+    field(:entity, DB.Type.Entity)
     field(:changes, :map)
 
     belongs_to(:video, Video)
@@ -37,7 +37,6 @@ defmodule DB.Schema.UserAction do
   def changeset(action = %UserAction{}, attrs) do
     action
     |> cast(attrs, @fields)
-    |> update_change(:entity, &entity/1)
     |> cast_assoc(:user)
     |> cast_assoc(:target_user)
     |> validate_required([:user_id, :type, :entity])
@@ -51,27 +50,8 @@ defmodule DB.Schema.UserAction do
   def changeset_admin(action = %UserAction{}, attrs) do
     action
     |> cast(attrs, @admin_fields)
-    |> update_change(:entity, &entity/1)
     |> cast_assoc(:target_user)
     |> validate_inclusion(:user, [nil])
     |> validate_required([:type, :entity])
   end
-
-  # Entities
-  def entity(value) when is_integer(value), do: value
-  def entity(:video), do: 1
-  def entity(:speaker), do: 2
-  def entity(:statement), do: 3
-  def entity(:comment), do: 4
-  def entity(:fact), do: 5
-  def entity(:user), do: 7
-  # Deprecated. Can safelly be re-used
-  def entity(:video_debate_action), do: 6
-
-  @doc """
-  Take a list of entities as atom, returns their equivalent as integer
-  """
-  @spec entities(list(:atom)) :: list(:integer)
-  def entities(entities),
-    do: Enum.map(entities, &UserAction.entity/1)
 end

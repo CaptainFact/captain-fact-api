@@ -36,10 +36,8 @@ defmodule CaptainFact.Actions.ReputationChange do
   def for_action(type) when is_atom(type),
     do: Map.get(@actions, type) || {0, 0}
 
+  @spec for_action(atom(), atom()) :: any()
   def for_action(type, entity) when is_atom(type) and is_atom(entity),
-    do: for_action(type, UserAction.entity(entity))
-
-  def for_action(type, entity) when is_atom(type) and is_integer(entity),
     do: get_in(@actions, [type, entity]) || {0, 0}
 
   @doc """

@@ -28,8 +28,6 @@ defmodule CaptainFactJobs.Moderation do
   @refute_ban_under -0.66
   @confirm_ban_above 0.66
 
-  @entity_comment UserAction.entity(:comment)
-
   # --- Client API ---
 
   def start_link() do
@@ -145,8 +143,9 @@ defmodule CaptainFactJobs.Moderation do
     )
   end
 
-  # We can only moderate comment at the moment
-  defp process_entry(entry = %{action: %{type: :create, entity: @entity_comment}}) do
+  # We can only moderate comment and sourced comment at the moment
+  defp process_entry(entry = %{action: %{type: :create, entity: entity}})
+       when entity in [:comment, :fact] do
     comment = Repo.get(Comment.with_statement(Comment), entry.action.comment_id)
 
     if comment do
@@ -200,7 +199,7 @@ defmodule CaptainFactJobs.Moderation do
     broadcast_comment_remove(comment)
 
     # Record flags confirmations for flaggers to get reputation bonus
-    record_flags_results(flagging_users_ids, :comment, :confirmed_flag)
+    record_flags_results(flagging_users_ids, Comment.type(comment), :confirmed_flag)
   end
 
   defp ban_reason(reason) do
@@ -227,7 +226,7 @@ defmodule CaptainFactJobs.Moderation do
     # Repo.delete_all returns a tuple like {nb_updated, entries}
     |> elem(1)
     |> Enum.map(&Map.get(&1, :source_user_id))
-    |> record_flags_results(:comment, :abused_flag)
+    |> record_flags_results(Comment.type(comment), :abused_flag)
 
     # Delete all feedbacks
     Repo.delete_all(where(ModerationUserFeedback, [f], f.action_id == ^action.id))
@@ -243,7 +242,7 @@ defmodule CaptainFactJobs.Moderation do
         Map.merge(params, %{
           user_id: nil,
           type: action_type,
-          entity: UserAction.entity(entity_type),
+          entity: entity_type,
           inserted_at: Ecto.DateTime.utc()
         })
       end)

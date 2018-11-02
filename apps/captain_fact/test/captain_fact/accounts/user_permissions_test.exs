@@ -1,7 +1,6 @@
 defmodule CaptainFact.Accounts.UserPermissionsTest do
   use CaptainFact.DataCase
 
-  alias DB.Schema.UserAction
   alias CaptainFact.Actions
   alias CaptainFact.Accounts.UserPermissions
   alias UserPermissions.PermissionsError
@@ -119,7 +118,7 @@ defmodule CaptainFact.Accounts.UserPermissionsTest do
       user: nil,
       user_id: user_id,
       type: action_type,
-      entity: UserAction.entity(entity)
+      entity: entity
     )
   end
 

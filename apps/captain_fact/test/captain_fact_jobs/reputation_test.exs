@@ -3,7 +3,6 @@ defmodule CaptainFactJobs.ReputationTest do
   doctest CaptainFactJobs.Reputation
 
   alias DB.Schema.User
-  alias DB.Schema.UserAction
   alias CaptainFact.Actions.ReputationChange
   alias CaptainFactJobs.Reputation
 
@@ -39,7 +38,7 @@ defmodule CaptainFactJobs.ReputationTest do
 
     insert_list(limit * 2, :user_action, %{
       type: :vote_up,
-      entity: UserAction.entity(:comment),
+      entity: :comment,
       user: source_user,
       target_user: target_user
     })
@@ -57,7 +56,7 @@ defmodule CaptainFactJobs.ReputationTest do
 
     insert(:user_action, %{
       type: type,
-      entity: UserAction.entity(entity),
+      entity: entity,
       user: source_user,
       target_user: target_user
     })
@@ -82,6 +81,6 @@ defmodule CaptainFactJobs.ReputationTest do
   end
 
   defp insert_action(type, entity) do
-    insert(:user_action, %{type: type, entity: UserAction.entity(entity)})
+    insert(:user_action, %{type: type, entity: entity})
   end
 end

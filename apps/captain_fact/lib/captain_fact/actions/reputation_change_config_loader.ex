@@ -3,8 +3,6 @@ defmodule CaptainFact.Actions.ReputationChangeConfigLoader do
   Config loader for reputation changes
   """
 
-  alias DB.Schema.UserAction
-
   @doc """
   Load a config and convert it using `convert/1`
   """
@@ -22,7 +20,7 @@ defmodule CaptainFact.Actions.ReputationChangeConfigLoader do
 
       iex> import CaptainFact.Actions.ReputationChangeConfigLoader, only: [convert: 1]
       iex> convert(%{abused_flag: [0,-5], vote_up: %{comment: [0, 2], fact: [0, 3]}})
-      %{abused_flag: {0, -5}, vote_up: %{4 => {0, 2}, 5 => {0, 3}}}
+      %{abused_flag: {0, -5}, vote_up: %{comment: {0, 2}, fact: {0, 3}}}
   """
   def convert(base_config) do
     Enum.reduce(base_config, %{}, fn {atom_action_type, value}, actions_map ->
@@ -40,7 +38,11 @@ defmodule CaptainFact.Actions.ReputationChangeConfigLoader do
 
   defp convert_value(value) when is_map(value) do
     Enum.reduce(value, %{}, fn {entity, change_list}, action_changes ->
-      Map.put(action_changes, UserAction.entity(entity), List.to_tuple(change_list))
+      if DB.Type.Entity.valid_value?(entity) do
+        Map.put(action_changes, entity, List.to_tuple(change_list))
+      else
+        raise "Unknown entity in YAML reputation changes config: #{entity}"
+      end
     end)
   end
 end
