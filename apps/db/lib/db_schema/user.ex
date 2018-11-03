@@ -9,7 +9,7 @@ defmodule DB.Schema.User do
   import Ecto.Changeset
 
   alias DB.Type.{Achievement, UserPicture}
-  alias DB.Schema.{UserAction, Comment, Vote, Flag, Speaker}
+  alias DB.Schema.{UserAction, Comment, Vote, Flag, Speaker, Subscription, Notification}
 
   schema "users" do
     field(:username, :string)
@@ -41,6 +41,8 @@ defmodule DB.Schema.User do
     has_many(:comments, Comment, on_delete: :nilify_all)
     has_many(:votes, Vote, on_delete: :delete_all)
     has_many(:flags_posted, Flag, foreign_key: :source_user_id, on_delete: :delete_all)
+    has_many(:subscriptions, Subscription, on_delete: :delete_all)
+    has_many(:notifications, Notification, on_delete: :delete_all)
 
     belongs_to(:speaker, Speaker)
 

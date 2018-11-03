@@ -6,17 +6,35 @@ config :cf_jobs, CF.Jobs.Scheduler,
   global: true,
   debug_logging: false,
   jobs: [
-    # credo:disable-for-lines:10
-    # Actions analysers
-    # Every minute
-    {{:extended, "*/20"}, {CF.Jobs.Reputation, :update, []}},
-    # Every day
-    {"@daily", {CF.Jobs.Reputation, :reset_daily_limits, []}},
-    # Every minute
-    {"*/1 * * * *", {CF.Jobs.Flags, :update, []}},
-    # Various updaters
-    # Every 5 minutes
-    {"*/5 * * * *", {CF.Jobs.Moderation, :update, []}}
+    # Reputation
+    update_reputations: [
+      schedule: {:extended, "*/20"},
+      task: {CF.Jobs.Reputation, :update, []},
+      overlap: false
+    ],
+    reset_daily_reputation_limits: [
+      schedule: "@daily",
+      task: {CF.Jobs.Reputation, :reset_daily_limits, []},
+      overlap: false
+    ],
+    # Moderation
+    update_moderation: [
+      schedule: "*/5 * * * *",
+      task: {CF.Jobs.Moderation, :update, []},
+      overlap: false
+    ],
+    # Flags
+    update_flags: [
+      schedule: "*/1 * * * *",
+      task: {CF.Jobs.Flags, :update, []},
+      overlap: false
+    ],
+    # Notifications
+    create_notifications: [
+      schedule: {:extended, "*/3"},
+      task: {CF.Jobs.CreateNotifications, :update, []},
+      overlap: false
+    ]
   ]
 
 # Configure Postgres pool size

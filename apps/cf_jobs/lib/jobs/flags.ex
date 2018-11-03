@@ -5,7 +5,7 @@ defmodule CF.Jobs.Flags do
   TODO: Broadcast comment update
   """
 
-  use GenServer
+  @behaviour CF.Jobs.Job
 
   require Logger
   import Ecto.Query
@@ -19,13 +19,15 @@ defmodule CF.Jobs.Flags do
 
   alias CF.Jobs.ReportManager
 
-  @name __MODULE__
-  @analyser_id UsersActionsReport.analyser_id(:flags)
+  @name :flags
+  @analyser_id UsersActionsReport.analyser_id(@name)
 
   # --- Client API ---
 
+  def name, do: @name
+
   def start_link() do
-    GenServer.start_link(@name, :ok, name: @name)
+    GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
   def init(args) do
@@ -35,7 +37,7 @@ defmodule CF.Jobs.Flags do
   # 1 minute
   @timeout 60_000
   def update() do
-    GenServer.call(@name, :update_flags, @timeout)
+    GenServer.call(__MODULE__, :update_flags, @timeout)
   end
 
   # --- Server callbacks ---

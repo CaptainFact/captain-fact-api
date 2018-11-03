@@ -4,7 +4,7 @@ defmodule CF.Actions.ReputationChange do
   """
 
   alias DB.Schema.{User, UserAction}
-  alias DB.Query.Actions
+  alias CF.Actions
   alias CF.Actions.ReputationChangeConfigLoader
 
   # Reputation changes definition

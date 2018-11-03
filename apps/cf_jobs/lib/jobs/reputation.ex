@@ -4,7 +4,7 @@ defmodule CF.Jobs.Reputation do
   gain per day quota is respected.
   """
 
-  use GenServer
+  @behaviour CF.Jobs.Job
 
   require Logger
   import Ecto.Query
@@ -13,21 +13,23 @@ defmodule CF.Jobs.Reputation do
   alias DB.Schema.User
   alias DB.Schema.UserAction
   alias DB.Schema.UsersActionsReport
-  alias DB.Query.Actions
+  alias CF.Actions
 
   alias CF.Actions.ReputationChange
   alias CF.Jobs.ReportManager
 
-  @name __MODULE__
-  @analyser_id UsersActionsReport.analyser_id(:reputation)
+  @name :reputation
+  @analyser_id UsersActionsReport.analyser_id(@name)
 
   @daily_gain_limit ReputationChange.daily_gain_limit()
   @daily_loss_limit ReputationChange.daily_loss_limit()
 
   # --- Client API ---
 
+  def name, do: @name
+
   def start_link() do
-    GenServer.start_link(@name, :ok, name: @name)
+    GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
   def init(args) do
@@ -37,11 +39,11 @@ defmodule CF.Jobs.Reputation do
   # 2 minutes
   @timeout 120_000
   def update() do
-    GenServer.call(@name, :update_reputations, @timeout)
+    GenServer.call(__MODULE__, :update_reputations, @timeout)
   end
 
   def reset_daily_limits() do
-    GenServer.call(@name, :reset_daily_limits, @timeout)
+    GenServer.call(__MODULE__, :reset_daily_limits, @timeout)
   end
 
   @doc """

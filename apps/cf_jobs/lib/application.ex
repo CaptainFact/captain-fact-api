@@ -13,7 +13,8 @@ defmodule CF.Jobs.Application do
       # Jobs
       worker(CF.Jobs.Reputation, []),
       worker(CF.Jobs.Flags, []),
-      worker(CF.Jobs.Moderation, [])
+      worker(CF.Jobs.Moderation, []),
+      worker(CF.Jobs.CreateNotifications, [])
     ]
 
     opts = [strategy: :one_for_one, name: CF.Jobs.Supervisor]

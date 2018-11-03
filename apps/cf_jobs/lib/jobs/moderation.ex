@@ -3,9 +3,11 @@ defmodule CF.Jobs.Moderation do
   This job analyze moderation feebacks and ban or unreport comments accordingly.
 
   TODO: Broadcast updates
+  TODO: This job does not use the ReportManager! (it should!)
   """
 
-  use GenServer
+  @behaviour CF.Jobs.Job
+
   require Logger
   import Ecto.Query
 
@@ -19,15 +21,17 @@ defmodule CF.Jobs.Moderation do
   alias CF.Actions.ActionCreator
   alias CF.Comments
 
-  @name __MODULE__
+  @name :moderation
   @min_nb_feedbacks_to_process_entry 3
   @refute_ban_under -0.66
   @confirm_ban_above 0.66
 
   # --- Client API ---
 
+  def name, do: @name
+
   def start_link() do
-    GenServer.start_link(@name, :ok, name: @name)
+    GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
   def init(args) do
@@ -37,7 +41,7 @@ defmodule CF.Jobs.Moderation do
   # 1 minute
   @timeout 60_000
   def update() do
-    GenServer.call(@name, :update, @timeout)
+    GenServer.call(__MODULE__, :update, @timeout)
   end
 
   @doc """
