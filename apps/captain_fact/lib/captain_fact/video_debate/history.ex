@@ -4,11 +4,7 @@ defmodule CaptainFact.VideoDebate.History do
   alias DB.Repo
   alias DB.Schema.UserAction
 
-  @allowed_entities [
-    UserAction.entity(:statement),
-    UserAction.entity(:speaker),
-    UserAction.entity(:video)
-  ]
+  @allowed_entities [:statement, :speaker, :video]
 
   def video_history(video_id) do
     UserAction
@@ -21,7 +17,7 @@ defmodule CaptainFact.VideoDebate.History do
   def statement_history(statement_id) do
     UserAction
     |> preload(:user)
-    |> where([a], a.entity == ^UserAction.entity(:statement))
+    |> where([a], a.entity == ^:statement)
     |> where([a], a.statement_id == ^statement_id)
     |> Repo.all()
   end

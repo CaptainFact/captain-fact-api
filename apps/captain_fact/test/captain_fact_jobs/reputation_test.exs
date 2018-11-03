@@ -3,7 +3,6 @@ defmodule CaptainFactJobs.ReputationTest do
   doctest CaptainFactJobs.Reputation
 
   alias DB.Schema.User
-  alias DB.Schema.UserAction
   alias CaptainFact.Actions.ReputationChange
   alias CaptainFactJobs.Reputation
 
@@ -38,8 +37,8 @@ defmodule CaptainFactJobs.ReputationTest do
     limit = ReputationChange.daily_gain_limit()
 
     insert_list(limit * 2, :user_action, %{
-      type: UserAction.type(:vote_up),
-      entity: UserAction.entity(:comment),
+      type: :vote_up,
+      entity: :comment,
       user: source_user,
       target_user: target_user
     })
@@ -56,8 +55,8 @@ defmodule CaptainFactJobs.ReputationTest do
     {_, expected_diff} = ReputationChange.for_action(type, entity)
 
     insert(:user_action, %{
-      type: UserAction.type(type),
-      entity: UserAction.entity(entity),
+      type: type,
+      entity: entity,
       user: source_user,
       target_user: target_user
     })
@@ -82,6 +81,6 @@ defmodule CaptainFactJobs.ReputationTest do
   end
 
   defp insert_action(type, entity) do
-    insert(:user_action, %{type: UserAction.type(type), entity: UserAction.entity(entity)})
+    insert(:user_action, %{type: type, entity: entity})
   end
 end

@@ -45,7 +45,7 @@ defmodule DB.Query.Actions do
   @doc """
   Filter given query on matching entity types
   """
-  @spec matching_entities(Ecto.Queryable.t(), nonempty_list(integer)) :: Ecto.Queryable.t()
+  @spec matching_entities(Ecto.Queryable.t(), nonempty_list(atom)) :: Ecto.Queryable.t()
   def matching_entities(query, types) do
     where(query, [a], a.entity in ^types)
   end

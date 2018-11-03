@@ -17,7 +17,7 @@ defmodule CaptainFact.Actions do
   def count_wildcard(user, action_type, max_age \\ -1) do
     UserAction
     |> where([a], a.user_id == ^user_id(user))
-    |> where([a], a.type == ^UserAction.type(action_type))
+    |> where([a], a.type == ^action_type)
     |> age_filter(max_age)
     |> Repo.aggregate(:count, :id)
   end
@@ -30,8 +30,8 @@ defmodule CaptainFact.Actions do
   def count(user, action_type, entity, max_age \\ -1) do
     UserAction
     |> where([a], a.user_id == ^user_id(user))
-    |> where([a], a.type == ^UserAction.type(action_type))
-    |> where([a], a.entity == ^UserAction.entity(entity))
+    |> where([a], a.type == ^action_type)
+    |> where([a], a.entity == ^entity)
     |> age_filter(max_age)
     |> Repo.aggregate(:count, :id)
   end

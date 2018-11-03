@@ -10,7 +10,6 @@ defmodule CaptainFact.Videos do
   alias Ecto.Multi
   alias DB.Repo
   alias DB.Schema.Video
-  alias DB.Schema.UserAction
   alias DB.Schema.Statement
   alias DB.Schema.Speaker
   alias DB.Schema.VideoSpeaker
@@ -122,8 +121,8 @@ defmodule CaptainFact.Videos do
       :action,
       ActionCreator.action(
         user.id,
-        UserAction.entity(:video),
-        UserAction.type(:update),
+        :video,
+        :update,
         video_id: video_id,
         changes: %{"statements_time" => offset}
       )

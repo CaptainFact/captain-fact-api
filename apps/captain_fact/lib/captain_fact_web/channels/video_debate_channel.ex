@@ -116,6 +116,9 @@ defmodule CaptainFactWeb.VideoDebateChannel do
 
       {:error, :speaker, changeset, %{}} ->
         {:reply, {:error, ChangesetView.render("error.json", %{changeset: changeset})}, socket}
+
+      _ ->
+        {:reply, {:error, "Unknown error", socket}}
     end
   end
 

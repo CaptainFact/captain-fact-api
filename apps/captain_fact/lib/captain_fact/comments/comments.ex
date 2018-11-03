@@ -100,7 +100,7 @@ defmodule CaptainFact.Comments do
   defp delete_comments_actions(comments_ids) do
     # Delete all actions linked to this comment
     UserAction
-    |> where([a], a.entity == ^UserAction.entity(:comment))
+    |> where([a], a.entity == ^:comment)
     |> where([a], a.comment_id in ^comments_ids)
     |> Repo.delete_all()
   end

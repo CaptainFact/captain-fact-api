@@ -3,20 +3,19 @@ defmodule DB.Repo.Migrations.AddFlagReasonToModerationUsersFeedback do
   import Ecto.Query
   alias DB.Schema.UserAction
 
-
   def change do
     # Delete all existing feedbacks
     DB.Repo.delete_all(DB.Schema.ModerationUserFeedback, log: false)
 
     # Add flag reason to feedbacks
     alter table("moderation_users_feedbacks") do
-      add :flag_reason, :integer, null: false
+      add(:flag_reason, :integer, null: false)
     end
 
     # We also changed the way confirmed_email actions are recorded, invert
     # source_user_id and target_user_id
     UserAction
-    |> where([a], a.type == ^UserAction.type(:email_confirmed))
+    |> where([a], a.type == ^:email_confirmed)
     |> where([a], is_nil(a.target_user_id))
     |> select([:id, :type, :user_id, :target_user_id])
     |> DB.Repo.all()

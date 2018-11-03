@@ -6,7 +6,6 @@ defmodule CaptainFact.Comments.CommentsTest do
   import CaptainFact.Support.MetaPage
 
   alias DB.Schema.User
-  alias DB.Schema.UserAction
   alias DB.Schema.Comment
   alias DB.Utils.TokenGenerator
 
@@ -229,8 +228,8 @@ defmodule CaptainFact.Comments.CommentsTest do
   defp insert_reported_comment() do
     limit =
       CaptainFact.Moderation.nb_flags_to_report(
-        UserAction.type(:create),
-        UserAction.entity(:comment)
+        :create,
+        :comment
       )
 
     comment = insert(:comment) |> with_action() |> flag(limit)

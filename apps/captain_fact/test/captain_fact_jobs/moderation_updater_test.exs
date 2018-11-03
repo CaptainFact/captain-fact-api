@@ -82,7 +82,7 @@ defmodule CaptainFactJobs.ModerationTest do
   #    CaptainFactJobs.Moderation.update()
   #    CaptainFactJobs.Reputation.update()
   #
-  #    min_change..max_change = Moderation.reputation_change_ranges[UserAction.type(:action_banned)]
+  #    min_change..max_change = Moderation.reputation_change_ranges[:action_banned]
   #    updated_reputation = Repo.get!(User, action.user_id).reputation
   #    abs_change = abs(updated_reputation - action.user.reputation)
   #    assert abs_change > abs(min_change)
@@ -95,8 +95,8 @@ defmodule CaptainFactJobs.ModerationTest do
     action =
       Repo.get_by!(
         UserAction,
-        entity: UserAction.entity(:comment),
-        type: UserAction.type(:create),
+        entity: :comment,
+        type: :create,
         comment_id: comment.id
       )
 
@@ -113,8 +113,8 @@ defmodule CaptainFactJobs.ModerationTest do
   defp insert_reported_comment() do
     limit =
       CaptainFact.Moderation.nb_flags_to_report(
-        UserAction.type(:create),
-        UserAction.entity(:comment)
+        :create,
+        :comment
       )
 
     comment = insert(:comment) |> with_action() |> flag(limit)

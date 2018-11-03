@@ -32,8 +32,8 @@ defmodule CaptainFactWeb.ModerationControllerTest do
     action =
       Repo.get_by!(
         UserAction,
-        entity: UserAction.entity(:comment),
-        type: UserAction.type(:create),
+        entity: :comment,
+        type: :create,
         comment_id: comment.id
       )
 
