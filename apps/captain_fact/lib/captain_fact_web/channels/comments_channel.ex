@@ -16,6 +16,7 @@ defmodule CaptainFactWeb.CommentsChannel do
 
   @event_comment_updated "comment_updated"
   @event_comment_removed "comment_removed"
+  @event_score_diff "comment_score_diff"
 
   # ---- Public API (called from external code) ----
 
@@ -101,9 +102,16 @@ defmodule CaptainFactWeb.CommentsChannel do
   def handle_in_authenticated!("vote", %{"comment_id" => comment_id, "value" => value}, socket) do
     User
     |> Repo.get!(socket.assigns.user_id)
-    |> Comments.vote(socket.assigns.video_id, comment_id, value)
+    |> Comments.vote!(socket.assigns.video_id, comment_id, value)
+    |> case do
+      {:ok, comment, vote, prev_value} ->
+        msg = msg_score_diff(comment, value_diff(prev_value, vote.value))
+        broadcast!(socket, @event_score_diff, msg)
+        {:reply, :ok, socket}
 
-    {:reply, :ok, socket}
+      {:error, _} ->
+        {:reply, :error, socket}
+    end
   end
 
   def handle_in_authenticated!("flag_comment", %{"id" => comment_id, "reason" => reason}, socket) do
@@ -163,4 +171,21 @@ defmodule CaptainFactWeb.CommentsChannel do
       Map.take(comment, updated_fields)
     )
   end
+
+  defp msg_score_diff(comment, diff) do
+    %{
+      comment: %{
+        id: comment.id,
+        statement_id: comment.statement_id,
+        reply_to_id: comment.reply_to_id
+      },
+      diff: diff
+    }
+  end
+
+  defp value_diff(0, new_value),
+    do: new_value
+
+  defp value_diff(prev_value, new_value),
+    do: new_value - prev_value
 end

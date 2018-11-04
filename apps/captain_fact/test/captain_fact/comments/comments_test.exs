@@ -198,9 +198,7 @@ defmodule CaptainFact.Comments.CommentsTest do
       comment = insert(:comment)
       random_user = insert(:user, reputation: 1000)
 
-      Comments.vote(random_user, comment.statement.video_id, comment.id, 1)
-
-      CaptainFactJobs.Votes.update()
+      Comments.vote!(random_user, comment.statement.video_id, comment.id, 1)
       CaptainFactJobs.Reputation.update()
 
       assert random_user.reputation == Repo.get(User, random_user.id).reputation
@@ -211,9 +209,7 @@ defmodule CaptainFact.Comments.CommentsTest do
       comment = insert(:comment)
       random_user = insert(:user, reputation: 1000)
 
-      Comments.vote(random_user, comment.statement.video_id, comment.id, -1)
-
-      CaptainFactJobs.Votes.update()
+      Comments.vote!(random_user, comment.statement.video_id, comment.id, -1)
       CaptainFactJobs.Reputation.update()
 
       assert random_user.reputation > Repo.get(User, random_user.id).reputation

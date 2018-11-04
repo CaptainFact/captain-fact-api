@@ -4,6 +4,8 @@ defmodule DB.Schema.Vote do
 
   alias DB.Schema.{User, Statement, Comment}
 
+  @type vote_value :: -1 | 1
+
   @primary_key false
   schema "votes" do
     belongs_to(:user, User, primary_key: true)
@@ -18,6 +20,15 @@ defmodule DB.Schema.Vote do
     from(
       v in query,
       where: v.user_id == ^user_id
+    )
+  end
+
+  @spec user_comment_vote(Ecto.Query.t(), User.t(), Comment.t()) :: Ecto.Query.t()
+  def user_comment_vote(query \\ __MODULE__, user, comment) do
+    from(
+      v in query,
+      where: v.user_id == ^user.id,
+      where: v.comment_id == ^comment.id
     )
   end
 
@@ -40,8 +51,7 @@ defmodule DB.Schema.Vote do
     end
   end
 
-  # TODO user_id ?
-  @required_fields ~w(value comment_id)a
+  @required_fields ~w(user_id value comment_id)a
 
   @doc """
   Builds a changeset based on the `struct` and `params`.
@@ -51,5 +61,12 @@ defmodule DB.Schema.Vote do
     |> cast(params, @required_fields)
     |> validate_required(@required_fields)
     |> validate_inclusion(:value, [-1, 1])
+  end
+
+  @spec changeset_new(User.t(), Comment.t(), vote_value()) :: Changeset.t()
+  def changeset_new(user = %User{}, comment = %Comment{}, value) do
+    user
+    |> Ecto.build_assoc(:votes)
+    |> changeset(%{comment_id: comment.id, value: value})
   end
 end
