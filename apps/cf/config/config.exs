@@ -34,8 +34,6 @@ config :cf, CF.Scheduler,
     {"@daily", {CF.Jobs.Reputation, :reset_daily_limits, []}},
     # Every minute
     {"*/1 * * * *", {CF.Jobs.Flags, :update, []}},
-    # Every 3 minutes
-    {"*/3 * * * *", {CF.Jobs.Achievements, :update, []}},
     # Various updaters
     # Every 5 minutes
     {"*/5 * * * *", {CF.Jobs.Moderation, :update, []}}

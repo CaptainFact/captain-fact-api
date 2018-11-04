@@ -15,7 +15,7 @@ defmodule CF.TestUtils do
         full_comment = Repo.preload(comment, :statement)
 
         Enum.map(users, fn user ->
-          CF.Actions.Flagger.flag!(
+          CF.Moderation.Flagger.flag!(
             user.id,
             full_comment.statement.video_id,
             full_comment,

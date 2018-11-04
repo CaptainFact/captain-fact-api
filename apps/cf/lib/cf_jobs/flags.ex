@@ -1,22 +1,20 @@
 defmodule CF.Jobs.Flags do
   @moduledoc """
   Analyse flags periodically to report innapropriate content
+
+  TODO: Broadcast comment update
   """
 
   use GenServer
 
   require Logger
   import Ecto.Query
-  import CF.Web.CommentsChannel, only: [broadcast_comment_update: 2]
 
   alias DB.Repo
-  alias DB.Schema.Comment
   alias DB.Schema.UserAction
   alias DB.Schema.UsersActionsReport
-  alias DB.Schema.Comment
-  alias DB.Schema.Comment
 
-  alias CF.Actions.Flagger
+  alias CF.Moderation.Flagger
   alias CF.Moderation
 
   alias CF.Jobs.ReportManager
@@ -82,25 +80,11 @@ defmodule CF.Jobs.Flags do
   defp update_entity_flags(:comment, %UserAction{comment_id: comment_id}) do
     nb_flags = Flagger.get_nb_flags(:create, :comment, comment_id)
 
-    if nb_flags >= Moderation.nb_flags_to_report(:create, :comment) do
-      # Ban comment
-      {nb_updated, _} =
-        Repo.update_all(
-          from(
-            c in Comment,
-            where: c.id == ^comment_id,
-            where: c.is_reported == false
-          ),
-          set: [is_reported: true]
-        )
-
-      if nb_updated == 1 do
-        broadcast_comment_update(comment_id, [:is_reported])
-      end
-
-      nb_updated
+    with true <- nb_flags >= Moderation.nb_flags_to_report(:create, :comment),
+         {:ok, _} <- Moderation.ban_comment(comment_id) do
+      1
     else
-      0
+      _ -> 0
     end
   end
 

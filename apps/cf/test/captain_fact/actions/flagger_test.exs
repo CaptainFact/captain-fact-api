@@ -1,11 +1,11 @@
-defmodule CF.Actions.FlaggerTest do
+defmodule CF.Moderation.FlaggerTest do
   use CF.DataCase
 
   alias DB.Schema.User
   alias DB.Schema.Comment
   alias DB.Schema.Flag
 
-  alias CF.Actions.Flagger
+  alias CF.Moderation.Flagger
   alias CF.Jobs.{Flags, Reputation}
   alias CF.Moderation
 

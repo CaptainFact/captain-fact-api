@@ -11,7 +11,7 @@ defmodule CF.Web.CommentsChannel do
   alias DB.Schema.Comment
   alias DB.Schema.Vote
 
-  alias CF.Actions.Flagger
+  alias CF.Moderation.Flagger
   alias CF.Comments
 
   @event_comment_updated "comment_updated"

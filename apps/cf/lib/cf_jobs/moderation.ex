@@ -1,17 +1,13 @@
 defmodule CF.Jobs.Moderation do
   @moduledoc """
   This job analyze moderation feebacks and ban or unreport comments accordingly.
+
+  TODO: Broadcast updates
   """
 
   use GenServer
   require Logger
   import Ecto.Query
-
-  import CF.Web.CommentsChannel,
-    only: [
-      broadcast_comment_update: 2,
-      broadcast_comment_remove: 1
-    ]
 
   alias DB.Repo
   alias DB.Schema.ModerationUserFeedback
@@ -195,9 +191,6 @@ defmodule CF.Jobs.Moderation do
       })
     )
 
-    # Broadcast ban to web channel
-    broadcast_comment_remove(comment)
-
     # Record flags confirmations for flaggers to get reputation bonus
     record_flags_results(flagging_users_ids, Comment.type(comment), :confirmed_flag)
   end
@@ -215,9 +208,6 @@ defmodule CF.Jobs.Moderation do
   defp refute_ban(action, comment = %Comment{}, _) do
     # Set comment as not reported
     Repo.update(Ecto.Changeset.change(comment, is_reported: false))
-
-    # Broadcast the update
-    broadcast_comment_update(comment.id, [:is_reported])
 
     # Delete all flags and punish all users for abusive flags
     Flag

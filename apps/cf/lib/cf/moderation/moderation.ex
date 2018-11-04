@@ -23,6 +23,7 @@ defmodule CF.Moderation do
   alias DB.Schema.ModerationUserFeedback
   alias DB.Schema.UserAction
   alias DB.Schema.Flag
+  alias DB.Schema.Comment
 
   alias CF.Moderation.ModerationEntry
   alias CF.Accounts.UserPermissions
@@ -86,6 +87,26 @@ defmodule CF.Moderation do
     %ModerationUserFeedback{user_id: user.id, action_id: action.id}
     |> ModerationUserFeedback.changeset(%{value: value, flag_reason: flag_reason})
     |> Repo.insert()
+  end
+
+  @doc """
+  Ban the given comment by setting the `is_reported` flag to `true`.
+  In case of success, this function returns an :ok tuple with the updated comment.
+  It can fail if comment doesn't exist anymore or if it is already banned.
+  """
+  @spec ban_comment(Comment.t()) :: {:ok, Comment.t()} | {:error, binary()}
+  def ban_comment(comment_id) do
+    Comment
+    |> where([c], c.id == ^comment_id)
+    |> where([c], c.is_reported == false)
+    |> Repo.update_all([set: [is_reported: true]], returning: true)
+    |> case do
+      {1, [comment]} ->
+        {:ok, comment}
+
+      {0, _} ->
+        {:error, "Comment doesn't exist or is already banned"}
+    end
   end
 
   # ---- Private -----

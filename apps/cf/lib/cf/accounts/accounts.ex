@@ -201,12 +201,14 @@ defmodule CF.Accounts do
 
   @doc """
   Confirm user email. Ignored if already confirmed.
+
+  Returns updated user.
   """
   def confirm_email!(token) when is_binary(token),
     do: confirm_email!(Repo.get_by(User, email_confirmation_token: token))
 
-  def confirm_email!(%User{email_confirmed: true}),
-    do: nil
+  def confirm_email!(user = %User{email_confirmed: true}),
+    do: user
 
   def confirm_email!(user = %User{email_confirmed: false}) do
     Multi.new()
@@ -215,7 +217,15 @@ defmodule CF.Accounts do
     |> Repo.transaction()
     |> case do
       {:ok, %{user: updated_user}} ->
-        updated_user
+        case unlock_achievement(updated_user, :not_a_robot) do
+          {:ok, final_user} ->
+            final_user
+
+          # Don't fail if achievement cannot be unlocked, but log the error
+          _ ->
+            Logger.error(":not_a_robot achievement unlock failed for user #{user.id}")
+            updated_user
+        end
 
       {:error, _, reason, _} ->
         Logger.error(reason)

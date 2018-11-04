@@ -1,4 +1,4 @@
-defmodule CF.Actions.Flagger do
+defmodule CF.Moderation.Flagger do
   require Logger
   import Ecto.Query
 
@@ -44,7 +44,7 @@ defmodule CF.Actions.Flagger do
   def get_nb_flags(%Comment{id: id}),
     do: get_nb_flags(:create, :comment, id)
 
-  @spec get_nb_flags(DB.Type.UserActionType.t(), atom(), integer()) :: integer()
+  @spec get_nb_flags(DB.Type.UserActionType.t(), DB.Type.Entity.t(), integer()) :: integer()
   def get_nb_flags(action_type, entity, id) do
     Flag
     |> join(:inner, [f], a in assoc(f, :action))

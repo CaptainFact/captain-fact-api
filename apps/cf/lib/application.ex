@@ -23,7 +23,6 @@ defmodule CF.Application do
       # Jobs
       worker(CF.Jobs.Reputation, []),
       worker(CF.Jobs.Flags, []),
-      worker(CF.Jobs.Achievements, []),
       worker(CF.Jobs.Moderation, []),
       # Misc workers
       worker(CF.Accounts.UsernameGenerator, []),
@@ -46,8 +45,8 @@ defmodule CF.Application do
 
   @doc """
   If Mix is available, returns Mix.env(). If not available (in releases) return :prod
-  deprecated, use Application.get_env(:cf, :env)
   """
+  @deprecated "use Application.get_env(:cf, :env)"
   def env() do
     (Kernel.function_exported?(Mix, :env, 0) && Mix.env()) || :prod
   end

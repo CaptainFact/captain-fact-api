@@ -4,7 +4,7 @@ defmodule CF.AccountsTest do
 
   alias CF.Accounts
   alias CF.Accounts.Invitations
-  alias CF.Jobs.{Reputation, Achievements}
+  alias CF.Jobs.Reputation
 
   alias DB.Schema.User
 
@@ -189,7 +189,6 @@ defmodule CF.AccountsTest do
       user = insert(:user)
       Accounts.confirm_email!(user.email_confirmation_token)
       Reputation.update()
-      Achievements.update()
       updated_user = Repo.get(DB.Schema.User, user.id)
 
       assert updated_user.email_confirmed
