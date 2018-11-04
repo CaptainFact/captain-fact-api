@@ -6,10 +6,6 @@ defmodule DB.Application do
   def start(_type, _args) do
     import Supervisor.Spec, warn: false
 
-    # Start by configuring the app with runtime configuration (env + secrets)
-    DB.RuntimeConfiguration.setup()
-    DB.RuntimeConfiguration.configure()
-
     # Define workers and child supervisors to be supervised
     children = [
       # Starts a worker by calling: DB.Worker.start_link(arg1, arg2, arg3)

@@ -5,7 +5,7 @@ defmodule CF.RestApi.Presence do
   See the [`Phoenix.Presence`](http://hexdocs.pm/phoenix/Phoenix.Presence.html)
   docs for more details.
   """
-  use Phoenix.Presence, otp_app: :cf, pubsub_server: CF.PubSub
+  use Phoenix.Presence, otp_app: :cf_rest_api, pubsub_server: CF.RestApi.PubSub
 
   def fetch(_topic, entries) do
     %{

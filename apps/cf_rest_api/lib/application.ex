@@ -22,7 +22,7 @@ defmodule CF.RestApi.Application do
   Get app's version from `mix.exs`
   """
   def version() do
-    case :application.get_key(:cf, :vsn) do
+    case :application.get_key(:cf_rest_api, :vsn) do
       {:ok, version} -> to_string(version)
       _ -> "unknown"
     end

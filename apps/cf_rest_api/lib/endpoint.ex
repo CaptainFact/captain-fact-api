@@ -1,5 +1,5 @@
 defmodule CF.RestApi.Endpoint do
-  use Phoenix.Endpoint, otp_app: :cf
+  use Phoenix.Endpoint, otp_app: :cf_rest_api
 
   socket("/socket", CF.RestApi.UserSocket)
 

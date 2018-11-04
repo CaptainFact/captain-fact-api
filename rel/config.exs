@@ -1,14 +1,4 @@
-# Import all plugins from `rel/plugins`
-# They can then be used by adding `plugin MyPlugin` to
-# either an environment, or release definition, where
-# `MyPlugin` is the name of the plugin module.
-Path.join(["rel", "plugins", "*.exs"])
-|> Path.wildcard()
-|> Enum.map(&Code.eval_file(&1))
-
-use Mix.Releases.Config,
-  default_release: :cf,
-  default_environment: Mix.env()
+use Mix.Releases.Config, default_environment: :prod
 
 # Environments
 
@@ -17,14 +7,26 @@ environment :dev do
   set(dev_mode: false)
   set(include_erts: false)
   set(include_src: false)
-  set(cookie: :"MfqNgHUln;rEBpHUv^)@~8.b1wJ)>0W3<drs>ZRk0(S>qMU):<JtlEIiwR|/Oc>R")
+  set(cookie: :dev_cookie)
 end
 
 environment :prod do
   set(dev_mode: false)
   set(include_erts: false)
   set(include_src: false)
-  set(cookie: :"86@K5T~*`8U71EA5oGP?zEy~`b]@~CS{I|]OJn6EW|>V2A]r|(w[LYl69!;;[n$P")
+  set(cookie: :runtime_value)
+
+  set(
+    config_providers: [
+      {Mix.Releases.Config.Providers.Elixir, ["${RELEASE_ROOT_DIR}/etc/config.exs"]}
+    ]
+  )
+
+  set(
+    overlays: [
+      {:copy, "rel/runtime_config/config.exs", "etc/config.exs"}
+    ]
+  )
 end
 
 # Releases
@@ -32,7 +34,7 @@ end
 release :cf do
   set(version: current_version(:cf))
   set(applications: [:cf])
-  set(post_start_hook: "rel/hooks/post_start.sh")
+  set(post_start_hooks: "rel/hooks/migrate_db")
 
   set(
     commands: [
@@ -63,5 +65,4 @@ end
 release :cf_opengraph do
   set(version: current_version(:cf_opengraph))
   set(applications: [:cf_opengraph])
-  set(code_paths: ["apps/opengraph"])
 end

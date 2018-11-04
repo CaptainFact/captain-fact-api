@@ -41,7 +41,6 @@ defmodule DB.Mixfile do
       {:ecto, "~> 2.2.8"},
       {:ecto_enum, "~> 1.0"},
       {:postgrex, "~> 0.13.3"},
-      {:weave, "3.1.2"},
       {:ex_aws, "~> 2.1"},
       {:ex_aws_s3, "~> 2.0"},
       {:xml_builder, "~> 2.0", override: true},

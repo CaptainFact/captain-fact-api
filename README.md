@@ -60,28 +60,26 @@ This application is organized as an [umbrella project](https://elixir-lang.org/g
 ```
 .
 ├── apps
-│   ├── captain_fact => A monolith containing REST API, jobs and core functions
-│   │   ├── lib
-│   │   │   ├── captain_fact => Core functions + jobs
-│   │   │   └── captain_fact_web => REST API
-│   │   └── priv/secrets => dev secrets for this app
-│   ├── cf_graphql => GraphQL API
-│   │   └── priv/secrets => dev secrets for this app
-│   ├── cf_atom_feed => Atom feed
-│   └── db => DB repository and schemas
+│   ├── cf => Core functions as a library. **Not deployed**
+│   ├── cf_atom_feed => Atom feed.
+│   ├── cf_graphql => GraphQL API (public).
+│   ├── cf_jobs => Jobs.
+│   ├── cf_opengraph => An app that generate opengraph tags.
+│   ├── cf_rest_api => REST/WS API (private).
+│   └── db => DB repository and schemas **Not deployed**
 │       ├── lib
 │       │   ├── db
 │       │   ├── db_schema => Contains all the schemas (Video, Speaker, Comment...etc)
 │       │   ├── db_type => Special types (SpeakerPicture...etc)
 │       │   └── db_utils => Some utils functions
 │       └── priv
-│           ├── repo/migrations => All DB migrations files
-│           └── secrets => dev secrets for DB (db username, password...etc)
-├── README.md => You're reading it right now. Are you ?
+│           └── repo/migrations => All DB migrations files
+├── README.md => You're reading it right now. Are you?
 ├── rel => Release configs & tools
 │   ├── commands => Commands that will be available to run on the release (seed DB...etc)
-│   ├── config.exs => Releases configuration
-│   └── docker => Docker-specific files & configs
+│   ├── hooks => Some hooks for automatically run commands when release run.
+│   ├── runtime_config => Runtime configurations for all apps.
+│   └── config.exs => Releases configuration.
 ```
 
 ## Styling

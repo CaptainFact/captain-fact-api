@@ -25,7 +25,7 @@ RUN mix release --name ${APP} --env=$MIX_ENV
 
 # Copy app to workdir and remove build files
 WORKDIR /opt/app
-RUN cp -R /opt/build/_build/$MIX_ENV/rel/${APP}/* /opt/app/
+RUN mv /opt/build/_build/$MIX_ENV/rel/${APP}/* /opt/app/
 RUN rm -rf /opt/build
 RUN ln -s /opt/app/bin/${APP} bin/entrypoint
 

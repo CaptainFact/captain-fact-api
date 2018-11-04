@@ -9,7 +9,6 @@ use Mix.Config
 config :cf,
   env: Mix.env(),
   ecto_repos: [DB.Repo],
-  cors_origins: [],
   oauth: [facebook: []],
   invitation_system: false
 

@@ -1,4 +1,4 @@
-defmodule CaptainFactAPI.Mixfile do
+defmodule CFUmbrella.Mixfile do
   use Mix.Project
 
   def project do
@@ -22,7 +22,7 @@ defmodule CaptainFactAPI.Mixfile do
   defp deps do
     [
       # ---- Release ----
-      {:distillery, "~> 1.5", runtime: false},
+      {:distillery, "~> 2.0", runtime: false},
 
       # ---- Test and Dev
       {:excoveralls, "~> 0.8", only: :test},
