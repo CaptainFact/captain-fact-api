@@ -43,6 +43,12 @@ release :cf do
   )
 end
 
+release :cf_jobs do
+  set(version: current_version(:cf_jobs))
+  set(applications: [:cf_jobs])
+  set(commands: [migrate: "rel/commands/migrate.sh"])
+end
+
 release :cf_graphql do
   set(version: current_version(:cf_graphql))
   set(applications: [:cf_graphql])

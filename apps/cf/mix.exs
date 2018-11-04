@@ -53,7 +53,6 @@ defmodule CF.Mixfile do
       {:httpoison, "~> 0.11"},
       {:poison, "~> 3.1"},
       {:csv, "~> 1.4.4"},
-      {:quantum, github: "quantum-elixir/quantum-core"},
       {:timex, "~> 3.0"},
       {:not_qwerty123, "~> 2.2"},
       {:bamboo, github: "thoughtbot/bamboo"},

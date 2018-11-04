@@ -18,12 +18,6 @@ defmodule CF.Application do
       supervisor(CF.Sources.Fetcher, []),
       # Presence to track number of connected users to a channel
       supervisor(CF.Web.Presence, []),
-      # Scheduler for all CRON jobs
-      worker(CF.Scheduler, []),
-      # Jobs
-      worker(CF.Jobs.Reputation, []),
-      worker(CF.Jobs.Flags, []),
-      worker(CF.Jobs.Moderation, []),
       # Misc workers
       worker(CF.Accounts.UsernameGenerator, []),
       # Sweep tokens from db
