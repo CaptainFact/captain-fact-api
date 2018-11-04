@@ -110,7 +110,7 @@ defmodule CF.RuntimeConfiguration do
   end
 
   defp put_in_endpoint(keys, value),
-    do: put_in_env(:cf, [CF.Web.Endpoint] ++ keys, value)
+    do: put_in_env(:cf, [CF.RestApi.Endpoint] ++ keys, value)
 
   defp put_in_mailer(keys, value),
     do: put_in_env(:cf, [CF.Mailer] ++ keys, value)
@@ -128,9 +128,9 @@ defmodule CF.RuntimeConfiguration do
 
     # Update CORS for websockets
     if new_cors == "*" do
-      put_in_env(:cf, [CF.Web.Endpoint, :check_origin], false)
+      put_in_env(:cf, [CF.RestApi.Endpoint, :check_origin], false)
     else
-      put_in_env(:cf, [CF.Web.Endpoint, :check_origin], new_cors)
+      put_in_env(:cf, [CF.RestApi.Endpoint, :check_origin], new_cors)
     end
   end
 

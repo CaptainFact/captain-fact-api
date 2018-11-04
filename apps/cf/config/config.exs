@@ -13,13 +13,6 @@ config :cf,
   oauth: [facebook: []],
   invitation_system: false
 
-# Configures the endpoint
-config :cf, CF.Web.Endpoint,
-  url: [host: "localhost"],
-  render_errors: [view: CF.Web.ErrorView, accepts: ~w(json), default_format: "json"],
-  pubsub: [name: CF.PubSub, adapter: Phoenix.PubSub.PG2],
-  server: true
-
 # Configure scheduler
 config :cf, CF.Scheduler,
   # Run only one instance across cluster

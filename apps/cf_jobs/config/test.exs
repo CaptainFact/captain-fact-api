@@ -1,4 +1,4 @@
 use Mix.Config
 
-# Disable CRON tasks during tests
+# Disable CRON tasks on test
 config :cf, CF.Scheduler, jobs: []

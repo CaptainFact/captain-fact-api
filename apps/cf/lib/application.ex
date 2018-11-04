@@ -12,12 +12,8 @@ defmodule CF.Application do
 
     # Define workers and child supervisors to be supervised
     children = [
-      # Start the endpoint when the application starts
-      supervisor(CF.Web.Endpoint, []),
       # Other custom supervisors
       supervisor(CF.Sources.Fetcher, []),
-      # Presence to track number of connected users to a channel
-      supervisor(CF.Web.Presence, []),
       # Misc workers
       worker(CF.Accounts.UsernameGenerator, []),
       # Sweep tokens from db

@@ -14,22 +14,6 @@ config :cf,
     ]
   ]
 
-# For development, we disable any cache and enable
-# debugging and code reloading.
-config :cf, CF.Web.Endpoint,
-  secret_key_base: dev_secret,
-  debug_errors: false,
-  code_reloader: false,
-  check_origin: false,
-  http: [port: 4000],
-  force_ssl: false,
-  https: [
-    port: 4001,
-    otp_app: :cf,
-    keyfile: "priv/keys/privkey.pem",
-    certfile: "priv/keys/fullchain.pem"
-  ]
-
 # Guardian
 config :cf,
        CF.Authenticator.GuardianImpl,

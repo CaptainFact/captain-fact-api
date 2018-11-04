@@ -5,12 +5,6 @@ use Mix.Config
 # See `lib/captain_fact/weave.ex`
 # --------------------------------------------------------------------------------------
 
-config :cf, CF.Web.Endpoint,
-  url: [port: 80],
-  http: [port: 80],
-  force_ssl: false,
-  check_origin: []
-
 # Do not print debug messages in production
 config :logger, level: :info
 
