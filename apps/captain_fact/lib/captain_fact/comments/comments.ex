@@ -1,6 +1,10 @@
 defmodule CaptainFact.Comments do
-  import Ecto.Query
   require Logger
+
+  import Ecto.Query
+  import CaptainFact.Actions.ActionCreator
+
+  alias Ecto.Multi
 
   alias DB.Repo
   alias DB.Schema.Source
@@ -10,7 +14,6 @@ defmodule CaptainFact.Comments do
   alias DB.Schema.UserAction
 
   alias CaptainFact.Accounts.UserPermissions
-  alias CaptainFact.Actions.ActionCreator
   alias CaptainFact.Sources
 
   # ---- Public API ----
@@ -49,7 +52,7 @@ defmodule CaptainFact.Comments do
       |> Map.put(:score, 0)
 
     # Record action
-    Repo.insert(ActionCreator.action_create(user.id, video_id, full_comment, source_url))
+    Repo.insert(action_create(user.id, video_id, full_comment, source_url))
 
     # If new source, fetch metadata
     unless is_nil(source) || !is_nil(Map.get(source, :id)),
@@ -73,7 +76,7 @@ defmodule CaptainFact.Comments do
     UserPermissions.check!(user, :delete, :comment)
 
     if do_delete_comment(comment) != false,
-      do: Repo.insert!(ActionCreator.action_delete(user_id, video_id, comment))
+      do: Repo.insert!(action_delete(user_id, video_id, comment))
   end
 
   @doc """
@@ -83,7 +86,7 @@ defmodule CaptainFact.Comments do
   """
   def admin_delete_comment(comment = %Comment{}, video_id \\ nil) do
     if do_delete_comment(comment) != false,
-      do: Repo.insert!(ActionCreator.action_admin_delete(video_id, comment))
+      do: Repo.insert!(action_admin_delete(video_id, comment))
   end
 
   defp do_delete_comment(comment) do
@@ -124,43 +127,67 @@ defmodule CaptainFact.Comments do
 
   # ---- Comments voting ----
 
-  def vote(user, video_id, comment_id, 0),
-    do: delete_vote(user, video_id, Repo.get!(Comment, comment_id))
+  @doc """
+  Vote on given comment. Will delete vote if value is 0 or if comment does not
+  exist.
 
-  def vote(user, video_id, comment_id, value) do
+  Returns a tuple like {:ok, vote, prev_value}
+  """
+  @spec vote!(User.t(), integer(), integer(), Vote.vote_value() | 0) ::
+          {:ok, Comment.t(), Vote.t(), integer()} | {:error, any()}
+  def vote!(user, video_id, comment_id, 0) do
+    comment = Repo.get!(Comment, comment_id)
+
+    case delete_vote!(user, video_id, comment) do
+      {:ok, vote} ->
+        {:ok, comment, %{vote | value: 0}, vote.value}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  def vote!(user, video_id, comment_id, value) do
     comment = Repo.get!(Comment, comment_id)
     vote_type = Vote.vote_type(user, comment, value)
     comment_type = Comment.type(comment)
     UserPermissions.check!(user, vote_type, comment_type)
 
     # Delete prev directly vote if any (without logging a delete action)
-    prev_vote = Repo.get_by(Vote, user_id: user.id, comment_id: comment_id)
-    if prev_vote, do: Repo.delete(prev_vote)
+    Multi.new()
+    |> Multi.delete_all(:prev_vote, Vote.user_comment_vote(user, comment), returning: [:value])
+    |> Multi.insert(:vote, Vote.changeset_new(user, comment, value))
+    |> Multi.insert(:vote_action, action_vote(user.id, video_id, vote_type, comment))
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{vote: vote, prev_vote: {0, []}}} ->
+        {:ok, comment, %{vote | comment_id: comment.id, comment: comment}, 0}
 
-    # Record vote
-    vote =
-      user
-      |> Ecto.build_assoc(:votes)
-      |> Vote.changeset(%{comment_id: comment_id, value: value})
-      |> Repo.insert!()
+      {:ok, %{vote: vote, prev_vote: {_, [%{value: prev_value}]}}} ->
+        {:ok, comment, %{vote | comment_id: comment.id, comment: comment}, prev_value}
 
-    # Insert action
-    Repo.insert!(ActionCreator.action_vote(user.id, video_id, vote_type, comment))
-
-    # Return vote
-    vote
+      {:error, _, reason, _} ->
+        {:error, reason}
+    end
   end
 
-  def delete_vote(user, video_id, comment = %Comment{}) do
-    delete_vote(
-      user,
-      video_id,
-      comment,
-      Repo.get_by!(Vote, user_id: user.id, comment_id: comment.id)
-    )
+  @doc """
+  Delete user vote. Will raise if user does not have permission.
+  """
+  @spec delete_vote!(User.t(), integer(), Comment.t()) :: {:ok, Vote.t()} | {:error, any()}
+  def delete_vote!(user, video_id, comment = %Comment{}) do
+    case Repo.get_by(Vote, user_id: user.id, comment_id: comment.id) do
+      nil ->
+        {:error, "User has no vote for this comment"}
+
+      vote ->
+        delete_vote!(user, video_id, comment, vote)
+    end
   end
 
-  def delete_vote(
+  @spec delete_vote!(User.t(), integer(), Comment.t(), Vote.t()) ::
+          {:ok, Vote.t()} | {:error, any()}
+  def delete_vote!(
         user = %User{id: user_id},
         video_id,
         comment = %Comment{},
@@ -169,13 +196,18 @@ defmodule CaptainFact.Comments do
     vote_type = reverse_vote_type(Vote.vote_type(user, comment, vote.value))
     comment_type = Comment.type(comment)
     UserPermissions.check!(user, vote_type, comment_type)
-    Repo.delete(vote)
 
-    # Record action
-    action = ActionCreator.action_revert_vote(user.id, video_id, vote_type, comment)
-    Repo.insert!(action)
+    Multi.new()
+    |> Multi.delete_all(:delete_existing, Vote.user_comment_vote(user, comment))
+    |> Multi.insert(:delete_action, action_revert_vote(user.id, video_id, vote_type, comment))
+    |> Repo.transaction()
+    |> case do
+      {:ok, _} ->
+        {:ok, vote}
 
-    %Vote{comment_id: comment.id}
+      {:error, _, reason, _} ->
+        {:error, reason}
+    end
   end
 
   # ---- Private ----
