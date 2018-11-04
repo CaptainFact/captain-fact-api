@@ -1,0 +1,37 @@
+## `msgid`s in this file come from POT (.pot) files.
+##
+## Do not add, change, or remove `msgid`s manually here as
+## they're tied to the ones in the corresponding POT file
+## (with the same domain).
+##
+## Use `mix gettext.extract --merge` or `mix gettext.merge`
+## to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: fr\n"
+
+#: lib/cf_mailer/email.ex:75
+msgid "%{name} invited you to try CaptainFact.io!"
+msgstr "%{name} vous a invité à rejoindre CaptainFact.io !"
+
+#: lib/cf_mailer/email.ex:49
+msgid "CaptainFact.io - Reset your password"
+msgstr "CaptainFact.io - Réinitialisation du mot de passe"
+
+#: lib/cf_mailer/email.ex:31
+msgid "Welcome to CaptainFact.io!"
+msgstr "Bienvenue sur CaptainFact.io !"
+
+#: lib/cf_mailer/email.ex:57
+msgid "About your recent loss of reputation on CaptainFact"
+msgstr "A propos de votre récente perte de réputation sur CaptainFact"
+
+#: lib/cf_mailer/templates/_layout.html.eex:189
+#: lib/cf_mailer/templates/_layout.text.eex:6
+msgid "CaptainFact is a free and open source project."
+msgstr "CaptainFact est un projet open-source à but non lucratif."
+
+#: lib/cf_mailer/templates/_layout.html.eex:190
+#: lib/cf_mailer/templates/_layout.text.eex:7
+msgid "If you like it, please share the word!"
+msgstr "Si vous appréciez notre travail, partagez-le !"

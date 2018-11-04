@@ -27,12 +27,13 @@ docker installed, you can use the pre-seed postgres docker image:
 
 ### Start API services
 
-* Without Docker (recommended if you want to make changes in the API)
+- Without Docker (recommended if you want to make changes in the API)
+
   - `mix deps.get`
   - `mix ecto.migrate`
   - `iex -S mix`
 
-* With Docker
+- With Docker
   - Download project's dependencies with `./dev/get_dependencies.sh`
   - Migrate your database with `./dev/db_migrate.sh`
   - Start server with `./dev/start_server.sh`
@@ -93,10 +94,10 @@ Avoid lines longer than 80 characters, **never** go beyond 110 characters.
 
 ## Linked projects
 
-* [Community discussions and documentation](https://github.com/CaptainFact/captain-fact/)
-* [Frontend](https://github.com/CaptainFact/captain-fact-frontend)
-* [Extension](https://github.com/CaptainFact/captain-fact-extension)
-* [Overlay injector](https://github.com/CaptainFact/captain-fact-overlay-injector)
+- [Community discussions and documentation](https://github.com/CaptainFact/captain-fact/)
+- [Frontend](https://github.com/CaptainFact/captain-fact-frontend)
+- [Extension](https://github.com/CaptainFact/captain-fact-extension)
+- [Overlay injector](https://github.com/CaptainFact/captain-fact-overlay-injector)
 
 # Feature requests
 

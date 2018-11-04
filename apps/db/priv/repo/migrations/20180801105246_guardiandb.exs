@@ -1,4 +1,4 @@
-defmodule CaptainFact.Repo.Migrations.Guardian.DB do
+defmodule CF.Repo.Migrations.Guardian.DB do
   use Ecto.Migration
 
   def change do
