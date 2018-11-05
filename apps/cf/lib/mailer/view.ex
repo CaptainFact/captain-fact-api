@@ -1,5 +1,5 @@
 defmodule CF.Mailer.View do
-  use Phoenix.View, root: "lib/cf_mailer/templates", namespace: CF.Mailer
+  use Phoenix.View, root: "lib/mailer/templates", namespace: CF.Mailer
   use Phoenix.HTML
 
   import CF.Gettext
