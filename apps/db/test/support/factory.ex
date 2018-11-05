@@ -52,7 +52,8 @@ defmodule DB.Factory do
       title: Faker.Lorem.sentence(3..8),
       provider: "youtube",
       provider_id: youtube_id,
-      hash_id: nil
+      hash_id: nil,
+      language: Enum.random(["en", "fr", nil])
     }
   end
 

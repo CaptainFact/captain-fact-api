@@ -39,6 +39,10 @@ load_bool = fn secret ->
   end
 end
 
+# ---- [Global config keys] ----
+
+frontend_url = String.trim_trailing(load_secret.("frontend_url")) <> "/"
+
 # ---- [APP CONFIG] :db ----
 
 config :db, DB.Repo,
@@ -57,13 +61,13 @@ config :arc,
 # ---- [APP CONFIG] :cf ----
 
 config :cf,
-  frontend_url: load_secret.("frontend_url"),
+  frontend_url: frontend_url,
   youtube_api_key: load_secret.({"youtube_api_key", nil}),
   oauth: [
     facebook: [
       client_id: load_secret.("facebook_app_id"),
       client_secret: load_secret.("facebook_app_secret"),
-      redirect_uri: Path.join(load_secret.("frontend_url"), "/login/callback/facebook")
+      redirect_uri: Path.join(frontend_url, "login/callback/facebook")
     ]
   ]
 
@@ -80,7 +84,7 @@ if load_bool.({"cors_allow_all", "false"}) do
 else
   config :cf_rest_api,
     cors_origins: [
-      load_secret.("frontend_url"),
+      frontend_url,
       load_secret.("chrome_extension_id")
     ]
 end
@@ -89,7 +93,7 @@ config :cf_rest_api, CF.RestApi.Endpoint,
   url: [host: load_secret.("host")],
   secret_key_base: load_secret.("secret_key_base")
 
-# ---- [APP CONFIG] :cf_rest_api ----
+# ---- [APP CONFIG] :cf_graphql ----
 
 config :cf_graphql, CF.GraphQLWeb.Endpoint,
   url: [host: load_secret.("host")],

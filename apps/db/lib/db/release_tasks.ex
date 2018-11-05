@@ -71,10 +71,6 @@ defmodule DB.ReleaseTasks do
 
     Logger.info("Dependencies started, loading runtime configuration...")
 
-    # Loading runtime configuration
-    DB.RuntimeConfiguration.setup()
-    DB.RuntimeConfiguration.configure()
-
     # Start the Repo(s) for myapp
     Logger.info("Starting repos..")
     Enum.each(@repos, & &1.start_link(pool_size: 1))

@@ -2,4 +2,4 @@
 
 --------------------------------------------------------------------------------
 
-Se désinscrire de cette newsletter: <%= frontend_url() %>/newsletter/unsubscribe/<%= @user.newsletter_subscription_token %>
+Se désinscrire de cette newsletter: <%= unsubscribe_newsletter_url(@user.newsletter_subscription_token) %>

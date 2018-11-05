@@ -34,9 +34,9 @@ end
 
 # Releases
 
-release :cf do
-  set(version: current_version(:cf))
-  set(applications: [:cf])
+release :cf_rest_api do
+  set(version: current_version(:cf_rest_api))
+  set(applications: [:cf_rest_api])
   set(post_start_hooks: "rel/hooks/migrate_db")
 
   set(

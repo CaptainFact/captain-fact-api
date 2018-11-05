@@ -4,7 +4,7 @@ dev_secret = "8C6FsJwjV11d+1WPUIbkEH6gB/VavJrcXWoPLujgpclfxjkLkoNFSjVU9XfeNm6s"
 
 # General config
 config :cf,
-  frontend_url: "http://localhost:3333",
+  frontend_url: "http://localhost:3333/",
   oauth: [
     facebook: [
       client_id: "506726596325615",

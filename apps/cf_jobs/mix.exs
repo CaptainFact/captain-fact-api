@@ -38,7 +38,6 @@ defmodule CF.Jobs.Mixfile do
 
       # ---- Internal ----
       {:cf, in_umbrella: true},
-      {:cf_utils, in_umbrella: true},
       {:db, in_umbrella: true}
     ]
   end

@@ -14,8 +14,8 @@ defmodule CF.Mailer.EmailTest do
 
     assert email.to == invit.email
     assert email.subject == "Your invitation to try CaptainFact.io is ready!"
-    assert email.html_body =~ invit_frontend_url
     assert email.text_body =~ invit_frontend_url
+    assert email.html_body =~ invit_frontend_url
   end
 
   test "invited by user" do
@@ -28,8 +28,8 @@ defmodule CF.Mailer.EmailTest do
     assert email.subject =~ invited_by.username
     assert email.subject =~ invited_by.name
     assert email.subject =~ "invited you to try CaptainFact.io!"
-    assert email.html_body =~ invit_frontend_url
     assert email.text_body =~ invit_frontend_url
+    assert email.html_body =~ invit_frontend_url
   end
 
   # User emails
@@ -51,16 +51,16 @@ defmodule CF.Mailer.EmailTest do
 
     assert email_en.to == @user_en
     assert email_en.subject == "About your recent loss of reputation on CaptainFact"
-    assert email_en.html_body =~ "Your CaptainFact reputation passed below -5."
     assert email_en.text_body =~ "Your CaptainFact reputation passed below -5."
+    assert email_en.html_body =~ "Your CaptainFact reputation passed below -5."
 
     assert email_fr.to == @user_fr
     assert email_fr.subject == "A propos de votre récente perte de réputation sur CaptainFact"
 
-    assert email_fr.html_body =~
+    assert email_fr.text_body =~
              "Votre réputation sur CaptainFact est récemment passée en dessous de -5"
 
-    assert email_fr.text_body =~
+    assert email_fr.html_body =~
              "Votre réputation sur CaptainFact est récemment passée en dessous de -5"
   end
 
@@ -75,15 +75,15 @@ defmodule CF.Mailer.EmailTest do
     common_reset_password_test(request_fr, email_fr)
 
     assert email_en.subject == "CaptainFact.io - Reset your password"
-    assert email_en.html_body =~ "You recently asked to reset your password on CF."
     assert email_en.text_body =~ "You recently asked to reset your password on CF."
+    assert email_en.html_body =~ "You recently asked to reset your password on CF."
 
     assert email_fr.subject == "CaptainFact.io - Réinitialisation du mot de passe"
 
-    assert email_fr.html_body =~
+    assert email_fr.text_body =~
              "Vous avez demandé la réinitialisation de votre mot de passe sur CF."
 
-    assert email_fr.text_body =~
+    assert email_fr.html_body =~
              "Vous avez demandé la réinitialisation de votre mot de passe sur CF."
   end
 
@@ -100,23 +100,23 @@ defmodule CF.Mailer.EmailTest do
     common_newsletter_test(@user_en, subject, html_content, email_en)
     common_newsletter_test(@user_fr, subject, html_content, email_fr)
 
-    assert email_en.html_body =~ "Unsubscribe from this newsletter"
     assert email_en.text_body =~ "Unsubscribe from this newsletter"
-    assert email_fr.html_body =~ "Se désinscrire de cette newsletter"
     assert email_fr.text_body =~ "Se désinscrire de cette newsletter"
+    assert email_en.html_body =~ "Unsubscribe from this newsletter"
+    assert email_fr.html_body =~ "Se désinscrire de cette newsletter"
   end
 
   defp common_newsletter_test(user, subject, html_content, email) do
     assert email.to == user
     assert email.subject == subject
-    assert email.html_body =~ html_content
     assert email.text_body =~ "Hello World"
     assert email.text_body =~ "This is an awesome test mail"
-
-    assert email.html_body =~
-             "https://TEST_FRONTEND/newsletter/unsubscribe/#{user.newsletter_subscription_token}"
+    assert email.html_body =~ html_content
 
     assert email.text_body =~
+             "https://TEST_FRONTEND/newsletter/unsubscribe/#{user.newsletter_subscription_token}"
+
+    assert email.html_body =~
              "https://TEST_FRONTEND/newsletter/unsubscribe/#{user.newsletter_subscription_token}"
   end
 
@@ -133,8 +133,8 @@ defmodule CF.Mailer.EmailTest do
   defp common_reset_password_test(request, email) do
     assert email.to == request.user
     assert email.text_body =~ request.source_ip
+    assert email.text_body =~ "https://TEST_FRONTEND/reset_password/confirm/#{request.token}"
     assert email.html_body =~ request.source_ip
     assert email.html_body =~ "https://TEST_FRONTEND/reset_password/confirm/#{request.token}"
-    assert email.text_body =~ "https://TEST_FRONTEND/reset_password/confirm/#{request.token}"
   end
 end

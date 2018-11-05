@@ -59,7 +59,7 @@ defmodule CF.VideosTest do
 
   describe "Fetch captions" do
     test "fetch captions" do
-      video = DB.Factory.insert(:video, provider: "__TEST__")
+      video = DB.Factory.insert(:video, provider: "__TEST__", language: "en")
       {:ok, captions} = Videos.download_captions(video)
 
       assert captions.content == "__TEST-CONTENT__"

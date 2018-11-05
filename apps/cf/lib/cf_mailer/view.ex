@@ -3,10 +3,7 @@ defmodule CF.Mailer.View do
   use Phoenix.HTML
 
   import CF.Gettext
-
-  def frontend_url do
-    Application.fetch_env!(:cf, :frontend_url)
-  end
+  import CF.Utils.FrontendRouter
 
   def user_appelation(user) do
     DB.Schema.User.user_appelation(user)

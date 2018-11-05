@@ -42,7 +42,7 @@ defmodule CF.AtomFeed.Mixfile do
 
       # ---- In Umbrella
       {:db, in_umbrella: true},
-      {:cf_utils, in_umbrella: true}
+      {:cf, in_umbrella: true}
     ]
   end
 end

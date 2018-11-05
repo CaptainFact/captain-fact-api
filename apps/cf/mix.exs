@@ -61,7 +61,6 @@ defmodule CF.Mixfile do
 
       # ---- Internal ----
       {:db, in_umbrella: true},
-      {:cf_utils, in_umbrella: true},
 
       # Dev only
       {:exsync, "~> 0.2", only: :dev},

@@ -1,4 +1,4 @@
-defmodule CFUmbrella.Mixfile do
+defmodule CF.Umbrella.Mixfile do
   use Mix.Project
 
   def project do
