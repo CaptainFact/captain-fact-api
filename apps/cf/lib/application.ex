@@ -6,10 +6,6 @@ defmodule CF.Application do
   def start(_type, _args) do
     import Supervisor.Spec
 
-    # Load runtime configuration
-    CF.RuntimeConfiguration.setup()
-    CF.RuntimeConfiguration.configure()
-
     # Define workers and child supervisors to be supervised
     children = [
       # Other custom supervisors

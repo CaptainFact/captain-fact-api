@@ -10,8 +10,3 @@ config :cf_graphql, CF.GraphQLWeb.Endpoint,
   code_reloader: false,
   check_origin: false,
   watchers: []
-
-# Runtime configuration
-config :weave,
-  file_directory: "/run/secrets",
-  loaders: [Weave.Loaders.File, Weave.Loaders.Environment]

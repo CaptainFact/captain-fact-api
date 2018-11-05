@@ -51,9 +51,5 @@ config :cf,
 
 config :guardian, Guardian.DB, repo: DB.Repo
 
-config :weave,
-  environment_prefix: "CF_",
-  loaders: [Weave.Loaders.Environment]
-
 # Import environment specific config
 import_config "#{Mix.env()}.exs"

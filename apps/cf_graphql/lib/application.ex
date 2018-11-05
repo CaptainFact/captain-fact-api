@@ -6,10 +6,6 @@ defmodule CF.GraphQL.Application do
   def start(_type, _args) do
     import Supervisor.Spec
 
-    # Start by configuring the app with runtime configuration (env + secrets)
-    CF.GraphQL.RuntimeConfiguration.setup()
-    CF.GraphQL.RuntimeConfiguration.configure()
-
     # Define workers and child supervisors to be supervised
     children = [
       # Start the endpoint when the application starts

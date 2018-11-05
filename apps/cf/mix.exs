@@ -56,7 +56,6 @@ defmodule CF.Mixfile do
       {:hackney, "~> 1.6"},
       {:oauth2, "~> 0.9"},
       {:sweet_xml, "~> 0.6"},
-      {:weave, "3.1.2"},
       {:burnex, "~> 1.0"},
       {:yaml_elixir, "~> 2.1.0"},
 

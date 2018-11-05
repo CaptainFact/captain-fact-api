@@ -41,7 +41,6 @@ defmodule CF.GraphQL.Mixfile do
       {:absinthe_plug, "~> 1.4.1"},
       {:basic_auth, "~> 2.2.2"},
       {:kaur, "~> 1.1"},
-      {:weave, "3.1.2"},
       {:poison, "~> 3.1"},
       {:db, in_umbrella: true},
 

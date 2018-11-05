@@ -27,7 +27,3 @@ config :phoenix, :stacktrace_depth, 20
 
 # Mails
 config :cf, CF.Mailer, adapter: Bamboo.LocalAdapter
-
-# Env / Secrets are above everything else
-# Weave loads config from env or secret files
-config :weave, loaders: [Weave.Loaders.File, Weave.Loaders.Environment]

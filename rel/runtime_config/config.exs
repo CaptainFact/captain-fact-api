@@ -34,14 +34,10 @@ load_bool = fn secret ->
     value when value in ~w(no false off) ->
       false
 
-    _ ->
+    value ->
       raise "Invalid bool value: #{inspect(value)}"
   end
 end
-
-# ---- [GLOBAL CONFIG] ----
-
-# TODO Erlang cookie
 
 # ---- [APP CONFIG] :db ----
 
@@ -73,6 +69,10 @@ config :cf,
 
 config :cf, CF.Authenticator.GuardianImpl, secret_key: load_secret.("secret_key_base")
 
+config :cf, CF.Mailer,
+  domain: load_secret.("mailgun_domain"),
+  api_key: load_secret.("mailgun_api_key")
+
 # ---- [APP CONFIG] :cf_rest_api ----
 
 if load_bool.({"cors_allow_all", "false"}) do
@@ -88,3 +88,10 @@ end
 config :cf_rest_api, CF.RestApi.Endpoint,
   url: [host: load_secret.("host")],
   secret_key_base: load_secret.("secret_key_base")
+
+# ---- [APP CONFIG] :cf_rest_api ----
+
+config :cf_graphql, CF.GraphQLWeb.Endpoint,
+  url: [host: load_secret.("host")],
+  secret_key_base: [host: load_secret.("secret_key_base")],
+  basic_auth: [password: load_secret.("basic_auth_password")]

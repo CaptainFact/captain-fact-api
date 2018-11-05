@@ -14,7 +14,10 @@ environment :prod do
   set(dev_mode: false)
   set(include_erts: false)
   set(include_src: false)
-  set(cookie: :runtime_value)
+
+  set(
+    cookie: String.to_atom(binary_part(Base.url_encode64(:crypto.strong_rand_bytes(32)), 0, 32))
+  )
 
   set(
     config_providers: [
