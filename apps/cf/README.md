@@ -7,6 +7,10 @@ manipulate data from DB.
 
 Following secrets must be configured in production:
 
+- db_hostname
+- db_username
+- db_password
+- db_name
 - frontend_url
 - youtube_api_key
 - facebook_app_id

@@ -15,5 +15,5 @@ done
 set -e
 
 echo "Running migrations"
-release_ctl migrate
+release_ctl eval 'Elixir.DB.ReleaseTasks.migrate()'
 echo "Migrated"

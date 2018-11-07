@@ -1,7 +1,7 @@
 use Mix.Config
 
 # Configure scheduler
-config :cf, CF.Scheduler,
+config :cf_jobs, CF.Jobs.Scheduler,
   # Run only one instance across cluster
   global: true,
   debug_logging: false,
@@ -9,7 +9,7 @@ config :cf, CF.Scheduler,
     # credo:disable-for-lines:10
     # Actions analysers
     # Every minute
-    {"*/1 * * * *", {CF.Jobs.Reputation, :update, []}},
+    {{:extended, "*/20"}, {CF.Jobs.Reputation, :update, []}},
     # Every day
     {"@daily", {CF.Jobs.Reputation, :reset_daily_limits, []}},
     # Every minute
