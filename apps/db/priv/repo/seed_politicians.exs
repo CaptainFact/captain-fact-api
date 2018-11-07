@@ -4,7 +4,7 @@ require Arc.Ecto.Schema
 
 alias DB.Repo
 alias DB.Schema.Speaker
-alias CaptainFact.Speakers
+alias CF.Speakers
 
 defmodule SeedPoliticians do
   def seed(csv_path, fetch_pictures? \\ true, names_filter \\ []) do

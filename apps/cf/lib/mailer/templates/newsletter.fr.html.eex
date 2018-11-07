@@ -1,0 +1,8 @@
+<%= raw @content %>
+
+<br><br>
+
+<a href="<%= unsubscribe_newsletter_url(@user.newsletter_subscription_token) %>"
+style="font-size: 15px;text-align: center;font-family: Ubuntu, Lato, Tahoma, sans-serif;background: aliceblue;padding: 1em;display: block;">
+  Se désinscrire de cette newsletter
+</a>

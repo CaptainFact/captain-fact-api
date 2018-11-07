@@ -27,12 +27,13 @@ docker installed, you can use the pre-seed postgres docker image:
 
 ### Start API services
 
-* Without Docker (recommended if you want to make changes in the API)
+- Without Docker (recommended if you want to make changes in the API)
+
   - `mix deps.get`
   - `mix ecto.migrate`
   - `iex -S mix`
 
-* With Docker
+- With Docker
   - Download project's dependencies with `./dev/get_dependencies.sh`
   - Migrate your database with `./dev/db_migrate.sh`
   - Start server with `./dev/start_server.sh`
@@ -59,28 +60,26 @@ This application is organized as an [umbrella project](https://elixir-lang.org/g
 ```
 .
 ├── apps
-│   ├── captain_fact => A monolith containing REST API, jobs and core functions
-│   │   ├── lib
-│   │   │   ├── captain_fact => Core functions + jobs
-│   │   │   └── captain_fact_web => REST API
-│   │   └── priv/secrets => dev secrets for this app
-│   ├── cf_graphql => GraphQL API
-│   │   └── priv/secrets => dev secrets for this app
-│   ├── cf_atom_feed => Atom feed
-│   └── db => DB repository and schemas
+│   ├── cf => Core functions as a library. **Not deployed**
+│   ├── cf_atom_feed => Atom feed.
+│   ├── cf_graphql => GraphQL API (public).
+│   ├── cf_jobs => Jobs.
+│   ├── cf_opengraph => An app that generate opengraph tags.
+│   ├── cf_rest_api => REST/WS API (private).
+│   └── db => DB repository and schemas **Not deployed**
 │       ├── lib
 │       │   ├── db
 │       │   ├── db_schema => Contains all the schemas (Video, Speaker, Comment...etc)
 │       │   ├── db_type => Special types (SpeakerPicture...etc)
 │       │   └── db_utils => Some utils functions
 │       └── priv
-│           ├── repo/migrations => All DB migrations files
-│           └── secrets => dev secrets for DB (db username, password...etc)
-├── README.md => You're reading it right now. Are you ?
+│           └── repo/migrations => All DB migrations files
+├── README.md => You're reading it right now. Are you?
 ├── rel => Release configs & tools
 │   ├── commands => Commands that will be available to run on the release (seed DB...etc)
-│   ├── config.exs => Releases configuration
-│   └── docker => Docker-specific files & configs
+│   ├── hooks => Some hooks for automatically run commands when release run.
+│   ├── runtime_config => Runtime configurations for all apps.
+│   └── config.exs => Releases configuration.
 ```
 
 ## Styling
@@ -93,10 +92,10 @@ Avoid lines longer than 80 characters, **never** go beyond 110 characters.
 
 ## Linked projects
 
-* [Community discussions and documentation](https://github.com/CaptainFact/captain-fact/)
-* [Frontend](https://github.com/CaptainFact/captain-fact-frontend)
-* [Extension](https://github.com/CaptainFact/captain-fact-extension)
-* [Overlay injector](https://github.com/CaptainFact/captain-fact-overlay-injector)
+- [Community discussions and documentation](https://github.com/CaptainFact/captain-fact/)
+- [Frontend](https://github.com/CaptainFact/captain-fact-frontend)
+- [Extension](https://github.com/CaptainFact/captain-fact-extension)
+- [Overlay injector](https://github.com/CaptainFact/captain-fact-overlay-injector)
 
 # Feature requests
 

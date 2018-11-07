@@ -1,0 +1,5 @@
+<%= @text_content %>
+
+--------------------------------------------------------------------------------
+
+Unsubscribe from this newsletter: <%= unsubscribe_newsletter_url(@user.newsletter_subscription_token) %>

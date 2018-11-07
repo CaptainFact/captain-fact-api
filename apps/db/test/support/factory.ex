@@ -52,7 +52,8 @@ defmodule DB.Factory do
       title: Faker.Lorem.sentence(3..8),
       provider: "youtube",
       provider_id: youtube_id,
-      hash_id: nil
+      hash_id: nil,
+      language: Enum.random(["en", "fr", nil])
     }
   end
 
@@ -96,7 +97,7 @@ defmodule DB.Factory do
 
   def source_factory do
     %Source{
-      url: Faker.Internet.url(),
+      url: "#{Faker.Internet.url()}/#{random_string(4)}",
       site_name: Faker.Internet.domain_word(),
       language: String.downcase(Faker.Address.country_code()),
       title: Faker.Lorem.sentence(1..10)
@@ -198,7 +199,7 @@ defmodule DB.Factory do
     comment
   end
 
-  defp random_string(length) do
+  def random_string(length) do
     DB.Utils.TokenGenerator.generate(length)
   end
 end

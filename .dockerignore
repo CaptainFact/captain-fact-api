@@ -4,14 +4,19 @@
 .travis.yml
 
 # Elixir
-.elixir_ls
 _build
+.elixir_ls
 deps
+apps/*/test
 
 # Project-specific
-rel/docker
 resources
 dev
+priv
+
+# Docker
+.dockerignore
+Dockerfile
 
 # Secrets
 apps/*/priv/secrets/*

@@ -1,7 +1,7 @@
 defmodule DB.ReleaseTasks do
   @moduledoc """
   Contains release tasks run by `distillery` on startup. You can find the
-  entrypoints of these commands in `rel/commands/*.sh`, `rel/hooks/*` and the 
+  entrypoints of these commands in `rel/commands/*.sh`, `rel/hooks/*` and the
   configuration in `rel/config.exs`
   """
 
@@ -12,7 +12,6 @@ defmodule DB.ReleaseTasks do
     :ssl,
     :postgrex,
     :ecto,
-    :weave,
     :logger
   ]
 
@@ -71,10 +70,6 @@ defmodule DB.ReleaseTasks do
     Enum.each(@start_apps, &Application.ensure_all_started/1)
 
     Logger.info("Dependencies started, loading runtime configuration...")
-
-    # Loading runtime configuration
-    DB.RuntimeConfiguration.setup()
-    DB.RuntimeConfiguration.configure()
 
     # Start the Repo(s) for myapp
     Logger.info("Starting repos..")

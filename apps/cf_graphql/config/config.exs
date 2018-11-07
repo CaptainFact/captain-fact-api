@@ -12,7 +12,7 @@ config :cf_graphql,
   env: Mix.env(),
   basic_auth: [
     username: "captain",
-    password: "Will be replaced by config runtime, see weave.ex",
+    password: "SetAtRuntime",
     realm: "GraphiQL Public Endpoint"
   ]
 
