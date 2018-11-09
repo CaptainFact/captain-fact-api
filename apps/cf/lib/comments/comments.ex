@@ -33,19 +33,18 @@ defmodule CF.Comments do
     UserPermissions.check!(user, :create, :comment)
     source_url = source_url && Source.prepare_url(source_url)
 
+    # Load source from DB or create a changeset to make a new one
     source =
       source_url &&
-        (Repo.get_by(Source, url: source_url) || Source.changeset(%Source{}, %{url: source_url}))
+        (Sources.get_by_url(source_url) || Source.changeset(%Source{}, %{url: source_url}))
 
-    comment_changeset =
+    # Insert comment in DB
+    full_comment =
       user
       |> Ecto.build_assoc(:comments)
       |> Ecto.Changeset.change()
       |> Ecto.Changeset.put_assoc(:source, source)
       |> Comment.changeset(params)
-
-    full_comment =
-      comment_changeset
       |> Repo.insert!()
       |> Map.put(:user, user)
       |> Repo.preload(:source)
