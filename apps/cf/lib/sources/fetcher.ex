@@ -56,8 +56,9 @@ defmodule CF.Sources.Fetcher do
 
   defp fetch(url, callback) do
     without_domain = Regex.replace(@url_regex, url, "\\1")
+    path = Regex.replace(~r/\?.+$/, without_domain, "")
 
-    case do_fetch_source_metadata(url, MIME.from_path(without_domain)) do
+    case do_fetch_source_metadata(url, MIME.from_path(path)) do
       {:error, _} -> :error
       {:ok, result} -> callback.(result)
     end

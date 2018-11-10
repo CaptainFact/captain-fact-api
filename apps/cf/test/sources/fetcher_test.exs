@@ -29,8 +29,16 @@ defmodule CF.Sources.FetcherTest do
   end
 
   test "stores file name and mime type" do
-    # Start web server providing a page with giver metadata
     Fetcher.fetch_source_metadata("https://CaptainFact.io/great-file.pdf", fn response ->
+      assert response.title == "great-file"
+      assert response.file_mime_type == "application/pdf"
+    end)
+
+    wait_fetcher()
+  end
+
+  test "should not be confused by URL params (1)" do
+    Fetcher.fetch_source_metadata("https://CaptainFact.io/great-file.pdf?fool=you", fn response ->
       assert response.title == "great-file"
       assert response.file_mime_type == "application/pdf"
     end)
