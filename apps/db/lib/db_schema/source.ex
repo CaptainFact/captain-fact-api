@@ -12,6 +12,8 @@ defmodule DB.Schema.Source do
     timestamps()
   end
 
+  @url_max_length 2048
+
   # Allow to add localhost urls as sources during tests
   @url_regex if Application.get_env(:db, :env) == :test,
                do:
@@ -20,15 +22,19 @@ defmodule DB.Schema.Source do
                  ~r/^https?:\/\/[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/
 
   @doc """
+  Get max URL length.
+  See https://boutell.com/newfaq/misc/urllength.html
+  """
+  def url_max_length, do: @url_max_length
+
+  @doc """
   Builds a changeset based on the `struct` and `params`.
   """
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(params, [:url])
     |> update_change(:url, &prepare_url/1)
-    |> validate_required([:url])
-    |> unique_constraint(:url)
-    |> validate_format(:url, @url_regex)
+    |> changeset_common_validations()
   end
 
   def changeset_fetched(struct, params) do
@@ -39,15 +45,21 @@ defmodule DB.Schema.Source do
     |> update_change(:title, &clean_and_truncate/1)
     |> update_change(:language, &String.trim/1)
     |> update_change(:site_name, &clean_and_truncate/1)
-    |> validate_required([:url])
-    |> unique_constraint(:url)
-    |> validate_format(:url, @url_regex)
+    |> changeset_common_validations()
   end
 
   @regex_contains_http ~r/^https?:\/\//
   def prepare_url(str) do
     str = String.trim(str)
     if Regex.match?(@regex_contains_http, str), do: str, else: "https://" <> str
+  end
+
+  defp changeset_common_validations(changeset) do
+    changeset
+    |> validate_required([:url])
+    |> unique_constraint(:url)
+    |> validate_format(:url, @url_regex)
+    |> validate_length(:url, min: 10, max: @url_max_length)
   end
 
   defp clean_and_truncate(str) do
