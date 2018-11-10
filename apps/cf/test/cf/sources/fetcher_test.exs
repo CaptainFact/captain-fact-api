@@ -28,6 +28,16 @@ defmodule CF.Sources.FetcherTest do
     wait_fetcher()
   end
 
+  test "stores file name and mime type" do
+    # Start web server providing a page with giver metadata
+    Fetcher.fetch_source_metadata("https://CaptainFact.io/great-file.pdf", fn response ->
+      assert response.title == "great-file"
+      assert response.file_mime_type == "application/pdf"
+    end)
+
+    wait_fetcher()
+  end
+
   test "return error if status is not 2xx" do
     # Error 404
     @valid_attributes.url

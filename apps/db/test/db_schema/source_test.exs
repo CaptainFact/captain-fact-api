@@ -5,6 +5,7 @@ defmodule DB.Schema.SourceTest do
 
   @valid_attrs %{
     title: "some content",
+    file_mime_type: "application/pdf",
     url:
       "http://www.lemonde.fr/idees/article/2017/04/24/les-risques-d-une-explosion_5116380_3232.html"
   }
@@ -21,6 +22,11 @@ defmodule DB.Schema.SourceTest do
     refute Source.changeset(%Source{}, %{@valid_attrs | url: "http://"}).valid?
     refute Source.changeset(%Source{}, %{@valid_attrs | url: "https://x"}).valid?
     refute Source.changeset(%Source{}, %{@valid_attrs | url: "https://xxxxxx"}).valid?
+  end
+
+  test "changeset_fetched" do
+    assert Source.changeset_fetched(%Source{}, @valid_attrs).valid?
+    refute Source.changeset_fetched(%Source{}, %{@valid_attrs | file_mime_type: "zzzz"}).valid?
   end
 
   test "must add https:// if url doesn't start with http:// or https://" do
