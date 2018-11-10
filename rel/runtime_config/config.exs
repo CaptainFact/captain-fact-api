@@ -42,6 +42,11 @@ end
 # ---- [Global config keys] ----
 
 frontend_url = String.trim_trailing(load_secret.("frontend_url")) <> "/"
+rollbar_access_token = load_secret.({"rollbar_access_token", nil})
+
+if rollbar_access_token do
+  config :rollbax, enabled: true, access_token: rollbar_access_token
+end
 
 # ---- [APP CONFIG] :db ----
 

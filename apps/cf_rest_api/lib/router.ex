@@ -1,5 +1,6 @@
 defmodule CF.RestApi.Router do
   use CF.RestApi, :router
+  use Plug.ErrorHandler
 
   alias CF.Authenticator.GuardianImpl
 
@@ -72,6 +73,65 @@ defmodule CF.RestApi.Router do
       get("/moderation/random", ModerationController, :random)
       post("/moderation/feedback", ModerationController, :post_feedback)
     end
+  end
+
+  defp handle_errors(conn, %{kind: kind, reason: reason, stack: stacktrace}) do
+    conn =
+      conn
+      |> Plug.Conn.fetch_cookies()
+      |> Plug.Conn.fetch_query_params()
+
+    params =
+      case conn.params do
+        %Plug.Conn.Unfetched{aspect: :params} -> "unfetched"
+        other -> other
+      end
+
+    occurrence_data = %{
+      "request" => %{
+        "cookies" => conn.req_cookies,
+        "url" => "#{conn.scheme}://#{conn.host}:#{conn.port}#{conn.request_path}",
+        "user_ip" => List.to_string(:inet.ntoa(conn.remote_ip)),
+        "headers" => filter_headers(conn),
+        "method" => conn.method,
+        "params" => filter_params(params)
+      }
+    }
+
+    CF.Errors.do_report(kind, reason, stacktrace, data: occurrence_data)
+  end
+
+  defp filter_headers(conn) do
+    for {key, value} = tuple <- conn.req_headers, into: %{} do
+      case key do
+        "authorization" ->
+          {key, filter_str(value, 16)}
+
+        _ ->
+          tuple
+      end
+    end
+  end
+
+  defp filter_params(params) when is_map(params) do
+    for {key, value} = tuple <- params, into: %{} do
+      case key do
+        k when k in ~w(password passwordRepeat) ->
+          {key, filter_str(value)}
+
+        "user" when is_map(value) ->
+          {key, filter_params(value)}
+
+        _ ->
+          tuple
+      end
+    end
+  end
+
+  defp filter_params(params), do: params
+
+  def filter_str(str, length_to_keep \\ 0) do
+    "#{String.slice(str, 0, length_to_keep)}********* [FILTERED]"
   end
 
   # ---- Dev only: mailer. We can use Mix.env here cause file is interpreted at compile time ----

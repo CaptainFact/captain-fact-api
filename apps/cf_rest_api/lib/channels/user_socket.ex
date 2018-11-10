@@ -22,7 +22,7 @@ defmodule CF.RestApi.UserSocket do
     case authenticate(socket, GuardianImpl, token) do
       {:ok, authed_socket} ->
         user_id =
-          case Guardian.Phoenix.Socket.current_resource(authed_socket) do
+          case connected_user(authed_socket) do
             nil -> nil
             user -> user.id
           end
@@ -66,22 +66,49 @@ defmodule CF.RestApi.UserSocket do
       _ in Ecto.NoResultsError ->
         reply_error(socket, Phoenix.View.render(ErrorView, "404.json", []))
 
-      e ->
-        Logger.error("[RescueChannel] An unknown error just popped : #{inspect(e)}")
-
-        Logger.debug(fn ->
-          "Stacktrace: #{inspect(System.stacktrace(), pretty: true)}"
-        end)
-
+      exception ->
+        report_socket_error(exception, System.stacktrace(), command, params, socket)
         reply_error(socket, Phoenix.View.render(ErrorView, "error.json", []))
     catch
-      e ->
-        Logger.error("[RescueChannel] Uncatched exception : #{inspect(e)}")
+      exception ->
+        report_socket_throw(exception, System.stacktrace(), command, params, socket)
         reply_error(socket, Phoenix.View.render(ErrorView, "error.json", []))
     end
   end
 
+  def connected_user(socket) do
+    Guardian.Phoenix.Socket.current_resource(socket)
+  end
+
   def id(_socket), do: nil
+
+  defp report_socket_error(exception, stacktrace, command, params, socket) do
+    CF.Errors.report(
+      exception,
+      stacktrace,
+      custom: socket_error_custom_data(params),
+      data: socket_error_occurence_data(socket, command),
+      user: connected_user(socket)
+    )
+  end
+
+  defp report_socket_throw(exception, stacktrace, command, params, socket) do
+    CF.Errors.report_throw(
+      exception,
+      stacktrace,
+      custom: socket_error_custom_data(params),
+      data: socket_error_occurence_data(socket, command),
+      user: connected_user(socket)
+    )
+  end
+
+  defp socket_error_occurence_data(socket, command) do
+    %{"context" => "wss:#{socket.topic}##{command}"}
+  end
+
+  defp socket_error_custom_data(params) do
+    %{"payload" => params}
+  end
 
   defp reply_error(socket, error) do
     {:reply, {:error, error}, socket}

@@ -41,8 +41,8 @@ defmodule CF.Sources.Fetcher do
           try do
             fetch(url, callback)
           rescue
-            e ->
-              Logger.error("Fetch metadata for #{url} crashed - #{inspect(e)}")
+            exception ->
+              CF.Errors.report(exception, System.stacktrace())
           after
             Fetcher.LinkChecker.free_url(url)
           end

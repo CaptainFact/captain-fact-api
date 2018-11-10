@@ -1,7 +1,7 @@
 defmodule CF.Sources.FetcherTest do
   use CF.DataCase
 
-  import ExUnit.CaptureLog
+  import Mock
   import CF.Support.MetaPage
   alias CF.Sources.Fetcher
   alias DB.Utils.TokenGenerator
@@ -112,23 +112,37 @@ defmodule CF.Sources.FetcherTest do
     end
 
     # Call fetcher and increment call counter
-    log =
-      capture_log(fn ->
-        for url <- all_urls do
-          if Enum.any?(crashing, &(&1 == url)) do
-            Fetcher.fetch_source_metadata(endpoint_url(bypass, url), fn _ ->
-              raise "RAISE_TEST"
-            end)
-          else
-            Fetcher.fetch_source_metadata(endpoint_url(bypass, url), increment_call)
-          end
-        end
 
-        wait_fetcher()
+    for url <- all_urls do
+      if Enum.any?(crashing, &(&1 == url)) do
+        Fetcher.fetch_source_metadata(endpoint_url(bypass, url), fn _ ->
+          raise "RAISE_TEST"
+        end)
+      else
+        Fetcher.fetch_source_metadata(endpoint_url(bypass, url), increment_call)
+      end
+    end
+
+    wait_fetcher()
+
+    assert Agent.get(calls_counter_name, & &1) == Enum.count(valid_urls)
+  end
+
+  test "reports fetch errors to error reporter" do
+    bypass = Bypass.open()
+    url = gen_url()
+
+    Bypass.expect(bypass, "GET", url, plug_response(200, @valid_attributes))
+
+    with_mock CF.Errors, report: fn _, _ -> nil end do
+      Fetcher.fetch_source_metadata(endpoint_url(bypass, url), fn _ ->
+        raise "RAISE_TEST"
       end)
 
-    assert Enum.count(Regex.scan(~r/RAISE_TEST/m, log)) === Enum.count(crashing)
-    assert Agent.get(calls_counter_name, & &1) == Enum.count(valid_urls)
+      wait_fetcher()
+
+      assert_called(CF.Errors.report(%RuntimeError{message: "RAISE_TEST"}, :_))
+    end
   end
 
   defp gen_url(), do: "/#{TokenGenerator.generate(8)}"

@@ -25,5 +25,9 @@ config :logger, :console, format: "[$level] $message\n"
 # in production as building large stacktraces may be expensive.
 config :phoenix, :stacktrace_depth, 20
 
+# Configure Rollbar (errors reporting)
+config :rollbax,
+  environment: "dev"
+
 # Mails
 config :cf, CF.Mailer, adapter: Bamboo.LocalAdapter

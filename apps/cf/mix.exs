@@ -55,6 +55,7 @@ defmodule CF.Mixfile do
       {:bamboo, github: "thoughtbot/bamboo"},
       {:hackney, "~> 1.6"},
       {:oauth2, "~> 0.9"},
+      {:rollbax, ">= 0.0.0"},
       {:sweet_xml, "~> 0.6"},
       {:burnex, "~> 1.0"},
       {:yaml_elixir, "~> 2.1.0"},
