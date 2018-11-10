@@ -26,3 +26,7 @@ config :bcrypt_elixir, :log_rounds, 4
 # Captions mock for testing
 config :cf,
   captions_fetcher: CF.Videos.CaptionsFetcherTest
+
+# Configure Rollbar (errors reporting)
+config :rollbax,
+  environment: "test"
