@@ -41,7 +41,8 @@ defmodule CF.Sources.Fetcher do
           try do
             fetch(url, callback)
           rescue
-            e -> Logger.error("Fetch metadata for #{url} crashed - #{inspect(e)}")
+            e ->
+              Logger.error("Fetch metadata for #{url} crashed - #{inspect(e)}")
           after
             Fetcher.LinkChecker.free_url(url)
           end
@@ -51,14 +52,20 @@ defmodule CF.Sources.Fetcher do
 
   def get_queue, do: Fetcher.LinkChecker.get_queue()
 
+  @url_regex ~r/^https?:\/\/[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/
+
   defp fetch(url, callback) do
-    case do_fetch_source_metadata(url) do
+    without_domain = Regex.replace(@url_regex, url, "\\1")
+
+    case do_fetch_source_metadata(url, MIME.from_path(without_domain)) do
       {:error, _} -> :error
       {:ok, result} -> callback.(result)
     end
   end
 
-  defp do_fetch_source_metadata(url) do
+  @fetchable_mime_types ~w(text/html application/octet-stream application/xhtml+xml application/vnd.ms-htmlhelp)
+
+  defp do_fetch_source_metadata(url, mime_types) when mime_types in @fetchable_mime_types do
     case HTTPoison.get(
            url,
            [],
@@ -78,6 +85,12 @@ defmodule CF.Sources.Fetcher do
       {:error, %HTTPoison.Error{reason: reason}} ->
         {:error, reason}
     end
+  end
+
+  defp do_fetch_source_metadata(url, mime_type) do
+    ext = Path.extname(url)
+    title = Path.basename(url, ext)
+    {:ok, %{file_mime_type: mime_type, title: title}}
   end
 
   defp source_params_from_tree(tree) do

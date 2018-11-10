@@ -8,6 +8,7 @@ defmodule DB.Schema.Source do
     field(:title, :string)
     field(:language, :string)
     field(:site_name, :string)
+    field(:file_mime_type, :string)
 
     timestamps()
   end
@@ -39,7 +40,7 @@ defmodule DB.Schema.Source do
 
   def changeset_fetched(struct, params) do
     struct
-    |> cast(params, [:og_url, :url, :title, :language, :site_name])
+    |> cast(params, [:og_url, :url, :title, :language, :site_name, :file_mime_type])
     |> update_change(:url, &prepare_url/1)
     |> update_change(:og_url, &prepare_url/1)
     |> update_change(:title, &clean_and_truncate/1)
@@ -60,6 +61,15 @@ defmodule DB.Schema.Source do
     |> unique_constraint(:url)
     |> validate_format(:url, @url_regex)
     |> validate_length(:url, min: 10, max: @url_max_length)
+    |> validate_change(:file_mime_type, &validate_file_mime_type/2)
+  end
+
+  defp validate_file_mime_type(:file_mime_type, mime_type) do
+    if MIME.valid?(mime_type) do
+      []
+    else
+      [file_mime_type: "Invalid MIME type"]
+    end
   end
 
   defp clean_and_truncate(str) do
