@@ -42,6 +42,6 @@ defmodule CF.AtomFeed.CommentsTest do
 
     Factory.insert(:comment, user: nil)
     feed = CF.AtomFeed.Comments.feed_all()
-    assert feed =~ ~r(New Comment from Anonymous user)
+    assert feed =~ ~r(New Comment from Deleted account)
   end
 end
