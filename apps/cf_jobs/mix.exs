@@ -4,7 +4,7 @@ defmodule CF.Jobs.Mixfile do
   def project do
     [
       app: :cf_jobs,
-      version: "0.8.17",
+      version: "0.9",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
