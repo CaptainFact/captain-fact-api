@@ -8,7 +8,7 @@ config :db,
 # Database: use postgres
 config :db, DB.Repo,
   adapter: Ecto.Adapters.Postgres,
-  pool_size: 20
+  pool_size: 3
 
 # Import environment specific config
 import_config "#{Mix.env()}.exs"

@@ -19,5 +19,8 @@ config :cf_jobs, CF.Jobs.Scheduler,
     {"*/5 * * * *", {CF.Jobs.Moderation, :update, []}}
   ]
 
+# Configure Postgres pool size
+config :db, DB.Repo, pool_size: 3
+
 # Import environment specific config
 import_config "#{Mix.env()}.exs"

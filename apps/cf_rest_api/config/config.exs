@@ -10,5 +10,8 @@ config :cf_rest_api, CF.RestApi.Endpoint,
   pubsub: [name: CF.RestApi.PubSub, adapter: Phoenix.PubSub.PG2],
   server: true
 
+# Configure Postgres pool size
+config :db, DB.Repo, pool_size: 10
+
 # Import environment specific config
 import_config "#{Mix.env()}.exs"
