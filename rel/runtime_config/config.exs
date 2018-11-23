@@ -87,14 +87,17 @@ config :cf, CF.Mailer,
 
 # ---- [APP CONFIG] :cf_rest_api ----
 
+cors_allow_all? = load_bool.({"cors_allow_all", "false"})
+check_origin = if cors_allow_all?, do: false, else: [frontend_url]
+
 config :cf_rest_api, CF.RestApi.Endpoint,
   url: [host: load_secret.("host")],
   secret_key_base: load_secret.("secret_key_base"),
-  check_origin: [frontend_url]
+  check_origin: check_origin
 
 # CORS origins for HTTP endpoint
 
-if load_bool.({"cors_allow_all", "false"}) do
+if cors_allow_all? do
   config :cf_rest_api, cors_origins: "*"
 else
   config :cf_rest_api,
