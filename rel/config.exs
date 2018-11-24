@@ -1,57 +1,71 @@
-# Import all plugins from `rel/plugins`
-# They can then be used by adding `plugin MyPlugin` to
-# either an environment, or release definition, where
-# `MyPlugin` is the name of the plugin module.
-Path.join(["rel", "plugins", "*.exs"])
-|> Path.wildcard()
-|> Enum.map(&Code.eval_file(&1))
-
-use Mix.Releases.Config,
-    default_release: :captain_fact,
-    default_environment: Mix.env()
+use Mix.Releases.Config, default_environment: :prod
 
 # Environments
 
 environment :dev do
-  set dev_mode: false # Disable symlinks that breaks docker dev image release. Uncomment to debug build
-  set include_erts: false
-  set include_src: false
-  set cookie: :"MfqNgHUln;rEBpHUv^)@~8.b1wJ)>0W3<drs>ZRk0(S>qMU):<JtlEIiwR|/Oc>R"
+  # Disable symlinks that breaks docker dev image release. Uncomment to debug build
+  set(dev_mode: false)
+  set(include_erts: false)
+  set(include_src: false)
+  set(cookie: :dev_cookie)
 end
 
 environment :prod do
-  set dev_mode: false
-  set include_erts: false
-  set include_src: false
-  set cookie: :"86@K5T~*`8U71EA5oGP?zEy~`b]@~CS{I|]OJn6EW|>V2A]r|(w[LYl69!;;[n$P"
+  set(dev_mode: false)
+  set(include_erts: false)
+  set(include_src: false)
+
+  set(
+    cookie: String.to_atom(binary_part(Base.url_encode64(:crypto.strong_rand_bytes(32)), 0, 32))
+  )
+
+  set(
+    config_providers: [
+      {Mix.Releases.Config.Providers.Elixir, ["${RELEASE_ROOT_DIR}/etc/config.exs"]}
+    ]
+  )
+
+  set(
+    overlays: [
+      {:copy, "rel/runtime_config/config.exs", "etc/config.exs"}
+    ]
+  )
 end
 
 # Releases
 
-release :captain_fact do
-  set version: current_version(:captain_fact)
-  set applications: [:captain_fact]
-  set post_start_hook: "rel/hooks/post_start.sh"
-  set commands: [
-    "migrate": "rel/commands/migrate.sh",
-    "seed": "rel/commands/seed.sh",
-    "seed_politicians": "rel/commands/seed_politicians.sh"
-  ]
+release :cf_rest_api do
+  set(version: current_version(:cf_rest_api))
+  set(applications: [:cf_rest_api])
+  set(post_start_hooks: "rel/hooks/migrate_db")
+
+  set(
+    commands: [
+      migrate: "rel/commands/migrate.sh",
+      seed: "rel/commands/seed.sh",
+      seed_politicians: "rel/commands/seed_politicians.sh"
+    ]
+  )
+end
+
+release :cf_jobs do
+  set(version: current_version(:cf_jobs))
+  set(applications: [:cf_jobs])
+  set(commands: [migrate: "rel/commands/migrate.sh"])
 end
 
 release :cf_graphql do
-  set version: current_version(:cf_graphql)
-  set applications: [:cf_graphql]
-  set commands: ["migrate": "rel/commands/migrate.sh"]
+  set(version: current_version(:cf_graphql))
+  set(applications: [:cf_graphql])
+  set(commands: [migrate: "rel/commands/migrate.sh"])
 end
 
 release :cf_atom_feed do
-  set version: current_version(:cf_atom_feed)
-  set applications: [:cf_atom_feed]
+  set(version: current_version(:cf_atom_feed))
+  set(applications: [:cf_atom_feed])
 end
 
 release :cf_opengraph do
-  set version: current_version(:cf_opengraph)
-  set applications: [:cf_opengraph]
-  set code_paths: ["apps/opengraph"]
+  set(version: current_version(:cf_opengraph))
+  set(applications: [:cf_opengraph])
 end

@@ -1,10 +1,11 @@
 defmodule DB.Type.Achievement do
   @moduledoc """
   Translate a user achievement from atom to integer.
+  TODO: Migrate this to a real Ecto.Type using Ecto.Enum
   """
 
   @doc """
-  Get an achievement id from an easy to use / remember atom. 
+  Get an achievement id from an easy to use / remember atom.
   You can add more at the end, but you CANNOT change
   existing identifiers, it would break existing achievements
   """

@@ -39,7 +39,7 @@ defmodule CF.GraphQL.Resolvers.Users do
     {:ok, DB.Type.UserPicture.url({user.picture_url, user}, :mini_thumb)}
   end
 
-  @watched_entities UserAction.entities(~w(video speaker statement comment fact)a)
+  @watched_entities ~w(video speaker statement comment fact)a
 
   @doc """
   Resolve user actions history

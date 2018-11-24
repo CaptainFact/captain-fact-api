@@ -4,7 +4,7 @@ defmodule DB.Mixfile do
   def project do
     [
       app: :db,
-      version: "0.8.17",
+      version: "0.9.0",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
@@ -39,8 +39,8 @@ defmodule DB.Mixfile do
       {:arc, github: "Betree/arc", override: true},
       {:arc_ecto, "~> 0.10.0"},
       {:ecto, "~> 2.2.8"},
+      {:ecto_enum, "~> 1.0"},
       {:postgrex, "~> 0.13.3"},
-      {:weave, "3.1.2"},
       {:ex_aws, "~> 2.1"},
       {:ex_aws_s3, "~> 2.0"},
       {:xml_builder, "~> 2.0", override: true},
@@ -50,6 +50,7 @@ defmodule DB.Mixfile do
       {:burnex, "~> 1.0"},
       {:hashids, "~> 2.0"},
       {:kaur, "~> 1.1"},
+      {:mime, "~> 1.2"},
       {:scrivener_ecto, "~> 1.0"},
 
       # Dev only

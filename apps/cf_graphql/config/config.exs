@@ -12,7 +12,7 @@ config :cf_graphql,
   env: Mix.env(),
   basic_auth: [
     username: "captain",
-    password: "Will be replaced by config runtime, see weave.ex",
+    password: "SetAtRuntime",
     realm: "GraphiQL Public Endpoint"
   ]
 
@@ -27,6 +27,9 @@ config :cf_graphql, CF.GraphQLWeb.Endpoint,
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
+
+# Configure Postgres pool size
+config :db, DB.Repo, pool_size: 5
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

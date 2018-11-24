@@ -23,14 +23,14 @@ defmodule CF.AtomFeed.CommentsTest do
                <name>CaptainFact</name>
                <email>atom-feed@captainfact.io</email>
              </author>
-             <id>https://captainfact.io/</id>
+             <id>https://TEST_FRONTEND/</id>
              <title>[CaptainFact] All Comments</title>
            """
 
     # Check comment entries
     for comment <- comments do
       assert feed =~
-               ~r(https://captainfact\.io/videos/[a-zA-Z0-9]+\?statement=#{comment.statement_id}"/>)
+               ~r(https://TEST_FRONTEND/videos/[a-zA-Z0-9]+\?statement=#{comment.statement_id}"/>)
 
       assert feed =~ ~r(<title>New Comment from .+ on ##{comment.statement_id}</title>)
     end
@@ -42,6 +42,6 @@ defmodule CF.AtomFeed.CommentsTest do
 
     Factory.insert(:comment, user: nil)
     feed = CF.AtomFeed.Comments.feed_all()
-    assert feed =~ ~r(New Comment from Anonymous user)
+    assert feed =~ ~r(New Comment from Deleted account)
   end
 end

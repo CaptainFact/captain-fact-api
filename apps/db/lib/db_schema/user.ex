@@ -64,7 +64,7 @@ defmodule DB.Schema.User do
     do: "#{name} (@#{username})"
 
   def user_appelation(nil),
-    do: "Anonymous user"
+    do: "Deleted account"
 
   @email_regex ~r/\A([\w+\-].?)+@[a-z\d\-]+(\.[a-z]+)*\.[a-z]+\z/i
   @valid_locales ~w(en fr)
@@ -257,7 +257,7 @@ defmodule DB.Schema.User do
 
   def validate_locale(changeset), do: changeset
 
-  @forbidden_username_keywords ~w(captainfact captain admin newuser temporary anonymous)
+  @forbidden_username_keywords ~w(captainfact captain admin newuser temporary deleted supprimé)
   # Only alphanum, '-' and '_'
   @username_regex ~r/^[a-zA-Z0-9-_]+$/
   defp validate_username(changeset = %{changes: %{username: username}}) do
