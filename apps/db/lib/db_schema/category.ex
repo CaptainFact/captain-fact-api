@@ -5,6 +5,8 @@ defmodule DB.Schema.Category do
 
   use Ecto.Schema
 
+  alias DB.Schema.Video
+
   schema "categories" do
     field(:title, :string)
 

@@ -24,7 +24,7 @@ defmodule CF.RestApi.VideoView do
       language: video.language,
       is_partner: video.is_partner,
       unlisted: video.unlisted
-      categories: render_many(video.categories, CaptainFactWeb.CategoriesView, "categories.json")
+      categories: render_many(video.categories, CaptainFactWeb.CategoryView, "category.json")
     }
   end
 end
