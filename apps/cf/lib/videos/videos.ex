@@ -10,7 +10,6 @@ defmodule CF.Videos do
 
   alias Ecto.Multi
   alias DB.Repo
-  alias DB.Schema.Category
   alias DB.Schema.Video
   alias DB.Schema.Speaker
   alias DB.Schema.VideoSpeaker
