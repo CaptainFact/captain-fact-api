@@ -9,6 +9,7 @@ defmodule CF.Videos do
 
   alias Ecto.Multi
   alias DB.Repo
+  alias DB.Schema.Category
   alias DB.Schema.Video
   alias DB.Schema.Statement
   alias DB.Schema.Speaker
@@ -39,13 +40,9 @@ defmodule CF.Videos do
     |> Video.query_list(filters)
     |> with_speakers.()
     |> with_categories.()
+    |> Repo.all
   end
 
-  def videos_list(filters, true),
-    do: Repo.all(Video.query_list(Video.with_speakers(Video), filters))
-
-  def videos_list(filters, false),
-    do: Repo.all(Video.query_list(Video, filters))
 
   @doc """
   Index videos, returning only their id, provider_id and provider.
@@ -66,6 +63,7 @@ defmodule CF.Videos do
       {provider, id} ->
         Video
         |> Video.with_speakers()
+        |> Video.with_categories()
         |> Repo.get_by(provider: provider, provider_id: id)
 
       nil ->

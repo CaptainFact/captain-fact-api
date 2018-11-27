@@ -77,6 +77,7 @@ defmodule CF.GraphQL.Resolvers.Videos do
       {provider, id} ->
         Video
         |> Video.with_speakers()
+        |> Video.with_categories
         |> Repo.get_by(provider: provider, provider_id: id)
 
       nil ->
