@@ -39,9 +39,8 @@ defmodule CF.Videos do
     |> Video.query_list(filters)
     |> with_speakers.()
     |> with_categories.()
-    |> Repo.all
+    |> Repo.all()
   end
-
 
   @doc """
   Index videos, returning only their id, provider_id and provider.
