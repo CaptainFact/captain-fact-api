@@ -10,6 +10,7 @@ defmodule CF.Videos do
 
   alias Ecto.Multi
   alias DB.Repo
+  alias DB.Schema.Category
   alias DB.Schema.Video
   alias DB.Schema.Speaker
   alias DB.Schema.VideoSpeaker
@@ -40,13 +41,9 @@ defmodule CF.Videos do
     |> Video.query_list(filters)
     |> with_speakers.()
     |> with_categories.()
+    |> Repo.all
   end
 
-  def videos_list(filters, true),
-    do: Repo.all(Video.query_list(Video.with_speakers(Video), filters))
-
-  def videos_list(filters, false),
-    do: Repo.all(Video.query_list(Video, filters))
 
   @doc """
   Get videos added by given user. This will return all videos, included the ones
@@ -69,6 +66,7 @@ defmodule CF.Videos do
       {:youtube, id} ->
         Video
         |> Video.with_speakers()
+        |> Video.with_categories()
         |> Repo.get_by(youtube_id: id)
 
       _ ->

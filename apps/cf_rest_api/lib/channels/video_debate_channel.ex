@@ -25,6 +25,7 @@ defmodule CF.RestApi.VideoDebateChannel do
   def join("video_debate:" <> video_hash_id, _payload, socket) do
     Video
     |> Video.with_speakers()
+    |> Video.with_categories
     |> Repo.get_by(hash_id: video_hash_id)
     |> case do
       nil ->
@@ -34,6 +35,7 @@ defmodule CF.RestApi.VideoDebateChannel do
         rendered_video = View.render_one(video, VideoView, "video.json")
         send(self(), :after_join)
         {:ok, rendered_video, assign(socket, :video_id, video.id)}
+
     end
   end
 

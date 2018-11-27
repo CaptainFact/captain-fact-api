@@ -7,7 +7,7 @@ defmodule DB.Schema.Video do
   import Ecto.{Changeset, Query}
 
   alias DB.Type.VideoHashId
-  alias DB.Schema.{Speaker, Statement, VideoSpeaker}
+  alias DB.Schema.{Category, Speaker, Statement, VideoSpeaker}
 
   schema "videos" do
     field(:title, :string)
