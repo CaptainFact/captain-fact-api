@@ -40,9 +40,8 @@ defmodule CF.Videos do
     |> Video.query_list(filters)
     |> with_speakers.()
     |> with_categories.()
-    |> Repo.all
+    |> Repo.all()
   end
-
 
   @doc """
   Get videos added by given user. This will return all videos, included the ones

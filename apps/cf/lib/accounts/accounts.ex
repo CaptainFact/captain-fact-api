@@ -94,7 +94,6 @@ defmodule CF.Accounts do
       confirm_email!(user)
     end
 
-
     if @fetch_default_picture() && user.picture_url == nil do
       Task.start(fn ->
         pic_url = DB.Type.UserPicture.default_url(:thumb, user)

@@ -16,7 +16,7 @@ defmodule DB.Schema.CategoriesVideos do
   @doc """
   Builds a changeset based on the `struct` and `params`
   """
-  @spec changeset(%__MODULE__{} | Ecto.Changeset.t)::Ecto.Changeset.t
+  @spec changeset(%__MODULE__{} | Ecto.Changeset.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ []) do
     struct
     |> cast(params, @required_fields)
