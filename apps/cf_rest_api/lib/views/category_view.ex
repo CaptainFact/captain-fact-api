@@ -1,5 +1,5 @@
-defmodule CaptainFactWeb.CategoryView do
-  use CaptainFactWeb, :view
+defmodule CF.RestApi.CategoryView do
+  use CF.RestApi, :view
 
   def render("category.json", %{category: category}) do
     %{
