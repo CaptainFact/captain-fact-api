@@ -21,7 +21,7 @@ defmodule CF.RestApi.VideoView do
       speakers: render_many(video.speakers, CF.RestApi.SpeakerView, "speaker.json"),
       language: video.language,
       is_partner: video.is_partner,
-      categories: render_many(video.categories, CaptainFactWeb.CategoriesView, "categories.json")
+      categories: render_many(video.categories, CaptainFactWeb.CategoryView, "category.json")
     }
   end
 end

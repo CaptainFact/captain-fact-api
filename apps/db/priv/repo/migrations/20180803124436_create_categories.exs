@@ -4,7 +4,7 @@ defmodule DB.Repo.Migrations.CreateCategories do
   def change do
     create table "categories" do
       # 150 is max size for Youtube playlist title maybe too much ?
-      add(:title, :string, null: false, size: 150)
+      add(:slug, :string, null: false, size: 150)
 
       timestamps()
     end
