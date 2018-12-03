@@ -118,6 +118,7 @@ defmodule DB.Factory do
       target_user: build(:user),
       type: :create,
       entity: :comment,
+      comment: build(:comment),
       changes: nil
     }
   end
