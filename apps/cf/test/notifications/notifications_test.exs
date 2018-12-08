@@ -15,7 +15,7 @@ defmodule CF.NotificationsTest do
     end
 
     test "sorts notifications", %{user: user, sorted_notifs_ids: sorted_notifs_ids} do
-      returned_ids = Enum.map(Notifications.all(user, 0, 5), & &1.id)
+      returned_ids = Enum.map(Notifications.all(user, 1, 5), & &1.id)
       assert returned_ids == sorted_notifs_ids
     end
   end

@@ -1,4 +1,4 @@
-defmodule CF.GraphQL.AuthPipeline do
+defmodule CF.Graphql.AuthPipeline do
   @moduledoc """
   Adds the token authentification from CF app to graphql API.
   """

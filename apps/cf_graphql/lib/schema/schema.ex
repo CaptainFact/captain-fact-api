@@ -1,9 +1,9 @@
-defmodule CF.GraphQL.Schema do
+defmodule CF.Graphql.Schema do
   use Absinthe.Schema
-  alias CF.GraphQL.Resolvers
-  alias CF.GraphQL.Schema.Middleware
+  alias CF.Graphql.Resolvers
+  alias CF.Graphql.Schema.Middleware
 
-  import_types(CF.GraphQL.Schema.Types)
+  import_types(CF.Graphql.Schema.Types)
 
   # Actual API
 

@@ -1,4 +1,4 @@
-defmodule CF.GraphQL.Mixfile do
+defmodule CF.Graphql.Mixfile do
   use Mix.Project
 
   def project do
@@ -22,7 +22,7 @@ defmodule CF.GraphQL.Mixfile do
 
   def application do
     [
-      mod: {CF.GraphQL.Application, []},
+      mod: {CF.Graphql.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end

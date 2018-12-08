@@ -12,16 +12,14 @@ defmodule CF.Notifications do
 
   @doc """
   Get all notifications for user, last inserted first.
-  Paginated with `offset` + `limit`.
+  Paginated with `page` + `limit`.
   """
-  @spec all(User.t()) :: [Notification.t()]
-  def all(%User{id: user_id}, offset \\ 0, limit \\ 10) do
+  @spec all(User.t()) :: Scrivener.Page.t()
+  def all(%User{id: user_id}, page \\ 1, page_size \\ 10) do
     Notification
     |> where([n], n.user_id == ^user_id)
     |> order_by(desc: :inserted_at)
-    |> offset(^offset)
-    |> limit(^limit)
-    |> Repo.all()
+    |> Repo.paginate(page: page, page_size: page_size)
   end
 
   @doc """

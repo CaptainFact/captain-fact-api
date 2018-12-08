@@ -4,11 +4,23 @@ defmodule CF.Notifications.Subscriptions do
   the process.
   """
 
+  import Ecto.Query
+
   alias DB.Schema.Subscription
   alias DB.Schema.User
   alias DB.Schema.Video
   alias DB.Schema.Statement
   alias DB.Schema.Comment
+
+  @doc """
+  Get all subscriptions for user
+  """
+  @spec all(User.t()) :: [Subscription.t()]
+  def all(%User{id: user_id}) do
+    Subscription
+    |> where([s], s.user_id == ^user_id)
+    |> DB.Repo.all()
+  end
 
   @doc """
   Subscribe to given entity changes.

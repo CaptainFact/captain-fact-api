@@ -1,4 +1,4 @@
-defmodule CF.GraphQL.Schema.Types.UserAction do
+defmodule CF.Graphql.Schema.Types.UserAction do
   @moduledoc """
   Representation of a `DB.Schema.UserAction` for Absinthe
   """

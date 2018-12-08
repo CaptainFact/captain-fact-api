@@ -9,7 +9,7 @@ defmodule CF.GraphQLWeb.Router do
 
   pipeline :api_auth do
     plug(:accepts, ["json"])
-    plug(CF.GraphQL.AuthPipeline)
+    plug(CF.Graphql.AuthPipeline)
   end
 
   pipeline :basic_auth do
@@ -25,7 +25,7 @@ defmodule CF.GraphQLWeb.Router do
       forward(
         "/",
         Absinthe.Plug.GraphiQL,
-        schema: CF.GraphQL.Schema,
+        schema: CF.Graphql.Schema,
         analyze_complexity: true,
         # (6 joins = 300) + 20 fields
         max_complexity: 320
@@ -35,7 +35,7 @@ defmodule CF.GraphQLWeb.Router do
     forward(
       "/",
       Absinthe.Plug,
-      schema: CF.GraphQL.Schema,
+      schema: CF.Graphql.Schema,
       analyze_complexity: true,
       # (6 joins = 300) + 20 fields
       max_complexity: 320

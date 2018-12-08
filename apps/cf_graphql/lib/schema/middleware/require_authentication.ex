@@ -1,4 +1,4 @@
-defmodule CF.GraphQL.Schema.Middleware.RequireAuthentication do
+defmodule CF.Graphql.Schema.Middleware.RequireAuthentication do
   @moduledoc """
   A middleware to force authentication.
   """

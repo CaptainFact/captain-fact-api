@@ -1,4 +1,4 @@
-defmodule CF.GraphQL.Resolvers.Users do
+defmodule CF.Graphql.Resolvers.Users do
   @moduledoc """
   Resolver for `DB.Schema.User`
   """
@@ -14,6 +14,10 @@ defmodule CF.GraphQL.Resolvers.Users do
   @doc """
   Resolve a user by its id or username
   """
+  def get(_, %{id: id}, %{context: %{user: user = %{id: id}}}) do
+    {:ok, user}
+  end
+
   def get(_, %{id: id}, _) do
     User
     |> Repo.get(id)
@@ -65,6 +69,28 @@ defmodule CF.GraphQL.Resolvers.Users do
     |> DB.Query.order_by_last_inserted_desc()
     |> Repo.paginate(page: offset, page_size: limit)
     |> Result.ok()
+  end
+
+  @doc """
+  User notifications, only if authenticated
+  """
+  def notifications(user, %{page: page, page_size: page_size}, %{context: %{user: loggedin_user}}) do
+    if user.id !== loggedin_user.id do
+      {:error, "unauthorized"}
+    else
+      {:ok, CF.Notifications.all(user, page, page_size)}
+    end
+  end
+
+  @doc """
+  User notifications, only if authenticated
+  """
+  def subscriptions(user, _, %{context: %{user: loggedin_user}}) do
+    if user.id !== loggedin_user.id do
+      {:error, "unauthorized"}
+    else
+      {:ok, CF.Notifications.Subscriptions.all(user)}
+    end
   end
 
   @doc """

@@ -1,4 +1,4 @@
-defmodule CF.GraphQL.Schema.Types.Video do
+defmodule CF.Graphql.Schema.Types.Video do
   @moduledoc """
   Representation of a `DB.Schema.Video` for Absinthe
   """
@@ -6,9 +6,9 @@ defmodule CF.GraphQL.Schema.Types.Video do
   use Absinthe.Schema.Notation
   use Absinthe.Ecto, repo: DB.Repo
   import CF.Graphql.Schema.Utils
-  alias CF.GraphQL.Resolvers
+  alias CF.Graphql.Resolvers
 
-  import_types(CF.GraphQL.Schema.Types.{Paginated, Statement, Speaker})
+  import_types(CF.Graphql.Schema.Types.{Paginated, Statement, Speaker})
 
   @desc "Identifies a video. Only Youtube is supported at the moment"
   object :video do
