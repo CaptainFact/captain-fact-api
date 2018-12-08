@@ -1,6 +1,7 @@
 defmodule CF.GraphQL.Schema do
   use Absinthe.Schema
   alias CF.GraphQL.Resolvers
+  alias CF.GraphQL.Schema.Middleware
 
   import_types(CF.GraphQL.Schema.Types)
 
@@ -47,12 +48,18 @@ defmodule CF.GraphQL.Schema do
       resolve(&Resolvers.Users.get/3)
     end
 
+    @desc "Get logged in user"
+    field :loggedin_user, :user do
+      middleware(Middleware.RequireAuthentication)
+      resolve(&Resolvers.Users.get_logged_in/3)
+    end
+
     @desc "Get app info"
     field :app_info, :app_info do
       resolve(&Resolvers.AppInfo.info/3)
     end
 
-    @desc "get all_statistics"
+    @desc "Get all_statistics"
     field :all_statistics, :statistics do
       resolve(&Resolvers.Statistics.default/3)
     end

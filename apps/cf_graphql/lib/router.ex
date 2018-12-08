@@ -7,15 +7,20 @@ defmodule CF.GraphQLWeb.Router do
     plug(:accepts, ["json"])
   end
 
-  pipeline :authenticated do
+  pipeline :api_auth do
+    plug(:accepts, ["json"])
+    plug(CF.GraphQL.AuthPipeline)
+  end
+
+  pipeline :basic_auth do
     plug(BasicAuth, use_config: {:cf_graphql, :basic_auth})
   end
 
   scope "/" do
-    pipe_through(:api)
+    pipe_through(:api_auth)
 
     scope @graphiql_route do
-      if Mix.env() == :prod, do: pipe_through(:authenticated)
+      if Mix.env() == :prod, do: pipe_through(:basic_auth)
 
       forward(
         "/",
@@ -23,8 +28,7 @@ defmodule CF.GraphQLWeb.Router do
         schema: CF.GraphQL.Schema,
         analyze_complexity: true,
         # (6 joins = 300) + 20 fields
-        max_complexity: 320,
-        context: %{pubsub: CF.GraphQLWeb.Endpoint}
+        max_complexity: 320
       )
     end
 
