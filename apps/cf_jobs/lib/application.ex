@@ -6,16 +6,21 @@ defmodule CF.Jobs.Application do
   def start(_type, _args) do
     import Supervisor.Spec
 
+    env = Application.get_env(:cf, :env)
     # Define workers and child supervisors to be supervised
     children = [
-      # Scheduler for all CRON jobs
-      worker(CF.Jobs.Scheduler, []),
       # Jobs
       worker(CF.Jobs.Reputation, []),
       worker(CF.Jobs.Flags, []),
       worker(CF.Jobs.Moderation, []),
       worker(CF.Jobs.CreateNotifications, [])
     ]
+
+    # Do not start scheduler in tests
+    children =
+      if env == :test,
+        do: children,
+        else: children ++ [worker(CF.Jobs.Scheduler, [])]
 
     opts = [strategy: :one_for_one, name: CF.Jobs.Supervisor]
     Supervisor.start_link(children, opts)

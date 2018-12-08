@@ -1,12 +1,14 @@
 defmodule CF.Jobs.CreateNotificationsTest do
-  use CF.Jobs.DataCase
+  use CF.Jobs.DataCase, async: false
   alias DB.Schema.UserAction
   alias DB.Schema.Notification
+  alias DB.Schema.UsersActionsReport
   alias CF.Jobs.CreateNotifications
 
   test "creates notifications" do
     DB.Repo.delete_all(Notification)
     DB.Repo.delete_all(UserAction)
+    DB.Repo.delete_all(UsersActionsReport)
 
     subscription = insert(:subscription)
     statement = insert(:statement, video: subscription.video)
@@ -20,7 +22,7 @@ defmodule CF.Jobs.CreateNotificationsTest do
         statement: statement
       )
 
-    CreateNotifications.handle_call(:update, nil, nil)
+    CreateNotifications.update(true)
 
     [notification] = DB.Repo.all(Notification)
     assert notification.user_id == subscription.user_id

@@ -53,34 +53,46 @@ defmodule CF.Jobs.CreateNotifications do
 
   # 2 minutes
   @timeout 120_000
-  def update() do
-    GenServer.call(__MODULE__, :update, @timeout)
+
+  @doc """
+  Create notifications for new actions. At first run, it ignores all the
+  notifications to avoir spamming old users when deploying the feature. You
+  can however force the update by passing `true` for `force` param (useful for testing).
+  """
+  @spec update(boolean()) :: any()
+  def update(force \\ false) do
+    GenServer.call(__MODULE__, {:update, force}, @timeout)
   end
 
   # --- Server callbacks ---
 
-  def handle_call(:update, _from, _state) do
-    case ReportManager.get_last_action_id(@analyser_id) do
-      -1 ->
+  def handle_call({:update, force}, _from, _state) do
+    last_action_id = ReportManager.get_last_action_id(@analyser_id)
+
+    cond do
+      last_action_id == -1 ->
         # Already running, ignore
         nil
 
-      0 ->
-        # First run, don't generate notifications for old actions
+      last_action_id == 0 and !force ->
+        # First run, don't generate notifications for old actions (except if forced)
         actions = DB.Repo.all(UserAction)
 
-        ReportManager.create_report!(
-          @analyser_id,
-          :success,
-          actions,
-          %{nb_actions: 0, run_duration: 0}
-        )
+        unless Enum.empty?(actions) do
+          ReportManager.create_report!(
+            @analyser_id,
+            :success,
+            actions,
+            %{nb_actions: 0, run_duration: 0}
+          )
+        end
 
-      last_action_id ->
+      true ->
         UserAction
         |> where([a], a.id > ^last_action_id)
         |> Actions.matching_types(@watched_action_types)
         |> Actions.matching_entities(@watched_entities)
+        |> order_by(:id)
         |> Repo.all(log: false)
         |> start_analysis()
     end
@@ -112,7 +124,18 @@ defmodule CF.Jobs.CreateNotifications do
 
   @spec insert_notifications([map()]) :: {:ok, integer()}
   defp insert_notifications(notifications_params) do
-    {count, _} = DB.Repo.insert_all(Notification, notifications_params)
+    now = DateTime.utc_now()
+
+    notifications =
+      Enum.map(
+        notifications_params,
+        &Map.merge(&1, %{
+          inserted_at: now,
+          updated_at: now
+        })
+      )
+
+    {count, _} = DB.Repo.insert_all(Notification, notifications)
     {:ok, count}
   end
 end
