@@ -16,27 +16,26 @@
 <hr/>
 <br/>
 
-## Install & Run
+# Install & Run
 
-### Start DB
+## Prerequisites
+
+You need to install Elixir. We recommand using [asdf](https://github.com/asdf-vm/asdf#setup).
+Check their documentation on how to install it, then run `asdf install` from
+root `captain-fact-api` folder.
+
+## Start DB
 
 Create / launch a postgres instance on your local machine. If you have
 docker installed, you can use the pre-seed postgres docker image:
 
 `docker run -d --name cf_dev_db -p 5432:5432 captainfact/dev-db:latest`
 
-### Start API services
+## Start API
 
-- Without Docker (recommended if you want to make changes in the API)
-
-  - `mix deps.get`
-  - `mix ecto.migrate`
-  - `iex -S mix`
-
-- With Docker
-  - Download project's dependencies with `./dev/get_dependencies.sh`
-  - Migrate your database with `./dev/db_migrate.sh`
-  - Start server with `./dev/start_server.sh`
+- `mix deps.get` --> Get dependencies
+- `mix ecto.migrate` --> Migrate DB
+- `iex -S mix` --> Start project
 
 Following services will be started:
 
@@ -46,16 +45,16 @@ Following services will be started:
 - [localhost:4003](https://localhost:4003) - GraphQL API (https)
 - [localhost:4004](http://localhost:4004) - Atom feed
 
-You can run tests with `./dev/test.sh`. You can filter which tests to run by
-running something like `./dev/test.sh test/your_test_subpath`.
-Check `./dev/test.sh` script comments for details.
+## Other useful commands
 
-## Project architecture
+- `mix test` --> Run tests
+- `mix test.watch` --> Run tests watcher
+- `mix format` --> Format code
+- `mix ecto.gen.migration [migration_name]` --> Generate migration
 
-Elixir offers very nice ways to separate concerns and work with microservices.
+# Project architecture
+
 This application is organized as an [umbrella project](https://elixir-lang.org/getting-started/mix-otp/dependencies-and-umbrella-apps.html) which allows us to divide CaptainFact API into small apps.
-
-### File structure
 
 ```
 .
@@ -82,21 +81,9 @@ This application is organized as an [umbrella project](https://elixir-lang.org/g
 │   └── config.exs => Releases configuration.
 ```
 
-## Styling
-
-Code should follow [Elixy Style Guide](https://github.com/christopheradams/elixir_style_guide)
-and [Credo style guide](https://github.com/rrrene/elixir-style-guide)
-as much as possible.
-
-Avoid lines longer than 80 characters, **never** go beyond 110 characters.
-
-## Linked projects
+# Linked projects
 
 - [Community discussions and documentation](https://github.com/CaptainFact/captain-fact/)
 - [Frontend](https://github.com/CaptainFact/captain-fact-frontend)
 - [Extension](https://github.com/CaptainFact/captain-fact-extension)
 - [Overlay injector](https://github.com/CaptainFact/captain-fact-overlay-injector)
-
-# Feature requests
-
-[![Feature Requests](http://feathub.com/CaptainFact/captain-fact?format=svg)](http://feathub.com/CaptainFact/captain-fact)
