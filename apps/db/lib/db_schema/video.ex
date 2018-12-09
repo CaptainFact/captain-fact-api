@@ -22,7 +22,7 @@ defmodule DB.Schema.Video do
     many_to_many(:speakers, Speaker, join_through: VideoSpeaker, on_delete: :delete_all)
     has_many(:statements, Statement, on_delete: :delete_all)
 
-    timestamps()
+    timestamps(type: :utc_datetime)
   end
 
   # Define valid providers
