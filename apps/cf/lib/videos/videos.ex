@@ -17,6 +17,7 @@ defmodule CF.Videos do
 
   alias CF.Actions.ActionCreator
   alias CF.Accounts.UserPermissions
+  alias CF.Videos.MetadataFetcher
 
   @captions_fetcher Application.get_env(:cf, :captions_fetcher)
 
@@ -35,27 +36,16 @@ defmodule CF.Videos do
     do: Repo.all(Video.query_list(Video, filters))
 
   @doc """
-  Index videos, returning only their id, provider_id and provider.
-  Accepted filters are the same than for `videos_list/1`
-  """
-  def videos_index(from_id \\ 0) do
-    Video
-    |> select([v], %{id: v.id, provider: v.provider, provider_id: v.provider_id})
-    |> where([v], v.id > ^from_id)
-    |> Repo.all()
-  end
-
-  @doc """
   Return the corresponding video if it has already been added, `nil` otherwise
   """
   def get_video_by_url(url) do
     case Video.parse_url(url) do
-      {provider, id} ->
+      {:youtube, id} ->
         Video
         |> Video.with_speakers()
-        |> Repo.get_by(provider: provider, provider_id: id)
+        |> Repo.get_by(youtube_id: id)
 
-      nil ->
+      _ ->
         nil
     end
   end
@@ -74,7 +64,8 @@ defmodule CF.Videos do
   def create!(user, video_url, is_partner \\ nil) do
     UserPermissions.check!(user, :add, :video)
 
-    with {:ok, metadata} <- fetch_video_metadata(video_url) do
+    with metadata_fetcher when not is_nil(metadata_fetcher) <- get_metadata_fetcher(video_url),
+         {:ok, metadata} <- metadata_fetcher.(video_url) do
       # Videos posted by publishers are recorded as partner unless explicitely
       # specified otherwise (false)
       base_video = %Video{is_partner: user.is_publisher && is_partner != false}
@@ -163,15 +154,30 @@ defmodule CF.Videos do
 
   Usage:
   iex> download_captions(video)
-  iex> download_captions(video)
   """
   def download_captions(video = %Video{}) do
-    with {:ok, captions} <- @captions_fetcher.fetch(video.provider_id, video.language) do
+    with {:ok, captions} <- @captions_fetcher.fetch(video) do
       captions
       |> VideoCaption.changeset(%{video_id: video.id})
       |> Repo.insert()
 
       {:ok, captions}
+    end
+  end
+
+  defp get_metadata_fetcher(video_url) do
+    cond do
+      Application.get_env(:cf, :use_test_video_metadata_fetcher) ->
+        &MetadataFetcher.Test.fetch_video_metadata/1
+
+      # We only support YouTube for now
+      # TODO Use a Regex here
+      video_url ->
+        &MetadataFetcher.Youtube.fetch_video_metadata/1
+
+      # Use a default fetcher that retrieves info from OpenGraph tags
+      true ->
+        &MetadataFetcher.Opengraph.fetch_video_metadata/1
     end
   end
 end

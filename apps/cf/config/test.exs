@@ -23,9 +23,9 @@ config :cf, CF.Mailer, adapter: Bamboo.TestAdapter
 # Reduce the number of round for encryption during tests
 config :bcrypt_elixir, :log_rounds, 4
 
-# Captions mock for testing
-config :cf,
-  captions_fetcher: CF.Videos.CaptionsFetcherTest
+# Behaviours mock for testing
+config :cf, captions_fetcher: CF.Videos.CaptionsFetcherTest
+config :cf, use_test_video_metadata_fetcher: true
 
 # Configure Rollbar (errors reporting)
 config :rollbax,

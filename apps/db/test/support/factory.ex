@@ -50,8 +50,7 @@ defmodule DB.Factory do
     %Video{
       url: "https://www.youtube.com/watch?v=#{youtube_id}",
       title: Faker.Lorem.sentence(3..8),
-      provider: "youtube",
-      provider_id: youtube_id,
+      youtube_id: youtube_id,
       hash_id: nil,
       language: Enum.random(["en", "fr", nil])
     }

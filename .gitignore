@@ -17,6 +17,7 @@ until_fail.sh
 # Secrets
 apps/*/priv/secrets/*
 !apps/*/priv/secrets/.keep
+**/*.secret.exs
 
 # Elixir LS
 .elixir_ls
