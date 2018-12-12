@@ -9,6 +9,9 @@ defmodule DB.Schema.Category do
 
   schema "categories" do
     field(:title, :string)
+    field(:depth_degree, :integer)
+
+    belongs_to(:parent, __MODULE__)
 
     many_to_many(:videos, Video, join_through: "category_videos", on_delete: :delete_all)
 
