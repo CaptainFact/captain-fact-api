@@ -28,7 +28,6 @@ defmodule CF.AtomFeed.Flags do
         order_by: [desc: flag.inserted_at],
         left_join: action in assoc(flag, :action),
         left_join: comment in assoc(action, :comment),
-        left_join: statement in assoc(comment, :statement),
         left_join: user in assoc(comment, :user),
         left_join: source in assoc(comment, :source),
         preload: [action: [comment: [:user, :statement, :source]]],
@@ -57,7 +56,7 @@ defmodule CF.AtomFeed.Flags do
     comment = flag.action.comment
     user_appelation = User.user_appelation(comment.user)
     title = entry_title(flag, user_appelation)
-    link = comment_url(comment)
+    link = comment_url(flag.action)
     insert_datetime = DateTime.from_naive!(flag.inserted_at, "Etc/UTC")
 
     link
@@ -84,8 +83,8 @@ defmodule CF.AtomFeed.Flags do
     "New Flag for #{user_appelation} comment ##{flag.action.comment.id}"
   end
 
-  defp comment_url(comment) do
-    video_hash_id = DB.Type.VideoHashId.encode(comment.statement.video_id)
-    FrontendRouter.comment_url(video_hash_id, comment)
+  defp comment_url(action) do
+    video_hash_id = DB.Type.VideoHashId.encode(action.video_id)
+    FrontendRouter.comment_url(video_hash_id, action.comment)
   end
 end
