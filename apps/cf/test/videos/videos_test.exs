@@ -5,7 +5,7 @@ defmodule CF.VideosTest do
   alias CF.Videos
   alias CF.Accounts.UserPermissions.PermissionsError
 
-  defp test_url, do: "__TEST__/#{DB.Utils.TokenGenerator.generate(8)}"
+  defp test_url, do: "https://www.youtube.com/watch?v=#{DB.Utils.TokenGenerator.generate(11)}"
 
   describe "Add video" do
     test "without enough reputation" do
@@ -59,7 +59,13 @@ defmodule CF.VideosTest do
 
   describe "Fetch captions" do
     test "fetch captions" do
-      video = DB.Factory.insert(:video, provider: "__TEST__", language: "en")
+      video =
+        DB.Factory.insert(
+          :video,
+          youtube_id: DB.Utils.TokenGenerator.generate(11),
+          language: "en"
+        )
+
       {:ok, captions} = Videos.download_captions(video)
 
       assert captions.content == "__TEST-CONTENT__"

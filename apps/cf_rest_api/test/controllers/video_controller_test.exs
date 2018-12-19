@@ -18,7 +18,7 @@ defmodule CF.RestApi.VideoControllerTest do
       assert Enum.count(videos) == Enum.count(response)
 
       assert random_video.title ==
-               Enum.find(response, &(&1["provider_id"] == random_video.provider_id))["title"]
+               Enum.find(response, &(&1["youtube_id"] == random_video.youtube_id))["title"]
     end
 
     test "filter on language", %{conn: conn} do
@@ -67,6 +67,6 @@ defmodule CF.RestApi.VideoControllerTest do
       |> post("/videos", %{url: "https://google.fr"})
       |> json_response(422)
 
-    assert response == %{"error" => %{"url" => "Invalid URL"}}
+    assert response == %{"errors" => %{"url" => ["invalid_url"]}}
   end
 end

@@ -100,7 +100,7 @@ defmodule CF.Actions.ActionCreator do
       user_id,
       :video,
       :update,
-      video_id: video.video_id,
+      video_id: video.id,
       changes: changes
     )
   end

@@ -21,9 +21,15 @@ defmodule CF.GraphQL.Schema.Types.Video do
     @desc "Video URL"
     field(:url, non_null(:string), do: resolve(&Resolvers.Videos.url/3))
     @desc "Video provider (youtube, vimeo...etc)"
-    field(:provider, non_null(:string))
+    field(:provider, non_null(:string), deprecate: "Use `url` or `youtube_id`") do
+      resolve(fn _, _, _ -> {:ok, "youtube"} end)
+    end
+
     @desc "Unique ID used to identify video with provider"
-    field(:provider_id, non_null(:string))
+    field(:provider_id, non_null(:string), deprecate: "Use `url` or `youtube_id`") do
+      resolve(fn v, _, _ -> {:ok, v.youtube_id} end)
+    end
+
     @desc "Language of the video represented as a two letters locale"
     field(:language, :string)
     @desc "Video insert datetime"
@@ -41,6 +47,14 @@ defmodule CF.GraphQL.Schema.Types.Video do
       resolve(&Resolvers.Videos.statements/3)
       complexity(join_complexity())
     end
+
+    # Video providers
+
+    @desc "Youtube ID for this video"
+    field(:youtube_id, :string)
+
+    @desc "Offset for all statements on this video when watched with YouTube player"
+    field(:youtube_offset, non_null(:integer))
   end
 
   @desc "A list a paginated videos"
