@@ -154,6 +154,18 @@ defmodule DB.Schema.Video do
   end
 
   @doc """
+  Builds a changeset that allows shifting statements for all providers
+
+  ## Examples
+
+      iex> DB.Schema.Video.changeset_shift_offsets(%DB.Schema.Video{}, %{youtube_offset: 42})
+      #Ecto.Changeset<action: nil, changes: %{youtube_offset: 42}, errors: [], data: #DB.Schema.Video<>, valid?: true>
+  """
+  def changeset_shift_offsets(struct, params \\ %{}) do
+    cast(struct, params, [:youtube_offset])
+  end
+
+  @doc """
   Given a changeset, fill the `{provider}_id` fields or add an error if URL is not valid.
   """
   def parse_video_url(changeset = %Ecto.Changeset{}) do

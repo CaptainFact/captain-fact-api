@@ -6,11 +6,11 @@ defmodule CF.Videos do
   import Ecto.Query, warn: false
   import CF.Videos.MetadataFetcher
   import CF.Videos.CaptionsFetcher
+  import CF.Actions.ActionCreator, only: [action_update: 2]
 
   alias Ecto.Multi
   alias DB.Repo
   alias DB.Schema.Video
-  alias DB.Schema.Statement
   alias DB.Schema.Speaker
   alias DB.Schema.VideoSpeaker
   alias DB.Schema.VideoCaption
@@ -97,33 +97,20 @@ defmodule CF.Videos do
   Returns {:ok, statements} if success, {:error, reason} otherwise.
   Returned statements contains only an id and a key
   """
-  def shift_statements(user, video_id, offset) when is_integer(offset) do
+  def shift_statements(user, video_id, offsets) do
     UserPermissions.check!(user, :update, :video)
-    statements_query = where(Statement, [s], s.video_id == ^video_id)
+    video = Repo.get!(Video, video_id)
+    changeset = Video.changeset_shift_offsets(video, offsets)
 
     Multi.new()
-    |> Multi.update_all(
-      :statements_update,
-      statements_query,
-      [inc: [time: offset]],
-      returning: [:id, :time]
-    )
-    |> Multi.insert(
-      :action,
-      ActionCreator.action(
-        user.id,
-        :video,
-        :update,
-        video_id: video_id,
-        changes: %{"statements_time" => offset}
-      )
-    )
+    |> Multi.update(:video, changeset)
+    |> Multi.insert(:action_update, action_update(user.id, changeset))
     |> Repo.transaction()
     |> case do
-      {:ok, %{statements_update: {_, statements}}} ->
-        {:ok, Enum.map(statements, &%{id: &1.id, time: &1.time})}
+      {:ok, %{video: video}} ->
+        {:ok, video}
 
-      {:error, _, reason, _} ->
+      {:error, _operation, reason, _changes} ->
         {:error, reason}
     end
   end

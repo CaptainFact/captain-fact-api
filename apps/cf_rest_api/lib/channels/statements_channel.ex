@@ -10,7 +10,6 @@ defmodule CF.RestApi.StatementsChannel do
   alias DB.Schema.Statement
 
   alias CF.Statements
-  alias CF.Videos
   alias CF.Accounts.UserPermissions
 
   alias CF.RestApi.{StatementView, ErrorView}
@@ -30,26 +29,6 @@ defmodule CF.RestApi.StatementsChannel do
 
   def handle_in(command, params, socket) do
     handle_in_authenticated(command, params, socket, &handle_in_authenticated!/3)
-  end
-
-  @doc """
-  Shift all video's statements
-  """
-  def handle_in_authenticated!("shift_all", offset, socket) do
-    user = Repo.get(DB.Schema.User, socket.assigns.user_id)
-
-    case Videos.shift_statements(
-           user,
-           socket.assigns.video_id,
-           String.to_integer(offset)
-         ) do
-      {:ok, statements} ->
-        broadcast!(socket, "statements_updated", %{statements: statements})
-        {:reply, :ok, socket}
-
-      {:error, _} ->
-        {:reply, :error, socket}
-    end
   end
 
   @doc """
