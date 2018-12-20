@@ -162,6 +162,13 @@ defmodule CF.AccountsTest do
       Accounts.create_account(user_params, invit.token, provider_params: provider_params)
     end
 
+    test "truncate name if too long" do
+      user_params = Map.put(build_user_params(), :name, "abcdefghijklmnopqrstuvwxyz")
+      provider_params = %{fb_user_id: "4242424242"}
+      {:ok, user} = Accounts.create_account(user_params, nil, provider_params: provider_params)
+      assert user.name == "abcdefghijklmnopqrst"
+    end
+
     test "delete invitation request after creating the user" do
       Repo.delete_all(DB.Schema.InvitationRequest)
       invit = insert(:invitation_request)
