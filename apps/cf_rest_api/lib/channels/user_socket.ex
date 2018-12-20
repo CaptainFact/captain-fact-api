@@ -16,6 +16,7 @@ defmodule CF.RestApi.UserSocket do
 
   ## Transports
   transport(:websocket, Phoenix.Transports.WebSocket)
+  transport(:longpoll, Phoenix.Transports.LongPoll)
 
   # Connect with token
   def connect(%{"token" => token}, socket) do
