@@ -40,30 +40,28 @@ defmodule CF.AtomFeed.Videos do
 
   defp render_entry(video) do
     video_link = FrontendRouter.video_url(video.hash_id)
-    insert_datetime = video_datetime(video)
 
     video_link
-    |> Entry.new(insert_datetime, video.title)
+    |> Entry.new(video.inserted_at, video.title)
     |> Entry.link(video_link)
-    |> Entry.published(insert_datetime)
+    |> Entry.published(video.inserted_at)
     |> Entry.content(entry_content(video))
     |> Entry.build()
   end
 
+  defp entry_content(%{speakers: []}) do
+    ""
+  end
+
   defp entry_content(video) do
-    """
-    Speakers: #{Enum.map_join(video.speakers, ", ", &render_speaker/1)}
-    """
+    Enum.map_join(video.speakers, ", ", &render_speaker/1)
   end
 
   defp render_speaker(speaker = %{full_name: name}),
     do: "[#{name}](#{FrontendRouter.speaker_url(speaker)})"
 
-  defp video_datetime(%{inserted_at: naive_datetime}),
-    do: DateTime.from_naive!(naive_datetime, "Etc/UTC")
-
   defp last_update([video | _]),
-    do: video_datetime(video)
+    do: video.inserted_at
 
   defp last_update(_),
     do: DateTime.utc_now()

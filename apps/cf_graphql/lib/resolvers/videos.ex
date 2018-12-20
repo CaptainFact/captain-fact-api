@@ -15,21 +15,21 @@ defmodule CF.GraphQL.Resolvers.Videos do
   # Queries
 
   def get(_root, %{id: id}, _info) do
-    case get_video_by_id(id) do
+    case CF.Videos.get_video_by_id(id) do
       nil -> {:error, "Video #{id} doesn't exist"}
       video -> {:ok, video}
     end
   end
 
   def get(_root, %{hash_id: id}, _info) do
-    case get_video_by_id(id) do
+    case CF.Videos.get_video_by_id(id) do
       nil -> {:error, "Video #{id} doesn't exist"}
       video -> {:ok, video}
     end
   end
 
   def get(_root, %{url: url}, _info) do
-    case get_video_by_url(url) do
+    case CF.Videos.get_video_by_url(url) do
       nil -> {:error, "Video with url #{url} doesn't exist"}
       video -> {:ok, video}
     end
@@ -69,20 +69,4 @@ defmodule CF.GraphQL.Resolvers.Videos do
     |> Repo.all()
     |> Enum.group_by(& &1.video_id)
   end
-
-  # ---- Private ----
-
-  defp get_video_by_url(url) do
-    case Video.parse_url(url) do
-      {provider, id} ->
-        Video
-        |> Video.with_speakers()
-        |> Repo.get_by(provider: provider, provider_id: id)
-
-      nil ->
-        nil
-    end
-  end
-
-  defp get_video_by_id(id), do: Repo.get(Video, id)
 end

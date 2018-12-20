@@ -6,7 +6,7 @@ defmodule CF.Videos.CaptionsFetcherTest do
   @behaviour CF.Videos.CaptionsFetcher
 
   @impl true
-  def fetch(_provider_id, _locale) do
+  def fetch(_video) do
     captions = %DB.Schema.VideoCaption{
       content: "__TEST-CONTENT__",
       format: "xml"

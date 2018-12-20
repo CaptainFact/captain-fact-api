@@ -6,7 +6,7 @@ defmodule CF.Videos.CaptionsFetcherYoutube do
   @behaviour CF.Videos.CaptionsFetcher
 
   @impl true
-  def fetch(youtube_id, locale) do
+  def fetch(%{youtube_id: youtube_id, locale: locale}) do
     with {:ok, content} <- fetch_captions_content(youtube_id, locale) do
       captions = %DB.Schema.VideoCaption{
         content: content,

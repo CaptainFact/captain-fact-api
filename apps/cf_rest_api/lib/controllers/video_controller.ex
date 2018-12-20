@@ -5,6 +5,7 @@ defmodule CF.RestApi.VideoController do
 
   use CF.RestApi, :controller
   import CF.Videos
+  alias CF.RestApi.ChangesetView
 
   action_fallback(CF.RestApi.FallbackController)
 
@@ -24,16 +25,6 @@ defmodule CF.RestApi.VideoController do
     do: render(conn, :index, videos: videos_list())
 
   @doc """
-  List all videos but only return indexes.
-  """
-  @deprecated "Extension/Injector is now using GraphQL API for this"
-  def index_ids(conn, %{"min_id" => min_id}),
-    do: json(conn, videos_index(min_id))
-
-  def index_ids(conn, _),
-    do: json(conn, videos_index())
-
-  @doc """
   Create a new video based on `url`.
   If it already exist, just returns the video.
   """
@@ -44,10 +35,15 @@ defmodule CF.RestApi.VideoController do
         |> Guardian.Plug.current_resource()
         |> create!(url, params["is_partner"])
         |> case do
-          {:error, message} ->
+          {:error, error} when is_binary(error) ->
             conn
             |> put_status(:unprocessable_entity)
-            |> json(%{error: %{url: message}})
+            |> json(%{error: error})
+
+          {:error, changeset = %Ecto.Changeset{}} ->
+            conn
+            |> put_status(:unprocessable_entity)
+            |> json(ChangesetView.render("error.json", %{changeset: changeset}))
 
           {:ok, video} ->
             render(conn, "show.json", video: video)

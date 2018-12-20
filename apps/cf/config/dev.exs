@@ -31,3 +31,6 @@ config :rollbax,
 
 # Mails
 config :cf, CF.Mailer, adapter: Bamboo.LocalAdapter
+
+# Import local secrets if any - use wildcard to ignore errors
+import_config "*dev.secret.exs"

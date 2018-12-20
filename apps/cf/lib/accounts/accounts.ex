@@ -48,8 +48,24 @@ defmodule CF.Accounts do
 
       # Do create user
       user_params
+      |> prepare_user_params_from_third_party()
       |> create_account_from_params(provider_params, allow_empty_username)
       |> after_create(invitation)
+    end
+  end
+
+  # Special formating for third-party provided user params
+  defp prepare_user_params_from_third_party(params) do
+    # Truncate name to avoid crashing when registering with a too-long name
+    cond do
+      Map.has_key?(params, :name) ->
+        Map.update(params, :name, nil, &String.slice(&1, 0..19))
+
+      Map.has_key?(params, "name") ->
+        Map.update(params, "name", nil, &String.slice(&1, 0..19))
+
+      true ->
+        params
     end
   end
 

@@ -18,6 +18,7 @@ defmodule CF.RestApi.VideoDebateChannel do
   alias DB.Schema.Speaker
   alias DB.Schema.VideoSpeaker
 
+  alias CF.Videos
   alias CF.Accounts.UserPermissions
   alias CF.RestApi.{VideoView, SpeakerView, ChangesetView}
 
@@ -56,6 +57,27 @@ defmodule CF.RestApi.VideoDebateChannel do
 
   def handle_in(command, params, socket) do
     handle_in_authenticated(command, params, socket, &handle_in_authenticated!/3)
+  end
+
+  @doc """
+  Shift all video's statements
+  """
+  def handle_in_authenticated!("shift_statements", offsets, socket) do
+    user = Repo.get(DB.Schema.User, socket.assigns.user_id)
+
+    case Videos.shift_statements(user, socket.assigns.video_id, offsets) do
+      {:ok, video} ->
+        rendered_video =
+          video
+          |> DB.Repo.preload(:speakers)
+          |> View.render_one(VideoView, "video.json")
+
+        broadcast!(socket, "video_updated", %{video: rendered_video})
+        {:reply, :ok, socket}
+
+      {:error, _} ->
+        {:reply, :error, socket}
+    end
   end
 
   @doc """
