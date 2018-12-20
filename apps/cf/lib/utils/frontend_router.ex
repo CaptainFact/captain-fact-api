@@ -38,8 +38,8 @@ defmodule CF.Utils.FrontendRouter do
   @doc """
   Comment's URL
   """
-  def comment_url(video_hash_id, %Comment{id: id, statement: statement}),
-    do: statement_url(video_hash_id, statement.id) <> "&c=#{id}"
+  def comment_url(video_hash_id, %Comment{statement: statement}),
+    do: statement_url(video_hash_id, statement.id)
 
   @doc """
   Speaker URL
