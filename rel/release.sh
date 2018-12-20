@@ -15,11 +15,11 @@ fi
 set -e
 
 # ---- Images names ----
-CF_API_REST_IMAGE: captainfact/rest-api:$1
-CF_API_GRAPHQL_IMAGE: captainfact/graphql-api:$1
-CF_API_ATOM_FEED: captainfact/atom-feed:$1
-CF_API_OPENGRAPH_IMAGE: captainfact/opengraph:$1
-CF_API_JOBS_IMAGE: captainfact/jobs:$1
+CF_API_REST_IMAGE=captainfact/rest-api:$1
+CF_API_GRAPHQL_IMAGE=captainfact/graphql-api:$1
+CF_API_ATOM_FEED=captainfact/atom-feed:$1
+CF_API_OPENGRAPH_IMAGE=captainfact/opengraph:$1
+CF_API_JOBS_IMAGE=captainfact/jobs:$1
 
 # ---- Build ----
 echo "[RELEASE] Building Apps 🔨"
