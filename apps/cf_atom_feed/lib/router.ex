@@ -42,4 +42,8 @@ defmodule CF.AtomFeed.Router do
   get "/videos" do
     render_feed(conn, CF.AtomFeed.Videos.feed_all())
   end
+
+  get "/flags" do
+    render_feed(conn, CF.AtomFeed.Flags.feed_all())
+  end
 end
