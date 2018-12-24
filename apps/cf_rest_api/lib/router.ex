@@ -139,7 +139,7 @@ defmodule CF.RestApi.Router do
       plug(:accepts, ["html"])
     end
 
-    scope "/jouge42" do
+    scope "/_dev/" do
       pipe_through([:browser])
       forward("/mail", Bamboo.SentEmailViewerPlug)
     end
