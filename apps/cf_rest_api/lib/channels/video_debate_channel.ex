@@ -14,12 +14,14 @@ defmodule CF.RestApi.VideoDebateChannel do
 
   alias Phoenix.View
   alias Ecto.Multi
+  alias DB.Schema.User
   alias DB.Schema.Video
   alias DB.Schema.Speaker
   alias DB.Schema.VideoSpeaker
 
   alias CF.Videos
   alias CF.Accounts.UserPermissions
+  alias CF.Notifications.Subscriptions
   alias CF.RestApi.{VideoView, SpeakerView, ChangesetView}
 
   def join("video_debate:" <> video_hash_id, _payload, socket) do
@@ -31,7 +33,11 @@ defmodule CF.RestApi.VideoDebateChannel do
         {:error, "not_found"}
 
       video ->
-        rendered_video = View.render_one(video, VideoView, "video.json")
+        rendered_video =
+          View.render_one(video, VideoView, "video_with_subscription.json",
+            is_subscribed: is_subscribed(socket.assigns.user_id, video)
+          )
+
         send(self(), :after_join)
         {:ok, rendered_video, assign(socket, :video_id, video.id)}
     end
@@ -198,6 +204,19 @@ defmodule CF.RestApi.VideoDebateChannel do
     {:reply, {:ok, %{speakers: Repo.all(speakers_query)}}, socket}
   end
 
+  def handle_in_authenticated!("change_subscription", subscribe, socket) do
+    user = Guardian.Phoenix.Socket.current_resource(socket)
+    video = %Video{id: socket.assigns.video_id}
+
+    if subscribe do
+      Subscriptions.subscribe(user, video)
+    else
+      Subscriptions.unsubscribe(user, video)
+    end
+
+    {:reply, :ok, socket}
+  end
+
   defp do_remove_speaker(socket, speaker) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
     UserPermissions.check!(user_id, :remove, :speaker)
@@ -207,5 +226,14 @@ defmodule CF.RestApi.VideoDebateChannel do
     |> Multi.delete(:video_speaker, VideoSpeaker.changeset(video_speaker))
     |> Multi.insert(:action_remove, action_remove(user_id, video_id, speaker))
     |> Repo.transaction()
+  end
+
+  # Check wether current user_id from socket is subscribed to video's notifications
+  defp is_subscribed(nil, _) do
+    false
+  end
+
+  defp is_subscribed(user_id, video) do
+    Subscriptions.is_subscribed(%User{id: user_id}, video)
   end
 end

@@ -33,4 +33,50 @@ defmodule CF.Notifications.SubscriptionsTest do
       {:ok, _} = Subscriptions.subscribe(user, video)
     end
   end
+
+  describe "unsubscribe" do
+    test "removes existing subscription on video" do
+      video = insert(:video)
+      subscription = insert(:subscription, scope: :video, video: video)
+      Subscriptions.unsubscribe(subscription.user, subscription.video)
+      refute Repo.get(DB.Schema.Subscription, subscription.id)
+    end
+
+    test "removes existing subscription on statement" do
+      statement = insert(:statement)
+
+      subscription =
+        insert(:subscription, scope: :statement, video: statement.video, statement: statement)
+
+      Subscriptions.unsubscribe(subscription.user, subscription.statement)
+      refute Repo.get(DB.Schema.Subscription, subscription.id)
+    end
+
+    test "removes existing subscription on comment" do
+      comment = insert(:comment)
+
+      subscription =
+        insert(:subscription,
+          scope: :comment,
+          video: comment.statement.video,
+          statement: comment.statement,
+          comment: comment
+        )
+
+      Subscriptions.unsubscribe(subscription.user, subscription.comment)
+      refute Repo.get(DB.Schema.Subscription, subscription.id)
+    end
+  end
+
+  describe "subscribe, unsubscribe and is_subscribed togethers" do
+    test "simple" do
+      user = insert(:user)
+      video = insert(:video)
+      refute Subscriptions.is_subscribed(user, video)
+      {:ok, _} = Subscriptions.subscribe(user, video)
+      assert Subscriptions.is_subscribed(user, video)
+      {:ok, _} = Subscriptions.unsubscribe(user, video)
+      refute Subscriptions.is_subscribed(user, video)
+    end
+  end
 end
