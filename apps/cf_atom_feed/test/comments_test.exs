@@ -30,7 +30,9 @@ defmodule CF.AtomFeed.CommentsTest do
     # Check comment entries
     for comment <- comments do
       assert feed =~
-               ~r(https://TEST_FRONTEND/videos/[a-zA-Z0-9]+\?statement=#{comment.statement_id}"/>)
+               ~r(https://TEST_FRONTEND/videos/[a-zA-Z0-9]+\?statement=#{comment.statement_id}&amp;c=#{
+                 comment.id
+               }"/>)
 
       assert feed =~ ~r(<title>New Comment from .+ on ##{comment.statement_id}</title>)
     end
