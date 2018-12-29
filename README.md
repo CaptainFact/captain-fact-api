@@ -45,6 +45,8 @@ Following services will be started:
 - [localhost:4003](https://localhost:4003) - GraphQL API (https)
 - [localhost:4004](http://localhost:4004) - Atom feed
 
+You can also see all the mail sent by going to http://localhost:4000/_dev/mail
+
 ## Other useful commands
 
 - `mix test` --> Run tests
