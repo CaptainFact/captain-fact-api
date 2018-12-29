@@ -49,8 +49,11 @@ defmodule CF.RestApi.UserSocket do
 
   def handle_in_authenticated(command, params, socket, handler) do
     case socket.assigns.user_id do
-      nil -> {:reply, :error, socket}
-      _ -> rescue_handler(handler, command, params, socket)
+      nil ->
+        reply_error(socket, Phoenix.View.render(ErrorView, "401.json", []))
+
+      _ ->
+        rescue_handler(handler, command, params, socket)
     end
   end
 

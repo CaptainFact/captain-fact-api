@@ -6,7 +6,7 @@ defmodule CF.AtomFeed.Flags do
   import Ecto.Query
 
   alias Atomex.{Feed, Entry}
-  alias DB.Schema.{Flag, UserAction, User, Comment}
+  alias DB.Schema.{Flag, User}
   alias DB.Type.FlagReason
   alias CF.Utils.FrontendRouter
 
@@ -18,7 +18,7 @@ defmodule CF.AtomFeed.Flags do
   """
   def feed_all() do
     flags = fetch_flags()
-    generate_feed(flags, last_update(flags))
+    generate_feed("https://feed.captainfact.io/flags/", flags, last_update(flags))
   end
 
   defp fetch_flags() do
@@ -26,8 +26,8 @@ defmodule CF.AtomFeed.Flags do
       from(
         flag in Flag,
         order_by: [desc: flag.inserted_at],
-        left_join: action in assoc(flag, :action),
-        left_join: comment in assoc(action, :comment),
+        inner_join: action in assoc(flag, :action),
+        inner_join: comment in assoc(action, :comment),
         left_join: user in assoc(comment, :user),
         left_join: source in assoc(comment, :source),
         preload: [action: [comment: [:user, :statement, :source]]],
@@ -42,11 +42,11 @@ defmodule CF.AtomFeed.Flags do
   defp last_update(_),
     do: DateTime.utc_now()
 
-  defp generate_feed(flags, last_update) do
-    FrontendRouter.base_url()
+  defp generate_feed(feed_link, flags, last_update) do
+    feed_link
     |> Feed.new(last_update, "[CaptainFact] All Flags")
     |> CF.AtomFeed.Common.feed_author()
-    |> Feed.link("https://feed.captainfact.io/flags/", rel: "self")
+    |> Feed.link(feed_link, rel: "self")
     |> Feed.entries(Enum.map(flags, &get_entry/1))
     |> Feed.build()
     |> Atomex.generate_document()
@@ -67,7 +67,7 @@ defmodule CF.AtomFeed.Flags do
     ```
     #{comment.text}
     ```
-    Source Comment: #{source(comment)}\n
+    Source: #{source(comment)}\n
     Flag reason: #{FlagReason.label(flag.reason)}
     """)
     |> Entry.build()

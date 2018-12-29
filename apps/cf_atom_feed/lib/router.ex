@@ -16,6 +16,7 @@ defmodule CF.AtomFeed.Router do
     |> put_resp_content_type("application/json")
     |> send_resp(200, """
       {
+        "app": "CF.AtomFeed",
         "status": "✔",
         "version": "#{CF.AtomFeed.Application.version()}",
         "db_version": "#{DB.Application.version()}"

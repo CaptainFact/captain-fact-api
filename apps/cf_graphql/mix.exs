@@ -4,7 +4,7 @@ defmodule CF.GraphQL.Mixfile do
   def project do
     [
       app: :cf_graphql,
-      version: "0.9.1",
+      version: "0.9.2",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
@@ -42,6 +42,9 @@ defmodule CF.GraphQL.Mixfile do
       {:basic_auth, "~> 2.2.2"},
       {:kaur, "~> 1.1"},
       {:poison, "~> 3.1"},
+
+      # Local
+      {:cf, in_umbrella: true},
       {:db, in_umbrella: true},
 
       # Dev only
