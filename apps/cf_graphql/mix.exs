@@ -42,6 +42,9 @@ defmodule CF.GraphQL.Mixfile do
       {:basic_auth, "~> 2.2.2"},
       {:kaur, "~> 1.1"},
       {:poison, "~> 3.1"},
+
+      # Local
+      {:cf, in_umbrella: true},
       {:db, in_umbrella: true},
 
       # Dev only
