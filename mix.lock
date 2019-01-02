@@ -8,7 +8,7 @@
   "atomex": {:hex, :atomex, "0.3.0", "19b5d1a2aef8706dbd307385f7d5d9f6f273869226d317492c396c7bacf26402", [:mix], [{:xml_builder, "~> 2.0.0", [hex: :xml_builder, repo: "hexpm", optional: false]}], "hexpm"},
   "bamboo": {:git, "https://github.com/thoughtbot/bamboo.git", "023b012d5a90617d68a67efa807e276712730638", []},
   "base64url": {:hex, :base64url, "0.0.1", "36a90125f5948e3afd7be97662a1504b934dd5dac78451ca6e9abf85a10286be", [:rebar], [], "hexpm"},
-  "basic_auth": {:hex, :basic_auth, "2.2.2", "802748bd581c3ed836c66bd897478c84cd3d51ae16df227ed26a00d25b67a2af", [:mix], [{:cowboy, "~> 1.0", [hex: :cowboy, repo: "hexpm", optional: false]}, {:plug, "~> 0.14 or ~> 1.0", [hex: :plug, repo: "hexpm", optional: false]}], "hexpm"},
+  "basic_auth": {:hex, :basic_auth, "2.2.4", "d8c748237870dd1df3bc5c0f1ab4f1fad6270c75472d7e62b19302ec59e92a79", [:mix], [{:plug, "~> 0.14 or ~> 1.0", [hex: :plug, repo: "hexpm", optional: false]}], "hexpm"},
   "bcrypt_elixir": {:hex, :bcrypt_elixir, "1.0.9", "cdd8de5c7d69cd7fad2816f4f6379686710f3944dfbde447828860c825e3479d", [:make, :mix], [{:elixir_make, "~> 0.4", [hex: :elixir_make, repo: "hexpm", optional: false]}], "hexpm"},
   "bunt": {:hex, :bunt, "0.2.0", "951c6e801e8b1d2cbe58ebbd3e616a869061ddadcc4863d0a2182541acae9a38", [:mix], [], "hexpm"},
   "burnex": {:hex, :burnex, "1.1.1", "292206259d503ffaf51f13b07f5f9ffcb21a586fdddbdf885ac7a7727d1a910d", [:mix], [], "hexpm"},
