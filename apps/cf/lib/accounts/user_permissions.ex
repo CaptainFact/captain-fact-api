@@ -14,9 +14,6 @@ defmodule CF.Accounts.UserPermissions do
     defexception message: "forbidden", plug_status: 403
   end
 
-  # 24 hours
-  @daily_limit 24 * 60 * 60
-
   @error_not_enough_reputation "not_enough_reputation"
   @error_limit_reached "limit_reached"
 
@@ -48,7 +45,7 @@ defmodule CF.Accounts.UserPermissions do
       iex> alias CF.Accounts.UserPermissions
       iex> user = DB.Factory.insert(:user, %{reputation: 45})
       iex> UserPermissions.check(user, :create, :comment)
-      {:ok, 20}
+      {:ok, 7}
       iex> UserPermissions.check(%{user | reputation: -42}, :remove, :statement)
       {:error, "not_enough_reputation"}
   """
@@ -109,14 +106,38 @@ defmodule CF.Accounts.UserPermissions do
   @doc """
   Count the number of occurences of this user / action type in limited perdiod.
   """
+  def action_count(user, action_type = :add, entity = :video) do
+    Actions.count(user, action_type, entity, hard_limitations_period())
+  end
+
   def action_count(user, action_type, entity) do
     if is_wildcard_limitation(action_type) do
-      Actions.count_wildcard(user, action_type, @daily_limit)
+      Actions.count_wildcard(user, action_type, soft_limitations_period())
     else
-      Actions.count(user, action_type, entity, @daily_limit)
+      Actions.count(user, action_type, entity, soft_limitations_period())
     end
   end
 
+  @fifteen_minutes 15 * 60
+  @three_hours 3 * 60 * 60
+
+  @doc """
+  Get the limit, in seconds, on which the actions are analyzed for limitations.
+  This uses a variable from env to make it configurable on the fly.
+  """
+  def soft_limitations_period,
+    do: Application.get_env(:cf, :soft_limitations_period, @fifteen_minutes)
+
+  @doc """
+  Same as `soft_limitations_period/0` but less permissive, only used when adding
+  new videos.
+  """
+  def hard_limitations_period,
+    do: Application.get_env(:cf, :hard_limitations_period, @three_hours)
+
+  @doc """
+  Get the limitations for a given user and action type.
+  """
   def limitation(user = %User{}, action_type, entity) do
     case level(user) do
       -1 ->
