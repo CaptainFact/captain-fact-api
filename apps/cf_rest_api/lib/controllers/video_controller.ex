@@ -33,7 +33,7 @@ defmodule CF.RestApi.VideoController do
       nil ->
         conn
         |> Guardian.Plug.current_resource()
-        |> create!(url, params["is_partner"])
+        |> create!(url, is_partner: params["is_partner"], unlisted: params["unlisted"])
         |> case do
           {:error, error} when is_binary(error) ->
             conn

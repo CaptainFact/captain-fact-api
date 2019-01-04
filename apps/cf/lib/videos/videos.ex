@@ -36,6 +36,19 @@ defmodule CF.Videos do
     do: Repo.all(Video.query_list(Video, filters))
 
   @doc """
+  Get videos added by given user. This will return all videos, included the ones
+  marked as `unlisted`.
+  """
+  def added_by_user(user, paginate_options \\ []) do
+    Video
+    |> join(:inner, [v], a in DB.Schema.UserAction, a.video_id == v.id)
+    |> where([_, a], a.user_id == ^user.id)
+    |> where([_, a], a.type == ^:add and a.entity == ^:video)
+    |> DB.Query.order_by_last_inserted_desc()
+    |> Repo.paginate(paginate_options)
+  end
+
+  @doc """
   Return the corresponding video if it has already been added, `nil` otherwise
   """
   def get_video_by_url(url) do
@@ -61,14 +74,17 @@ defmodule CF.Videos do
   Returns video if success or {:error, reason} if something bad append.
   Can also throw if bad permissions.
   """
-  def create!(user, video_url, is_partner \\ nil) do
+  def create!(user, video_url, params \\ []) do
     UserPermissions.check!(user, :add, :video)
 
     with metadata_fetcher when not is_nil(metadata_fetcher) <- get_metadata_fetcher(video_url),
          {:ok, metadata} <- metadata_fetcher.(video_url) do
       # Videos posted by publishers are recorded as partner unless explicitely
       # specified otherwise (false)
-      base_video = %Video{is_partner: user.is_publisher && is_partner != false}
+      base_video = %Video{
+        is_partner: user.is_publisher && Keyword.get(params, :is_partner) != false,
+        unlisted: Keyword.get(params, :unlisted, false)
+      }
 
       Multi.new()
       |> Multi.insert(:video_without_hash_id, Video.changeset(base_video, metadata))

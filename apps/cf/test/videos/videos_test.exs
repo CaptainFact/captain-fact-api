@@ -31,9 +31,9 @@ defmodule CF.VideosTest do
       publisher = insert(:user, is_publisher: true)
 
       {:ok, video_unspecified} = Videos.create!(publisher, test_url())
-      {:ok, video_nil} = Videos.create!(publisher, test_url(), nil)
-      {:ok, video_true} = Videos.create!(publisher, test_url(), true)
-      {:ok, video_false} = Videos.create!(publisher, test_url(), false)
+      {:ok, video_nil} = Videos.create!(publisher, test_url(), is_partner: nil)
+      {:ok, video_true} = Videos.create!(publisher, test_url(), is_partner: true)
+      {:ok, video_false} = Videos.create!(publisher, test_url(), is_partner: false)
 
       assert video_unspecified.is_partner == true
       assert video_nil.is_partner == true
@@ -44,7 +44,7 @@ defmodule CF.VideosTest do
     test "regular user cannot set is_partner" do
       regular_user = insert(:user, reputation: 50_000)
       {:ok, video} = Videos.create!(regular_user, test_url())
-      {:ok, video_2} = Videos.create!(regular_user, test_url(), true)
+      {:ok, video_2} = Videos.create!(regular_user, test_url(), is_partner: true)
 
       assert video.is_partner == false
       assert video_2.is_partner == false
