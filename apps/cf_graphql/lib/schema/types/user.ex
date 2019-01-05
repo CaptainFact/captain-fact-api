@@ -60,6 +60,9 @@ defmodule CF.Graphql.Schema.Types.User do
     field :subscriptions, list_of(:notifications_subscription) do
       middleware(Middleware.RequireAuthentication)
       complexity(join_complexity())
+      arg(:scopes, list_of(:string), default_value: ["video", "statement"])
+      arg(:is_subscribed, :boolean, default_value: true)
+      arg(:video_id, :integer)
       resolve(&Resolvers.Users.subscriptions/3)
     end
 

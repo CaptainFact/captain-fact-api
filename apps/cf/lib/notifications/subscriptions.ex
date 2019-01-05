@@ -15,12 +15,13 @@ defmodule CF.Notifications.Subscriptions do
   @type subscribable_entities :: Video.t() | Statement.t() | Comment.t()
 
   @doc """
-  Get all subscriptions for user
+  Get all subscriptions for user.
   """
-  @spec all(User.t()) :: [Subscription.t()]
-  def all(%User{id: user_id}) do
+  @spec all(User.t(), Keyword.t()) :: [Subscription.t()]
+  def all(%User{id: user_id}, filters \\ []) do
     Subscription
     |> where([s], s.user_id == ^user_id)
+    |> apply_filters(filters)
     |> DB.Repo.all()
   end
 
@@ -58,6 +59,25 @@ defmodule CF.Notifications.Subscriptions do
     with subscription when not is_nil(subscription) <- load_subscription(user, entity) do
       DB.Repo.delete(subscription)
     end
+  end
+
+  # Apply subscriptions filters on query
+  defp apply_filters(query, filters) do
+    Enum.reduce(filters, query, fn {filter_name, value}, query ->
+      case filter_name do
+        :scopes ->
+          where(query, [s], s.scope in ^value)
+
+        :is_subscribed ->
+          where(query, [s], s.is_subscribed == ^value)
+
+        :video_id ->
+          where(query, [s], s.video_id == ^value)
+
+        _ ->
+          query
+      end
+    end)
   end
 
   # Load an existing subscription for given user / entity.

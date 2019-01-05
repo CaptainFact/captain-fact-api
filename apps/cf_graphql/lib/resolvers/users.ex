@@ -10,6 +10,7 @@ defmodule CF.Graphql.Resolvers.Users do
   alias DB.Repo
   alias DB.Schema.User
   alias DB.Schema.UserAction
+  alias CF.Notifications.Subscriptions
 
   @doc """
   Resolve a user by its id or username
@@ -85,11 +86,11 @@ defmodule CF.Graphql.Resolvers.Users do
   @doc """
   User notifications, only if authenticated
   """
-  def subscriptions(user, _, %{context: %{user: loggedin_user}}) do
+  def subscriptions(user, params, %{context: %{user: loggedin_user}}) do
     if user.id !== loggedin_user.id do
       {:error, "unauthorized"}
     else
-      {:ok, CF.Notifications.Subscriptions.all(user)}
+      {:ok, Subscriptions.all(user, Map.to_list(params))}
     end
   end
 
