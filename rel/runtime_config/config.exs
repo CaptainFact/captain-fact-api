@@ -39,6 +39,22 @@ load_bool = fn secret ->
   end
 end
 
+load_int = fn secret ->
+  case load_secret.(secret) do
+    value when is_integer(value) ->
+      value
+
+    value when is_binary(value) ->
+      case Integer.parse(value) do
+        {number, ""} -> number
+        _ -> 0
+      end
+
+    _ ->
+      0
+  end
+end
+
 # ---- [Global config keys] ----
 
 frontend_url = String.trim_trailing(load_secret.("frontend_url")) <> "/"
@@ -70,6 +86,9 @@ config :arc,
 
 config :cf,
   frontend_url: frontend_url,
+  soft_limitations_period: load_int.({"soft_limitations_period", 15 * 60}),
+  hard_limitations_period: load_int.({"hard_limitations_period", 3 * 60 * 60}),
+  invitation_system: load_bool.({"invitation_system", "false"}),
   youtube_api_key: load_secret.({"youtube_api_key", nil}),
   oauth: [
     facebook: [

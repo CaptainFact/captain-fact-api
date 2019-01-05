@@ -22,7 +22,8 @@ defmodule CF.RestApi.VideoView do
       posted_at: video.inserted_at,
       speakers: render_many(video.speakers, CF.RestApi.SpeakerView, "speaker.json"),
       language: video.language,
-      is_partner: video.is_partner
+      is_partner: video.is_partner,
+      unlisted: video.unlisted
     }
   end
 end

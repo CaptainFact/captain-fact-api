@@ -3,12 +3,13 @@ defmodule CF.GraphQL.Resolvers.Users do
   Resolver for `DB.Schema.User`
   """
 
+  import Ecto.Query
+
   alias Kaur.Result
 
   alias DB.Repo
   alias DB.Schema.User
   alias DB.Schema.UserAction
-  alias DB.Query.Actions
 
   @doc """
   Resolve a user by its id or username
@@ -40,16 +41,29 @@ defmodule CF.GraphQL.Resolvers.Users do
   end
 
   @watched_entities ~w(video speaker statement comment fact)a
+  @action_banned [
+    :action_banned_bad_language,
+    :action_banned_spam,
+    :action_banned_irrelevant,
+    :action_banned_not_constructive
+  ]
 
   @doc """
   Resolve user actions history
   """
   def activity_log(user, %{offset: offset, limit: limit}, _) do
     UserAction
-    |> Actions.by_user(user)
-    |> Actions.matching_entities(@watched_entities)
+    |> where([a], a.user_id == ^user.id and a.entity in ^@watched_entities)
+    |> or_where([a], a.target_user_id == ^user.id and a.type in ^@action_banned)
     |> DB.Query.order_by_last_inserted_desc()
     |> Repo.paginate(page: offset, page_size: limit)
     |> Result.ok()
+  end
+
+  @doc """
+  Get videos added by this user
+  """
+  def videos_added(user, %{offset: offset, limit: limit}, _) do
+    {:ok, CF.Videos.added_by_user(user, page: offset, page_size: limit)}
   end
 end

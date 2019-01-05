@@ -10,7 +10,9 @@ config :cf,
   env: Mix.env(),
   ecto_repos: [DB.Repo],
   oauth: [facebook: []],
-  invitation_system: false
+  invitation_system: false,
+  soft_limitations_period: 15 * 60,
+  hard_limitations_period: 3 * 60 * 60
 
 # Configure scheduler
 config :cf, CF.Scheduler,
