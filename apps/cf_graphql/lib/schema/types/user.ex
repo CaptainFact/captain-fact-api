@@ -36,6 +36,14 @@ defmodule CF.GraphQL.Schema.Types.User do
       arg(:limit, :integer, default_value: 10)
       resolve(&Resolvers.Users.activity_log/3)
     end
+
+    @desc "A paginated list of videos added by this user"
+    field :videos_added, :paginated_videos do
+      complexity(join_complexity())
+      arg(:offset, :integer, default_value: 1)
+      arg(:limit, :integer, default_value: 10)
+      resolve(&Resolvers.Users.videos_added/3)
+    end
   end
 
   @desc "A paginated list of user actions"

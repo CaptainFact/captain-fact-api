@@ -59,4 +59,11 @@ defmodule CF.GraphQL.Resolvers.Users do
     |> Repo.paginate(page: offset, page_size: limit)
     |> Result.ok()
   end
+
+  @doc """
+  Get videos added by this user
+  """
+  def videos_added(user, %{offset: offset, limit: limit}, _) do
+    {:ok, CF.Videos.added_by_user(user, page: offset, page_size: limit)}
+  end
 end
