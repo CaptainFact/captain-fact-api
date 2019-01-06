@@ -56,7 +56,8 @@ defmodule CF.Notifications.SubscriptionsTest do
       comment = insert(:comment)
 
       subscription =
-        insert(:subscription,
+        insert(
+          :subscription,
           scope: :comment,
           video: comment.statement.video,
           statement: comment.statement,

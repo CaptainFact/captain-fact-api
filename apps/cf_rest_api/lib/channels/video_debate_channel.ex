@@ -34,7 +34,10 @@ defmodule CF.RestApi.VideoDebateChannel do
 
       video ->
         rendered_video =
-          View.render_one(video, VideoView, "video_with_subscription.json",
+          View.render_one(
+            video,
+            VideoView,
+            "video_with_subscription.json",
             is_subscribed: is_subscribed(socket.assigns.user_id, video)
           )
 
