@@ -204,11 +204,11 @@ defmodule CF.RestApi.VideoDebateChannel do
     {:reply, {:ok, %{speakers: Repo.all(speakers_query)}}, socket}
   end
 
-  def handle_in_authenticated!("change_subscription", subscribe, socket) do
+  def handle_in_authenticated!("change_subscription", %{"subscribed" => subscribed}, socket) do
     user = Guardian.Phoenix.Socket.current_resource(socket)
     video = %Video{id: socket.assigns.video_id}
 
-    if subscribe do
+    if subscribed do
       Subscriptions.subscribe(user, video)
     else
       Subscriptions.unsubscribe(user, video)

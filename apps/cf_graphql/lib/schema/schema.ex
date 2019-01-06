@@ -49,7 +49,7 @@ defmodule CF.Graphql.Schema do
     end
 
     @desc "Get logged in user"
-    field :loggedin_user, :user do
+    field :logged_in_user, :user do
       middleware(Middleware.RequireAuthentication)
       resolve(&Resolvers.Users.get_logged_in/3)
     end

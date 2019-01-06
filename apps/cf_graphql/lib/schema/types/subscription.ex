@@ -7,6 +7,7 @@ defmodule CF.Graphql.Schema.Types.Subscription do
   use Absinthe.Ecto, repo: DB.Repo
 
   import CF.Graphql.Schema.Utils
+  alias DB.Type.VideoHashId
 
   @desc "A user subscription to entities changes, used by notifications generator"
   object :notifications_subscription do
@@ -26,6 +27,16 @@ defmodule CF.Graphql.Schema.Types.Subscription do
 
     @desc "Associated video ID"
     field(:video_id, :integer)
+
+    @desc "Associated video hash ID"
+    field(
+      :video_hash_id,
+      :string,
+      do:
+        resolve(fn a, _, _ ->
+          {:ok, a.video_id && VideoHashId.encode(a.video_id)}
+        end)
+    )
 
     @desc "Associated statement ID"
     field(:statement_id, :integer)
