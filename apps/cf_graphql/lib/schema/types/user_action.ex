@@ -49,6 +49,24 @@ defmodule CF.Graphql.Schema.Types.UserAction do
     @desc "Comment impacted by this action"
     field(:comment_id, :integer)
 
+    @desc "Associated video"
+    field :video, :video do
+      complexity(join_complexity())
+      resolve(assoc(:video))
+    end
+
+    @desc "Associated statement"
+    field :statement, :statement do
+      complexity(join_complexity())
+      resolve(assoc(:statement))
+    end
+
+    @desc "Associated comment"
+    field :comment, :comment do
+      complexity(join_complexity())
+      resolve(assoc(:comment))
+    end
+
     @desc "A map with all the changes made by this action"
     field(
       :changes,
