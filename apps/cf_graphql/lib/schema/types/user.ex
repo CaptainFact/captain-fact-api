@@ -53,7 +53,7 @@ defmodule CF.Graphql.Schema.Types.User do
       complexity(join_complexity())
       arg(:page, :integer, default_value: 1)
       arg(:page_size, :integer, default_value: 10)
-      resolve(&Resolvers.Users.notifications/3)
+      resolve(&Resolvers.Notifications.for_user/3)
     end
 
     @desc "User subscriptions"
@@ -63,7 +63,7 @@ defmodule CF.Graphql.Schema.Types.User do
       arg(:scopes, list_of(:string), default_value: ["video", "statement"])
       arg(:is_subscribed, :boolean, default_value: true)
       arg(:video_id, :integer)
-      resolve(&Resolvers.Users.subscriptions/3)
+      resolve(&Resolvers.Notifications.subscriptions/3)
     end
 
     @desc "A paginated list of videos added by this user"

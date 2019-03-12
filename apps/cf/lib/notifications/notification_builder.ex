@@ -53,6 +53,12 @@ defmodule CF.Notifications.NotificationBuilder do
   defp notification_type(%{type: :update, entity: :speaker}, _),
     do: :updated_speaker
 
+  defp notification_type(%{type: :remove, entity: :speaker}, _),
+    do: :removed_speaker
+
+  defp notification_type(%{type: :remove, entity: :statement}, _),
+    do: :removed_statement
+
   defp notification_type(%{type: type, entity: entity}, _) do
     Logger.warn("Don't know how to generate a notification for #{type} #{entity}")
     :default

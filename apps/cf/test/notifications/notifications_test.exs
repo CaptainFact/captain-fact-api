@@ -26,8 +26,14 @@ defmodule CF.NotificationsTest do
   describe "mark_as_seen/1" do
     test "mark the notification as seen" do
       notification = insert(:notification, seen_at: nil)
-      {:ok, updated} = Notifications.mark_as_seen(notification)
+      {:ok, updated} = Notifications.mark_as_seen(notification, true)
       refute is_nil(updated.seen_at)
+    end
+
+    test "mark the notification as unseen" do
+      notification = insert(:notification, seen_at: DateTime.utc_now())
+      {:ok, updated} = Notifications.mark_as_seen(notification, false)
+      assert is_nil(updated.seen_at)
     end
   end
 end

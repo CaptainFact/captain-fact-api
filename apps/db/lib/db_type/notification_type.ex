@@ -14,6 +14,8 @@ defenum(
     :updated_statement,
     :updated_video,
     :updated_speaker,
+    :removed_statement,
+    :removed_speaker,
     # Notifications below are meant to be dispatched manualy
     :new_achievement,
     :email_confirmed

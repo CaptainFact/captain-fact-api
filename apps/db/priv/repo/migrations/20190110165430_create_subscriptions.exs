@@ -20,7 +20,7 @@ defmodule DB.Repo.Migrations.Createsubscriptions do
   end
 
   def down do
-    DB.Type.SubscriptionReason.drop_type()
     drop(table(:subscriptions))
+    DB.Type.SubscriptionReason.drop_type()
   end
 end

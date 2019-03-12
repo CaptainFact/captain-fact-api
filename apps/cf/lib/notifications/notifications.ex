@@ -34,16 +34,23 @@ defmodule CF.Notifications do
   end
 
   @doc """
-  Mark the given notification as seen. Ignored if notification has already been
+  Mark the given notification as seen or unseed.
   seen.
   """
-  @spec mark_as_seen(Notification.t()) :: Notification.t()
-  def mark_as_seen(notification = %Notification{seen_at: nil}) do
+  @spec mark_as_seen(Notification.t(), boolean()) :: Notification.t()
+  def mark_as_seen(notification = %Notification{seen_at: nil}, true) do
     notification
     |> Notification.changeset(%{seen_at: DateTime.utc_now()})
     |> Repo.update()
   end
 
-  def mark_as_seen(notification = %Notification{}),
-    do: notification
+  def mark_as_seen(notification = %Notification{seen_at: seen_at}, false)
+      when not is_nil(seen_at) do
+    notification
+    |> Notification.changeset(%{seen_at: nil})
+    |> Repo.update()
+  end
+
+  def mark_as_seen(notification, _),
+    do: {:ok, notification}
 end

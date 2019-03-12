@@ -4,16 +4,9 @@ defmodule CF.Graphql.Schema do
   alias CF.Graphql.Schema.Middleware
 
   import_types(CF.Graphql.Schema.Types)
+  import_types(CF.Graphql.Schema.InputObjects)
 
-  # Actual API
-
-  input_object :video_filter do
-    field(:language, :string)
-    field(:min_id, :id)
-    field(:speaker_id, :id)
-    field(:speaker_slug, :string)
-    field(:is_partner, :boolean)
-  end
+  # Query API
 
   query do
     @desc "[Deprecated] Get all videos"
@@ -62,6 +55,18 @@ defmodule CF.Graphql.Schema do
     @desc "Get all_statistics"
     field :all_statistics, :statistics do
       resolve(&Resolvers.Statistics.default/3)
+    end
+  end
+
+  # Mutation API
+
+  mutation do
+    @desc "Use this to mark a notifications as seen"
+    field :update_notifications, list_of(:notification) do
+      arg(:ids, non_null(list_of(:id)))
+      arg(:seen, non_null(:boolean))
+
+      resolve(&Resolvers.Notifications.update/3)
     end
   end
 end

@@ -17,8 +17,8 @@ defmodule DB.Repo.Migrations.CreateNotifications do
   end
 
   def down do
-    DB.Type.NotificationType.drop_type()
     drop(index(:notifications, :user_id))
-    drop(table(:subscriptions))
+    drop(table(:notifications))
+    DB.Type.NotificationType.drop_type()
   end
 end
