@@ -17,7 +17,6 @@ defmodule DB.Repo.Migrations.AddHashIdToVideos do
 
     # Update all existing videos with their hashIds
     Video
-    |> select([v], v.id)
     |> DB.Repo.all()
     |> Enum.map(&Video.changeset_generate_hash_id/1)
     |> Enum.map(&DB.Repo.update/1)
