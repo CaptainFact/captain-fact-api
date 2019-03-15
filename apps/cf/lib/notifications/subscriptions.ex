@@ -32,12 +32,18 @@ defmodule CF.Notifications.Subscriptions do
   """
   def is_subscribed(%User{id: user_id}, %Video{id: video_id}) do
     Subscription
-    |> select([:id])
+    |> select([:id, :is_subscribed])
     |> where([s], s.scope == ^:video)
     |> where([s], s.user_id == ^user_id)
     |> where([s], s.video_id == ^video_id)
     |> DB.Repo.one()
-    |> Kernel.!=(nil)
+    |> case do
+      nil ->
+        false
+
+      %{is_subscribed: is_subscribed} = a ->
+        is_subscribed
+    end
   end
 
   @doc """
@@ -56,8 +62,14 @@ defmodule CF.Notifications.Subscriptions do
   """
   @spec unsubscribe(User.t(), subscribable_entities()) :: {:ok, Subscription.t()} | nil
   def unsubscribe(user, entity) do
-    with subscription when not is_nil(subscription) <- load_subscription(user, entity) do
-      DB.Repo.delete(subscription)
+    user
+    |> load_subscription(entity)
+    |> case do
+      nil ->
+        {:error, "not_found"}
+
+      subscription ->
+        DB.Repo.update(Subscription.changeset_subscribed(subscription, false))
     end
   end
 

@@ -67,6 +67,12 @@ defmodule CF.Graphql.Schema.Types.UserAction do
       resolve(assoc(:comment))
     end
 
+    @desc "Associated speaker"
+    field :speaker, :speaker do
+      complexity(join_complexity())
+      resolve(assoc(:speaker))
+    end
+
     @desc "A map with all the changes made by this action"
     field(
       :changes,

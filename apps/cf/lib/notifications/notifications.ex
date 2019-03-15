@@ -14,10 +14,11 @@ defmodule CF.Notifications do
   Get all notifications for user, last inserted first.
   Paginated with `page` + `limit`.
   """
-  @spec all(User.t()) :: Scrivener.Page.t()
-  def all(%User{id: user_id}, page \\ 1, page_size \\ 10) do
+  @spec all(User.t(), integer(), integer(), :all | :seen | :unseen) :: Scrivener.Page.t()
+  def all(%User{id: user_id}, page \\ 1, page_size \\ 10, filter \\ :all) do
     Notification
     |> where([n], n.user_id == ^user_id)
+    |> add_filter(filter)
     |> order_by(desc: :inserted_at)
     |> Repo.paginate(page: page, page_size: page_size)
   end
@@ -53,4 +54,8 @@ defmodule CF.Notifications do
 
   def mark_as_seen(notification, _),
     do: {:ok, notification}
+
+  defp add_filter(query, :seen), do: where(query, [n], not is_nil(n.seen_at))
+  defp add_filter(query, :unseen), do: where(query, [n], is_nil(n.seen_at))
+  defp add_filter(query, :all), do: query
 end

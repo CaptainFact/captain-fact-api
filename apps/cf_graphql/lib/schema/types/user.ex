@@ -13,6 +13,8 @@ defmodule CF.Graphql.Schema.Types.User do
   import_types(CF.Graphql.Schema.Types.Paginated)
   import_types(CF.Graphql.Schema.Types.Notification)
 
+  enum(:notifications_filter, values: [:all, :seen, :unseen])
+
   @desc "A user registered on the website"
   object :user do
     @desc "Unique user ID"
@@ -53,6 +55,7 @@ defmodule CF.Graphql.Schema.Types.User do
       complexity(join_complexity())
       arg(:page, :integer, default_value: 1)
       arg(:page_size, :integer, default_value: 10)
+      arg(:filter, :notifications_filter, default_value: :all)
       resolve(&Resolvers.Notifications.for_user/3)
     end
 

@@ -63,8 +63,13 @@ defmodule DB.Schema.Subscription do
     changeset(struct, %{
       video_id: video.id,
       scope: :video,
-      reason: reason
+      reason: reason,
+      is_subscribed: true
     })
+  end
+
+  def changeset_subscribed(struct, is_subscribed) do
+    change(struct, is_subscribed: is_subscribed)
   end
 
   defp validate_required_by_scope(changeset) do

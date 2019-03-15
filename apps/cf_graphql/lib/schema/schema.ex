@@ -68,5 +68,15 @@ defmodule CF.Graphql.Schema do
 
       resolve(&Resolvers.Notifications.update/3)
     end
+
+    @desc "Use this to (un)subscribe from an item notifications"
+    field :update_subscription, :notifications_subscription do
+      arg(:scope, non_null(:string))
+      arg(:entity_id, non_null(:id))
+      arg(:is_subscribed, non_null(:boolean))
+      arg(:reason, :string)
+
+      resolve(&Resolvers.Notifications.update_subscription/3)
+    end
   end
 end

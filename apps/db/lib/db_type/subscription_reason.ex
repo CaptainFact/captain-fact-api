@@ -3,5 +3,9 @@ import EctoEnum
 defenum(
   DB.Type.SubscriptionReason,
   :subscription_reason,
-  [:is_author]
+  [
+    :is_author,
+    :manual,
+    :suggestion
+  ]
 )

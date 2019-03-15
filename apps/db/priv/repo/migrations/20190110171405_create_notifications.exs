@@ -13,11 +13,11 @@ defmodule DB.Repo.Migrations.CreateNotifications do
       timestamps()
     end
 
-    create(index(:notifications, :user_id))
+    create(index(:notifications, [:user_id, :action_id]))
   end
 
   def down do
-    drop(index(:notifications, :user_id))
+    drop(index(:notifications, [:user_id, :action_id]))
     drop(table(:notifications))
     DB.Type.NotificationType.drop_type()
   end

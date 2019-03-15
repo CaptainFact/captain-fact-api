@@ -5,6 +5,7 @@ defmodule CF.Comments do
   import CF.Actions.ActionCreator
 
   alias Ecto.Multi
+  alias Kaur.Result
 
   alias DB.Repo
   alias DB.Schema.Source
@@ -14,6 +15,7 @@ defmodule CF.Comments do
   alias DB.Schema.UserAction
 
   alias CF.Accounts.UserPermissions
+  alias CF.Notifications.Subscriptions
   alias CF.Sources
 
   # ---- Public API ----
@@ -28,6 +30,12 @@ defmodule CF.Comments do
     |> Repo.all()
   end
 
+  @doc """
+  Add a new comment.
+
+  [!] This function is very bad and should be refactored, especially the async
+  source fetcher should be moved to a job.
+  """
   def add_comment(user, video_id, params, source_url \\ nil, source_fetch_callback \\ nil) do
     # TODO [Security] What if reply_to_id refer to a comment that is on a different statement ?
     UserPermissions.check!(user, :create, :comment)
@@ -38,26 +46,44 @@ defmodule CF.Comments do
       source_url &&
         (Sources.get_by_url(source_url) || Source.changeset(%Source{}, %{url: source_url}))
 
-    # Insert comment in DB
-    full_comment =
+    comment_changeset =
       user
       |> Ecto.build_assoc(:comments)
       |> Ecto.Changeset.change()
       |> Ecto.Changeset.put_assoc(:source, source)
       |> Comment.changeset(params)
+
+    Multi.new()
+    |> Multi.run(:comment, fn _ ->
+      comment_changeset
       |> Repo.insert!()
       |> Map.put(:user, user)
-      |> Repo.preload(:source)
+      |> Repo.preload([:source, :statement])
       |> Map.put(:score, 0)
+      |> Result.ok()
+    end)
+    |> Multi.run(:action, fn %{comment: comment} ->
+      Repo.insert(action_create(user.id, video_id, comment, source_url))
+    end)
+    |> Multi.run(:suscription, fn %{comment: comment} ->
+      Subscriptions.subscribe(user, comment, :is_author)
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:error, _operation, reason, _changes} ->
+        {:error, reason}
 
-    # Record action
-    Repo.insert(action_create(user.id, video_id, full_comment, source_url))
+      {:ok, %{comment: comment}} ->
+        # Set default on comment
+        full_comment = comment
 
-    # If new source, fetch metadata
-    unless is_nil(source) || !is_nil(Map.get(source, :id)),
-      do: fetch_source_metadata_and_update_comment(full_comment, source_fetch_callback)
+        # If new source, fetch metadata
+        if source && is_nil(Map.get(source, :id)),
+          do: fetch_source_metadata_and_update_comment(comment, source_fetch_callback)
 
-    full_comment
+        # Return comment
+        full_comment
+    end
   end
 
   # Delete
