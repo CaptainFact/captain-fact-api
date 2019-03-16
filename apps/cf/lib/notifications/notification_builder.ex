@@ -32,8 +32,11 @@ defmodule CF.Notifications.NotificationBuilder do
   end
 
   @spec notification_type(SubscriptionReason.t(), Subscription.t()) :: NotificationType.t()
-  defp notification_type(%{type: :create, entity: :comment}, %{reason: :is_author}),
-    do: :reply_to_comment
+  defp notification_type(
+         %{type: :create, entity: :comment, changes: %{"reply_to_id" => comment_id}},
+         %{reason: :is_author, comment_id: comment_id}
+       ),
+       do: :reply_to_comment
 
   defp notification_type(%{type: :create, entity: :comment}, _),
     do: :new_comment

@@ -31,10 +31,10 @@ defmodule CF.Jobs.CreateNotifications do
   @analyser_id UsersActionsReport.analyser_id(@name)
 
   # Define entities that are watched for changes
-  @watched_entities [:video, :statement, :comment]
+  @watched_entities [:video, :statement, :comment, :speaker]
 
   # Define watched action types
-  @watched_action_types [:create, :add, :remove, :restore]
+  @watched_action_types [:create, :add, :remove, :restore, :update]
 
   # --- Client API ---
 
