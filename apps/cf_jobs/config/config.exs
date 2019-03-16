@@ -31,7 +31,7 @@ config :cf_jobs, CF.Jobs.Scheduler,
     ],
     # Notifications
     create_notifications: [
-      schedule: {:extended, "*/3"},
+      schedule: {:extended, "*/5"},
       task: {CF.Jobs.CreateNotifications, :update, []},
       overlap: false
     ]
