@@ -45,7 +45,7 @@ defmodule CF.Notifications.SubscriptionsMatcherTest do
     end
 
     test "for new comment reply", %{entities: entities, subscriptions: subscriptions} do
-      reply = insert(:comment, reply_to: entities[:comment])
+      reply = insert(:comment, reply_to: entities[:comment], statement: entities[:statement])
 
       # They should all be notified for new comment reply
       action =
@@ -66,7 +66,7 @@ defmodule CF.Notifications.SubscriptionsMatcherTest do
       user = insert(:user)
       statement = insert(:statement, video: entities[:video])
       action = Repo.insert!(ActionCreator.action_create(user.id, statement))
-      expected_subscriptions = Keyword.take(subscriptions, [:video, :statement])
+      expected_subscriptions = Keyword.take(subscriptions, [:video])
 
       returned_subscriptions = SubscriptionsMatcher.match_action(action)
       compare_subscriptions_ids(expected_subscriptions, returned_subscriptions)
@@ -74,21 +74,17 @@ defmodule CF.Notifications.SubscriptionsMatcherTest do
 
     test "for updated statement", %{entities: entities, subscriptions: subscriptions} do
       user = insert(:user)
-      statement = insert(:statement, video: entities[:video])
-      changeset = Ecto.Changeset.change(statement, text: "Changed")
+      changeset = Ecto.Changeset.change(entities[:statement], text: "Changed")
       action = Repo.insert!(ActionCreator.action_update(user.id, changeset))
       expected_subscriptions = Keyword.take(subscriptions, [:video, :statement])
-
       returned_subscriptions = SubscriptionsMatcher.match_action(action)
       compare_subscriptions_ids(expected_subscriptions, returned_subscriptions)
     end
 
     test "for removed statement", %{entities: entities, subscriptions: subscriptions} do
       user = insert(:user)
-      statement = insert(:statement, video: entities[:video])
-      action = Repo.insert!(ActionCreator.action_remove(user.id, statement))
+      action = Repo.insert!(ActionCreator.action_remove(user.id, entities[:statement]))
       expected_subscriptions = Keyword.take(subscriptions, [:video, :statement])
-
       returned_subscriptions = SubscriptionsMatcher.match_action(action)
       compare_subscriptions_ids(expected_subscriptions, returned_subscriptions)
     end

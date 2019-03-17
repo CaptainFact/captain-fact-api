@@ -41,7 +41,7 @@ defmodule CF.Notifications.Subscriptions do
       nil ->
         false
 
-      %{is_subscribed: is_subscribed} = a ->
+      %{is_subscribed: is_subscribed} ->
         is_subscribed
     end
   end

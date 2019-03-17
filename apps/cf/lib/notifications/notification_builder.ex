@@ -17,10 +17,10 @@ defmodule CF.Notifications.NotificationBuilder do
 
   ## Examples
 
-      iex> action = %UserAction{id: 42, type: :create, entity: :comment}
-      iex> subscription = %Subscription{user_id: 100, reason: :is_author}
+      iex> action = %UserAction{id: 42, type: :create, entity: :statement}
+      iex> subscription = %Subscription{user_id: 100}
       iex> NotificationBuilder.for_subscribed_action(action, subscription)
-      %{action_id: 42, type: :reply_to_comment, user_id: 100}
+      %{action_id: 42, type: :new_statement, user_id: 100}
   """
   @spec for_subscribed_action(UserAction.t(), Subscription.t()) :: Notification.t()
   def for_subscribed_action(action, subscription) when not is_nil(subscription) do
