@@ -1,18 +1,12 @@
-defmodule CF.GraphQL.Schema do
+defmodule CF.Graphql.Schema do
   use Absinthe.Schema
-  alias CF.GraphQL.Resolvers
+  alias CF.Graphql.Resolvers
+  alias CF.Graphql.Schema.Middleware
 
-  import_types(CF.GraphQL.Schema.Types)
+  import_types(CF.Graphql.Schema.Types)
+  import_types(CF.Graphql.Schema.InputObjects)
 
-  # Actual API
-
-  input_object :video_filter do
-    field(:language, :string)
-    field(:min_id, :id)
-    field(:speaker_id, :id)
-    field(:speaker_slug, :string)
-    field(:is_partner, :boolean)
-  end
+  # Query API
 
   query do
     @desc "[Deprecated] Get all videos"
@@ -47,14 +41,42 @@ defmodule CF.GraphQL.Schema do
       resolve(&Resolvers.Users.get/3)
     end
 
+    @desc "Get logged in user"
+    field :logged_in_user, :user do
+      middleware(Middleware.RequireAuthentication)
+      resolve(&Resolvers.Users.get_logged_in/3)
+    end
+
     @desc "Get app info"
     field :app_info, :app_info do
       resolve(&Resolvers.AppInfo.info/3)
     end
 
-    @desc "get all_statistics"
+    @desc "Get all_statistics"
     field :all_statistics, :statistics do
       resolve(&Resolvers.Statistics.default/3)
+    end
+  end
+
+  # Mutation API
+
+  mutation do
+    @desc "Use this to mark a notifications as seen"
+    field :update_notifications, list_of(:notification) do
+      arg(:ids, non_null(list_of(:id)))
+      arg(:seen, non_null(:boolean))
+
+      resolve(&Resolvers.Notifications.update/3)
+    end
+
+    @desc "Use this to (un)subscribe from an item notifications"
+    field :update_subscription, :notifications_subscription do
+      arg(:scope, non_null(:string))
+      arg(:entity_id, non_null(:id))
+      arg(:is_subscribed, non_null(:boolean))
+      arg(:reason, :string)
+
+      resolve(&Resolvers.Notifications.update_subscription/3)
     end
   end
 end

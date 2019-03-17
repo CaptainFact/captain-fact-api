@@ -1,4 +1,4 @@
-defmodule CF.GraphQL.Schema.Types.Source do
+defmodule CF.Graphql.Schema.Types.Source do
   @moduledoc """
   Representation of a `DB.Schema.Source` for Absinthe
   """

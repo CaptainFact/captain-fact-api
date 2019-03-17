@@ -1,4 +1,4 @@
-defmodule CF.GraphQL.Schema.Types.Paginated do
+defmodule CF.Graphql.Schema.Types.Paginated do
   @moduledoc """
   A generic pagination object
   """

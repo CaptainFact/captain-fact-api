@@ -1,4 +1,4 @@
-defmodule CF.GraphQL.Application do
+defmodule CF.Graphql.Application do
   use Application
 
   # See https://hexdocs.pm/elixir/Application.html
@@ -14,7 +14,7 @@ defmodule CF.GraphQL.Application do
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: CF.GraphQL.Supervisor]
+    opts = [strategy: :one_for_one, name: CF.Graphql.Supervisor]
     Supervisor.start_link(children, opts)
   end
 

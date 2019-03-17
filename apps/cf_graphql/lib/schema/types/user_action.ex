@@ -1,4 +1,4 @@
-defmodule CF.GraphQL.Schema.Types.UserAction do
+defmodule CF.Graphql.Schema.Types.UserAction do
   @moduledoc """
   Representation of a `DB.Schema.UserAction` for Absinthe
   """
@@ -48,6 +48,30 @@ defmodule CF.GraphQL.Schema.Types.UserAction do
     field(:statement_id, :integer)
     @desc "Comment impacted by this action"
     field(:comment_id, :integer)
+
+    @desc "Associated video"
+    field :video, :video do
+      complexity(join_complexity())
+      resolve(assoc(:video))
+    end
+
+    @desc "Associated statement"
+    field :statement, :statement do
+      complexity(join_complexity())
+      resolve(assoc(:statement))
+    end
+
+    @desc "Associated comment"
+    field :comment, :comment do
+      complexity(join_complexity())
+      resolve(assoc(:comment))
+    end
+
+    @desc "Associated speaker"
+    field :speaker, :speaker do
+      complexity(join_complexity())
+      resolve(assoc(:speaker))
+    end
 
     @desc "A map with all the changes made by this action"
     field(

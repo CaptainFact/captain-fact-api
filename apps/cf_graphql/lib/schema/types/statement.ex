@@ -1,4 +1,4 @@
-defmodule CF.GraphQL.Schema.Types.Statement do
+defmodule CF.Graphql.Schema.Types.Statement do
   @moduledoc """
   Representation of a `DB.Schema.Statement` for Absinthe
   """
@@ -7,7 +7,7 @@ defmodule CF.GraphQL.Schema.Types.Statement do
   use Absinthe.Ecto, repo: DB.Repo
   import CF.Graphql.Schema.Utils
 
-  import_types(CF.GraphQL.Schema.Types.{Speaker, Comment})
+  import_types(CF.Graphql.Schema.Types.{Speaker, Comment})
 
   @desc "A transcript or a description of the picture"
   object :statement do

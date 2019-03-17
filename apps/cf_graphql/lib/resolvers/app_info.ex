@@ -1,9 +1,9 @@
-defmodule CF.GraphQL.Resolvers.AppInfo do
+defmodule CF.Graphql.Resolvers.AppInfo do
   def info(_, _args, _info) do
     {:ok,
      %{
        status: "✔",
-       version: CF.GraphQL.Application.version(),
+       version: CF.Graphql.Application.version(),
        db_version: DB.Application.version()
      }}
   end

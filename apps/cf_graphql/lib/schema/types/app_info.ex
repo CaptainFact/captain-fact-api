@@ -1,4 +1,4 @@
-defmodule CF.GraphQL.Schema.Types.AppInfo do
+defmodule CF.Graphql.Schema.Types.AppInfo do
   @moduledoc """
   App info representation. Contains version, status...etc
   """
@@ -10,7 +10,7 @@ defmodule CF.GraphQL.Schema.Types.AppInfo do
   object :app_info do
     @desc "Indicate if the application is running properly with a checkmark"
     field(:status, non_null(:string))
-    @desc "GraphQL API version"
+    @desc "Graphql API version"
     field(:version, non_null(:string))
     @desc "Version of the database app attached to this API"
     field(:db_version, non_null(:string))
