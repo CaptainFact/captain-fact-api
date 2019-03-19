@@ -1,4 +1,4 @@
-defmodule CF.GraphQL.Resolvers.Users do
+defmodule CF.Graphql.Resolvers.Users do
   @moduledoc """
   Resolver for `DB.Schema.User`
   """
@@ -14,6 +14,10 @@ defmodule CF.GraphQL.Resolvers.Users do
   @doc """
   Resolve a user by its id or username
   """
+  def get(_, %{id: id}, %{context: %{user: user = %{id: id}}}) do
+    {:ok, user}
+  end
+
   def get(_, %{id: id}, _) do
     User
     |> Repo.get(id)
@@ -24,6 +28,13 @@ defmodule CF.GraphQL.Resolvers.Users do
     User
     |> Repo.get_by(username: username)
     |> Result.ok()
+  end
+
+  @doc """
+  Get logged in user
+  """
+  def get_logged_in(_, _, %{context: %{user: user}}) do
+    {:ok, user}
   end
 
   @doc """

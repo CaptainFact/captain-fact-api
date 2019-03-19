@@ -1,14 +1,16 @@
-defmodule CF.GraphQL.Schema.Types do
+defmodule CF.Graphql.Schema.Types do
   use Absinthe.Schema.Notation
 
-  import_types(CF.GraphQL.Schema.Types.{
+  import_types(CF.Graphql.Schema.Types.{
     AppInfo,
     Comment,
+    Notification,
     Paginated,
     Source,
     Speaker,
     Statement,
     Statistics,
+    Subscription,
     UserAction,
     User,
     Video

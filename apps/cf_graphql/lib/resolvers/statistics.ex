@@ -1,4 +1,4 @@
-defmodule CF.GraphQL.Resolvers.Statistics do
+defmodule CF.Graphql.Resolvers.Statistics do
   @moduledoc """
   Absinthe solver for community insights and statistics
   """

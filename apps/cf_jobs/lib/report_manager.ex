@@ -33,7 +33,7 @@ defmodule CF.Jobs.ReportManager do
         Map.merge(
           %{
             analyser_id: analyser_id,
-            last_action_id: Enum.max(actions, & &1.id).id,
+            last_action_id: Enum.max_by(actions, & &1.id).id,
             status: UsersActionsReport.status(status),
             nb_actions: Enum.count(actions)
           },

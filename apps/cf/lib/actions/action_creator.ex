@@ -21,9 +21,9 @@ defmodule CF.Actions.ActionCreator do
       video_id: statement.video_id,
       statement_id: statement.id,
       changes: %{
-        text: statement.text,
-        time: statement.time,
-        speaker_id: statement.speaker_id
+        "text" => statement.text,
+        "time" => statement.time,
+        "speaker_id" => statement.speaker_id
       }
     )
   end
@@ -35,8 +35,8 @@ defmodule CF.Actions.ActionCreator do
       :create,
       speaker_id: speaker.id,
       changes: %{
-        full_name: speaker.full_name,
-        title: speaker.title
+        "full_name" => speaker.full_name,
+        "title" => speaker.title
       }
     )
   end
@@ -50,10 +50,10 @@ defmodule CF.Actions.ActionCreator do
       statement_id: comment.statement_id,
       comment_id: comment.id,
       changes: %{
-        text: comment.text,
-        source: source_url,
-        statement_id: comment.statement_id,
-        reply_to_id: comment.reply_to_id
+        "text" => comment.text,
+        "source" => source_url,
+        "statement_id" => comment.statement_id,
+        "reply_to_id" => comment.reply_to_id
       }
     )
   end
@@ -77,7 +77,7 @@ defmodule CF.Actions.ActionCreator do
       :add,
       video_id: video.id,
       changes: %{
-        url: Video.build_url(video)
+        "url" => Video.build_url(video)
       }
     )
   end

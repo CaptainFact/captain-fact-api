@@ -1,4 +1,4 @@
-defmodule CF.GraphQL.Schema.Types.Comment do
+defmodule CF.Graphql.Schema.Types.Comment do
   @moduledoc """
   Representation of a `DB.Schema.Comment` for Absinthe
   """
@@ -6,7 +6,7 @@ defmodule CF.GraphQL.Schema.Types.Comment do
   use Absinthe.Schema.Notation
   use Absinthe.Ecto, repo: DB.Repo
   import CF.Graphql.Schema.Utils
-  alias CF.GraphQL.Resolvers
+  alias CF.Graphql.Resolvers
 
   @desc "A user's comment. A comment will be considered being a fact if it has a source"
   object :comment do

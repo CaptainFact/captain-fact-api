@@ -1,4 +1,4 @@
-defmodule CF.GraphQL.Schema.Types.Statistics do
+defmodule CF.Graphql.Schema.Types.Statistics do
   @moduledoc """
   Various application statistics, like the number of users, the number of
   comments...
@@ -6,7 +6,7 @@ defmodule CF.GraphQL.Schema.Types.Statistics do
 
   use Absinthe.Schema.Notation
   use Absinthe.Ecto, repo: DB.Repo
-  alias CF.GraphQL.Resolvers
+  alias CF.Graphql.Resolvers
 
   @desc "Statistics about the platform community"
   object :statistics do

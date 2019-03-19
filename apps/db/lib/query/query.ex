@@ -1,6 +1,6 @@
 defmodule DB.Query do
   @moduledoc """
-  General queries
+  General queriying utils.
   """
 
   import Ecto.Query

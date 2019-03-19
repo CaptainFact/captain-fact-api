@@ -134,8 +134,19 @@ defmodule DB.Repo.Migrations.AddRelationshipsToUserActions do
       if action.changes do
         base_update
       else
-        video = Repo.get!(Video, action.entity_id)
-        [{:changes, %{"url" => Video.build_url(video)}} | base_update]
+        Ecto.Adapters.SQL.query!(
+          Repo,
+          """
+          SELECT  provider_id
+          FROM    videos
+          WHERE   id = $1
+          """,
+          [action.entity_id]
+        )
+        |> (fn %Postgrex.Result{rows: [[provider_id]]} ->
+              video_url = "https://www.youtube.com/watch?v=#{provider_id}"
+              [{:changes, %{"url" => video_url}} | base_update]
+            end).()
       end
 
     change(action, full_update)

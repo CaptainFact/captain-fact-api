@@ -1,4 +1,4 @@
-defmodule CF.GraphQL.Schema.Types.Speaker do
+defmodule CF.Graphql.Schema.Types.Speaker do
   @moduledoc """
   Representation of a `DB.Schema.Speaker` for Absinthe
   """
@@ -6,7 +6,7 @@ defmodule CF.GraphQL.Schema.Types.Speaker do
   use Absinthe.Schema.Notation
   use Absinthe.Ecto, repo: DB.Repo
   import CF.Graphql.Schema.Utils
-  alias CF.GraphQL.Resolvers
+  alias CF.Graphql.Resolvers
 
   @desc "A speaker appearing in one or more videos"
   object :speaker do

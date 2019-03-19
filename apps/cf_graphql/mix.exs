@@ -1,10 +1,10 @@
-defmodule CF.GraphQL.Mixfile do
+defmodule CF.Graphql.Mixfile do
   use Mix.Project
 
   def project do
     [
       app: :cf_graphql,
-      version: "0.9.3",
+      version: "1.0.0",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
@@ -22,7 +22,7 @@ defmodule CF.GraphQL.Mixfile do
 
   def application do
     [
-      mod: {CF.GraphQL.Application, []},
+      mod: {CF.Graphql.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end
@@ -43,9 +43,9 @@ defmodule CF.GraphQL.Mixfile do
       {:kaur, "~> 1.1"},
       {:poison, "~> 3.1"},
 
-      # Local
-      {:cf, in_umbrella: true},
+      # Internal dependencies
       {:db, in_umbrella: true},
+      {:cf, in_umbrella: true},
 
       # Dev only
       {:exsync, "~> 0.2", only: :dev}
