@@ -13,7 +13,7 @@ defmodule CF.Authenticator.OAuth.Facebook do
     strategy: __MODULE__,
     site: "https://graph.facebook.com",
     authorize_url: "https://www.facebook.com/dialog/oauth",
-    token_url: "/v2.8/oauth/access_token",
+    token_url: "/v2.9/oauth/access_token",
     token_method: :get
   ]
 
