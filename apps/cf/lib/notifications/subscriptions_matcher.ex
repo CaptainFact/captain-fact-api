@@ -28,7 +28,7 @@ defmodule CF.Notifications.SubscriptionsMatcher do
       )
       when not is_nil(reply_to_id) do
     Subscription
-    |> where([s], s.user_id != ^user_id)
+    |> where([s], s.user_id != ^user_id and s.is_subscribed == true)
     |> where(
       [s],
       (s.comment_id == ^reply_to_id and s.scope == ^:comment) or
@@ -41,7 +41,7 @@ defmodule CF.Notifications.SubscriptionsMatcher do
 
   def match_action(action = %{entity: :comment, type: :create, user_id: user_id}) do
     Subscription
-    |> where([s], s.user_id != ^user_id)
+    |> where([s], s.user_id != ^user_id and s.is_subscribed == true)
     |> where(
       [s],
       (s.statement_id == ^action.statement_id and s.scope == ^:statement) or
@@ -54,7 +54,7 @@ defmodule CF.Notifications.SubscriptionsMatcher do
   def match_action(action = %{entity: :statement, type: type, user_id: user_id})
       when type in [:update, :remove, :create] do
     Subscription
-    |> where([s], s.user_id != ^user_id)
+    |> where([s], s.user_id != ^user_id and s.is_subscribed == true)
     |> where(
       [s],
       (s.statement_id == ^action.statement_id and s.scope == ^:statement) or
@@ -66,7 +66,7 @@ defmodule CF.Notifications.SubscriptionsMatcher do
 
   def match_action(%{entity: :video, type: :update, video_id: video_id, user_id: user_id}) do
     Subscription
-    |> where([s], s.user_id != ^user_id)
+    |> where([s], s.user_id != ^user_id and s.is_subscribed == true)
     |> where([s], s.scope == ^:video)
     |> where([s], s.video_id == ^video_id)
     |> Repo.all()
@@ -76,7 +76,7 @@ defmodule CF.Notifications.SubscriptionsMatcher do
   def match_action(%{entity: :speaker, type: type, video_id: video_id, user_id: user_id})
       when type in [:add, :remove] do
     Subscription
-    |> where([s], s.user_id != ^user_id)
+    |> where([s], s.user_id != ^user_id and s.is_subscribed == true)
     |> where([s], s.scope == ^:video)
     |> where([s], s.video_id == ^video_id)
     |> Repo.all()
