@@ -128,7 +128,9 @@ end
 
 # ---- [APP CONFIG] :cf_graphql ----
 
+config :cf_graphql,
+  basic_auth: [password: load_secret.("basic_auth_password")]
+
 config :cf_graphql, CF.GraphQLWeb.Endpoint,
   url: [host: load_secret.("host")],
-  secret_key_base: [host: load_secret.("secret_key_base")],
-  basic_auth: [password: load_secret.("basic_auth_password")]
+  secret_key_base: [host: load_secret.("secret_key_base")]
