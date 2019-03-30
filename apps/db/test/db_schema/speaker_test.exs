@@ -19,24 +19,24 @@ defmodule DB.Schema.SpeakerTest do
     refute changeset.valid?
   end
 
-  test "full name must be between 3 and 60 characters" do
+  test "full name must be between 3 and 120 characters" do
     # Too short
     attrs = %{full_name: "x"}
     assert {:full_name, "should be at least 3 character(s)"} in errors_on(%Speaker{}, attrs)
 
     # Too long
-    attrs = %{full_name: String.duplicate("x", 61)}
-    assert {:full_name, "should be at most 60 character(s)"} in errors_on(%Speaker{}, attrs)
+    attrs = %{full_name: String.duplicate("x", 121)}
+    assert {:full_name, "should be at most 120 character(s)"} in errors_on(%Speaker{}, attrs)
   end
 
-  test "title must be between 3 and 60 characters" do
+  test "title must be between 3 and 240 characters" do
     # Too short
     attrs = %{title: "x"}
     assert {:title, "should be at least 3 character(s)"} in errors_on(%Speaker{}, attrs)
 
     # Too long
-    attrs = %{title: String.duplicate("x", 61)}
-    assert {:title, "should be at most 60 character(s)"} in errors_on(%Speaker{}, attrs)
+    attrs = %{title: String.duplicate("x", 241)}
+    assert {:title, "should be at most 240 character(s)"} in errors_on(%Speaker{}, attrs)
   end
 
   test "name and title are trimmed" do
