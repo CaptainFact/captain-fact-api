@@ -50,7 +50,6 @@ defmodule CF.Mixfile do
       {:httpoison, "~> 0.11"},
       {:poison, "~> 3.1"},
       {:csv, "~> 1.4.4"},
-      {:timex, "~> 3.0"},
       {:not_qwerty123, "~> 2.2"},
       {:bamboo, github: "thoughtbot/bamboo"},
       {:hackney, "~> 1.6"},
