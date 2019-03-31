@@ -39,7 +39,7 @@ defmodule DB.Schema.Speaker do
     |> validate_length(:full_name, min: 3, max: 120)
     |> validate_length(:title, min: 3, max: 240)
     |> validate_required(:full_name)
-    |> update_change(:wikidata_item_id, &String.upcase/1)
+    |> update_change(:wikidata_item_id, &DB.Utils.String.upcase/1)
     |> validate_format(:wikidata_item_id, ~r/Q[1-9]\d*/)
     |> unique_constraint(:wikidata_item_id)
   end
