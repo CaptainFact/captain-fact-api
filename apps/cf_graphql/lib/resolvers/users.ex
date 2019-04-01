@@ -38,6 +38,13 @@ defmodule CF.Graphql.Resolvers.Users do
   end
 
   @doc """
+  Get logged in user
+  """
+  def get_logged_in(_, _, _) do
+    {:ok, nil}
+  end
+
+  @doc """
   Resolve main picture URL for `user`
   """
   def picture_url(user, _, _) do

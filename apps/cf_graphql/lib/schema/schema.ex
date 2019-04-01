@@ -43,7 +43,6 @@ defmodule CF.Graphql.Schema do
 
     @desc "Get logged in user"
     field :logged_in_user, :user do
-      middleware(Middleware.RequireAuthentication)
       resolve(&Resolvers.Users.get_logged_in/3)
     end
 
@@ -63,6 +62,8 @@ defmodule CF.Graphql.Schema do
   mutation do
     @desc "Use this to mark a notifications as seen"
     field :update_notifications, list_of(:notification) do
+      middleware(Middleware.RequireAuthentication)
+
       arg(:ids, non_null(list_of(:id)))
       arg(:seen, non_null(:boolean))
 
@@ -71,6 +72,8 @@ defmodule CF.Graphql.Schema do
 
     @desc "Use this to (un)subscribe from an item notifications"
     field :update_subscription, :notifications_subscription do
+      middleware(Middleware.RequireAuthentication)
+
       arg(:scope, non_null(:string))
       arg(:entity_id, non_null(:id))
       arg(:is_subscribed, non_null(:boolean))
