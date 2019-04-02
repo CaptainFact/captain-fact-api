@@ -1,12 +1,18 @@
-stages:
-  - name: test
-  - name: release
-
-# ---- Jobs ----
-
 jobs:
   include:
     - stage: test
+      name: Check Format
+      language: elixir
+      elixir: "1.6"
+      otp_release: "21.0"
+      cache: { paths: ["_build", "deps"] }
+      env:
+        - MIX_ENV=test
+      script:
+        - mix format --check-formatted
+
+    - stage: test
+      name: Unit test
       language: elixir
       elixir: "1.6"
       otp_release: "21.0"
@@ -15,7 +21,6 @@ jobs:
       env:
         - MIX_ENV=test
       before_script:
-        - mix format --check-formatted
         - mix local.hex --force
         - mix local.rebar --force
         - mix deps.get
@@ -25,7 +30,7 @@ jobs:
         - mix coveralls.travis --umbrella
 
     - stage: release
-      if: branch IN (master, staging) AND type != pull_request
+      if: type != pull_request AND (branch IN (master, staging) OR tag =~ ^v\d+)
       language: generic
       sudo: required
       services: [docker]

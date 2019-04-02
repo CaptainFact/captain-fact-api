@@ -21,4 +21,8 @@ defmodule DB.Utils.String do
     |> String.trim()
     |> String.replace(~r/\s+/, " ")
   end
+
+  def upcase(nil), do: nil
+
+  def upcase(str), do: String.upcase(str)
 end

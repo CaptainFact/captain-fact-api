@@ -20,6 +20,7 @@ defmodule CF.RestApi.VideoDebateChannel do
   alias DB.Schema.VideoSpeaker
 
   alias CF.Videos
+  alias CF.Speakers
   alias CF.Accounts.UserPermissions
   alias CF.Notifications.Subscriptions
   alias CF.RestApi.{VideoView, SpeakerView, ChangesetView}
@@ -170,6 +171,9 @@ defmodule CF.RestApi.VideoDebateChannel do
         |> Repo.transaction()
         |> case do
           {:ok, %{speaker: speaker}} ->
+            unless is_nil(changeset.changes[:wikidata_item_id]),
+              do: fetch_speaker_picture_from_wiki_async(socket, speaker)
+
             rendered_speaker = View.render_one(speaker, SpeakerView, "speaker.json")
             broadcast!(socket, "speaker_updated", rendered_speaker)
             {:reply, :ok, socket}
@@ -238,5 +242,19 @@ defmodule CF.RestApi.VideoDebateChannel do
 
   defp is_subscribed(user_id, video) do
     Subscriptions.is_subscribed(%User{id: user_id}, video)
+  end
+
+  defp fetch_speaker_picture_from_wiki_async(socket, speaker) do
+    Task.start(fn ->
+      case Speakers.fetch_picture_from_wikimedia(speaker) do
+        {:ok, speaker} ->
+          rendered_speaker = View.render_one(speaker, SpeakerView, "speaker.json")
+          broadcast!(socket, "speaker_updated", rendered_speaker)
+
+        _ ->
+          # We don't care about errors here
+          nil
+      end
+    end)
   end
 end

@@ -4,7 +4,7 @@ defmodule CF.Mixfile do
   def project do
     [
       app: :cf,
-      version: "1.0.1",
+      version: "1.0.2",
       build_path: "../../_build",
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       config_path: "../../config/config.exs",
@@ -50,7 +50,6 @@ defmodule CF.Mixfile do
       {:httpoison, "~> 0.11"},
       {:poison, "~> 3.1"},
       {:csv, "~> 1.4.4"},
-      {:timex, "~> 3.0"},
       {:not_qwerty123, "~> 2.2"},
       {:bamboo, github: "thoughtbot/bamboo"},
       {:hackney, "~> 1.6"},
