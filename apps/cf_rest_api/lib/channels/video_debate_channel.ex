@@ -6,7 +6,7 @@ defmodule CF.RestApi.VideoDebateChannel do
     only: [
       action_add: 3,
       action_create: 2,
-      action_update: 2,
+      action_update: 3,
       action_remove: 3
     ]
 
@@ -156,6 +156,7 @@ defmodule CF.RestApi.VideoDebateChannel do
 
   def handle_in_authenticated!("update_speaker", params, socket) do
     user_id = socket.assigns.user_id
+    video_id = socket.assigns.video_id
     UserPermissions.check!(user_id, :update, :speaker)
     speaker = Repo.get!(Speaker, params["id"])
     changeset = Speaker.changeset(speaker, params)
@@ -167,7 +168,7 @@ defmodule CF.RestApi.VideoDebateChannel do
       _ ->
         Multi.new()
         |> Multi.update(:speaker, changeset)
-        |> Multi.insert(:action_update, action_update(user_id, changeset))
+        |> Multi.insert(:action_update, action_update(user_id, changeset, video_id))
         |> Repo.transaction()
         |> case do
           {:ok, %{speaker: speaker}} ->
