@@ -10,28 +10,36 @@ msgid ""
 msgstr ""
 "Language: fr\n"
 
-#: lib/mailer/email.ex:75
+#: lib/mailer/email.ex:93 lib/mailer/email.ex:93
 msgid "%{name} invited you to try CaptainFact.io!"
 msgstr "%{name} vous a invité à rejoindre CaptainFact.io !"
 
-#: lib/mailer/email.ex:49
+#: lib/mailer/email.ex:60 lib/mailer/email.ex:60
 msgid "CaptainFact.io - Reset your password"
 msgstr "CaptainFact.io - Réinitialisation du mot de passe"
 
-#: lib/mailer/email.ex:31
-msgid "Welcome to CaptainFact.io!"
-msgstr "Bienvenue sur CaptainFact.io !"
-
-#: lib/mailer/email.ex:57
+#: lib/mailer/email.ex:73 lib/mailer/email.ex:73
 msgid "About your recent loss of reputation on CaptainFact"
 msgstr "A propos de votre récente perte de réputation sur CaptainFact"
 
 #: lib/mailer/templates/_layout.html.eex:189
+#: lib/mailer/templates/_layout.html.eex:189
+#: lib/mailer/templates/_layout.text.eex:6
 #: lib/mailer/templates/_layout.text.eex:6
 msgid "CaptainFact is a free and open source project."
 msgstr "CaptainFact est un projet open-source à but non lucratif."
 
 #: lib/mailer/templates/_layout.html.eex:190
+#: lib/mailer/templates/_layout.html.eex:190
+#: lib/mailer/templates/_layout.text.eex:7
 #: lib/mailer/templates/_layout.text.eex:7
 msgid "If you like it, please share the word!"
 msgstr "Si vous appréciez notre travail, partagez-le !"
+
+#: lib/mailer/email.ex:32 lib/mailer/email.ex:32
+msgid "Confirm your CaptainFact account"
+msgstr "Confirmez votre compte CaptainFact pour obtenir +15pts de réputation 🌟️"
+
+#: lib/mailer/email.ex:89 lib/mailer/email.ex:89
+msgid "Your invitation to try CaptainFact.io is ready!"
+msgstr ""

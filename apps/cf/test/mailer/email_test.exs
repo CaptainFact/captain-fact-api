@@ -41,8 +41,10 @@ defmodule CF.Mailer.EmailTest do
     common_welcome_test(@user_en, email_en)
     common_welcome_test(@user_fr, email_fr)
 
-    assert email_en.subject == "Welcome to CaptainFact.io!"
-    assert email_fr.subject == "Bienvenue sur CaptainFact.io !"
+    assert email_en.subject == "Confirm your CaptainFact account"
+
+    assert email_fr.subject ==
+             "Confirmez votre compte CaptainFact pour obtenir +15pts de réputation 🌟️"
   end
 
   test "reputation loss" do

@@ -29,7 +29,7 @@ defmodule CF.Mailer.Email do
 
     user
     |> user_email()
-    |> subject(gettext_mail_user(user, "Welcome to CaptainFact.io!"))
+    |> subject(gettext_mail_user(user, "Confirm your CaptainFact account"))
     |> assign(:confirm_email_reputation, reputation_change)
     |> render_i18n(:welcome)
   end
