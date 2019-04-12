@@ -105,6 +105,10 @@ defmodule CF.Actions.ActionCreator do
     )
   end
 
+  def action_update(user_id, %{data: %Speaker{id: id}, changes: changes}, video_id) do
+    action(user_id, :speaker, :update, speaker_id: id, video_id: video_id, changes: changes)
+  end
+
   def action_update(user_id, %{data: %Speaker{id: id}, changes: changes}) do
     action(user_id, :speaker, :update, speaker_id: id, changes: changes)
   end
