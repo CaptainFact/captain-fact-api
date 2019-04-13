@@ -4,7 +4,7 @@ defmodule CF.RestApi.Mixfile do
   def project do
     [
       app: :cf_rest_api,
-      version: "1.0.2",
+      version: "1.0.3",
       build_path: "../../_build",
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       config_path: "../../config/config.exs",
