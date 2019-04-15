@@ -6,7 +6,7 @@
   "arc_ecto": {:hex, :arc_ecto, "0.10.0", "d2efcc17c45169a13aaac3cd32115ccc832585b7942ea640083280edfd54f514", [:mix], [{:arc, "~> 0.10.0", [hex: :arc, repo: "hexpm", optional: false]}, {:ecto, "~> 2.1", [hex: :ecto, repo: "hexpm", optional: false]}], "hexpm"},
   "artificery": {:hex, :artificery, "0.2.6", "f602909757263f7897130cbd006b0e40514a541b148d366ad65b89236b93497a", [:mix], [], "hexpm"},
   "atomex": {:hex, :atomex, "0.3.0", "19b5d1a2aef8706dbd307385f7d5d9f6f273869226d317492c396c7bacf26402", [:mix], [{:xml_builder, "~> 2.0.0", [hex: :xml_builder, repo: "hexpm", optional: false]}], "hexpm"},
-  "bamboo": {:git, "https://github.com/thoughtbot/bamboo.git", "023b012d5a90617d68a67efa807e276712730638", []},
+  "bamboo": {:git, "https://github.com/thoughtbot/bamboo.git", "214f5f3e3be51e15d7c2d4c7449fe1d48a6aa472", []},
   "base64url": {:hex, :base64url, "0.0.1", "36a90125f5948e3afd7be97662a1504b934dd5dac78451ca6e9abf85a10286be", [:rebar], [], "hexpm"},
   "basic_auth": {:hex, :basic_auth, "2.2.4", "d8c748237870dd1df3bc5c0f1ab4f1fad6270c75472d7e62b19302ec59e92a79", [:mix], [{:plug, "~> 0.14 or ~> 1.0", [hex: :plug, repo: "hexpm", optional: false]}], "hexpm"},
   "bcrypt_elixir": {:hex, :bcrypt_elixir, "1.1.1", "6b5560e47a02196ce5f0ab3f1d8265db79a23868c137e973b27afef928ed8006", [:make, :mix], [{:elixir_make, "~> 0.4", [hex: :elixir_make, repo: "hexpm", optional: false]}], "hexpm"},
