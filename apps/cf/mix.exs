@@ -39,7 +39,7 @@ defmodule CF.Mixfile do
     [
       {:phoenix, "~> 1.3.0", override: true},
       {:phoenix_html, "~> 2.6"},
-      {:gettext, "~> 0.13.1"},
+      {:gettext, "~> 0.16.1"},
       {:google_api_you_tube, "~> 0.1.0"},
       {:kaur, "~> 1.1"},
       {:bcrypt_elixir, "~> 1.0"},

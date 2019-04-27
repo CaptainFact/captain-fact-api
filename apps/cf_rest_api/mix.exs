@@ -37,7 +37,7 @@ defmodule CF.RestApi.Mixfile do
     [
       {:corsica, "~> 1.0"},
       {:cowboy, "~> 1.0"},
-      {:gettext, "~> 0.13.1"},
+      {:gettext, "~> 0.16.1"},
       {:kaur, "~> 1.1"},
       {:phoenix, "~> 1.3.0", override: true},
       {:phoenix_html, "~> 2.6"},
