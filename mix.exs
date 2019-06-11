@@ -26,7 +26,7 @@ defmodule CF.Umbrella.Mixfile do
 
       # ---- Test and Dev
       {:excoveralls, "~> 0.8", only: :test},
-      {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.1.0", only: [:dev, :test], runtime: false},
       {:mix_test_watch, "~> 0.6", only: :dev, runtime: false}
     ]
   end
