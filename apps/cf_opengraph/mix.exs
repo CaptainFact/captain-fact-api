@@ -31,7 +31,7 @@ defmodule CF.Opengraph.MixProject do
       {:cowboy, "~> 1.1"},
       {:kaur, "~> 1.1"},
       {:phoenix_html, "~> 2.11.2"},
-      {:plug, "~> 1.5.1"},
+      {:plug, "~> 1.8.2"},
 
       # ---- Internal ----
       {:db, in_umbrella: true},
