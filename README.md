@@ -20,14 +20,14 @@
 
 ## Prerequisites
 
-You need to install Elixir. We recommand using [asdf](https://github.com/asdf-vm/asdf#setup).
+You need to install Elixir. We recommand using [asdf-vm](https://github.com/asdf-vm/asdf#setup).
 Check their documentation on how to install it, then run `asdf install` from
 root `captain-fact-api` folder.
 
 ## Start DB
 
-Create / launch a postgres instance on your local machine. If you have
-docker installed, you can use the pre-seed postgres docker image:
+Create / launch a PostgreSQL instance on your local machine. If you have
+Docker installed, you can use the pre-Seed PostgreSQL Docker image:
 
 `docker run -d --name cf_dev_db -p 5432:5432 captainfact/dev-db:latest`
 
@@ -40,17 +40,17 @@ docker installed, you can use the pre-seed postgres docker image:
 Following services will be started:
 
 - [localhost:4000](http://localhost:4000) - REST API
-- [localhost:4001](https://localhost:4001) - REST API (https)
+- [localhost:4001](https://localhost:4001) - REST API (HTTPS)
 - [localhost:4002](http://localhost:4002) - GraphQL API
-- [localhost:4003](https://localhost:4003) - GraphQL API (https)
+- [localhost:4003](https://localhost:4003) - GraphQL API (HTTPS)
 - [localhost:4004](http://localhost:4004) - Atom feed
 
-You can also see all the mail sent by going to http://localhost:4000/_dev/mail
+You can also see all e-mail sent, by going to http://localhost:4000/_dev/mail
 
 ## Other useful commands
 
 - `mix test` --> Run tests
-- `mix test.watch` --> Run tests watcher
+- `mix test.watch` --> Run test watcher
 - `mix format` --> Format code
 - `mix ecto.gen.migration [migration_name]` --> Generate migration
 
@@ -70,22 +70,22 @@ This application is organized as an [umbrella project](https://elixir-lang.org/g
 │   └── db => DB repository and schemas **Not deployed**
 │       ├── lib
 │       │   ├── db
-│       │   ├── db_schema => Contains all the schemas (Video, Speaker, Comment...etc)
-│       │   ├── db_type => Special types (SpeakerPicture...etc)
-│       │   └── db_utils => Some utils functions
+│       │   ├── db_schema => Contains all the schemas (Video, Speaker, Comment…etc)
+│       │   ├── db_type => Special types (SpeakerPicture…etc.)
+│       │   └── db_utils => Some utility functions
 │       └── priv
 │           └── repo/migrations => All DB migrations files
 ├── README.md => You're reading it right now. Are you?
 ├── rel => Release configs & tools
-│   ├── commands => Commands that will be available to run on the release (seed DB...etc)
+│   ├── commands => Commands that will be available to run on the release (seed DB…etc.)
 │   ├── hooks => Some hooks for automatically run commands when release run.
 │   ├── runtime_config => Runtime configurations for all apps.
-│   └── config.exs => Releases configuration.
+│   └── config.exs => Release configuration.
 ```
 
 # Linked projects
 
 - [Community discussions and documentation](https://github.com/CaptainFact/captain-fact/)
-- [Frontend](https://github.com/CaptainFact/captain-fact-frontend)
+- [Front-end](https://github.com/CaptainFact/captain-fact-frontend)
 - [Extension](https://github.com/CaptainFact/captain-fact-extension)
 - [Overlay injector](https://github.com/CaptainFact/captain-fact-overlay-injector)
