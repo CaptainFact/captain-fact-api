@@ -57,7 +57,7 @@ defmodule CF.Mixfile do
       {:rollbax, ">= 0.0.0"},
       {:sweet_xml, "~> 0.6"},
       {:burnex, "~> 1.0"},
-      {:yaml_elixir, "~> 2.1.0"},
+      {:yaml_elixir, "~> 2.4.0"},
 
       # ---- Internal ----
       {:db, in_umbrella: true},
