@@ -25,7 +25,7 @@ defmodule CF.Umbrella.Mixfile do
       {:distillery, "~> 2.0", runtime: false},
 
       # ---- Test and Dev
-      {:excoveralls, "~> 0.8", only: :test},
+      {:excoveralls, "~> 0.12.1", only: :test},
       {:credo, "~> 1.1.0", only: [:dev, :test], runtime: false},
       {:mix_test_watch, "~> 0.6", only: :dev, runtime: false}
     ]
