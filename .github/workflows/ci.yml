@@ -1,0 +1,50 @@
+name: CI
+
+on: [push]
+
+env:
+  MIX_ENV: test
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-elixir@v1.1.0
+        with:
+          otp-version: 21.x
+          elixir-version: 1.6.x
+      - name: Check format
+        run: mix format --check-formatted
+
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    services:
+      db:
+        image: postgres:9.6
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/cache@v1
+        with:
+          path: deps
+          key: ${{ runner.os }}-mix-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+          restore-keys: |
+            ${{ runner.os }}-mix-
+      - uses: actions/setup-elixir@v1.1.0
+        with:
+          otp-version: 21.x
+          elixir-version: 1.6.x
+      - name: Install dependencies
+        run: mix deps.get
+      - name: Prepare DB
+        run: mix ecto.create && mix ecto.migrate
+      - name: Run tests
+        run: mix coveralls.github --umbrella

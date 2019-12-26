@@ -1,4 +1,5 @@
 FROM bitwalker/alpine-elixir:1.6.6
+RUN apk update && apk upgrade
 RUN apk add bash imagemagick curl gcc make libc-dev libgcc && rm -rf /var/cache/apk/*
 
 ENV HOME=/opt/app/ SHELL=/bin/bash MIX_ENV=prod
