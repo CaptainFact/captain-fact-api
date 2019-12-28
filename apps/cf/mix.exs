@@ -43,7 +43,7 @@ defmodule CF.Mixfile do
       {:google_api_you_tube, "~> 0.1.0"},
       {:kaur, "~> 1.1"},
       {:bcrypt_elixir, "~> 1.0"},
-      {:guardian, "~> 1.1.0"},
+      {:guardian, "~> 1.2.1"},
       {:guardian_db, "~> 1.1.0"},
       {:floki, "~> 0.20.2"},
       {:html_entities, "~> 0.3"},
