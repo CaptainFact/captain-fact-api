@@ -1,0 +1,75 @@
+name: E2E/Integration tests
+
+on: [push]
+
+env:
+  CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+
+jobs:
+  cypress:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: captainfact/dev-db:latest
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout API
+        uses: actions/checkout@v1
+      - name: Restore Elixir cache
+        uses: actions/cache@v1
+        with:
+          path: deps
+          key: ${{ runner.os }}-mix-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+          restore-keys: |
+            ${{ runner.os }}-mix-
+      - name: Restore Elixir build folder
+        uses: actions/cache@v1
+        with:
+          path: build
+          key: ${{ runner.os }}-mix-build
+      - uses: actions/setup-elixir@v1.1.0
+        with:
+          otp-version: 21.x
+          elixir-version: 1.6.x
+      - name: Install API's dependencies
+        run: mix deps.get
+      - name: Compile dependencies
+        run: mix deps.compile
+      - name: Compile project
+        run: mix compile
+      - name: Prepare DB
+        run: mix ecto.create && mix ecto.migrate
+      - name: Start API
+        run: iex -S mix run &
+      - name: Checkout Frontend
+        uses: actions/checkout@v2
+        with:
+          repository: CaptainFact/captain-fact-frontend
+          ref: refs/heads/staging
+          path: ./captain-fact-frontend
+      - name: Restore node_modules
+        uses: actions/cache@v1
+        id: node-modules
+        with:
+          path: captain-fact-frontend/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('captain-fact-frontend/package-lock.json') }}
+      - name: Install Frontend's dependencies
+        working-directory: captain-fact-frontend
+        run: npm ci --prefer-offline --no-audit
+      - name: Start Frontend
+        working-directory: captain-fact-frontend
+        run: npm run dev &
+      - name: Waiting for API to be ready
+        run: timeout 1m bash -c "until curl localhost:4000; do sleep 1; done"
+      - name: Waiting for Frontend to be ready
+        run: timeout 1m bash -c "until curl localhost:3333 > /dev/null; do sleep 1; done"
+      - name: Run tests
+        working-directory: captain-fact-frontend
+        run: npm run cypress
+      - name: Shutdown everything
+        run: kill $(jobs -p) || true
