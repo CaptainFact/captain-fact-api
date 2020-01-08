@@ -42,7 +42,7 @@ defmodule CF.Graphql.Schema.Types.Video do
       complexity(join_complexity())
     end
 
-    @desc "List all non-removed statements for this video"
+    @desc "List all non-removed statements for this video ordered by time"
     field :statements, list_of(:statement) do
       resolve(&Resolvers.Videos.statements/3)
       complexity(join_complexity())
