@@ -66,6 +66,7 @@ defmodule CF.Graphql.Resolvers.Videos do
     Statement
     |> where([s], s.video_id in ^videos_ids)
     |> where([s], s.is_removed == false)
+    |> order_by(asc: :time)
     |> Repo.all()
     |> Enum.group_by(& &1.video_id)
   end
