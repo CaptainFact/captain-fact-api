@@ -22,7 +22,7 @@ RUN mix deps.compile
 
 # Build app
 ARG APP
-RUN mix release --name ${APP} --env=$MIX_ENV
+RUN mix distillery.release --name ${APP} --env=$MIX_ENV
 
 # Copy app to workdir and remove build files
 WORKDIR /opt/app

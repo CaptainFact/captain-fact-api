@@ -22,7 +22,7 @@ defmodule CF.Umbrella.Mixfile do
   defp deps do
     [
       # ---- Release ----
-      {:distillery, "~> 2.0", runtime: false},
+      {:distillery, "~> 2.1", runtime: false},
 
       # ---- Test and Dev
       {:excoveralls, "~> 0.12.1", only: :test},
