@@ -11,7 +11,6 @@ COPY apps/cf/mix.exs ./apps/cf/
 COPY apps/cf_atom_feed/mix.exs ./apps/cf_atom_feed/
 COPY apps/cf_graphql/mix.exs ./apps/cf_graphql/
 COPY apps/cf_jobs/mix.exs ./apps/cf_jobs/
-COPY apps/cf_opengraph/mix.exs ./apps/cf_opengraph/
 COPY apps/cf_rest_api/mix.exs ./apps/cf_rest_api/
 COPY apps/db/mix.exs ./apps/db/
 RUN HEX_HTTP_CONCURRENCY=4 HEX_HTTP_TIMEOUT=180 mix deps.get
