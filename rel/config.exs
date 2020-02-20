@@ -34,6 +34,20 @@ end
 
 # Releases
 
+release :cf_full_app do
+  set(version: current_version(:cf_rest_api))
+  set(applications: [:cf_rest_api, :cf_jobs, :cf_graphql, :cf_atom_feed])
+  set(post_start_hooks: "rel/hooks/migrate_db")
+
+  set(
+    commands: [
+      migrate: "rel/commands/migrate.sh",
+      seed: "rel/commands/seed.sh",
+      seed_politicians: "rel/commands/seed_politicians.sh"
+    ]
+  )
+end
+
 release :cf_rest_api do
   set(version: current_version(:cf_rest_api))
   set(applications: [:cf_rest_api])
