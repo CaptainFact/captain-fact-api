@@ -18,7 +18,6 @@ set -e
 CF_API_REST_IMAGE=captainfact/rest-api:$1
 CF_API_GRAPHQL_IMAGE=captainfact/graphql-api:$1
 CF_API_ATOM_FEED=captainfact/atom-feed:$1
-CF_API_OPENGRAPH_IMAGE=captainfact/opengraph:$1
 CF_API_JOBS_IMAGE=captainfact/jobs:$1
 
 # ---- Build ----
@@ -26,7 +25,6 @@ echo "[RELEASE] Building Apps 🔨"
 docker build --build-arg APP=cf_rest_api  -t ${CF_API_REST_IMAGE} .
 docker build --build-arg APP=cf_graphql   -t ${CF_API_GRAPHQL_IMAGE} .
 docker build --build-arg APP=cf_atom_feed -t ${CF_API_ATOM_FEED} .
-docker build --build-arg APP=cf_opengraph -t ${CF_API_OPENGRAPH_IMAGE} .
 docker build --build-arg APP=cf_jobs      -t ${CF_API_JOBS_IMAGE} .
 
 # ---- Push release ----
@@ -35,5 +33,4 @@ docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
 docker push $CF_API_REST_IMAGE
 docker push $CF_API_GRAPHQL_IMAGE
 docker push $CF_API_ATOM_FEED
-docker push $CF_API_OPENGRAPH_IMAGE
 docker push $CF_API_JOBS_IMAGE

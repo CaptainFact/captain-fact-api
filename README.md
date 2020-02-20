@@ -65,7 +65,6 @@ This application is organized as an [umbrella project](https://elixir-lang.org/g
 │   ├── cf_atom_feed => Atom feed.
 │   ├── cf_graphql => GraphQL API (public).
 │   ├── cf_jobs => Jobs.
-│   ├── cf_opengraph => An app that generate opengraph tags.
 │   ├── cf_rest_api => REST/WS API (private).
 │   └── db => DB repository and schemas **Not deployed**
 │       ├── lib
