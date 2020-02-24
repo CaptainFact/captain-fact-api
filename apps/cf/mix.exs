@@ -4,7 +4,7 @@ defmodule CF.Mixfile do
   def project do
     [
       app: :cf,
-      version: "1.0.4",
+      version: "1.1.0",
       build_path: "../../_build",
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       config_path: "../../config/config.exs",
