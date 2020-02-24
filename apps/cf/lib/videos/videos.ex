@@ -58,6 +58,11 @@ defmodule CF.Videos do
         |> Video.with_speakers()
         |> Repo.get_by(youtube_id: id)
 
+      {:facebook, id} ->
+        Video
+        |> Video.with_speakers()
+        |> Repo.get_by(facebook_id: id)
+
       _ ->
         nil
     end
@@ -169,18 +174,14 @@ defmodule CF.Videos do
   end
 
   defp get_metadata_fetcher(video_url) do
-    cond do
-      Application.get_env(:cf, :use_test_video_metadata_fetcher) ->
-        &MetadataFetcher.Test.fetch_video_metadata/1
-
-      # We only support YouTube for now
-      # TODO Use a Regex here
-      video_url ->
-        &MetadataFetcher.Youtube.fetch_video_metadata/1
-
-      # Use a default fetcher that retrieves info from OpenGraph tags
-      true ->
-        &MetadataFetcher.Opengraph.fetch_video_metadata/1
+    if Application.get_env(:cf, :use_test_video_metadata_fetcher) do
+      &MetadataFetcher.Test.fetch_video_metadata/1
+    else
+      case Video.parse_url(video_url) do
+        {:youtube, _} -> &MetadataFetcher.Youtube.fetch_video_metadata/1
+        {:facebook, _} -> &MetadataFetcher.Opengraph.fetch_video_metadata/1
+        _ -> &MetadataFetcher.Opengraph.fetch_video_metadata/1
+      end
     end
   end
 end

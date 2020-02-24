@@ -20,6 +20,8 @@ defmodule CF.Graphql.Schema.Types.Video do
     field(:title, non_null(:string))
     @desc "Video URL"
     field(:url, non_null(:string), do: resolve(&Resolvers.Videos.url/3))
+    @desc "Video thumbnail URL"
+    field(:thumbnail, non_null(:string), do: resolve(&Resolvers.Videos.thumbnail/3))
     @desc "Video provider (youtube, vimeo...etc)"
     field(:provider, non_null(:string), deprecate: "Use `url` or `youtube_id`") do
       resolve(fn _, _, _ -> {:ok, "youtube"} end)
@@ -50,11 +52,17 @@ defmodule CF.Graphql.Schema.Types.Video do
 
     # Video providers
 
+    # YouTube
     @desc "Youtube ID for this video"
     field(:youtube_id, :string)
-
     @desc "Offset for all statements on this video when watched with YouTube player"
     field(:youtube_offset, non_null(:integer))
+
+    # Facebook
+    @desc "Facebook ID for this video"
+    field(:facebook_id, :string)
+    @desc "Offset for all statements on this video when watched with Facebook player"
+    field(:facebook_offset, non_null(:integer))
   end
 
   @desc "A list a paginated videos"
