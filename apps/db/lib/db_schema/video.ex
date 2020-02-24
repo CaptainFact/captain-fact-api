@@ -16,13 +16,15 @@ defmodule DB.Schema.Video do
     field(:language, :string, null: true)
     field(:unlisted, :boolean, null: false)
     field(:is_partner, :boolean, null: false)
+    field(:thumbnail, :string, null: true)
 
-    # DEPRECATED
-    # field(:provider, :string)
-    # field(:provider_id, :string)
-
+    # YouTube
     field(:youtube_id, :string)
     field(:youtube_offset, :integer, null: false, default: 0)
+
+    # Facebook
+    field(:facebook_id, :string)
+    field(:facebook_offset, :integer, null: false, default: 0)
 
     many_to_many(:speakers, Speaker, join_through: VideoSpeaker, on_delete: :delete_all)
     has_many(:statements, Statement, on_delete: :delete_all)
@@ -35,7 +37,9 @@ defmodule DB.Schema.Video do
   @providers_regexs %{
     # Map a provider name to its regex, using named_captures to get the id ---------↘️
     youtube:
-      ~r/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)(?<id>[^"&?\/ ]{11})/i
+      ~r/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)(?<id>[^"&?\/ ]{11})/i,
+    facebook:
+      ~r/(?:https?:\/\/)?(?:www.|web.|m.)?facebook.com\/(?:video.php\?v=(?<id3>\d+)|\?v=(?<id4>)\d+)|\S+\/videos\/((\S+)\/(?<id>\d+)|(?<id2>\d+))\/?/i
   }
 
   # Define queries
@@ -114,17 +118,29 @@ defmodule DB.Schema.Video do
   def build_url(%{youtube_id: id}) when not is_nil(id),
     do: "https://www.youtube.com/watch?v=#{id}"
 
+  def build_url(%{facebook_id: id}) when not is_nil(id),
+    do: "https://www.facebook.com/video.php?v=#{id}"
+
   # Add a special case for building test URLs
   if Application.get_env(:db, :env) == :test do
-    def build_url(%{youtube_id: id}),
-      do: "__TEST__/#{id}"
+    def build_url(%{youtube_id: id, facebook_id: fb_id}),
+      do: "__TEST__/#{id || fb_id}"
   end
 
   @doc """
   Returns overview image url for the given video
   """
+  def image_url(_video = %__MODULE__{thumbnail: url}) when not is_nil(url) do
+    url
+  end
+
   def image_url(_video = %__MODULE__{youtube_id: id}) when not is_nil(id) do
-    "https://img.youtube.com/vi/#{id}/hqdefault.jpg"
+    youtube_thumbnail(id)
+  end
+
+  def image_url(_video) do
+    # Facebook doesn't make it easy to fetch the thumbnail, so we use the default YouTube's one
+    "https://img.youtube.com/vi/default/hqdefault.jpg"
   end
 
   @doc """
@@ -137,6 +153,7 @@ defmodule DB.Schema.Video do
     |> parse_video_url()
     |> validate_length(:title, min: 5, max: 120)
     |> unique_constraint(:videos_youtube_id_index)
+    |> unique_constraint(:videos_facebook_id_index)
     # Change locales like "en-US" to "en"
     |> update_change(:language, &hd(String.split(&1, "-")))
   end
@@ -173,7 +190,12 @@ defmodule DB.Schema.Video do
       %Ecto.Changeset{valid?: true, changes: %{url: url}} ->
         case parse_url(url) do
           {:youtube, id} ->
-            put_change(changeset, :youtube_id, id)
+            changeset
+            |> put_change(:youtube_id, id)
+            |> put_change(:thumbnail, youtube_thumbnail(id))
+
+          {:facebook, id} ->
+            put_change(changeset, :facebook_id, id)
 
           _ ->
             add_error(changeset, :url, "invalid_url")
@@ -197,10 +219,18 @@ defmodule DB.Schema.Video do
       {:youtube, "dQw4w9WgXcQ"}
       iex> parse_url "https://www.youtube.com/watch?v="
       nil
+      iex> parse_url "https://www.facebook.com/brutofficiel/videos/une-carte-mondiale-du-qi-/628554354575815/"
+      {:facebook, "628554354575815"}
   """
   def parse_url(url) when is_binary(url) do
     Enum.find_value(@providers_regexs, fn {provider, regex} ->
       case Regex.named_captures(regex, url) do
+        %{"id" => id, "id2" => id2, "id3" => id3, "id4" => id4} ->
+          {provider,
+           Enum.find([id, id2, id3, id4], fn id_to_test ->
+             not is_nil(id_to_test) and String.length(id_to_test) > 0
+           end)}
+
         %{"id" => id} ->
           {provider, id}
 
@@ -208,6 +238,10 @@ defmodule DB.Schema.Video do
           nil
       end
     end)
+  end
+
+  defp youtube_thumbnail(id) do
+    "https://img.youtube.com/vi/#{id}/hqdefault.jpg"
   end
 
   defp filter_with(query, filters) do

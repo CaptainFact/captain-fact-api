@@ -56,6 +56,10 @@ defmodule CF.Graphql.Resolvers.Videos do
     {:ok, DB.Schema.Video.build_url(video)}
   end
 
+  def thumbnail(video, _, _) do
+    {:ok, DB.Schema.Video.image_url(video)}
+  end
+
   def statements(video, _, _) do
     batch({__MODULE__, :fetch_statements_by_videos_ids}, video.id, fn results ->
       {:ok, Map.get(results, video.id) || []}
