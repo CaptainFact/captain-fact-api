@@ -140,7 +140,7 @@ defmodule DB.Schema.Video do
 
   def image_url(_video) do
     # Facebook doesn't make it easy to fetch the thumbnail, so we use the default YouTube's one
-    "https://img.youtube.com/vi/default/hqdefault.jpg"
+    "https://img.youtube.com/vi/default/mqdefault.jpg"
   end
 
   @doc """
@@ -241,7 +241,7 @@ defmodule DB.Schema.Video do
   end
 
   defp youtube_thumbnail(id) do
-    "https://img.youtube.com/vi/#{id}/hqdefault.jpg"
+    "https://img.youtube.com/vi/#{id}/mqdefault.jpg"
   end
 
   defp filter_with(query, filters) do
