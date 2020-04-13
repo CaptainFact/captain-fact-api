@@ -29,7 +29,7 @@ defmodule CF.Moderation do
   alias CF.Accounts.UserPermissions
 
   @nb_flags_to_report %{
-    {:create, :comment} => 3
+    {:create, :comment} => 1
   }
 
   @doc """
@@ -38,7 +38,7 @@ defmodule CF.Moderation do
   ## Examples
 
     iex> CF.Moderation.nb_flags_to_report(:create, :comment)
-    3
+    1
   """
   @spec nb_flags_to_report(atom(), atom()) :: integer()
   def nb_flags_to_report(action, entity) when is_atom(action) and is_atom(entity),
