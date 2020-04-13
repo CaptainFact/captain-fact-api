@@ -13,5 +13,6 @@ defmodule CF.Graphql.Schema.InputObjects.VideoFilter do
     field(:speaker_id, :id)
     field(:speaker_slug, :string)
     field(:is_partner, :boolean)
+    field(:is_featured, :boolean)
   end
 end
