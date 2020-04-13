@@ -263,6 +263,30 @@ defmodule DB.Schema.Video do
 
       {:is_partner, is_partner}, query ->
         from(v in query, where: v.is_partner == ^is_partner)
+
+      {:is_featured, _}, query ->
+        from(
+          v in query,
+          where:
+            v.is_partner == true or
+              v.inserted_at >= datetime_add(^NaiveDateTime.utc_now(), -3, "day") or
+              v.id in fragment("""
+                SELECT popular_videos.id
+                FROM videos popular_videos
+                INNER JOIN statements ON statements.video_id = popular_videos.id
+                GROUP BY popular_videos.id
+                HAVING COUNT(statements.id) >= 3
+              """)
+        )
     end)
+  end
+
+  # Return IDs of videos with at least 3 statements
+  defp popular_videos_subquery do
+    Video
+    |> join(:inner, [v], s in assoc(v, :statements))
+    |> select([:id])
+    |> group_by([v], v.id)
+    |> having([v, s], count(s.id) >= 3)
   end
 end
