@@ -3,6 +3,7 @@ defmodule CF.Umbrella.Mixfile do
 
   def project do
     [
+      version: "1.2.0",
       apps_path: "apps",
       deps_path: "deps",
       build_embedded: Mix.env() == :prod,
@@ -15,6 +16,16 @@ defmodule CF.Umbrella.Mixfile do
         "coveralls.detail": :test,
         "coveralls.post": :test,
         "coveralls.html": :test
+      ],
+      releases: [
+        full_app: [
+          applications: [
+            cf_rest_api: :permanent,
+            cf_jobs: :permanent,
+            cf_graphql: :permanent,
+            cf_atom_feed: :permanent
+          ]
+        ]
       ]
     ]
   end
