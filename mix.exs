@@ -20,10 +20,8 @@ defmodule CF.Umbrella.Mixfile do
       releases: [
         full_app: [
           applications: [
-            cf_rest_api: :permanent,
-            cf_jobs: :permanent,
-            cf_graphql: :permanent,
-            cf_atom_feed: :permanent
+            cf_reverse_proxy: :permanent,
+            cf_jobs: :permanent
           ]
         ]
       ]

@@ -13,9 +13,12 @@ export CF_FACEBOOK_APP_ID=xxxxxxxxxxxxxxxxxxxx
 export CF_FACEBOOK_APP_SECRET=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 export CF_FRONTEND_URL="http://localhost:3333"
 export CF_CHROME_EXTENSION_ID="chrome-extension://fnnhlmbnlbgomamcolcpgncflofhjckm"
-export CF_REST_API_PORT=4000
-export CF_GRAPHQL_API_PORT=4001
-export CF_ATOM_FEED_PORT=4002
+export CF_PORT=4242
 
+# With Mix
 mix release --overwrite
 _build/prod/rel/full_app/bin/full_app start
+
+# With Distillery
+# mix distillery.release --env prod --name cf_full_app
+# _build/prod/rel/cf_full_app/bin/cf_full_app foreground

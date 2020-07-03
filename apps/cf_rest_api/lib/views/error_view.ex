@@ -16,8 +16,7 @@ defmodule CF.RestApi.ErrorView do
     %{error: message}
   end
 
-  def render("403.json", assigns) do
-    Logger.debug(inspect(assigns))
+  def render("403.json", _) do
     %{error: "forbidden"}
   end
 
@@ -29,13 +28,12 @@ defmodule CF.RestApi.ErrorView do
     %{error: message}
   end
 
-  def render("error.json", assigns) do
-    Logger.debug(inspect(assigns))
+  def render("error.json", _) do
     %{error: "unexpected"}
   end
 
   def render(_, assigns) do
-    Logger.debug(inspect(assigns))
+    IO.inspect(assigns)
     %{error: "unexpected"}
   end
 end

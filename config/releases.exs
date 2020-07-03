@@ -112,8 +112,7 @@ check_origin = if cors_allow_all?, do: false, else: [frontend_url]
 config :cf_rest_api, CF.RestApi.Endpoint,
   url: [host: load_secret.("host")],
   secret_key_base: load_secret.("secret_key_base"),
-  check_origin: check_origin,
-  http: [port: load_int.("rest_api_port")]
+  check_origin: check_origin
 
 # CORS origins for HTTP endpoint
 
@@ -129,14 +128,15 @@ end
 
 # ---- [APP CONFIG] :cf_graphql ----
 
-config :cf_graphql,
-  basic_auth: [password: load_secret.("basic_auth_password")]
-
 config :cf_graphql, CF.GraphQLWeb.Endpoint,
   url: [host: load_secret.("host")],
-  secret_key_base: [host: load_secret.("secret_key_base")],
-  http: [port: load_int.("graphql_api_port")]
+  secret_key_base: [host: load_secret.("secret_key_base")]
 
-# ---- [APP CONFIG] :cf_atom_feed ----
+# ---- [APP CONFIG] :cf_reverse_proxy ----
 
-config :cf_atom_feed, CF.AtomFeed.Router, cowboy: [port: load_int.("atom_feed_port")]
+config :cf_reverse_proxy, CF.ReverseProxy.Endpoint,
+  check_origin: false,
+  url: [
+    host: System.get_env("RENDER_EXTERNAL_HOSTNAME") || load_secret.("host") || "localhost",
+    port: load_int.("port")
+  ]

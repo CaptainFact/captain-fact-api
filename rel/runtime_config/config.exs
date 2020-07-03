@@ -112,7 +112,8 @@ check_origin = if cors_allow_all?, do: false, else: [frontend_url]
 config :cf_rest_api, CF.RestApi.Endpoint,
   url: [host: load_secret.("host")],
   secret_key_base: load_secret.("secret_key_base"),
-  check_origin: check_origin
+  check_origin: check_origin,
+  server: false
 
 # CORS origins for HTTP endpoint
 
@@ -128,9 +129,7 @@ end
 
 # ---- [APP CONFIG] :cf_graphql ----
 
-config :cf_graphql,
-  basic_auth: [password: load_secret.("basic_auth_password")]
-
 config :cf_graphql, CF.GraphQLWeb.Endpoint,
   url: [host: load_secret.("host")],
-  secret_key_base: [host: load_secret.("secret_key_base")]
+  secret_key_base: [host: load_secret.("secret_key_base")],
+  server: false

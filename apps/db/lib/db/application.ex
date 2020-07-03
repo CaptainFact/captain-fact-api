@@ -2,6 +2,7 @@ defmodule DB.Application do
   @moduledoc false
 
   use Application
+  require Logger
 
   def start(_type, _args) do
     import Supervisor.Spec, warn: false
@@ -16,7 +17,19 @@ defmodule DB.Application do
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: DB.Supervisor]
-    Supervisor.start_link(children, opts)
+    link = Supervisor.start_link(children, opts)
+    migrate_db()
+    link
+  end
+
+  defp migrate_db do
+    Logger.info("Running migrations...")
+    Ecto.Migrator.run(DB.Repo, migrations_path(), :up, all: true)
+    Logger.info("Migrated!")
+  end
+
+  defp migrations_path do
+    Path.join([:code.priv_dir(:db), "repo", "migrations"])
   end
 
   def version() do

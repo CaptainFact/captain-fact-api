@@ -12,16 +12,10 @@ defmodule CF.GraphQLWeb.Router do
     plug(CF.Graphql.AuthPipeline)
   end
 
-  pipeline :basic_auth do
-    plug(BasicAuth, use_config: {:cf_graphql, :basic_auth})
-  end
-
   scope "/" do
     pipe_through(:api_auth)
 
     scope @graphiql_route do
-      if Mix.env() == :prod, do: pipe_through(:basic_auth)
-
       forward(
         "/",
         Absinthe.Plug.GraphiQL,
