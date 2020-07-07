@@ -36,14 +36,14 @@ defmodule CF.ReverseProxy.Endpoint do
       conn
       |> Map.replace!(:path_info, path_info)
       |> Map.replace!(:request_path, Enum.join(path_info, "/"))
-      |> endpoint.call(endpoint.init(nil))
+      |> endpoint.call([])
     end
   else
     # Prod requests are routed through here
     def call(conn, _) do
       subdomain = get_domain_from_host(conn.host)
       endpoint = Map.get(@subdomains, subdomain, @default_host)
-      endpoint.call(conn, endpoint.init(nil))
+      endpoint.call(conn, [])
     end
 
     defp get_domain_from_host(host) do
