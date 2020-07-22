@@ -1,9 +1,7 @@
-defmodule CF.ReverseProxy.Endpoint do
-  @moduledoc """
-  Inspired by https://blog.appsignal.com/2019/04/16/elixir-alchemy-routing-phoenix-umbrella-apps.html
-  """
+defmodule CF.ReverseProxy.Plug do
+  @moduledoc false
 
-  use Phoenix.Endpoint, otp_app: :cf_reverse_proxy
+  use Plug.Builder
 
   plug(
     Corsica,
@@ -22,6 +20,11 @@ defmodule CF.ReverseProxy.Endpoint do
 
   def init(opts), do: opts
 
+  # See https://github.com/wojtekmach/acme_bank/blob/master/apps/master_proxy/lib/master_proxy/plug.ex
+  # Or CaddyServer
+  # https://elixirforum.com/t/umbrella-with-2-phoenix-apps-how-to-forward-request-from-1-to-2-and-vice-versa/1797/18?u=betree
+  # https://github.com/jesseshieh/master_proxy
+
   if Application.get_env(:cf, :env) == :dev do
     # Dev requests are routed through here
     def call(conn, _) do
@@ -36,14 +39,14 @@ defmodule CF.ReverseProxy.Endpoint do
       conn
       |> Map.replace!(:path_info, path_info)
       |> Map.replace!(:request_path, Enum.join(path_info, "/"))
-      |> endpoint.call([])
+      |> endpoint.call(endpoint.init(nil))
     end
   else
     # Prod requests are routed through here
     def call(conn, _) do
       subdomain = get_domain_from_host(conn.host)
       endpoint = Map.get(@subdomains, subdomain, @default_host)
-      endpoint.call(conn, [])
+      endpoint.call(conn, endpoint.init(nil))
     end
 
     defp get_domain_from_host(host) do
