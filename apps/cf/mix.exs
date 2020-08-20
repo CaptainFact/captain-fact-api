@@ -49,7 +49,7 @@ defmodule CF.Mixfile do
       {:html_entities, "~> 0.3"},
       {:httpoison, "~> 0.11"},
       {:poison, "~> 3.1"},
-      {:csv, "~> 1.4.4"},
+      {:csv, "~> 2.3.1"},
       {:not_qwerty123, "~> 2.2"},
       {:bamboo, github: "thoughtbot/bamboo"},
       {:hackney, "~> 1.6"},
