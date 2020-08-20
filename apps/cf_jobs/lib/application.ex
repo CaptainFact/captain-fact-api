@@ -6,8 +6,8 @@ defmodule CF.Jobs.Application do
   def start(_type, _args) do
     import Supervisor.Spec
 
-    # Wait 30s before starting to give some time for the migrations to run
-    :timer.sleep(30000)
+    # Wait 10s before starting to give some time for the migrations to run
+    :timer.sleep(1000)
 
     env = Application.get_env(:cf, :env)
     # Define workers and child supervisors to be supervised
