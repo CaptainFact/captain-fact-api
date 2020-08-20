@@ -5,14 +5,14 @@ use Distillery.Releases.Config, default_environment: :prod
 environment :dev do
   # Disable symlinks that breaks docker dev image release. Uncomment to debug build
   set(dev_mode: false)
-  set(include_erts: false)
+  set(include_erts: true)
   set(include_src: false)
   set(cookie: :dev_cookie)
 end
 
 environment :prod do
   set(dev_mode: false)
-  set(include_erts: false)
+  set(include_erts: true)
   set(include_src: false)
 
   set(
@@ -35,8 +35,9 @@ end
 # Releases
 
 release :cf_full_app do
-  set(version: current_version(:cf_rest_api))
-  set(applications: [:cf_rest_api, :cf_jobs, :cf_graphql, :cf_atom_feed])
+  set(version: current_version(:cf_reverse_proxy))
+  set(applications: [:cf_reverse_proxy, :cf_jobs])
+
   set(post_start_hooks: "rel/hooks/migrate_db")
 
   set(

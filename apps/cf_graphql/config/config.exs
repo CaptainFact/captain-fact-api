@@ -9,12 +9,7 @@ use Mix.Config
 config :cf_graphql,
   namespace: CF.Graphql,
   ecto_repos: [DB.Repo],
-  env: Mix.env(),
-  basic_auth: [
-    username: "captain",
-    password: "SetAtRuntime",
-    realm: "GraphiQL Public Endpoint"
-  ]
+  env: Mix.env()
 
 # Configures the endpoint
 config :cf_graphql, CF.GraphQLWeb.Endpoint,

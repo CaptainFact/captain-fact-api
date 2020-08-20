@@ -6,11 +6,12 @@ defmodule CF.AtomFeed.Application do
   def start(_type, _args) do
     import Supervisor.Spec
 
-    # Define workers and child supervisors to be supervised
-    children = [
-      # Start the endpoint when the application starts
-      supervisor(CF.AtomFeed.Router, [])
-    ]
+    children = []
+    config = Application.get_env(:cf_atom_feed, CF.AtomFeed.Router)
+
+    if config[:cowboy] do
+      children = [supervisor(CF.AtomFeed.Router, []) | children]
+    end
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

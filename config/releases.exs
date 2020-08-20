@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 # ---- Helpers ----
 
@@ -112,8 +112,7 @@ check_origin = if cors_allow_all?, do: false, else: [frontend_url]
 config :cf_rest_api, CF.RestApi.Endpoint,
   url: [host: load_secret.("host")],
   secret_key_base: load_secret.("secret_key_base"),
-  check_origin: check_origin,
-  server: false
+  check_origin: check_origin
 
 # CORS origins for HTTP endpoint
 
@@ -131,5 +130,13 @@ end
 
 config :cf_graphql, CF.GraphQLWeb.Endpoint,
   url: [host: load_secret.("host")],
-  secret_key_base: [host: load_secret.("secret_key_base")],
-  server: false
+  secret_key_base: [host: load_secret.("secret_key_base")]
+
+# ---- [APP CONFIG] :cf_reverse_proxy ----
+
+config :cf_reverse_proxy, CF.ReverseProxy.Endpoint,
+  check_origin: false,
+  url: [
+    host: System.get_env("RENDER_EXTERNAL_HOSTNAME") || load_secret.("host") || "localhost",
+    port: load_int.("port")
+  ]

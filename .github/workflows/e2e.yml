@@ -46,6 +46,7 @@ jobs:
         run: mix ecto.create && mix ecto.migrate
       - name: Start API
         run: iex -S mix run &
+      - uses: actions/setup-node@v1
       - name: Checkout Frontend
         uses: actions/checkout@v2
         with:
@@ -57,7 +58,7 @@ jobs:
         id: node-modules
         with:
           path: captain-fact-frontend/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('captain-fact-frontend/package-lock.json') }}
+          key: ${{ runner.os }}-node_modules-${{ hashFiles('captain-fact-frontend/package-lock.json') }}
       - name: Install Frontend's dependencies
         working-directory: captain-fact-frontend
         run: npm ci --prefer-offline --no-audit

@@ -10,10 +10,6 @@ config :cf_atom_feed,
   namespace: CF.AtomFeed,
   ecto_repos: [DB.Repo]
 
-config :cf_atom_feed,
-       CF.AtomFeed.Router,
-       cowboy: [port: 4004]
-
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
