@@ -19,6 +19,5 @@ export CF_PORT=4242
 mix release --overwrite
 _build/prod/rel/full_app/bin/full_app start
 
-# With Distillery
-# mix distillery.release --env prod --name cf_full_app
-# _build/prod/rel/cf_full_app/bin/cf_full_app foreground
+# With Docker
+# docker build -t cf-test-release .
