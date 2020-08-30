@@ -16,8 +16,23 @@ export CF_CHROME_EXTENSION_ID="chrome-extension://fnnhlmbnlbgomamcolcpgncflofhjc
 export CF_PORT=4242
 
 # With Mix
-mix release --overwrite
-_build/prod/rel/full_app/bin/full_app start
+# mix release --overwrite
+# _build/prod/rel/full_app/bin/full_app start
 
 # With Docker
-# docker build -t cf-test-release .
+docker build -t cf-test-release .
+docker run \
+  -e MIX_ENV \
+  -e CF_SECRET_KEY_BASE \
+  -e CF_HOST \
+  -e CF_DB_HOSTNAME \
+  -e CF_DB_USERNAME \
+  -e CF_DB_PASSWORD \
+  -e CF_DB_NAME \
+  -e CF_FACEBOOK_APP_ID \
+  -e CF_FACEBOOK_APP_SECRET \
+  -e CF_FRONTEND_URL \
+  -e CF_CHROME_EXTENSION_ID \
+  -e CF_PORT \
+  --network="host" \
+  cf-test-release
