@@ -280,11 +280,13 @@ defmodule DB.Schema.Video do
         from(v in query, where: v.is_partner == ^is_partner)
 
       {:is_featured, _}, query ->
+        now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+
         from(
           v in query,
           where:
             v.is_partner == true or
-              v.inserted_at >= datetime_add(^NaiveDateTime.utc_now(), -3, "day") or
+              v.inserted_at >= datetime_add(^now, -3, "day") or
               v.id in fragment("""
                 SELECT popular_videos.id
                 FROM videos popular_videos

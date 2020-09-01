@@ -8,7 +8,7 @@ defmodule DB.Type.UserPicture do
 
   @versions [:thumb, :mini_thumb]
 
-  # TODO  @extension_whitelist ~w(.jpg .jpeg .png)
+  # @extension_whitelist ~w(.jpg .jpeg .png)
 
   @doc """
   Validate file extension.
@@ -22,6 +22,17 @@ defmodule DB.Type.UserPicture do
     # did it for us) but this should be fixed before considering uploading user's pictures
     # --------------------------------------
     true
+  end
+
+  # The default `url` function has a bug where it does not include the host
+  def full_url(user, version) do
+    path = url({user.picture_url, user}, version)
+
+    cond do
+      is_nil(path) -> nil
+      String.starts_with?(path, "/") -> "#{Application.get_env(:arc, :asset_host)}/#{path}"
+      true -> path
+    end
   end
 
   # Versions

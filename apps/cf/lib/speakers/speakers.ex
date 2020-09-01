@@ -19,7 +19,12 @@ defmodule CF.Speakers do
     case SpeakerPicture.store({picture_url, speaker}) do
       {:ok, picture} ->
         speaker
-        |> Ecto.Changeset.change(picture: %{file_name: picture, updated_at: DateTime.utc_now()})
+        |> Ecto.Changeset.change(
+          picture: %{
+            file_name: picture,
+            updated_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+          }
+        )
         |> Repo.update()
 
       error ->
@@ -31,7 +36,7 @@ defmodule CF.Speakers do
   Calls `fetch_picture/2` with the picture retrieved from wikidata using
   `retrieve_wikimedia_picture_url/1`
   """
-  def fetch_picture_from_wikimedia(speaker = %Speaker{wikidata_item_id: nil}) do
+  def fetch_picture_from_wikimedia(_speaker = %Speaker{wikidata_item_id: nil}) do
     {:error, "Cannot fetch picture from wikimedia if wikidata_item_id is no set"}
   end
 
@@ -81,18 +86,16 @@ defmodule CF.Speakers do
         Logger.warn("Wikidata query failed: #{error.reason}")
         {:error, "Connection failed"}
 
-      e ->
+      _e ->
         Logger.info("No picture found for #{speaker.full_name}")
         {:error, "No picture found"}
     end
   end
 
-  @merged_profile_fields [:full_name, :title, :country, :wikidata_item_id, :picture]
-
   def merge_speakers(speaker_from, speaker_into) do
     Ecto.Multi.new()
     # Update speaker profile
-    |> Ecto.Multi.run(:speaker_into, fn _ ->
+    |> Ecto.Multi.run(:speaker_into, fn _repo, _ ->
       speaker_into
       |> Speaker.changeset(merge_speakers_fields(speaker_from, speaker_into))
       |> Repo.update()
