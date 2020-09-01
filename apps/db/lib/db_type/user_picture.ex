@@ -7,6 +7,7 @@ defmodule DB.Type.UserPicture do
   use Arc.Ecto.Definition
 
   @versions [:thumb, :mini_thumb]
+
   # TODO  @extension_whitelist ~w(.jpg .jpeg .png)
 
   @doc """

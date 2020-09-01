@@ -36,10 +36,11 @@ defmodule CF.RestApi.Mixfile do
   defp deps do
     [
       {:corsica, "~> 1.0"},
-      {:cowboy, "~> 1.0"},
+      {:plug_cowboy, "~> 1.0"},
+      {:plug, "~> 1.7"},
       {:gettext, "~> 0.13.1"},
       {:kaur, "~> 1.1"},
-      {:phoenix, "~> 1.3.0", override: true},
+      {:phoenix, "~> 1.4.0"},
       {:phoenix_html, "~> 2.6"},
       {:phoenix_pubsub, "~> 1.0"},
       {:poison, "~> 3.1"},

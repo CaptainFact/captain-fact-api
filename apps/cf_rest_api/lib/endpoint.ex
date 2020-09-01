@@ -1,7 +1,7 @@
 defmodule CF.RestApi.Endpoint do
   use Phoenix.Endpoint, otp_app: :cf_rest_api
 
-  socket("/socket", CF.RestApi.UserSocket)
+  socket("/socket", CF.RestApi.UserSocket, websocket: true, longpoll: true)
 
   if Application.get_env(:arc, :storage) == Arc.Storage.Local,
     do: plug(Plug.Static, at: "/resources", from: "./resources", gzip: false)
