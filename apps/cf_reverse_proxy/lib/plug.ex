@@ -28,25 +28,33 @@ defmodule CF.ReverseProxy.Plug do
   if Application.get_env(:cf, :env) == :dev do
     # Dev requests are routed through here
     def call(conn, _) do
-      [path_info, endpoint] =
-        case conn.path_info do
-          ["rest" | _] -> [tl(conn.path_info), CF.RestApi.Endpoint]
-          ["graphql" | _] -> [tl(conn.path_info), CF.GraphQLWeb.Endpoint]
-          ["feed" | _] -> [tl(conn.path_info), CF.AtomFeed.Router]
-          path_info -> [path_info, CF.RestApi.Endpoint]
-        end
+      if conn.request_path == "/status" do
+        send_resp(conn, 200, "Ok")
+      else
+        [path_info, endpoint] =
+          case conn.path_info do
+            ["rest" | _] -> [tl(conn.path_info), CF.RestApi.Endpoint]
+            ["graphql" | _] -> [tl(conn.path_info), CF.GraphQLWeb.Endpoint]
+            ["feed" | _] -> [tl(conn.path_info), CF.AtomFeed.Router]
+            path_info -> [path_info, CF.RestApi.Endpoint]
+          end
 
-      conn
-      |> Map.replace!(:path_info, path_info)
-      |> Map.replace!(:request_path, Enum.join(path_info, "/"))
-      |> endpoint.call(endpoint.init(nil))
+        conn
+        |> Map.replace!(:path_info, path_info)
+        |> Map.replace!(:request_path, Enum.join(path_info, "/"))
+        |> endpoint.call(endpoint.init(nil))
+      end
     end
   else
     # Prod requests are routed through here
     def call(conn, _) do
-      subdomain = get_domain_from_host(conn.host)
-      endpoint = Map.get(@subdomains, subdomain, @default_host)
-      endpoint.call(conn, endpoint.init(nil))
+      if conn.request_path == "/status" do
+        send_resp(conn, 200, "Ok")
+      else
+        subdomain = get_domain_from_host(conn.host)
+        endpoint = Map.get(@subdomains, subdomain, @default_host)
+        endpoint.call(conn, endpoint.init(nil))
+      end
     end
 
     defp get_domain_from_host(host) do
