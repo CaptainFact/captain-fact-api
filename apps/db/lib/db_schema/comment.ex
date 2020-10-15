@@ -54,7 +54,9 @@ defmodule DB.Schema.Comment do
         inserted_at: u.inserted_at,
         picture_url: u.picture_url,
         achievements: u.achievements,
-        speaker_id: u.speaker_id
+        speaker_id: u.speaker_id,
+        # To create pictures with Gravatar
+        email: u.email
       }
     })
   end
