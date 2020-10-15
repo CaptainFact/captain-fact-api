@@ -7,6 +7,7 @@ defmodule DB.Type.UserPicture do
   use Arc.Ecto.Definition
 
   @versions [:thumb, :mini_thumb]
+
   # TODO  @extension_whitelist ~w(.jpg .jpeg .png)
 
   @doc """
@@ -37,17 +38,29 @@ defmodule DB.Type.UserPicture do
     "#{user_id}_#{Atom.to_string(version)}"
   end
 
-  # Use adorable.io as default profile picture provider
-  def default_url(:thumb, %{id: id}) do
-    "https://api.adorable.io/avatars/96/#{id}.png"
+  # Use Gravatar as default profile picture provider
+  def default_url(:thumb, %{email: email}) do
+    "https://gravatar.com/avatar/#{gravatar_hash(email)}.jpg?size=94&d=robohash"
   end
 
-  def default_url(:mini_thumb, %{id: id}) do
-    "https://api.adorable.io/avatars/24/#{id}.png"
+  def default_url(:mini_thumb, %{email: email}) do
+    "https://gravatar.com/avatar/#{gravatar_hash(email)}.jpg?size=24&d=robohash"
   end
 
   # Override the storage directory:
   def storage_dir(_, {_, _}) do
     "resources/users"
+  end
+
+  defp gravatar_hash(email) do
+    email
+    |> String.trim()
+    |> String.downcase()
+    |> md5()
+    |> Base.encode16(case: :lower)
+  end
+
+  defp md5(str) do
+    :crypto.hash(:md5, str)
   end
 end
