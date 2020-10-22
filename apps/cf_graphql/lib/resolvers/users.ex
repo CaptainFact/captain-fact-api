@@ -5,6 +5,8 @@ defmodule CF.Graphql.Resolvers.Users do
 
   import Ecto.Query
 
+  alias CF.Moderation
+
   alias Kaur.Result
 
   alias DB.Repo
@@ -75,6 +77,14 @@ defmodule CF.Graphql.Resolvers.Users do
     |> or_where([a], a.target_user_id == ^user.id and a.type in ^@action_banned)
     |> DB.Query.order_by_last_inserted_desc()
     |> Repo.paginate(page: offset, page_size: limit)
+    |> Result.ok()
+  end
+
+  @doc """
+  Resolve user actions history
+  """
+  def pending_moderations(user, _, _) do
+    Moderation.unread_count!(user)
     |> Result.ok()
   end
 
