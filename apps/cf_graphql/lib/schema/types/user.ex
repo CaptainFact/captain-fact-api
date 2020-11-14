@@ -59,6 +59,12 @@ defmodule CF.Graphql.Schema.Types.User do
       resolve(&Resolvers.Notifications.for_user/3)
     end
 
+    @desc "Actions pending moderation"
+    field :actions_pending_moderation, :integer do
+      middleware(Middleware.RequireAuthentication)
+      resolve(&Resolvers.Users.pending_moderations/3)
+    end
+
     @desc "User subscriptions"
     field :subscriptions, list_of(:notifications_subscription) do
       middleware(Middleware.RequireAuthentication)

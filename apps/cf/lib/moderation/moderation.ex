@@ -11,7 +11,7 @@ defmodule CF.Moderation do
 
   -------------
 
-  Some usefull commands for testing:
+  Some useful commands for testing:
   # Insert 5 comments with 10 flags on each
   DB.Factory.insert_list(5, :comment) |> Enum.map(&DB.Factory.with_action/1) |> CF.TestUtils.flag_comments(10)
   # Update flags
@@ -53,17 +53,28 @@ defmodule CF.Moderation do
     UserPermissions.check!(user, :collective_moderation)
 
     UserAction
-    |> where([a], a.user_id != ^user.id)
-    |> without_user_feedback(user)
-    |> join(:inner, [a, _], f in Flag, f.action_id == a.id)
-    |> group_by([a, _, _], a.id)
-    |> being_reported()
+    |> requiring_moderation(user)
     |> preload([a, _, _], [:user])
     |> order_by(fragment("RANDOM()"))
     |> select([a, _, _], a)
     |> limit(1)
     |> Repo.one()
     |> moderation_entry()
+  end
+
+  @doc """
+  Get the count of actions for which number of flags is above the limit and for which
+  user hasn't voted yet. Will raise if `user` doesn't have permission to moderate.
+  """
+  @spec unread_count!(DB.Schema.User.t()) :: any
+  def unread_count!(user) do
+    UserPermissions.check!(user, :collective_moderation)
+
+    UserAction
+    |> requiring_moderation(user)
+    |> select([a, _, _], a)
+    |> subquery
+    |> Repo.aggregate(:count, :id)
   end
 
   @doc """
@@ -130,6 +141,15 @@ defmodule CF.Moderation do
         a.type == ^action_type and a.entity == ^entity and count(f.id) >= ^nb_flags_to_report
       )
     end)
+  end
+
+  defp requiring_moderation(query, user) do
+    query
+    |> where([a], a.user_id != ^user.id)
+    |> without_user_feedback(user)
+    |> join(:inner, [a, _], f in Flag, f.action_id == a.id)
+    |> group_by([a, _, _], a.id)
+    |> being_reported()
   end
 
   defp moderation_entry(action = %UserAction{}) do
