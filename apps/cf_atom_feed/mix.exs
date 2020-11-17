@@ -36,8 +36,8 @@ defmodule CF.AtomFeed.Mixfile do
     [
       # --- Runtime
       {:atomex, "~> 0.2"},
-      {:cowboy, "~> 1.0"},
-      {:plug, "~> 1.0"},
+      {:plug_cowboy, "~> 1.0"},
+      {:plug, "~> 1.7"},
       {:kaur, "~> 1.1"},
 
       # ---- In Umbrella

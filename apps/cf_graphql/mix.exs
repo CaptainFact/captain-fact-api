@@ -32,10 +32,10 @@ defmodule CF.Graphql.Mixfile do
 
   defp deps do
     [
-      {:phoenix, "~> 1.3.0"},
-      {:plug, "~> 1.0"},
+      {:phoenix, "~> 1.4.0"},
       {:phoenix_pubsub, "~> 1.0"},
-      {:cowboy, "~> 1.0"},
+      {:plug_cowboy, "~> 1.0"},
+      {:plug, "~> 1.7"},
       {:corsica, "~> 1.0"},
       {:absinthe_ecto, "~> 0.1.3"},
       {:absinthe_plug, "~> 1.4.1"},
