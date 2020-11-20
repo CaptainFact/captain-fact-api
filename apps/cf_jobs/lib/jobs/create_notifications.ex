@@ -65,7 +65,7 @@ defmodule CF.Jobs.CreateNotifications do
   end
 
   # --- Server callbacks ---
-
+  @transaction_opts [type: "background", name: "update_notifications"]
   def handle_call({:update, force}, _from, _state) do
     last_action_id = ReportManager.get_last_action_id(@analyser_id)
 

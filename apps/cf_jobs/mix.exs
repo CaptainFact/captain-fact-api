@@ -36,6 +36,7 @@ defmodule CF.Jobs.Mixfile do
     [
       {:quantum, "~> 2.3"},
       {:timex, "~> 3.0"},
+      {:scout_apm, "~> 1.0.6"},
 
       # ---- Internal ----
       {:cf, in_umbrella: true},

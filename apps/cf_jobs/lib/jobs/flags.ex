@@ -41,7 +41,7 @@ defmodule CF.Jobs.Flags do
   end
 
   # --- Server callbacks ---
-
+  @transaction_opts [type: "background", name: "update_flags"]
   def handle_call(:update_flags, _from, _state) do
     last_action_id = ReportManager.get_last_action_id(@analyser_id)
 
