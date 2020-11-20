@@ -6,6 +6,7 @@ defmodule CF.Jobs.Job do
   @type t :: module
 
   use GenServer
+  import ScoutApm.Tracing
 
   def init(args) do
     {:ok, args}

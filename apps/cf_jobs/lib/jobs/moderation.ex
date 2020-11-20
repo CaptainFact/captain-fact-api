@@ -78,6 +78,7 @@ defmodule CF.Jobs.Moderation do
 
   # --- Internal API ---
 
+  @transaction_opts [type: "background", name: "update_moderation"]
   def handle_call(:update, _, _) do
     UserAction
     |> join(:inner, [a], uf in ModerationUserFeedback, uf.action_id == a.id)

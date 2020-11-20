@@ -99,7 +99,7 @@ defmodule CF.Jobs.Reputation do
     do: max(change, @daily_loss_limit - today_change)
 
   # --- Server callbacks ---
-
+  @transaction_opts [type: "background", name: "update_reputation"]
   def handle_call(:update_reputations, _from, _state) do
     last_action_id = ReportManager.get_last_action_id(@analyser_id)
 
@@ -114,6 +114,7 @@ defmodule CF.Jobs.Reputation do
     {:reply, :ok, :ok}
   end
 
+  @transaction_opts [type: "background", name: "reset_reputation_limits"]
   def handle_call(:reset_daily_limits, _from, _state) do
     Logger.info("[Jobs.Reputation] Reset daily limits")
 

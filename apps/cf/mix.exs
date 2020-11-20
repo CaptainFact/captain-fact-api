@@ -58,6 +58,7 @@ defmodule CF.Mixfile do
       {:sweet_xml, "~> 0.6"},
       {:burnex, "~> 1.0"},
       {:yaml_elixir, "~> 2.4.0"},
+      {:scout_apm, "~> 1.0.6"},
 
       # ---- Internal ----
       {:db, in_umbrella: true},
