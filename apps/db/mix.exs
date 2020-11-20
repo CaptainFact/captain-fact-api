@@ -37,7 +37,7 @@ defmodule DB.Mixfile do
   defp deps do
     [
       {:arc, github: "Betree/arc", override: true},
-      {:arc_ecto, "~> 0.10.0"},
+      {:arc_ecto, "~> 0.11.3"},
       {:ecto, "~> 2.2.8"},
       {:ecto_enum, "~> 1.0"},
       {:postgrex, "~> 0.13.3"},
