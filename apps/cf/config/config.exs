@@ -59,7 +59,7 @@ config :rollbax,
 
 config :scout_apm,
   name: "CaptainFact",
-  key: System.get_env("CF_SCOUT_APM_KEY")
+  key: {:system, "CF_SCOUT_APM_KEY"}
 
 # Import environment specific config
 import_config "#{Mix.env()}.exs"
