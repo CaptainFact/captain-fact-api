@@ -43,6 +43,7 @@ defmodule CF.RestApi.Mixfile do
       {:phoenix_html, "~> 2.6"},
       {:phoenix_pubsub, "~> 1.0"},
       {:poison, "~> 3.1"},
+      {:scout_apm, "~> 1.0.6"},
 
       # ---- Internal ----
       {:cf, in_umbrella: true},

@@ -98,6 +98,9 @@ config :cf,
     ]
   ]
 
+config :scout_apm,
+  key: load_secret.("scout_apm_key")
+
 config :cf, CF.Authenticator.GuardianImpl, secret_key: load_secret.("secret_key_base")
 
 config :cf, CF.Mailer,

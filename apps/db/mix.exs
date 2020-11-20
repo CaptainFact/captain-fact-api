@@ -52,6 +52,7 @@ defmodule DB.Mixfile do
       {:kaur, "~> 1.1"},
       {:mime, "~> 1.2"},
       {:scrivener_ecto, "~> 1.0"},
+      {:scout_apm, "~> 1.0.6"},
 
       # Dev only
       {:exsync, "~> 0.2", only: :dev},
