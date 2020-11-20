@@ -57,7 +57,9 @@ config :guardian, Guardian.DB, repo: DB.Repo
 config :rollbax,
   enabled: :log
 
-config :scout_apm, name: "CaptainFact"
+config :scout_apm,
+  name: "CaptainFact",
+  key: System.get_env("CF_SCOUT_APM_KEY")
 
 # Import environment specific config
 import_config "#{Mix.env()}.exs"
