@@ -1,5 +1,6 @@
 defmodule CF.Jobs.ReportManager do
   import Ecto.Query
+
   # TODO Implement this as a behaviour
 
   alias DB.Repo

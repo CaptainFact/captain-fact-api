@@ -13,6 +13,7 @@ defmodule DB.Factory do
   alias DB.Schema.InvitationRequest
   alias DB.Schema.UserAction
   alias DB.Schema.Video
+  alias DB.Schema.VideoSpeaker
   alias DB.Schema.Comment
   alias DB.Schema.Vote
   alias DB.Schema.Speaker
@@ -67,6 +68,13 @@ defmodule DB.Factory do
       full_name: Faker.Name.name(),
       title: Faker.Name.title(),
       country: Faker.Address.country_code()
+    }
+  end
+
+  def video_speaker_factory do
+    %VideoSpeaker{
+      speaker: build(:speaker),
+      video: build(:video)
     }
   end
 
