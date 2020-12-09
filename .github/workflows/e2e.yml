@@ -34,8 +34,8 @@ jobs:
           key: ${{ runner.os }}-mix-build
       - uses: actions/setup-elixir@v1.1.0
         with:
-          otp-version: 21.x
-          elixir-version: 1.6.x
+          otp-version: 22.x
+          elixir-version: 1.10.1
       - name: Install API's dependencies
         run: mix deps.get
       - name: Compile dependencies
@@ -44,8 +44,6 @@ jobs:
         run: mix compile
       - name: Prepare DB
         run: mix ecto.create && mix ecto.migrate
-      - name: Start API
-        run: iex -S mix run &
       - uses: actions/setup-node@v1
       - name: Checkout Frontend
         uses: actions/checkout@v2
@@ -62,15 +60,4 @@ jobs:
       - name: Install Frontend's dependencies
         working-directory: captain-fact-frontend
         run: npm ci --prefer-offline --no-audit
-      - name: Start Frontend
-        working-directory: captain-fact-frontend
-        run: npm run dev &
-      - name: Waiting for API to be ready
-        run: timeout 1m bash -c "until curl localhost:4000; do sleep 1; done"
-      - name: Waiting for Frontend to be ready
-        run: timeout 1m bash -c "until curl localhost:3333 > /dev/null; do sleep 1; done"
-      - name: Run tests
-        working-directory: captain-fact-frontend
-        run: npm run cypress
-      - name: Shutdown everything
-        run: kill $(jobs -p) || true
+      - run: ./scripts/run_e2e_ci.sh

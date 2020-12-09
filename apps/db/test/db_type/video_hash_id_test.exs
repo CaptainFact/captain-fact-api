@@ -22,11 +22,11 @@ defmodule DB.Type.VideoHashIdTest do
   end
 
   property "should work with any integer" do
-    check all id <- id_generator(), do: assert(String.length(VideoHashId.encode(id)) >= 4)
+    check(all(id <- id_generator(), do: assert(String.length(VideoHashId.encode(id)) >= 4)))
   end
 
   defp id_generator do
-    ExUnitProperties.gen all id <- integer() do
+    ExUnitProperties.gen all(id <- integer()) do
       abs(id)
     end
   end

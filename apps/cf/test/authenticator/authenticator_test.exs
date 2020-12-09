@@ -29,7 +29,7 @@ defmodule CF.AuthenticatorTest do
 
       user = insert_user_with_custom_password(password)
 
-      check all password <- binary(), max_runs: 3 do
+      check all(password <- binary(), max_runs: 3) do
         assert is_nil(Authenticator.get_user_for_email_or_name_password(user.email, password))
       end
     end

@@ -8,6 +8,7 @@ defmodule CF.Speakers do
 
   alias DB.Repo
   alias DB.Schema.Speaker
+  alias DB.Schema.VideoSpeaker
   alias DB.Type.SpeakerPicture
 
   @doc """
@@ -84,6 +85,60 @@ defmodule CF.Speakers do
         Logger.info("No picture found for #{speaker.full_name}")
         {:error, "No picture found"}
     end
+  end
+
+  @merged_profile_fields [:full_name, :title, :country, :wikidata_item_id, :picture]
+
+  def merge_speakers(speaker_from, speaker_into) do
+    Ecto.Multi.new()
+    # Update speaker profile
+    |> Ecto.Multi.run(:speaker_into, fn _ ->
+      speaker_into
+      |> Speaker.changeset(merge_speakers_fields(speaker_from, speaker_into))
+      |> Repo.update()
+    end)
+    # Update VideoSpeakers
+    |> Ecto.Multi.update_all(:videos_speakers, speaker_videos(speaker_from),
+      set: [speaker_id: speaker_into.id]
+    )
+    # Update statements
+    |> Ecto.Multi.update_all(:statements, speaker_statements(speaker_from),
+      set: [speaker_id: speaker_into.id]
+    )
+    # Update user profiles
+    |> Ecto.Multi.update_all(:users, speaker_users(speaker_from),
+      set: [speaker_id: speaker_into.id]
+    )
+    # Mark first speaker as deleted
+    |> Ecto.Multi.delete(:speaker_from, speaker_from)
+    |> DB.Repo.transaction()
+  end
+
+  defp merge_speakers_fields(speaker_from, speaker_into) do
+    speaker_from
+    |> Map.from_struct()
+    |> Map.merge(remove_nil_values_from_struct(speaker_into))
+    |> Map.take([:full_name, :title, :country, :wikidata_item_id, :picture])
+    |> Enum.into(%{})
+  end
+
+  defp speaker_videos(speaker) do
+    from(v in VideoSpeaker, where: v.speaker_id == ^speaker.id)
+  end
+
+  defp speaker_statements(speaker) do
+    from(s in DB.Schema.Statement, where: s.speaker_id == ^speaker.id)
+  end
+
+  defp speaker_users(speaker) do
+    from(u in DB.Schema.User, where: u.speaker_id == ^speaker.id)
+  end
+
+  defp remove_nil_values_from_struct(struct) do
+    struct
+    |> Map.from_struct()
+    |> Enum.filter(fn {_, v} -> v != nil end)
+    |> Enum.into(%{})
   end
 
   defp picture_filename_from_response(%{"claims" => %{"P18" => images}}) do

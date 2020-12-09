@@ -46,4 +46,55 @@ defmodule CF.SpeakersTest do
       assert DB.Repo.get(DB.Schema.Speaker, speaker.id).slug == @slug
     end
   end
+
+  describe "merge_speakers" do
+    test "merges profiles and related data" do
+      speaker1 = insert(:speaker, %{title: "speaker_1"})
+      speaker2 = insert(:speaker, %{title: nil})
+      speaker1_statements = insert_list(3, :statement, speaker: speaker1)
+      speaker2_statements = insert_list(4, :statement, speaker: speaker2)
+      speaker1_videos = insert_list(3, :video_speaker, speaker: speaker1)
+      speaker2_videos = insert_list(4, :video_speaker, speaker: speaker2)
+      speaker1_users = insert_list(3, :user, speaker: speaker1)
+      speaker2_users = insert_list(4, :user, speaker: speaker2)
+
+      {:ok, result} = Speakers.merge_speakers(speaker1, speaker2)
+
+      assert result.speaker_from.id === speaker1.id
+      assert result.speaker_into.id === speaker2.id
+
+      # Profiles should be merged
+      assert result.speaker_into.title == speaker1.title
+
+      # Statements should be upddated
+      assert elem(result.statements, 0) == 3
+
+      assert DB.Repo.aggregate(
+               from(s in DB.Schema.Statement, where: s.speaker_id == ^speaker2.id),
+               :count,
+               :id
+             ) == 7
+
+      # Videos should be updated
+      assert elem(result.videos_speakers, 0) == 3
+
+      assert DB.Repo.aggregate(
+               from(s in DB.Schema.VideoSpeaker, where: s.speaker_id == ^speaker2.id),
+               :count,
+               :video_id
+             ) == 7
+
+      # Users should be upddated
+      assert elem(result.users, 0) == 3
+
+      assert DB.Repo.aggregate(
+               from(s in DB.Schema.User, where: s.speaker_id == ^speaker2.id),
+               :count,
+               :id
+             ) == 7
+
+      # First speaker should be deleted
+      assert DB.Repo.get(DB.Schema.Speaker, speaker1.id) == nil
+    end
+  end
 end
