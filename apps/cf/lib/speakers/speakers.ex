@@ -118,7 +118,7 @@ defmodule CF.Speakers do
     speaker_from
     |> Map.from_struct()
     |> Map.merge(remove_nil_values_from_struct(speaker_into))
-    |> Map.take([:full_name, :title, :country, :wikidata_item_id, :picture])
+    |> Map.take([:full_name, :title, :country, :wikidata_item_id])
     |> Enum.into(%{})
   end
 
