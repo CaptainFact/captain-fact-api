@@ -29,6 +29,9 @@ defmodule CF.Graphql.Schema.Types.User do
     @desc "Reputation of the user. See https://captainfact.io/help/reputation"
     field(:reputation, :integer)
 
+    @desc "User's reputation of the day. See https://captainfact.io/help/reputation"
+    field(:today_reputation_gain, :integer)
+
     @desc "User picture url (96x96)"
     field(:picture_url, non_null(:string), do: resolve(&Resolvers.Users.picture_url/3))
 
