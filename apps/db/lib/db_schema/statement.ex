@@ -1,6 +1,10 @@
 defmodule DB.Schema.Statement do
+  @moduledoc """
+  Ecto schema for `statements` table.
+  """
+
   use Ecto.Schema
-  import Ecto.Changeset
+  import Ecto.{Changeset, Query}
 
   schema "statements" do
     field(:text, :string)
@@ -17,6 +21,35 @@ defmodule DB.Schema.Statement do
 
   @required_fields ~w(text time video_id)a
   @optional_fields ~w(speaker_id)a
+
+  # Define queries
+
+  @doc """
+  Select all statements and order them by id.
+
+  ## Params
+
+    * query: an Ecto query
+    * filters: a list of tuples like {filter_name, value}.
+      Valid filters:
+        - language: `unknwown` or locale (`fr`, `en`...)
+        - speaker_id: speaker's integer ID
+        - speaker_slug: speaker's slug
+        - min_id: select all videos with id above given integer
+    * limit: Max number of videos to return
+  """
+  def query_list(query, filters \\ [], limit \\ nil) do
+    query
+    |> order_by([s], desc: s.id)
+    |> limit_statement_query_list(limit)
+  end
+
+  # TODO: Not sure if it is used ...
+  defp limit_statement_query_list(query, nil),
+    do: query
+
+  defp limit_statement_query_list(query, limit),
+    do: limit(query, ^limit)
 
   @doc """
   Builds a changeset based on the `struct` and `params`.
