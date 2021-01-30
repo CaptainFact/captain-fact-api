@@ -14,14 +14,10 @@ defmodule CF.Graphql.Resolvers.Statements do
   # Queries
 
   def paginated_list(_root, args = %{offset: offset, limit: limit}, _info) do
-    # Statement
-    # |> order_by(asc: :time)
-    #
-    # |> Video.query_list(Map.get(args, :filters, []))
-    #
-    # |> Repo.paginate(page: offset, page_size: limit)
-    # |> Result.ok()
-    {:ok, nil}
+    Statement
+    |> Statement.query_list(Map.get(args, :filters, []))
+    |> Repo.paginate(page: offset, page_size: limit)
+    |> Result.ok()
   end
 
   # Fields
