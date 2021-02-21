@@ -13,6 +13,7 @@ defmodule CF.RestApi.UserSocket do
   channel("statement_history:*", CF.RestApi.VideoDebateHistoryChannel)
   channel("statements:video:*", CF.RestApi.StatementsChannel)
   channel("comments:video:*", CF.RestApi.CommentsChannel)
+  channel("comments:statement:*", CF.RestApi.CommentsChannel)
 
   ## Transports
   transport(:websocket, Phoenix.Transports.WebSocket)
