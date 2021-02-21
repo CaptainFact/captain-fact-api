@@ -36,7 +36,7 @@ defmodule CF.Graphql.Schema do
 
     @desc "Get all statements"
     field :statements, :paginated_statements do
-      # arg(:filters, :statement_filter)
+      arg(:filters, :statement_filter)
       arg(:offset, :integer, default_value: 1)
       arg(:limit, :integer, default_value: 10)
       resolve(&Resolvers.Statements.paginated_list/3)
