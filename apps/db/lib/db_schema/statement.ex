@@ -32,15 +32,13 @@ defmodule DB.Schema.Statement do
     * query: an Ecto query
     * filters: a list of tuples like {filter_name, value}.
       Valid filters:
-        - language: `unknwown` or locale (`fr`, `en`...)
-        - speaker_id: speaker's integer ID
-        - speaker_slug: speaker's slug
-        - min_id: select all videos with id above given integer
+        - commented: select all statements without comments if commented == false, otherwise select those with comments
     * limit: Max number of videos to return
   """
   def query_list(query, filters \\ [], limit \\ nil) do
     query
     |> order_by([s], desc: s.id)
+    |> filter_with(filters)
     |> limit_statement_query_list(limit)
   end
 
@@ -50,6 +48,15 @@ defmodule DB.Schema.Statement do
 
   defp limit_statement_query_list(query, limit),
     do: limit(query, ^limit)
+
+  defp filter_with(query, filters) do
+    Enum.reduce(filters, query, fn
+      {:commented, false}, query ->
+        from(s in query, left_join: c in assoc(s, :comments), where: is_nil(c.statement_id))
+      {:commented, true}, query ->
+        from(s in query, left_join: c in assoc(s, :comments), where: not is_nil(c.statement_id))
+    end)
+  end
 
   @doc """
   Builds a changeset based on the `struct` and `params`.
