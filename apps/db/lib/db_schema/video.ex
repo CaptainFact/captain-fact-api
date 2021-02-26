@@ -155,7 +155,22 @@ defmodule DB.Schema.Video do
     |> unique_constraint(:videos_youtube_id_index)
     |> unique_constraint(:videos_facebook_id_index)
     # Change locales like "en-US" to "en"
-    |> update_change(:language, &hd(String.split(&1, "-")))
+    |> update_change(:language, &format_language/1)
+  end
+
+  defp format_language("zxx"), do: nil
+
+  defp format_language(locale) do
+    cond do
+      is_binary(locale) and locale =~ "-" ->
+        format_language(hd(String.split(locale, "-")))
+
+      is_binary(locale) and String.length(locale) == 2 ->
+        locale
+
+      true ->
+        nil
+    end
   end
 
   @doc """
