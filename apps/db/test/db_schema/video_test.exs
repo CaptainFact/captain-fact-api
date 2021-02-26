@@ -43,5 +43,29 @@ defmodule DB.Schema.VideoTest do
       attrs = %{title: String.duplicate("x", 121)}
       assert {:title, "should be at most 120 character(s)"} in errors_on(%Video{}, attrs)
     end
+
+    test "unknown or invalid language gives nil values but aren't rejected" do
+      attrs = Map.put(@valid_attrs, :language, "zxx")
+      changeset = Video.changeset(%Video{}, attrs)
+      assert changeset.valid?
+      assert changeset.changes.language == nil
+
+      attrs = Map.put(@valid_attrs, :language, "xxx-zzz-fff")
+      changeset = Video.changeset(%Video{}, attrs)
+      assert changeset.valid?
+      assert changeset.changes.language == nil
+    end
+
+    test "valid locale is stored" do
+      attrs = Map.put(@valid_attrs, :language, "fr")
+      changeset = Video.changeset(%Video{}, attrs)
+      assert changeset.valid?
+      assert changeset.changes.language == "fr"
+
+      attrs = Map.put(@valid_attrs, :language, "en-US")
+      changeset = Video.changeset(%Video{}, attrs)
+      assert changeset.valid?
+      assert changeset.changes.language == "en"
+    end
   end
 end
