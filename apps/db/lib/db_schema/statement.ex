@@ -33,6 +33,7 @@ defmodule DB.Schema.Statement do
     * filters: a list of tuples like {filter_name, value}.
       Valid filters:
         - commented: select all statements without comments if commented == false, otherwise select those with comments
+        - speaker_id: speaker's integer ID
     * limit: Max number of videos to return
   """
   def query_list(query, filters \\ [], limit \\ nil) do
@@ -55,6 +56,8 @@ defmodule DB.Schema.Statement do
         from(s in query, left_join: c in assoc(s, :comments), where: is_nil(c.statement_id))
       {:commented, true}, query ->
         from(s in query, left_join: c in assoc(s, :comments), where: not is_nil(c.statement_id))
+      {:speaker_id, id}, query ->
+        from(s in query, join: speaker in assoc(s, :speaker), where: speaker.id == ^id)
     end)
   end
 
