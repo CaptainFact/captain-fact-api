@@ -80,7 +80,10 @@ defmodule CF.Videos do
   Can also throw if bad permissions.
   """
   def create!(user, video_url, params \\ []) do
-    UserPermissions.check!(user, :add, :video)
+    case Keyword.get(params, :unlisted, false) do
+      false -> UserPermissions.check!(user, :add, :video)
+      true -> UserPermissions.check!(user, :add, :unlisted_video)
+    end
 
     with metadata_fetcher when not is_nil(metadata_fetcher) <- get_metadata_fetcher(video_url),
          {:ok, metadata} <- metadata_fetcher.(video_url) do
