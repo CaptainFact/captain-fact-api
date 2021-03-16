@@ -55,16 +55,6 @@ defmodule CF.RestApi.CommentsChannel do
 
   # ---- Channel API ----
 
-  def join("comments:statement:" <> statement_id, _payload, socket) do
-    user = Guardian.Phoenix.Socket.current_resource(socket)
-    comments = Comments.statement_comments(statement_id)
-    rendered_comments = CommentView.render("index.json", comments: comments)
-    response = load_user_data(%{comments: rendered_comments}, user)
-    socket = assign(socket, :statement_id, statement_id)
-
-    {:ok, response, socket}
-  end
-
   def join("comments:video:" <> video_id_hash, _payload, socket) do
     user = Guardian.Phoenix.Socket.current_resource(socket)
     video_id = VideoHashId.decode!(video_id_hash)
@@ -130,34 +120,6 @@ defmodule CF.RestApi.CommentsChannel do
   end
 
   defp load_user_data(response, nil, _), do: response
-
-  defp load_user_data(response = %{comments: comments}, user = %User{})  do
-    # TODO move these queries to Flagger
-    comments_ids = Enum.map(comments, & &1.id)
-
-    response
-    |> Map.put(
-      :my_votes,
-      VoteView.render(
-        "my_votes.json",
-        votes:
-          Vote
-          |> Vote.user_votes(user)
-          |> select([:comment_id, :value])
-          |> Repo.all()
-      )
-    )
-    |> Map.put(
-      :my_flags,
-      Flag
-      |> where([f], f.source_user_id == ^user.id)
-      |> join(:inner, [f], a in assoc(f, :action))
-      |> where([_, a], a.entity == ^:comment)
-      |> where([_, a], a.comment_id in ^comments_ids)
-      |> select([_, a], a.comment_id)
-      |> Repo.all()
-    )
-  end
 
   defp load_user_data(response = %{comments: comments}, user = %User{}, video_id) do
     # TODO move these queries to Flagger
