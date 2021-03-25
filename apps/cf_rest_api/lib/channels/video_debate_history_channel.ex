@@ -80,6 +80,7 @@ defmodule CF.RestApi.VideoDebateHistoryChannel do
           StatementView.render("show.json", statement: statement)
         )
 
+        CF.Algolia.StatementsIndex.save_object(statement)
         {:reply, :ok, socket}
 
       {:error, _, reason, _} ->
@@ -116,6 +117,7 @@ defmodule CF.RestApi.VideoDebateHistoryChannel do
           SpeakerView.render("show.json", speaker: speaker)
         )
 
+        CF.Algolia.VideosIndex.reindex_by_id(video_id)
         {:reply, :ok, socket}
 
       {:error, _reason} ->

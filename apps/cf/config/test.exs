@@ -1,7 +1,7 @@
 use Mix.Config
 
 # General config
-config :cf, frontend_url: "https://TEST_FRONTEND/"
+config :cf, frontend_url: "https://TEST_FRONTEND/", deploy_env: "test"
 
 # Don't fetch user picture on test environment
 config :cf, fetch_default_user_picture: false

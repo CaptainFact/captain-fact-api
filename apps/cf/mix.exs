@@ -53,7 +53,7 @@ defmodule CF.Mixfile do
       {:csv, "~> 1.4.4"},
       {:not_qwerty123, "~> 2.2"},
       {:bamboo, github: "thoughtbot/bamboo"},
-      {:hackney, "~> 1.6"},
+      {:hackney, "~> 1.17"},
       {:oauth2, "~> 0.9"},
       {:rollbax, ">= 0.0.0"},
       {:sweet_xml, "~> 0.6"},

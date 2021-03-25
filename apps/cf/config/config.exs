@@ -61,5 +61,11 @@ config :scout_apm,
   name: "CaptainFact",
   key: {:system, "CF_SCOUT_APM_KEY"}
 
+# To send records to Algolia (search engine)
+config :algoliax,
+  batch_size: 500,
+  recv_timeout: 5000,
+  application_id: "N5GW2EAIFX"
+
 # Import environment specific config
 import_config "#{Mix.env()}.exs"
