@@ -13,6 +13,14 @@ defmodule CF.DataCase do
   """
 
   use ExUnit.CaseTemplate
+  import Mock
+
+  # Mock all calls to Algolia
+  setup_with_mocks([
+    {Algoliax.Client, [], [request: fn _ -> nil end]}
+  ]) do
+    :ok
+  end
 
   using do
     quote do

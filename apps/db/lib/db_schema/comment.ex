@@ -6,7 +6,7 @@ defmodule DB.Schema.Comment do
   use Ecto.Schema
   import Ecto.{Changeset, Query}
 
-  alias DB.Schema.{Comment, User, Statement, Source}
+  alias DB.Schema.{Comment, User, Statement, Source, Vote}
 
   @max_length 512
 
@@ -21,6 +21,7 @@ defmodule DB.Schema.Comment do
     belongs_to(:user, User)
     belongs_to(:statement, Statement)
     belongs_to(:reply_to, Comment)
+    has_many(:votes, Vote)
     timestamps()
   end
 
@@ -29,36 +30,12 @@ defmodule DB.Schema.Comment do
     |> join(:inner, [c], s in assoc(c, :statement))
     |> join(:left, [c, _], u in assoc(c, :user))
     |> join(:left, [c, _, _], source in assoc(c, :source))
-    |> join(:left, [c, _, _, _], v in fragment("
-        SELECT sum(value) AS score, comment_id
-        FROM   votes
-        GROUP BY comment_id
-       "), v.comment_id == c.id)
+    |> join(:left, [c, _, _, _], vote in assoc(c, :votes))
     |> filter_facts(only_facts)
-    |> select([c, s, u, source, v], %{
-      id: c.id,
-      reply_to_id: c.reply_to_id,
-      approve: c.approve,
-      source: source,
-      statement_id: c.statement_id,
-      text: c.text,
-      is_reported: c.is_reported,
-      inserted_at: c.inserted_at,
-      updated_at: c.updated_at,
-      score: v.score,
-      user: %{
-        id: u.id,
-        name: u.name,
-        username: u.username,
-        reputation: u.reputation,
-        inserted_at: u.inserted_at,
-        picture_url: u.picture_url,
-        achievements: u.achievements,
-        speaker_id: u.speaker_id,
-        # To create pictures with Gravatar
-        email: u.email
-      }
-    })
+    |> preload([:user, :source])
+    |> select([comment, _, _, _, _], comment)
+    |> select_merge([_, _, _, _, vote], %{score: coalesce(sum(vote.value), 0)})
+    |> group_by([comment, _, _, _, _], [comment.id])
   end
 
   def with_source(query, true) do

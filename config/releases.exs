@@ -82,10 +82,15 @@ config :ex_aws,
 config :arc,
   bucket: load_secret.("s3_bucket")
 
+config :algoliax,
+  application_id: load_secret("algolia_app_id"),
+  api_key: load_secret("algolia_api_key")
+
 # ---- [APP CONFIG] :cf ----
 
 config :cf,
   frontend_url: frontend_url,
+  deploy_env: load_secret.("deploy_env"),
   soft_limitations_period: load_int.({"soft_limitations_period", 15 * 60}),
   hard_limitations_period: load_int.({"hard_limitations_period", 3 * 60 * 60}),
   invitation_system: load_bool.({"invitation_system", "false"}),

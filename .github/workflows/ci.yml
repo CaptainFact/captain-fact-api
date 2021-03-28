@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - uses: actions/setup-elixir@v1.1.0
+      - uses: erlef/setup-elixir@v1
         with:
-          otp-version: 22.x
+          otp-version: 22.2.7
           elixir-version: 1.10.1
       - name: Check format
         run: mix format --check-formatted
@@ -37,9 +37,9 @@ jobs:
           key: ${{ runner.os }}-mix-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
           restore-keys: |
             ${{ runner.os }}-mix-
-      - uses: actions/setup-elixir@v1.1.0
+      - uses: erlef/setup-elixir@v1
         with:
-          otp-version: 22.x
+          otp-version: 22.2.7
           elixir-version: 1.10.1
       - name: Install dependencies
         run: mix deps.get

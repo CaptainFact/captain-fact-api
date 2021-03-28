@@ -41,7 +41,7 @@ defmodule CF.RestApi.StatementsChannel do
 
     Multi.new()
     |> Multi.insert(:statement, changeset)
-    |> Multi.run(:action_create, fn %{statement: statement} ->
+    |> Multi.run(:action_create, fn _repo, %{statement: statement} ->
       Repo.insert(action_create(user_id, statement))
     end)
     |> Repo.transaction()
@@ -49,6 +49,7 @@ defmodule CF.RestApi.StatementsChannel do
       {:ok, %{statement: statement}} ->
         rendered_statement = StatementView.render("show.json", statement: statement)
         broadcast!(socket, "statement_added", rendered_statement)
+        CF.Algolia.StatementsIndex.save_object(statement)
         {:reply, {:ok, rendered_statement}, socket}
 
       {:error, _operation, reason, _changes} ->
@@ -63,6 +64,7 @@ defmodule CF.RestApi.StatementsChannel do
       {:ok, statement} ->
         rendered_statement = StatementView.render("show.json", statement: statement)
         broadcast!(socket, "statement_updated", rendered_statement)
+        CF.Algolia.StatementsIndex.save_object(statement)
         {:reply, :ok, socket}
 
       {:error, reason} ->
@@ -82,6 +84,7 @@ defmodule CF.RestApi.StatementsChannel do
     |> case do
       {:ok, _} ->
         broadcast!(socket, "statement_removed", %{id: id})
+        CF.Algolia.StatementsIndex.delete_object(statement)
         {:reply, :ok, socket}
 
       {:error, _, _reason, _} ->

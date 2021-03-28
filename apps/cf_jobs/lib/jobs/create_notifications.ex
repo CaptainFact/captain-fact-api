@@ -15,6 +15,7 @@ defmodule CF.Jobs.CreateNotifications do
 
   require Logger
   import Ecto.Query
+  import ScoutApm.Tracing
 
   alias DB.Repo
   alias DB.Schema.UsersActionsReport
@@ -124,7 +125,7 @@ defmodule CF.Jobs.CreateNotifications do
 
   @spec insert_notifications([map()]) :: {:ok, integer()}
   defp insert_notifications(notifications_params) do
-    now = DateTime.utc_now()
+    now = NaiveDateTime.local_now()
 
     notifications =
       Enum.map(

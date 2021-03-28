@@ -48,12 +48,12 @@ defmodule DB.Schema.VideoTest do
       attrs = Map.put(@valid_attrs, :language, "zxx")
       changeset = Video.changeset(%Video{}, attrs)
       assert changeset.valid?
-      assert changeset.changes.language == nil
+      assert changeset.changes["language"] == nil
 
       attrs = Map.put(@valid_attrs, :language, "xxx-zzz-fff")
       changeset = Video.changeset(%Video{}, attrs)
       assert changeset.valid?
-      assert changeset.changes.language == nil
+      assert changeset.changes["language"] == nil
     end
 
     test "valid locale is stored" do

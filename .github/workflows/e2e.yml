@@ -32,9 +32,9 @@ jobs:
         with:
           path: build
           key: ${{ runner.os }}-mix-build
-      - uses: actions/setup-elixir@v1.1.0
+      - uses: erlef/setup-elixir@v1
         with:
-          otp-version: 22.x
+          otp-version: 22.2.7
           elixir-version: 1.10.1
       - name: Install API's dependencies
         run: mix deps.get

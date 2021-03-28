@@ -11,7 +11,7 @@ defmodule CF.RestApi.SpeakerView do
       slug: speaker.slug,
       full_name: speaker.full_name,
       title: speaker.title,
-      picture: DB.Type.SpeakerPicture.url({speaker.picture, speaker}, :thumb),
+      picture: DB.Type.SpeakerPicture.full_url(speaker, :thumb),
       country: speaker.country,
       wikidata_item_id: speaker.wikidata_item_id
     }

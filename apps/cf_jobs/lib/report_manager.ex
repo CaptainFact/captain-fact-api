@@ -51,8 +51,11 @@ defmodule CF.Jobs.ReportManager do
   def set_success!(report, nb_entries_updated \\ 0) do
     update_report!(report, %{
       nb_entries_updated: nb_entries_updated,
-      run_duration: NaiveDateTime.diff(NaiveDateTime.utc_now(), report.inserted_at),
-      status: UsersActionsReport.status(:success)
+      status: UsersActionsReport.status(:success),
+      run_duration:
+        NaiveDateTime.utc_now()
+        |> NaiveDateTime.truncate(:second)
+        |> NaiveDateTime.diff(report.inserted_at)
     })
   end
 

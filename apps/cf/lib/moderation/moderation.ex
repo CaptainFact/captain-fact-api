@@ -88,7 +88,7 @@ defmodule CF.Moderation do
       UserAction
       |> without_user_feedback(user)
       |> where([a, _], a.id == ^action_id)
-      |> join(:inner, [a, _], f in Flag, f.action_id == a.id)
+      |> join(:inner, [a, _], f in Flag, on: f.action_id == a.id)
       |> group_by([a, _, _], a.id)
       # Following conditions will fail if target action is not reported. This is on purpose
       |> being_reported()
@@ -110,6 +110,7 @@ defmodule CF.Moderation do
     Comment
     |> where([c], c.id == ^comment_id)
     |> where([c], c.is_reported == false)
+    |> select([c], c)
     |> Repo.update_all([set: [is_reported: true]], returning: true)
     |> case do
       {1, [comment]} ->
@@ -124,7 +125,7 @@ defmodule CF.Moderation do
 
   defp without_user_feedback(query, user) do
     query
-    |> join(:left, [a], fb in subquery(user_feedbacks(user)), fb.action_id == a.id)
+    |> join(:left, [a], fb in subquery(user_feedbacks(user)), on: fb.action_id == a.id)
     |> where([_, fb], is_nil(fb.action_id))
   end
 
@@ -147,7 +148,7 @@ defmodule CF.Moderation do
     query
     |> where([a], a.user_id != ^user.id)
     |> without_user_feedback(user)
-    |> join(:inner, [a, _], f in Flag, f.action_id == a.id)
+    |> join(:inner, [a, _], f in Flag, on: f.action_id == a.id)
     |> group_by([a, _, _], a.id)
     |> being_reported()
   end

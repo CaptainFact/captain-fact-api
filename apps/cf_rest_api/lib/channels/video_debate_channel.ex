@@ -1,7 +1,6 @@
 defmodule CF.RestApi.VideoDebateChannel do
   use CF.RestApi, :channel
   import ScoutApm.Tracing
-  alias CF.RestApi.Presence
 
   import CF.Actions.ActionCreator,
     only: [
@@ -13,6 +12,7 @@ defmodule CF.RestApi.VideoDebateChannel do
 
   import CF.RestApi.UserSocket, only: [handle_in_authenticated: 4]
 
+  alias CF.RestApi.Presence
   alias Phoenix.View
   alias Ecto.Multi
   alias DB.Schema.User
@@ -109,6 +109,7 @@ defmodule CF.RestApi.VideoDebateChannel do
       {:ok, %{}} ->
         rendered_speaker = SpeakerView.render("show.json", speaker: speaker)
         broadcast!(socket, "speaker_added", rendered_speaker)
+        CF.Algolia.VideosIndex.reindex_by_id(video_id)
         {:reply, :ok, socket}
 
       {:error, _, %{errors: errors}, _} ->
@@ -128,16 +129,16 @@ defmodule CF.RestApi.VideoDebateChannel do
 
     Multi.new()
     |> Multi.insert(:speaker, speaker_changeset)
-    |> Multi.run(:video_speaker, fn %{speaker: speaker} ->
+    |> Multi.run(:video_speaker, fn _repo, %{speaker: speaker} ->
       # Insert association between video and speaker
       %VideoSpeaker{speaker_id: speaker.id, video_id: video_id}
       |> VideoSpeaker.changeset()
       |> Repo.insert()
     end)
-    |> Multi.run(:action_create, fn %{speaker: speaker} ->
+    |> Multi.run(:action_create, fn _repo, %{speaker: speaker} ->
       Repo.insert(action_create(user_id, speaker))
     end)
-    |> Multi.run(:action_add, fn %{speaker: speaker} ->
+    |> Multi.run(:action_add, fn _repo, %{speaker: speaker} ->
       Repo.insert(action_add(user_id, video_id, speaker))
     end)
     |> Repo.transaction()
@@ -146,6 +147,8 @@ defmodule CF.RestApi.VideoDebateChannel do
         # Broadcast the speaker
         rendered_speaker = SpeakerView.render("show.json", speaker: speaker)
         broadcast!(socket, "speaker_added", rendered_speaker)
+        CF.Algolia.VideosIndex.reindex_by_id(video_id)
+        CF.Algolia.SpeakersIndex.save_object(speaker)
         {:reply, :ok, socket}
 
       {:error, :speaker, changeset, %{}} ->
@@ -179,6 +182,9 @@ defmodule CF.RestApi.VideoDebateChannel do
 
             rendered_speaker = View.render_one(speaker, SpeakerView, "speaker.json")
             broadcast!(socket, "speaker_updated", rendered_speaker)
+            CF.Algolia.SpeakersIndex.save_object(speaker)
+            CF.Algolia.VideosIndex.reindex_all_speaker_videos(speaker.id)
+            CF.Algolia.StatementsIndex.reindex_all_speaker_statements(speaker.id)
             {:reply, :ok, socket}
 
           {:error, :speaker, changeset = %Ecto.Changeset{}, _} ->
@@ -194,10 +200,12 @@ defmodule CF.RestApi.VideoDebateChannel do
   def handle_in_authenticated!("remove_speaker", %{"id" => id}, socket) do
     speaker = Repo.get!(Speaker, id)
     do_remove_speaker(socket, speaker)
+    CF.Algolia.VideosIndex.reindex_by_id(socket.assigns.video_id)
     broadcast!(socket, "speaker_removed", %{id: id})
     {:reply, :ok, socket}
   end
 
+  # TODO: This should be a GraphQL query rather than a socket event
   @max_speakers_search_results 5
   def handle_in_authenticated!("search_speaker", params, socket) do
     query = "%#{params["query"]}%"

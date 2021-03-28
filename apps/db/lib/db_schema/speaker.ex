@@ -23,9 +23,9 @@ defmodule DB.Schema.Speaker do
     timestamps()
   end
 
-  @required_fields ~w(full_name)
-  @optional_fields ~w(title wikidata_item_id country)
-  @optional_file_fields ~w(picture)
+  @required_fields ~w(full_name)a
+  @optional_fields ~w(title wikidata_item_id country)a
+  @optional_file_fields ~w(picture)a
 
   @doc """
   Builds a changeset based on the `struct` and `params`.

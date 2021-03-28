@@ -50,14 +50,14 @@ defmodule CF.Graphql.Resolvers.Users do
   Resolve main picture URL for `user`
   """
   def picture_url(user, _, _) do
-    {:ok, DB.Type.UserPicture.url({user.picture_url, user}, :thumb)}
+    {:ok, DB.Type.UserPicture.full_url(user, :thumb)}
   end
 
   @doc """
   Resolve small picture URL for `user`
   """
   def mini_picture_url(user, _, _) do
-    {:ok, DB.Type.UserPicture.url({user.picture_url, user}, :mini_thumb)}
+    {:ok, DB.Type.UserPicture.full_url(user, :mini_thumb)}
   end
 
   @watched_entities ~w(video speaker statement comment fact)a

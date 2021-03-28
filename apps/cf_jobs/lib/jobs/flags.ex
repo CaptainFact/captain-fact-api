@@ -9,6 +9,7 @@ defmodule CF.Jobs.Flags do
 
   require Logger
   import Ecto.Query
+  import ScoutApm.Tracing
 
   alias DB.Repo
   alias DB.Schema.UserAction

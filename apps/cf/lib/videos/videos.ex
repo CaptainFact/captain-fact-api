@@ -41,7 +41,7 @@ defmodule CF.Videos do
   """
   def added_by_user(user, paginate_options \\ []) do
     Video
-    |> join(:inner, [v], a in DB.Schema.UserAction, a.video_id == v.id)
+    |> join(:inner, [v], a in DB.Schema.UserAction, on: a.video_id == v.id)
     |> where([_, a], a.user_id == ^user.id)
     |> where([_, a], a.type == ^:add and a.entity == ^:video)
     |> DB.Query.order_by_last_inserted_desc()
@@ -93,19 +93,22 @@ defmodule CF.Videos do
 
       Multi.new()
       |> Multi.insert(:video_without_hash_id, Video.changeset(base_video, metadata))
-      |> Multi.run(:video, fn %{video_without_hash_id: video} ->
+      |> Multi.run(:video, fn _repo, %{video_without_hash_id: video} ->
         video
         |> Video.changeset_generate_hash_id()
         |> Repo.update()
       end)
-      |> Multi.run(:action, fn %{video: video} ->
+      |> Multi.run(:action, fn _repo, %{video: video} ->
         Repo.insert(ActionCreator.action_add(user.id, video))
       end)
       |> Repo.transaction()
       |> case do
-        {:ok, %{video: video}} ->
+        {:ok, %{video: db_video}} ->
           # Return created video with empty speakers
-          {:ok, Map.put(video, :speakers, [])}
+          video = Map.put(db_video, :speakers, [])
+          # Ignore errors if indexing fails
+          CF.Algolia.VideosIndex.save_object(video)
+          {:ok, video}
 
         {:error, _, reason, _} ->
           {:error, reason}

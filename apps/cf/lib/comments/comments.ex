@@ -54,7 +54,7 @@ defmodule CF.Comments do
       |> Comment.changeset(params)
 
     Multi.new()
-    |> Multi.run(:comment, fn _ ->
+    |> Multi.run(:comment, fn _repo, _changes ->
       comment_changeset
       |> Repo.insert!()
       |> Map.put(:user, user)
@@ -62,10 +62,10 @@ defmodule CF.Comments do
       |> Map.put(:score, 0)
       |> Result.ok()
     end)
-    |> Multi.run(:action, fn %{comment: comment} ->
+    |> Multi.run(:action, fn _repo, %{comment: comment} ->
       Repo.insert(action_create(user.id, video_id, comment, source_url))
     end)
-    |> Multi.run(:suscription, fn %{comment: comment} ->
+    |> Multi.run(:suscription, fn _repo, %{comment: comment} ->
       Subscriptions.subscribe(user, comment, :is_author)
     end)
     |> Repo.transaction()
