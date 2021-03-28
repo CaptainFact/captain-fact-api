@@ -83,8 +83,8 @@ config :arc,
   bucket: load_secret.("s3_bucket")
 
 config :algoliax,
-  application_id: load_secret("algolia_app_id"),
-  api_key: load_secret("algolia_api_key")
+  application_id: load_secret.("algolia_app_id"),
+  api_key: load_secret.("algolia_api_key")
 
 # ---- [APP CONFIG] :cf ----
 
