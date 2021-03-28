@@ -103,9 +103,12 @@ defmodule CF.Videos do
       end)
       |> Repo.transaction()
       |> case do
-        {:ok, %{video: video}} ->
+        {:ok, %{video: db_video}} ->
           # Return created video with empty speakers
-          {:ok, Map.put(video, :speakers, [])}
+          video = Map.put(db_video, :speakers, [])
+          # Ignore errors if indexing fails
+          CF.Algolia.VideosIndex.save_object(video)
+          {:ok, video}
 
         {:error, _, reason, _} ->
           {:error, reason}

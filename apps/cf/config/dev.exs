@@ -4,6 +4,7 @@ dev_secret = "8C6FsJwjV11d+1WPUIbkEH6gB/VavJrcXWoPLujgpclfxjkLkoNFSjVU9XfeNm6s"
 
 # General config
 config :cf,
+  deploy_env: "dev",
   frontend_url: "http://localhost:3333/",
   oauth: [
     facebook: [
