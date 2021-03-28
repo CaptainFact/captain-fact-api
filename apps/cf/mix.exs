@@ -48,7 +48,7 @@ defmodule CF.Mixfile do
       {:guardian_db, "~> 2.0.0"},
       {:floki, "~> 0.20.2"},
       {:html_entities, "~> 0.3"},
-      {:httpoison, "~> 0.11"},
+      {:httpoison, "~> 1.8"},
       {:poison, "~> 3.1"},
       {:csv, "~> 1.4.4"},
       {:not_qwerty123, "~> 2.2"},
