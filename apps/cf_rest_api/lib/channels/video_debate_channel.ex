@@ -1,7 +1,6 @@
 defmodule CF.RestApi.VideoDebateChannel do
   use CF.RestApi, :channel
   import ScoutApm.Tracing
-  alias CF.RestApi.Presence
 
   import CF.Actions.ActionCreator,
     only: [
@@ -13,6 +12,7 @@ defmodule CF.RestApi.VideoDebateChannel do
 
   import CF.RestApi.UserSocket, only: [handle_in_authenticated: 4]
 
+  alias CF.RestApi.Presence
   alias Phoenix.View
   alias Ecto.Multi
   alias DB.Schema.User
@@ -128,16 +128,16 @@ defmodule CF.RestApi.VideoDebateChannel do
 
     Multi.new()
     |> Multi.insert(:speaker, speaker_changeset)
-    |> Multi.run(:video_speaker, fn %{speaker: speaker} ->
+    |> Multi.run(:video_speaker, fn _repo, %{speaker: speaker} ->
       # Insert association between video and speaker
       %VideoSpeaker{speaker_id: speaker.id, video_id: video_id}
       |> VideoSpeaker.changeset()
       |> Repo.insert()
     end)
-    |> Multi.run(:action_create, fn %{speaker: speaker} ->
+    |> Multi.run(:action_create, fn _repo, %{speaker: speaker} ->
       Repo.insert(action_create(user_id, speaker))
     end)
-    |> Multi.run(:action_add, fn %{speaker: speaker} ->
+    |> Multi.run(:action_add, fn _repo, %{speaker: speaker} ->
       Repo.insert(action_add(user_id, video_id, speaker))
     end)
     |> Repo.transaction()

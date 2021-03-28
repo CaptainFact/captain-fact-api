@@ -96,7 +96,7 @@ defmodule CF.Actions do
     do: query
 
   defp age_filter(query, age) do
-    datetime_now = NaiveDateTime.utc_now()
+    datetime_now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
     datetime_start = NaiveDateTime.add(datetime_now, -age)
     ActionsQuery.for_period(query, datetime_start, datetime_now)
   end

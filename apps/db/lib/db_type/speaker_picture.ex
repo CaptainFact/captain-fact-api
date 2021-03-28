@@ -15,6 +15,17 @@ defmodule DB.Type.SpeakerPicture do
     Enum.member?(@extension_whitelist, file_extension)
   end
 
+  # The default `url` function has a bug where it does not include the host
+  def full_url(speaker, version) do
+    path = url({speaker.picture, speaker}, version)
+
+    cond do
+      is_nil(path) -> nil
+      String.starts_with?(path, "/") -> "#{Application.get_env(:arc, :asset_host)}/#{path}"
+      true -> path
+    end
+  end
+
   # Define a thumbnail transformation:
   def transform(:thumb, _) do
     {:convert, "-thumbnail 50x50^ -gravity center -extent 50x50 -format jpg", :jpg}

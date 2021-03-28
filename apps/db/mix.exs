@@ -36,11 +36,14 @@ defmodule DB.Mixfile do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:arc, github: "Betree/arc", override: true},
-      {:arc_ecto, "~> 0.10.0"},
-      {:ecto, "~> 2.2.8"},
-      {:ecto_enum, "~> 1.0"},
-      {:postgrex, "~> 0.13.3"},
+      # {:arc, github: "Betree/arc", override: true},
+      # {:arc_ecto, "~> 0.10.0"},
+      {:arc, "~> 0.11.0"},
+      {:arc_ecto, "~> 0.11.3"},
+      {:ecto, "~> 3.0"},
+      {:ecto_sql, "~> 3.0"},
+      {:ecto_enum, "~> 1.4"},
+      {:postgrex, ">= 0.0.0"},
       {:ex_aws, "~> 2.1"},
       {:ex_aws_s3, "~> 2.0"},
       {:xml_builder, "~> 2.0", override: true},
@@ -51,7 +54,7 @@ defmodule DB.Mixfile do
       {:hashids, "~> 2.0"},
       {:kaur, "~> 1.1"},
       {:mime, "~> 1.2"},
-      {:scrivener_ecto, "~> 1.0"},
+      {:scrivener_ecto, "~> 2.0"},
       {:scout_apm, "~> 1.0.6"},
 
       # Dev only

@@ -41,7 +41,7 @@ defmodule CF.RestApi.StatementsChannel do
 
     Multi.new()
     |> Multi.insert(:statement, changeset)
-    |> Multi.run(:action_create, fn %{statement: statement} ->
+    |> Multi.run(:action_create, fn _repo, %{statement: statement} ->
       Repo.insert(action_create(user_id, statement))
     end)
     |> Repo.transaction()

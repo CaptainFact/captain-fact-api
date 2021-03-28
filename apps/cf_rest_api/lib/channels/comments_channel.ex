@@ -76,7 +76,7 @@ defmodule CF.RestApi.CommentsChannel do
 
     comment =
       Comments.add_comment(user, socket.assigns.video_id, params, source_url, fn comment ->
-        comment = Repo.preload(Repo.preload(comment, :source), :user)
+        comment = Repo.preload(comment, [:source, :user])
         rendered_comment = CommentView.render("comment.json", comment: comment)
         broadcast!(socket, @event_comment_updated, rendered_comment)
       end)

@@ -44,6 +44,7 @@ defmodule CF.Graphql.Resolvers.Notifications do
     Notification
     |> where([n], n.id in ^ids)
     |> where([n], n.user_id == ^loggedin_user.id)
+    |> select([n], n)
     |> DB.Repo.update_all([set: [seen_at: seen_at]], returning: true)
     |> elem(1)
     |> Result.ok()

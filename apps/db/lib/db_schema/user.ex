@@ -153,7 +153,10 @@ defmodule DB.Schema.User do
   def changeset_picture(model = %__MODULE__{}, file_name) do
     change(
       model,
-      picture_url: %{file_name: file_name, updated_at: DateTime.utc_now()}
+      picture_url: %{
+        file_name: file_name,
+        updated_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+      }
     )
   end
 

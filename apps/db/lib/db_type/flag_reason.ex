@@ -50,11 +50,15 @@ defmodule DB.Type.FlagReason do
     :error
   end
 
+  def equal?(reason1, reason2) do
+    reason1 == reason2
+  end
+
   # ---- Custom functions ----
 
   @doc """
   Return the string representation of given `reason_id`. This function is not
-  well optimized and should mostly be used to debug or to convert unique 
+  well optimized and should mostly be used to debug or to convert unique
   entries.
   """
   def label(reason_id) when is_valid_identifier(reason_id) do

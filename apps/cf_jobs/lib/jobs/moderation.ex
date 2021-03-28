@@ -10,6 +10,7 @@ defmodule CF.Jobs.Moderation do
 
   require Logger
   import Ecto.Query
+  import ScoutApm.Tracing
 
   alias DB.Repo
   alias DB.Schema.ModerationUserFeedback
@@ -81,7 +82,7 @@ defmodule CF.Jobs.Moderation do
   @transaction_opts [type: "background", name: "update_moderation"]
   def handle_call(:update, _, _) do
     UserAction
-    |> join(:inner, [a], uf in ModerationUserFeedback, uf.action_id == a.id)
+    |> join(:inner, [a], uf in ModerationUserFeedback, on: uf.action_id == a.id)
     |> select([a, uf], %{
       action: %{
         id: a.id,
@@ -217,6 +218,7 @@ defmodule CF.Jobs.Moderation do
     # Delete all flags and punish all users for abusive flags
     Flag
     |> where([f], f.action_id == ^action.id)
+    |> select([f], f)
     |> Repo.delete_all(returning: [:source_user_id])
     # Repo.delete_all returns a tuple like {nb_updated, entries}
     |> elem(1)
@@ -238,7 +240,7 @@ defmodule CF.Jobs.Moderation do
           user_id: nil,
           type: action_type,
           entity: entity_type,
-          inserted_at: Ecto.DateTime.utc()
+          inserted_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
         })
       end)
     )

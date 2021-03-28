@@ -28,7 +28,8 @@ defmodule DB.Schema.Vote do
     from(
       v in query,
       where: v.user_id == ^user.id,
-      where: v.comment_id == ^comment.id
+      where: v.comment_id == ^comment.id,
+      select: v
     )
   end
 

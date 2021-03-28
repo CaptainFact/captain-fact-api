@@ -10,6 +10,9 @@ defmodule DB.Schema.VoteTest do
   test "changeset with valid attributes" do
     changeset = Vote.changeset(%Vote{}, @valid_attrs)
     assert changeset.valid?
+
+    changeset = Vote.changeset(%Vote{}, Map.put(@valid_attrs, :value, -1))
+    assert changeset.valid?
   end
 
   test "changeset with invalid attributes" do
