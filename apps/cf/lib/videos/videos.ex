@@ -80,10 +80,18 @@ defmodule CF.Videos do
   Can also throw if bad permissions.
   """
   def create!(user, video_url, params \\ []) do
-    case Keyword.get(params, :unlisted, false) do
-      false -> UserPermissions.check!(user, :add, :video)
-      true -> UserPermissions.check!(user, :add, :unlisted_video)
-    end
+    is_unlisted =
+      case Keyword.get(params, :unlisted, false) do
+        v when v in [nil, false] ->
+          UserPermissions.check!(user, :add, :video)
+          false
+
+        true ->
+          UserPermissions.check!(user, :add, :unlisted_video)
+          true
+      end
+
+    video_entity = if is_unlisted, do: :unlisted_video, else: :video
 
     with metadata_fetcher when not is_nil(metadata_fetcher) <- get_metadata_fetcher(video_url),
          {:ok, metadata} <- metadata_fetcher.(video_url) do
@@ -91,7 +99,7 @@ defmodule CF.Videos do
       # specified otherwise (false)
       base_video = %Video{
         is_partner: user.is_publisher && Keyword.get(params, :is_partner) != false,
-        unlisted: Keyword.get(params, :unlisted, false)
+        unlisted: is_unlisted
       }
 
       Multi.new()
@@ -102,7 +110,7 @@ defmodule CF.Videos do
         |> Repo.update()
       end)
       |> Multi.run(:action, fn _repo, %{video: video} ->
-        Repo.insert(ActionCreator.action_add(user.id, video))
+        Repo.insert(ActionCreator.action_add(user.id, video_entity, video))
       end)
       |> Repo.transaction()
       |> case do
@@ -125,13 +133,22 @@ defmodule CF.Videos do
   Returned statements contains only an id and a key
   """
   def shift_statements(user, video_id, offsets) do
-    UserPermissions.check!(user, :update, :video)
     video = Repo.get!(Video, video_id)
+
+    case video.unlisted do
+      false ->
+        UserPermissions.check!(user, :update, :video)
+
+      true ->
+        UserPermissions.check!(user, :update, :unlisted_video)
+    end
+
+    video_entity = if video.unlisted, do: :unlisted_video, else: :video
     changeset = Video.changeset_shift_offsets(video, offsets)
 
     Multi.new()
     |> Multi.update(:video, changeset)
-    |> Multi.insert(:action_update, action_update(user.id, changeset))
+    |> Multi.insert(:action_update, ActionCreator.action_update(user.id, video_entity, changeset))
     |> Repo.transaction()
     |> case do
       {:ok, %{video: video}} ->

@@ -7,8 +7,21 @@ defmodule CF.VideosTest do
 
   defp test_url, do: "https://www.youtube.com/watch?v=#{DB.Utils.TokenGenerator.generate(11)}"
 
-  describe "Add video" do
-    test "without enough reputation" do
+  describe "Add" do
+    test "video as unlisted without enough reputation" do
+      user = insert(:user, reputation: 0, is_publisher: false)
+
+      assert_raise PermissionsError, fn ->
+        Videos.create!(user, test_url(), unlisted: true)
+      end
+    end
+
+    test "video as unlisted with enough reputation" do
+      user = insert(:user, reputation: 15)
+      {:ok, _video} = Videos.create!(user, test_url(), unlisted: true)
+    end
+
+    test "video as listed without enough reputation" do
       user = insert(:user, reputation: 0, is_publisher: false)
 
       assert_raise PermissionsError, fn ->
@@ -16,7 +29,7 @@ defmodule CF.VideosTest do
       end
     end
 
-    test "with enough reputation" do
+    test "video as listed with enough reputation" do
       user = insert(:user, reputation: 50_000)
       {:ok, _video} = Videos.create!(user, test_url())
     end
@@ -54,6 +67,40 @@ defmodule CF.VideosTest do
       user = insert(:user, reputation: 50_000)
       {:ok, video} = Videos.create!(user, test_url())
       assert video.hash_id == VideoHashId.encode(video.id)
+    end
+  end
+
+  describe "Update" do
+    test "an unlisted video without enough reputation" do
+      user = insert(:user, reputation: 50_000)
+      user2 = insert(:user, reputation: 0)
+      {:ok, video} = Videos.create!(user, test_url(), unlisted: true)
+
+      assert_raise PermissionsError, fn ->
+        Videos.shift_statements(user2, video.id, %{youtube_offset: 42})
+      end
+    end
+
+    test "an unlisted video with enough reputation" do
+      user = insert(:user, reputation: 15)
+      {:ok, video} = Videos.create!(user, test_url(), unlisted: true)
+      {:ok, _video} = Videos.shift_statements(user, video.id, %{youtube_offset: 42})
+    end
+
+    test "a listed video without enough reputation" do
+      user = insert(:user, reputation: 50_000)
+      user2 = insert(:user, reputation: 0)
+      {:ok, video} = Videos.create!(user, test_url())
+
+      assert_raise PermissionsError, fn ->
+        Videos.shift_statements(user2, video.id, %{youtube_offset: 42})
+      end
+    end
+
+    test "a listed video with enough reputation" do
+      user = insert(:user, reputation: 50_000)
+      {:ok, video} = Videos.create!(user, test_url())
+      {:ok, _video} = Videos.shift_statements(user, video.id, %{youtube_offset: 42})
     end
   end
 
