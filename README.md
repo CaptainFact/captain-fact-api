@@ -1,10 +1,14 @@
 <p align="center"><img src="https://avatars0.githubusercontent.com/u/28169525?s=200&v=4" height="100"/></p>
 <h1 align="center"><a href="https://captainfact.io">CaptainFact.io</a></h1>
-<p align="center"><a href="https://discord.gg/2Qd7hMz" title="Discord"><img src="https://discordapp.com/api/guilds/416782744748687361/widget.png" alt="Discord"></a>
+<p align="center">
+<a href="https://discord.gg/2Qd7hMz" title="Discord"><img src="https://discordapp.com/api/guilds/416782744748687361/widget.png" alt="Discord"></a>
 <a href="https://twitter.com/CaptainFact_io" title="Twitter"><img src="https://img.shields.io/twitter/follow/CaptainFact_io.svg?style=social&label=Follow"></a>
 <a href="https://opencollective.com/captainfact_io" title="Backers on Open Collective"><img src="https://opencollective.com/captainfact_io/backers/badge.svg"></a>
+</p>
+<p align="center">
 <a href="./LICENSE"><img src="https://img.shields.io/github/license/CaptainFact/captain-fact-api.svg" alt="AGPL3"></a>
-<a href="https://travis-ci.com/CaptainFact/captain-fact-api"><img src="https://travis-ci.com/CaptainFact/captain-fact-api.svg?branch=staging"></a>
+<a href="https://github.com/CaptainFact/captain-fact-api/releases"><img src="https://img.shields.io/github/v/release/CaptainFact/captain-fact-api" alt="GitHub release" /></a>
+<a href="https://github.com/CaptainFact/captain-fact-api/actions/workflows/ci.yml"><img src="https://github.com/CaptainFact/captain-fact-api/actions/workflows/ci.yml/badge.svg?branch=staging" alt='CI Status' /></a>
 <a href='https://coveralls.io/github/CaptainFact/captain-fact-api?branch=staging'><img src='https://coveralls.io/repos/github/CaptainFact/captain-fact-api/badge.svg?branch=staging' alt='Coverage Status' /></a>
 </p>
 <hr/>
