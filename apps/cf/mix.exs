@@ -68,7 +68,7 @@ defmodule CF.Mixfile do
       {:exsync, "~> 0.2", only: :dev},
 
       # Test only
-      {:bypass, "~> 0.8", only: :test},
+      {:bypass, "~> 2.0", only: :test},
       {:mock, "~> 0.3.1", only: :test}
     ]
   end
