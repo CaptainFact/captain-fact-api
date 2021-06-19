@@ -21,16 +21,6 @@ defmodule CF.Comments do
   # ---- Public API ----
 
   @doc """
-  Returns all comments for given `statement_id`
-  """
-  def statement_comments(statement_id) do
-    Comment
-    |> Comment.full()
-    |> where([c, s], c.statement_id == ^statement_id)
-    |> Repo.all()
-  end
-
-  @doc """
   Returns all comments for given `video_id`
   """
   def video_comments(video_id) do

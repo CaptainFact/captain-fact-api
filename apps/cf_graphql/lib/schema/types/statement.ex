@@ -28,7 +28,7 @@ defmodule CF.Graphql.Schema.Types.Statement do
       complexity(join_complexity())
     end
 
-    @desc "List of users comments and facts for this statement"
+    @desc "The video associated with this statement"
     field :video, :video do
       resolve(assoc(:video))
       complexity(join_complexity())

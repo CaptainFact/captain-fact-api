@@ -37,12 +37,11 @@ defmodule DB.Schema.Statement do
   """
   def query_list(query, filters \\ [], limit \\ nil) do
     query
-    |> order_by([s], desc: s.id)
+    |> order_by([s], desc: s.inserted_at)
     |> filter_with(filters)
     |> limit_statement_query_list(limit)
   end
 
-  # TODO: Not sure if it is used ...
   defp limit_statement_query_list(query, nil),
     do: query
 
@@ -53,8 +52,9 @@ defmodule DB.Schema.Statement do
     Enum.reduce(filters, query, fn
       {:commented, false}, query ->
         from(s in query, left_join: c in assoc(s, :comments), where: is_nil(c.statement_id))
+
       {:commented, true}, query ->
-        from(s in query, left_join: c in assoc(s, :comments), where: not is_nil(c.statement_id))
+        from(s in query, inner_join: c in assoc(s, :comments), group_by: s.id)
     end)
   end
 
