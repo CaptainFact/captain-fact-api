@@ -57,8 +57,11 @@ defmodule DB.Schema.Statement do
       {:commented, true}, query ->
         from(s in query, inner_join: c in assoc(s, :comments), group_by: s.id)
 
+      {:speaker_id, nil}, query ->
+        from(s in query, where: is_nil(s.speaker_id))
+
       {:speaker_id, id}, query ->
-        from(s in query, join: speaker in assoc(s, :speaker), where: speaker.id == ^id)
+        from(s in query, where: s.speaker_id == ^id)
     end)
   end
 
