@@ -7,7 +7,7 @@ defmodule CF.Graphql.Schema.Types.Statement do
   use Absinthe.Ecto, repo: DB.Repo
   import CF.Graphql.Schema.Utils
 
-  import_types(CF.Graphql.Schema.Types.{Speaker, Comment})
+  import_types(CF.Graphql.Schema.Types.{Paginated, Speaker, Comment})
 
   @desc "A transcript or a description of the picture"
   object :statement do
@@ -27,5 +27,17 @@ defmodule CF.Graphql.Schema.Types.Statement do
       resolve(assoc(:comments))
       complexity(join_complexity())
     end
+
+    @desc "The video associated with this statement"
+    field :video, :video do
+      resolve(assoc(:video))
+      complexity(join_complexity())
+    end
+  end
+
+  @desc "A list a paginated statements"
+  object :paginated_statements do
+    import_fields(:paginated)
+    field(:entries, list_of(:statement))
   end
 end

@@ -1,6 +1,10 @@
 defmodule DB.Schema.Statement do
+  @moduledoc """
+  Ecto schema for `statements` table.
+  """
+
   use Ecto.Schema
-  import Ecto.Changeset
+  import Ecto.{Changeset, Query}
 
   schema "statements" do
     field(:text, :string)
@@ -17,6 +21,49 @@ defmodule DB.Schema.Statement do
 
   @required_fields ~w(text time video_id)a
   @optional_fields ~w(speaker_id)a
+
+  # Define queries
+
+  @doc """
+  Select all statements and order them by id.
+
+  ## Params
+
+    * query: an Ecto query
+    * filters: a list of tuples like {filter_name, value}.
+      Valid filters:
+        - commented: select all statements without comments if commented == false, otherwise select those with comments
+        - speaker_id: speaker's integer ID
+    * limit: Max number of videos to return
+  """
+  def query_list(query, filters \\ [], limit \\ nil) do
+    query
+    |> order_by([s], desc: s.inserted_at)
+    |> filter_with(filters)
+    |> limit_statement_query_list(limit)
+  end
+
+  defp limit_statement_query_list(query, nil),
+    do: query
+
+  defp limit_statement_query_list(query, limit),
+    do: limit(query, ^limit)
+
+  defp filter_with(query, filters) do
+    Enum.reduce(filters, query, fn
+      {:commented, false}, query ->
+        from(s in query, left_join: c in assoc(s, :comments), where: is_nil(c.statement_id))
+
+      {:commented, true}, query ->
+        from(s in query, inner_join: c in assoc(s, :comments), group_by: s.id)
+
+      {:speaker_id, nil}, query ->
+        from(s in query, where: is_nil(s.speaker_id))
+
+      {:speaker_id, id}, query ->
+        from(s in query, where: s.speaker_id == ^id)
+    end)
+  end
 
   @doc """
   Builds a changeset based on the `struct` and `params`.

@@ -34,6 +34,14 @@ defmodule CF.Graphql.Schema do
       resolve(&Resolvers.Videos.get/3)
     end
 
+    @desc "Get all statements"
+    field :statements, :paginated_statements do
+      arg(:filters, :statement_filter)
+      arg(:offset, :integer, default_value: 1)
+      arg(:limit, :integer, default_value: 10)
+      resolve(&Resolvers.Statements.paginated_list/3)
+    end
+
     @desc "Get user public info"
     field :user, :user do
       arg(:id, :id)
