@@ -90,6 +90,20 @@ defmodule CF.Actions do
     |> where([a], a.inserted_at <= ^datetime_end)
   end
 
+  @spec compute_reputation!(%User{}) :: integer
+  def compute_reputation!(user) do
+    DB.Schema.User
+    |> where([u], u.id == ^user.id)
+    |> join(:inner, [u], action in UserAction, on: action.user_id == u.id)
+    |> join(:inner, [u, _], action in UserAction, on: action.target_user_id == u.id)
+    |> select(
+      [_, actions_authored, actions_targeted],
+      coalesce(sum(actions_authored.author_reputation_change), 0) +
+        coalesce(sum(actions_targeted.target_reputation_change), 0)
+    )
+    |> DB.Repo.one!()
+  end
+
   # ---- Private methods ----
 
   defp age_filter(query, -1),

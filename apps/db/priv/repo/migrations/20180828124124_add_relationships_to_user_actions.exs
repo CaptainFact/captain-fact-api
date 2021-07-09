@@ -43,6 +43,7 @@ defmodule DB.Repo.Migrations.AddRelationshipsToUserActions do
     # Migrate all existing actions
     nb_actions =
       UserAction
+      |> select([:id, :type, :entity, :entity_id, :context, :inserted_at])
       |> Repo.all()
       |> Enum.map(&changeset_migrate_action/1)
       |> Enum.map(&Repo.update(&1, log: false))
