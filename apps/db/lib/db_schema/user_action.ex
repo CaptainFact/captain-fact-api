@@ -19,6 +19,9 @@ defmodule DB.Schema.UserAction do
     field(:entity, DB.Type.Entity)
     field(:changes, :map)
 
+    field(:author_reputation_change, :integer, default: 0)
+    field(:target_reputation_change, :integer, default: 0)
+
     belongs_to(:video, Video)
     belongs_to(:statement, Statement)
     belongs_to(:comment, Comment)

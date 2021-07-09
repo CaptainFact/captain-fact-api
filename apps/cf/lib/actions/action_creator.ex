@@ -10,6 +10,7 @@ defmodule CF.Actions.ActionCreator do
   alias DB.Schema.Speaker
   alias DB.Schema.Statement
   alias DB.Schema.Comment
+  alias CF.Actions.ReputationChange
 
   # Create
 
@@ -226,12 +227,17 @@ defmodule CF.Actions.ActionCreator do
   creators like `action_create` or `action_delete`.
   """
   def action(user_id, entity, action_type, params \\ []) do
+    {author_reputation_change, target_reputation_change} =
+      ReputationChange.for_action(action_type, entity)
+
     UserAction.changeset(
       %UserAction{},
       Enum.into(params, %{
         user_id: user_id,
         type: action_type,
-        entity: entity
+        entity: entity,
+        author_reputation_change: author_reputation_change,
+        target_reputation_change: target_reputation_change
       })
     )
   end
