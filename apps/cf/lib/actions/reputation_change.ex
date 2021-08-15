@@ -95,6 +95,11 @@ defmodule CF.Actions.ReputationChange do
   """
   def actions_types, do: @actions_types
 
+  @doc """
+  Returns the full map of actions <> reputation changes
+  """
+  def actions, do: @actions
+
   def daily_gain_limit, do: @daily_gain_limit
 
   def daily_loss_limit, do: @daily_loss_limit

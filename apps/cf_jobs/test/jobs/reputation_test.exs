@@ -3,6 +3,7 @@ defmodule CF.Jobs.ReputationTest do
   doctest CF.Jobs.Reputation
 
   alias DB.Schema.User
+  alias CF.Actions
   alias CF.Actions.ReputationChange
   alias CF.Jobs.Reputation
 
@@ -78,6 +79,22 @@ defmodule CF.Jobs.ReputationTest do
     Reputation.reset_daily_limits()
     updated_user = Repo.get!(User, action.target_user_id)
     assert updated_user.today_reputation_gain == 0
+  end
+
+  describe "compute_reputation" do
+    test "should match user's reputations" do
+      action = insert_action(:vote_down, :fact)
+
+      source_user = Repo.get!(User, action.user_id)
+      target_user = Repo.get!(User, action.target_user_id)
+      Reputation.update()
+
+      Repo.reload(source_user)
+      Repo.reload(target_user)
+
+      assert source_user.reputation == CF.Actions.compute_reputation!(source_user)
+      assert target_user.reputation == CF.Actions.compute_reputation!(target_user)
+    end
   end
 
   defp insert_action(type, entity) do

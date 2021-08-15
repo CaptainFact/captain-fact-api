@@ -19,6 +19,9 @@ defmodule DB.Schema.UserAction do
     field(:entity, DB.Type.Entity)
     field(:changes, :map)
 
+    field(:author_reputation_change, :integer, default: 0)
+    field(:target_reputation_change, :integer, default: 0)
+
     belongs_to(:video, Video)
     belongs_to(:statement, Statement)
     belongs_to(:comment, Comment)
@@ -31,7 +34,7 @@ defmodule DB.Schema.UserAction do
     field(:entity_id, :integer)
   end
 
-  @fields ~w(user_id target_user_id type entity changes video_id statement_id comment_id speaker_id)a
+  @fields ~w(user_id target_user_id type entity changes video_id statement_id comment_id speaker_id author_reputation_change target_reputation_change)a
 
   @doc false
   def changeset(action = %UserAction{}, attrs) do
