@@ -92,14 +92,19 @@ defmodule CF.Actions do
 
   @spec compute_reputation!(%User{}) :: integer
   def compute_reputation!(user) do
-    DB.Schema.User
-    |> where([u], u.id == ^user.id)
-    |> join(:inner, [u], action in UserAction, on: action.user_id == u.id)
-    |> join(:inner, [u, _], action in UserAction, on: action.target_user_id == u.id)
+    DB.Schema.UserAction
+    |> where([a], a.user_id == ^user.id or a.target_user_id == ^user.id)
     |> select(
-      [_, actions_authored, actions_targeted],
-      coalesce(sum(actions_authored.author_reputation_change), 0) +
-        coalesce(sum(actions_targeted.target_reputation_change), 0)
+      [a],
+      coalesce(
+        sum(
+          fragment(
+            "CASE WHEN user_id = ? THEN author_reputation_change ELSE target_reputation_change END",
+            ^user.id
+          )
+        ),
+        0
+      )
     )
     |> DB.Repo.one!()
   end
