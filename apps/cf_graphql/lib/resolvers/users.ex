@@ -103,5 +103,5 @@ defmodule CF.Graphql.Resolvers.Users do
     do: where(query, [a], a.user_id == ^user.id)
 
   defp filter_by_user_action_direction(query, user, direction) when direction == :target,
-    do: where(query, [a], a.target_user_id == ^user.id)
+    do: where(query, [a], a.target_user_id == ^user.id and a.user_id != ^user.id)
 end
