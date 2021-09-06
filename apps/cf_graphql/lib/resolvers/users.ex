@@ -94,4 +94,16 @@ defmodule CF.Graphql.Resolvers.Users do
   def videos_added(user, %{offset: offset, limit: limit}, _) do
     {:ok, CF.Videos.added_by_user(user, page: offset, page_size: limit)}
   end
+<<<<<<< Updated upstream
+=======
+
+  defp filter_by_user_action_direction(query, user, direction) when direction == :all,
+    do: where(query, [a], a.user_id == ^user.id or a.target_user_id == ^user.id)
+
+  defp filter_by_user_action_direction(query, user, direction) when direction == :author,
+    do: where(query, [a], a.user_id == ^user.id)
+
+  defp filter_by_user_action_direction(query, user, direction) when direction == :target,
+    do: where(query, [a], a.target_user_id == ^user.id and a.user_id != ^user.id)
+>>>>>>> Stashed changes
 end
