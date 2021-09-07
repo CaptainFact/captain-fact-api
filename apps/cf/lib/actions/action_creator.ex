@@ -247,11 +247,16 @@ defmodule CF.Actions.ActionCreator do
   creators like `action_admin_delete`.
   """
   def admin_action(entity, action_type, params \\ []) do
+    {author_reputation_change, target_reputation_change} =
+      ReputationChange.for_action(action_type, entity)
+
     UserAction.changeset_admin(
       %UserAction{},
       Enum.into(params, %{
         type: action_type,
-        entity: entity
+        entity: entity,
+        author_reputation_change: author_reputation_change,
+        target_reputation_change: target_reputation_change
       })
     )
   end

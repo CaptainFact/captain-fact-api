@@ -3,9 +3,11 @@ defmodule CF.Actions.ReputationChange do
   Calculate reputation changes.
   """
 
+  import Ecto.Query
   alias DB.Schema.{User, UserAction}
   alias CF.Actions
   alias CF.Actions.ReputationChangeConfigLoader
+  alias CF.Actions.ReputationChange
 
   # Reputation changes definition
   # @external_resource specify the file dependency to compiler
@@ -26,19 +28,20 @@ defmodule CF.Actions.ReputationChange do
   for given action type / entity.
   """
   def for_action(%UserAction{type: type, entity: entity}) do
-    case Map.get(@actions, type) do
-      nil -> {0, 0}
-      res when is_map(res) -> Map.get(res, entity) || {0, 0}
-      res when is_tuple(res) -> res
-    end
+    for_action(type, entity)
   end
 
   def for_action(type) when is_atom(type),
     do: Map.get(@actions, type) || {0, 0}
 
   @spec for_action(atom(), atom()) :: any()
-  def for_action(type, entity) when is_atom(type) and is_atom(entity),
-    do: get_in(@actions, [type, entity]) || {0, 0}
+  def for_action(type, entity) when is_atom(type) and is_atom(entity) do
+    case Map.get(@actions, type) do
+      nil -> {0, 0}
+      res when is_map(res) -> Map.get(res, entity) || {0, 0}
+      res when is_tuple(res) -> res
+    end
+  end
 
   @doc """
   Get reputation change as an integer for admin action (email confirmed, abusive
@@ -103,4 +106,47 @@ defmodule CF.Actions.ReputationChange do
   def daily_gain_limit, do: @daily_gain_limit
 
   def daily_loss_limit, do: @daily_loss_limit
+
+  def update_all_actions_reputations do
+    Enum.each(ReputationChange.actions(), &update_for_actions_entry/1)
+  end
+
+  defp update_for_actions_entry(
+         {action_type, {author_reputation_change, target_reputation_change}}
+       ) do
+    DB.Schema.UserAction
+    |> where([a], a.type == ^dump_action_type!(action_type))
+    |> DB.Repo.update_all(
+      set: [
+        author_reputation_change: author_reputation_change,
+        target_reputation_change: target_reputation_change
+      ]
+    )
+  end
+
+  defp update_for_actions_entry({action_type, details}) when is_map(details) do
+    Enum.each(details, fn {entity, {author_reputation_change, target_reputation_change}} ->
+      DB.Schema.UserAction
+      |> where(
+        [a],
+        a.type == ^dump_action_type!(action_type) and a.entity == ^dump_entity_type!(entity)
+      )
+      |> DB.Repo.update_all(
+        set: [
+          author_reputation_change: author_reputation_change,
+          target_reputation_change: target_reputation_change
+        ]
+      )
+    end)
+  end
+
+  defp dump_action_type!(action_type) do
+    {:ok, action_type_id} = DB.Type.UserActionType.dump(action_type)
+    action_type_id
+  end
+
+  defp dump_entity_type!(entity) do
+    {:ok, entity_id} = DB.Type.Entity.dump(entity)
+    entity_id
+  end
 end

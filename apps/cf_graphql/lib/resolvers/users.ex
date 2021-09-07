@@ -61,20 +61,21 @@ defmodule CF.Graphql.Resolvers.Users do
   end
 
   @watched_entities ~w(video speaker statement comment fact)a
-  @action_banned [
+  @watched_actions [
     :action_banned_bad_language,
     :action_banned_spam,
     :action_banned_irrelevant,
-    :action_banned_not_constructive
+    :action_banned_not_constructive,
+    :email_confirmed
   ]
 
   @doc """
   Resolve user actions history
   """
-  def activity_log(user, %{offset: offset, limit: limit}, _) do
+  def activity_log(user, %{offset: offset, limit: limit, direction: direction}, _) do
     UserAction
-    |> where([a], a.user_id == ^user.id and a.entity in ^@watched_entities)
-    |> or_where([a], a.target_user_id == ^user.id and a.type in ^@action_banned)
+    |> where([a], a.entity in ^@watched_entities or a.type in ^@watched_actions)
+    |> filter_by_user_action_direction(user, direction)
     |> DB.Query.order_by_last_inserted_desc()
     |> Repo.paginate(page: offset, page_size: limit)
     |> Result.ok()
@@ -94,4 +95,13 @@ defmodule CF.Graphql.Resolvers.Users do
   def videos_added(user, %{offset: offset, limit: limit}, _) do
     {:ok, CF.Videos.added_by_user(user, page: offset, page_size: limit)}
   end
+
+  defp filter_by_user_action_direction(query, user, direction) when direction == :all,
+    do: where(query, [a], a.user_id == ^user.id or a.target_user_id == ^user.id)
+
+  defp filter_by_user_action_direction(query, user, direction) when direction == :author,
+    do: where(query, [a], a.user_id == ^user.id)
+
+  defp filter_by_user_action_direction(query, user, direction) when direction == :target,
+    do: where(query, [a], a.target_user_id == ^user.id and a.user_id != ^user.id)
 end

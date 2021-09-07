@@ -12,12 +12,16 @@ defmodule CF.Graphql.Schema.Types.UserAction do
   object :user_action do
     @desc "Unique action ID"
     field(:id, non_null(:id))
+    @desc "Id of the User who made the action"
+    field(:user_id, :id)
     @desc "User who made the action"
     field :user, :user do
       resolve(assoc(:user))
       complexity(join_complexity())
     end
 
+    @desc "Id of the User targeted by the action"
+    field(:target_user_id, :id)
     @desc "User targeted by the action"
     field :target_user, :user do
       resolve(assoc(:target_user))

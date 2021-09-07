@@ -14,6 +14,7 @@ defmodule CF.Graphql.Schema.Types.User do
   import_types(CF.Graphql.Schema.Types.Notification)
 
   enum(:notifications_filter, values: [:all, :seen, :unseen])
+  enum(:activity_log_direction, values: [:all, :author, :target])
 
   @desc "A user registered on the website"
   object :user do
@@ -49,6 +50,7 @@ defmodule CF.Graphql.Schema.Types.User do
       complexity(join_complexity())
       arg(:offset, :integer, default_value: 1)
       arg(:limit, :integer, default_value: 10)
+      arg(:direction, :activity_log_direction, default_value: :author)
       resolve(&Resolvers.Users.activity_log/3)
     end
 
