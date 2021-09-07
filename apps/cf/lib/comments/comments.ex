@@ -180,15 +180,25 @@ defmodule CF.Comments do
 
     # Delete prev directly vote if any (without logging a delete action)
     Multi.new()
-    |> Multi.delete_all(:prev_vote, Vote.user_comment_vote(user, comment), returning: [:value])
+    |> Multi.delete_all(:prev_votes, Vote.user_comment_vote(user, comment), returning: [:value])
+    |> Multi.run(:revert_vote, fn _repo, %{prev_votes: {_count, prev_votes}} ->
+      unless Enum.empty?(prev_votes) do
+        prev_vote = List.first(prev_votes)
+        prev_vote_type = Vote.vote_type(user, comment, prev_vote.value)
+        revert_vote_type = reverse_vote_type(prev_vote_type)
+        DB.Repo.insert(action_revert_vote(user.id, video_id, revert_vote_type, comment))
+      else
+        {:ok, nil}
+      end
+    end)
     |> Multi.insert(:vote, Vote.changeset_new(user, comment, value))
     |> Multi.insert(:vote_action, action_vote(user.id, video_id, vote_type, comment))
     |> Repo.transaction()
     |> case do
-      {:ok, %{vote: vote, prev_vote: {0, []}}} ->
+      {:ok, %{vote: vote, prev_votes: {0, []}}} ->
         {:ok, comment, %{vote | comment_id: comment.id, comment: comment}, 0}
 
-      {:ok, %{vote: vote, prev_vote: {_, [%{value: prev_value}]}}} ->
+      {:ok, %{vote: vote, prev_votes: {_, [%{value: prev_value}]}}} ->
         {:ok, comment, %{vote | comment_id: comment.id, comment: comment}, prev_value}
 
       {:error, _, reason, _} ->
