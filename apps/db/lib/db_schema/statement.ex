@@ -73,7 +73,7 @@ defmodule DB.Schema.Statement do
     |> cast(params, @required_fields ++ @optional_fields)
     |> validate_required(@required_fields)
     |> validate_number(:time, greater_than_or_equal_to: 0)
-    |> validate_length(:text, min: 10, max: 255)
+    |> validate_length(:text, min: 10, max: 280)
     |> cast_assoc(:speaker)
   end
 
