@@ -7,7 +7,7 @@ env:
 
 jobs:
   cypress:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04 # Remember to update this when changing Erlang version. See https://github.com/erlef/setup-beam
     services:
       db:
         image: captainfact/dev-db:latest
@@ -32,10 +32,10 @@ jobs:
         with:
           path: build
           key: ${{ runner.os }}-mix-build
-      - uses: erlef/setup-elixir@v1
+      - uses: erlef/setup-beam@v1
         with:
-          otp-version: 22.2.7
-          elixir-version: 1.10.1
+          version-file: .tool-versions
+          version-type: strict
       - name: Install API's dependencies
         run: mix deps.get
       - name: Compile dependencies

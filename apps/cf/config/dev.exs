@@ -34,4 +34,6 @@ config :rollbax,
 config :cf, CF.Mailer, adapter: Bamboo.LocalAdapter
 
 # Import local secrets if any - use wildcard to ignore errors
-import_config "*dev.secret.exs"
+for config <- "*dev.secret.exs" |> Path.expand(__DIR__) |> Path.wildcard() do
+  import_config config
+end

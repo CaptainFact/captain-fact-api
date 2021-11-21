@@ -64,7 +64,7 @@ defmodule DB.Mixfile do
       # Test only
       {:ex_machina, "~> 2.0", only: [:dev, :test]},
       {:faker, "~> 0.7", only: [:dev, :test]},
-      {:stream_data, "~> 0.1", only: :test}
+      {:stream_data, "~> 0.5", only: :test}
     ]
   end
 end

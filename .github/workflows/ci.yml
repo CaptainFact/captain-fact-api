@@ -7,18 +7,18 @@ env:
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04 # Remember to update this when changing Erlang version. See https://github.com/erlef/setup-beam
     steps:
       - uses: actions/checkout@v1
-      - uses: erlef/setup-elixir@v1
+      - uses: erlef/setup-beam@v1
         with:
-          otp-version: 22.2.7
-          elixir-version: 1.10.1
+          version-file: .tool-versions
+          version-type: strict
       - name: Check format
         run: mix format --check-formatted
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04 # Remember to update this when changing Erlang version. See https://github.com/erlef/setup-beam
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     services:
@@ -37,10 +37,10 @@ jobs:
           key: ${{ runner.os }}-mix-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
           restore-keys: |
             ${{ runner.os }}-mix-
-      - uses: erlef/setup-elixir@v1
+      - uses: erlef/setup-beam@v1
         with:
-          otp-version: 22.2.7
-          elixir-version: 1.10.1
+          version-file: .tool-versions
+          version-type: strict
       - name: Install dependencies
         run: mix deps.get
       - name: Prepare DB
