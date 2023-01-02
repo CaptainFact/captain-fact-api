@@ -34,7 +34,7 @@ defmodule CF.Jobs.Mixfile do
   # Dependencies
   defp deps do
     [
-      {:quantum, "~> 2.3"},
+      {:quantum, "~> 3.3"},
       {:timex, "~> 3.0"},
       {:scout_apm, "~> 1.0.6"},
 
