@@ -71,11 +71,11 @@ defmodule CF.RestApi.UserSocket do
         reply_error(socket, Phoenix.View.render(ErrorView, "404.json", []))
 
       exception ->
-        report_socket_error(exception, System.stacktrace(), command, params, socket)
+        report_socket_error(exception, __STACKTRACE__, command, params, socket)
         reply_error(socket, Phoenix.View.render(ErrorView, "error.json", []))
     catch
       exception ->
-        report_socket_throw(exception, System.stacktrace(), command, params, socket)
+        report_socket_throw(exception, __STACKTRACE__, command, params, socket)
         reply_error(socket, Phoenix.View.render(ErrorView, "error.json", []))
     end
   end

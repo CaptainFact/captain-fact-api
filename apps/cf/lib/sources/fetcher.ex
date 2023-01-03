@@ -42,7 +42,7 @@ defmodule CF.Sources.Fetcher do
             fetch(url, callback)
           rescue
             exception ->
-              CF.Errors.report(exception, System.stacktrace())
+              CF.Errors.report(exception, __STACKTRACE__)
           after
             Fetcher.LinkChecker.free_url(url)
           end

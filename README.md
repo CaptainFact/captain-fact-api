@@ -38,6 +38,7 @@ Docker installed, you can use the pre-Seed PostgreSQL Docker image:
 ## Start API
 
 - `mix deps.get` --> Get dependencies
+- `mix ecto.create` --> Create DB
 - `mix ecto.migrate` --> Migrate DB
 - `iex -S mix` --> Start project
 
@@ -49,7 +50,7 @@ Following services will be started:
 - [localhost:4003](https://localhost:4003) - GraphQL API (HTTPS)
 - [localhost:4004](http://localhost:4004) - Atom feed
 
-You can also see all e-mail sent, by going to http://localhost:4000/_dev/mail
+You can also see all e-mail sent, by going to http://localhost:4000/\_dev/mail
 
 ## Other useful commands
 
