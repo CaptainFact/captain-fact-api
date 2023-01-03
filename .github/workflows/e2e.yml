@@ -18,46 +18,61 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
+      # Checkout
       - name: Checkout API
-        uses: actions/checkout@v1
-      - name: Restore Elixir cache
-        uses: actions/cache@v1
+        uses: actions/checkout@v3
         with:
-          path: deps
-          key: ${{ runner.os }}-mix-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
-          restore-keys: |
-            ${{ runner.os }}-mix-
-      - name: Restore Elixir build folder
-        uses: actions/cache@v1
-        with:
-          path: build
-          key: ${{ runner.os }}-mix-build
-      - uses: erlef/setup-beam@v1
-        with:
-          version-file: .tool-versions
-          version-type: strict
-      - name: Install API's dependencies
-        run: mix deps.get
-      - name: Compile dependencies
-        run: mix deps.compile
-      - name: Compile project
-        run: mix compile
-      - name: Prepare DB
-        run: mix ecto.create && mix ecto.migrate
-      - uses: actions/setup-node@v1
+          repository: CaptainFact/captain-fact-api
+          path: api
       - name: Checkout Frontend
         uses: actions/checkout@v2
         with:
           repository: CaptainFact/captain-fact-frontend
           ref: refs/heads/staging
-          path: ./captain-fact-frontend
-      - name: Restore node_modules
-        uses: actions/cache@v1
-        id: node-modules
+          path: frontend
+      # Setup API
+      - name: Restore Elixir cache
+        uses: actions/cache@v3
         with:
-          path: captain-fact-frontend/node_modules
-          key: ${{ runner.os }}-node_modules-${{ hashFiles('captain-fact-frontend/package-lock.json') }}
+          path: ./api/deps
+          key: ${{ runner.os }}-mix-${{ env.cache-name }}-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-${{ env.cache-name }}-
+            ${{ runner.os }}-mix-
+      - name: Restore Elixir build folder
+        uses: actions/cache@v1
+        with:
+          path: ./api/build
+          key: ${{ runner.os }}-mix-${{ env.cache-name }}-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-${{ env.cache-name }}-
+            ${{ runner.os }}-mix-
+      - uses: erlef/setup-beam@v1
+        with:
+          version-file: ./api/.tool-versions
+          version-type: strict
+      - name: Install API's dependencies
+        working-directory: api
+        run: mix deps.get
+      - name: Compile dependencies
+        working-directory: api
+        run: mix deps.compile
+      - name: Compile project
+        working-directory: api
+        run: mix compile
+      - name: Prepare DB
+        working-directory: api
+        run: mix ecto.create && mix ecto.migrate
+      # Setup Frontend
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: "./frontend/.tool-versions"
+          cache-dependency-path: "./frontend/package-lock.json"
+          cache: "npm"
       - name: Install Frontend's dependencies
-        working-directory: captain-fact-frontend
+        working-directory: frontend
         run: npm ci --prefer-offline --no-audit
-      - run: ./scripts/run_e2e_ci.sh
+      # Run tests
+      - name: Start E2E tests
+        working-directory: api
+        run: ./scripts/run_e2e_ci.sh

@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 
+cd "$(dirname "$(realpath "$0")")"/..
+
 # Start API
-iex -S mix run &
+cd ./api
+mix run --no-halt &
 
 # Start Frontend
-cd captain-fact-frontend
+cd ../frontend
 npm run dev &
 
 # Waiting for API to be ready
@@ -15,9 +18,3 @@ timeout 1m bash -c "until curl localhost:3333 > /dev/null; do sleep 1; done"
 
 # Run tests
 npm run cypress
-RETURN_CODE=$?
-
-# Shutdown everything
-kill $(jobs -p) || true
-
-exit $RETURN_CODE
