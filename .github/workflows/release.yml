@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - staging
+      - release/docker-image
 
 env:
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -15,6 +16,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - run: docker build --build-arg BUILD_ENV=${GITHUB_REF##*/} -t captainfact/api:${GITHUB_REF##*/} .
+      - run: docker build --build-arg BUILD_ENV=staging -t captainfact/api:test .
       - run: docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
-      - run: docker push captainfact/api:${GITHUB_REF##*/}
+      - run: docker push captainfact/api:test
