@@ -46,7 +46,7 @@ defmodule CF.Mixfile do
       {:guardian, "~> 2.0.0"},
       {:guardian_phoenix, "~> 2.0.0"},
       {:guardian_db, "~> 2.1.0"},
-      {:floki, "~> 0.20.2"},
+      {:floki, "~> 0.34.0"},
       {:html_entities, "~> 0.3"},
       {:httpoison, "~> 0.11"},
       {:poison, "~> 3.1"},
