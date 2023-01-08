@@ -1,8 +1,9 @@
-FROM bitwalker/alpine-elixir:1.10.2
+FROM elixir:1.11.4-alpine
 RUN apk update && apk upgrade
 RUN apk add bash imagemagick curl gcc make libc-dev libgcc && rm -rf /var/cache/apk/*
 
-ENV HOME=/opt/app/ SHELL=/bin/bash MIX_ENV=prod
+ARG MIX_ENV=prod
+ENV HOME=/opt/app/ SHELL=/bin/bash MIX_ENV=$MIX_ENV
 WORKDIR /opt/build
 
 # Cache dependencies
@@ -14,6 +15,8 @@ COPY apps/cf_jobs/mix.exs ./apps/cf_jobs/
 COPY apps/cf_rest_api/mix.exs ./apps/cf_rest_api/
 COPY apps/cf_reverse_proxy/mix.exs ./apps/cf_reverse_proxy/
 COPY apps/db/mix.exs ./apps/db/
+RUN mix local.hex --force
+RUN mix local.rebar --force
 RUN HEX_HTTP_CONCURRENCY=4 HEX_HTTP_TIMEOUT=180 mix deps.get --only $MIX_ENV
 
 # Build dependencies
