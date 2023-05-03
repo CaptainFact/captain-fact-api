@@ -13,18 +13,18 @@ defmodule DB.Schema.Video do
     field(:title, :string)
     field(:hash_id, :string)
     field(:url, :string, virtual: true)
-    field(:language, :string, null: true)
-    field(:unlisted, :boolean, null: false)
-    field(:is_partner, :boolean, null: false)
-    field(:thumbnail, :string, null: true)
+    field(:language, :string)
+    field(:unlisted, :boolean)
+    field(:is_partner, :boolean)
+    field(:thumbnail, :string)
 
     # YouTube
     field(:youtube_id, :string)
-    field(:youtube_offset, :integer, null: false, default: 0)
+    field(:youtube_offset, :integer, default: 0)
 
     # Facebook
     field(:facebook_id, :string)
-    field(:facebook_offset, :integer, null: false, default: 0)
+    field(:facebook_offset, :integer, default: 0)
 
     many_to_many(:speakers, Speaker, join_through: VideoSpeaker, on_delete: :delete_all)
     has_many(:statements, Statement, on_delete: :delete_all)
