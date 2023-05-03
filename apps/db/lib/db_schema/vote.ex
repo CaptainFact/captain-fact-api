@@ -11,7 +11,7 @@ defmodule DB.Schema.Vote do
     belongs_to(:user, User, primary_key: true)
     belongs_to(:comment, Comment, primary_key: true)
 
-    field(:value, :integer, null: false)
+    field(:value, :integer)
 
     timestamps()
   end
