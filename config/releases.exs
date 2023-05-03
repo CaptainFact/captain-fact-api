@@ -73,7 +73,8 @@ config :db, DB.Repo,
   hostname: load_secret.("db_hostname"),
   username: load_secret.("db_username"),
   password: load_secret.("db_password"),
-  database: load_secret.("db_name")
+  database: load_secret.("db_name"),
+  ssl: load_bool.({"db_ssl", "false"})
 
 config :ex_aws,
   access_key_id: [load_secret.("s3_access_key_id"), :instance_role],
