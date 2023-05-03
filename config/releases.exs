@@ -69,22 +69,33 @@ end
 
 # ---- [APP CONFIG] :db ----
 
+# Location of root certificates to verify database SSL connection.
+# For example: /opt/homebrew/etc/openssl@3/cert.pem
+database_ca_cert_filepath =
+  load_secret.({"DATABASE_CA_CERT_FILEPATH", "/etc/ssl/certs/ca-certificates.crt"})
+
+postgres_enable_ssl? = load_bool.({"db_ssl", "false"})
+postgres_socket_options = if System.get_env("ECTO_IPV6"), do: [:inet6], else: []
+postgres_ssl_options = []
+
+if postgres_enable_ssl? do
+  postgres_ssl_options = [
+    server_name_indication: to_charlist(load_secret.("db_hostname")),
+    verify: :verify_peer,
+    cacertfile: database_ca_cert_filepath,
+    customize_hostname_check: [match_fun: :public_key.pkix_verify_hostname_match_fun(:https)]
+  ]
+end
+
 config :db, DB.Repo,
   hostname: load_secret.("db_hostname"),
   username: load_secret.("db_username"),
   password: load_secret.("db_password"),
   database: load_secret.("db_name"),
   pool_size: load_int.({"db_pool_size", 10}),
-  socket_options: if load_bool.({"db_ssl", "false"}), do: [:inet6], else: [],
-  ssl: load_bool.({"db_ssl", "false"}),
-  ssl_opts: [
-    server_name_indication: to_charlist(load_secret.("db_hostname")),
-    verify: :verify_peer,
-    customize_hostname_check: [
-      # Our hosting provider uses a wildcard certificate. By default, Erlang does not support wildcard certificates.
-      match_fun: :public_key.pkix_verify_hostname_match_fun(:https)
-    ]
-  ]
+  socket_options: postgres_socket_options,
+  ssl: postgres_enable_ssl?,
+  ssl_opts: postgres_ssl_options
 
 config :ex_aws,
   access_key_id: [load_secret.("s3_access_key_id"), :instance_role],
