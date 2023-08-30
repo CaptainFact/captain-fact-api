@@ -74,16 +74,9 @@ config :db, DB.Repo,
   username: load_secret.("db_username"),
   password: load_secret.("db_password"),
   database: load_secret.("db_name"),
-  pool_size: load_int.({"db_pool_size", 10}),
-  socket_options: if load_bool.({"db_ssl", "false"}), do: [:inet6], else: [],
   ssl: load_bool.({"db_ssl", "false"}),
   ssl_opts: [
-    server_name_indication: to_charlist(load_secret.("db_hostname")),
-    verify: :verify_peer,
-    customize_hostname_check: [
-      # Our hosting provider uses a wildcard certificate. By default, Erlang does not support wildcard certificates.
-      match_fun: :public_key.pkix_verify_hostname_match_fun(:https)
-    ]
+    server_name_indication: to_charlist(load_secret.("db_hostname"))
   ]
 
 config :ex_aws,
