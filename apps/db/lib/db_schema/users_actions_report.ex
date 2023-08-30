@@ -34,6 +34,7 @@ defmodule DB.Schema.UsersActionsReport do
   def analyser_id(:achievements), do: 3
   def analyser_id(:votes), do: 4
   def analyser_id(:create_notifications), do: 5
+  def analyser_id(:download_captions), do: 6
 
   def status(:pending), do: 1
   def status(:running), do: 2

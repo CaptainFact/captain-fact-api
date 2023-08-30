@@ -7,9 +7,16 @@ defmodule CF.Videos.CaptionsFetcherTest do
 
   @impl true
   def fetch(_video) do
-    captions = %DB.Schema.VideoCaption{
-      content: "__TEST-CONTENT__",
-      format: "xml"
+    captions = %{
+      raw: "__TEST-CONTENT__",
+      format: "custom",
+      parsed: [
+        %{
+          "text" => "__TEST-CONTENT__",
+          "start" => 0.0,
+          "duration" => 1.0
+        }
+      ]
     }
 
     {:ok, captions}

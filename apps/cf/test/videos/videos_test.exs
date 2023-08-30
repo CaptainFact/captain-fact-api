@@ -68,7 +68,15 @@ defmodule CF.VideosTest do
 
       {:ok, captions} = Videos.download_captions(video)
 
-      assert captions.content == "__TEST-CONTENT__"
+      assert captions.raw == "__TEST-CONTENT__"
+
+      assert captions.parsed == [
+               %{
+                 "text" => "__TEST-CONTENT__",
+                 "start" => 0.0,
+                 "duration" => 1.0
+               }
+             ]
     end
   end
 end

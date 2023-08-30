@@ -14,9 +14,6 @@ config :cf,
 # Print only warnings and errors during test
 config :logger, level: :warn
 
-# Disable CRON tasks on test
-config :cf, CF.Scheduler, jobs: []
-
 # Mails
 config :cf, CF.Mailer, adapter: Bamboo.TestAdapter
 
