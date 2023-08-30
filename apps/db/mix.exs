@@ -56,7 +56,7 @@ defmodule DB.Mixfile do
       {:mime, "~> 1.2"},
       {:scrivener_ecto, "~> 2.0"},
       {:scout_apm, "~> 1.0.6"},
-      {:algoliax, "~> 0.5.0"},
+      {:algoliax, "~> 0.7.1"},
 
       # Dev only
       {:exsync, "~> 0.2", only: :dev},
