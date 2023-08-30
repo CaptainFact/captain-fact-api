@@ -37,8 +37,9 @@ defmodule CF.Algolia.VideosIndex do
     |> DB.Repo.preload(:speakers)
     |> Map.update!(:speakers, &update_all_speakers/1)
     |> Map.take(
-      ~w(id title hash_id url language is_partner thumbnail youtube_id facebook_id youtube_offset speakers)a
+      ~w(id title hash_id language is_partner thumbnail youtube_id facebook_id youtube_offset speakers)a
     )
+    |> Map.put(:url, DB.Schema.Video.build_url(video))
   end
 
   def reindex_by_id(video_id) do
