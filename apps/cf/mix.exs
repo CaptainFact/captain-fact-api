@@ -54,7 +54,7 @@ defmodule CF.Mixfile do
       {:not_qwerty123, "~> 2.2"},
       {:bamboo, "~> 1.7.1"},
       {:hackney, "~> 1.17"},
-      {:oauth2, "~> 2.0"},
+      {:oauth2, "~> 0.9"},
       {:rollbax, ">= 0.0.0"},
       {:sweet_xml, "~> 0.6"},
       {:burnex, "~> 1.0"},
