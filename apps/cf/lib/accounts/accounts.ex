@@ -59,13 +59,23 @@ defmodule CF.Accounts do
     # Truncate name to avoid crashing when registering with a too-long name
     cond do
       Map.has_key?(params, :name) ->
-        Map.update(params, :name, nil, &String.slice(&1, 0..19))
+        Map.update(params, :name, nil, &format_name/1)
 
       Map.has_key?(params, "name") ->
-        Map.update(params, "name", nil, &String.slice(&1, 0..19))
+        Map.update(params, "name", nil, &format_name/1)
 
       true ->
         params
+    end
+  end
+
+  defp format_name(name) when is_nil(name) or name == "", do: nil
+
+  defp format_name(name) do
+    if String.match?(name, User.name_regex()) do
+      String.slice(name, 0..19)
+    else
+      nil
     end
   end
 

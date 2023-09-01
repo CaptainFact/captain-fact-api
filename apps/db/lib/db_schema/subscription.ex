@@ -17,9 +17,9 @@ defmodule DB.Schema.Subscription do
     belongs_to(:video, DB.Schema.Video)
     belongs_to(:statement, DB.Schema.Statement)
     belongs_to(:comment, DB.Schema.Comment)
-    field(:scope, DB.Type.Entity, null: false)
+    field(:scope, DB.Type.Entity)
     field(:reason, DB.Type.SubscriptionReason)
-    field(:is_subscribed, :boolean, default: true, null: false)
+    field(:is_subscribed, :boolean, default: true)
   end
 
   @fields [:user_id, :video_id, :statement_id, :comment_id, :scope, :is_subscribed, :reason]

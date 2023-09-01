@@ -69,6 +69,7 @@ defmodule DB.Schema.User do
     do: "Deleted account"
 
   @email_regex ~r/\A([\w+\-].?)+@[a-z\d\-]+(\.[a-z]+)*\.[a-z]+\z/i
+  @name_regex ~r/^[^0-9!*();:@&=+$,\/?#\[\].\'\\]+$/i
   @valid_locales ~w(en fr)
   @required_fields ~w(email username)a
   @optional_fields ~w(name password locale)a
@@ -191,6 +192,8 @@ defmodule DB.Schema.User do
     change(model, completed_onboarding_steps: [])
   end
 
+  def name_regex(), do: @name_regex
+
   @token_length 32
   defp generate_email_verification_token(changeset, false),
     do:
@@ -216,7 +219,7 @@ defmodule DB.Schema.User do
     |> validate_email()
     |> validate_locale()
     |> validate_username()
-    |> validate_format(:name, ~r/^[^0-9!*();:@&=+$,\/?#\[\].\'\\]+$/)
+    |> validate_format(:name, @name_regex)
   end
 
   defp put_encrypted_pw(changeset) do

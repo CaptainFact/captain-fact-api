@@ -10,7 +10,7 @@ defmodule DB.Schema.Notification do
     belongs_to(:user, DB.Schema.User)
     belongs_to(:action, DB.Schema.UserAction)
 
-    field(:type, DB.Type.NotificationType, null: false)
+    field(:type, DB.Type.NotificationType)
     field(:seen_at, :utc_datetime, default: nil)
 
     timestamps()
