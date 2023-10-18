@@ -36,7 +36,7 @@ defmodule CF.Graphql.Mixfile do
       {:plug, "~> 1.0"},
       {:phoenix_pubsub, "~> 1.0"},
       {:cowboy, "~> 1.0"},
-      {:corsica, "~> 1.0"},
+      {:corsica, "~> 2.1"},
       {:absinthe_ecto, "~> 0.1.3"},
       {:absinthe_plug, "~> 1.4.1"},
       {:kaur, "~> 1.1"},
