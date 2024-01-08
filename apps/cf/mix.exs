@@ -57,7 +57,7 @@ defmodule CF.Mixfile do
       {:oauth2, "~> 0.9"},
       {:rollbax, ">= 0.0.0"},
       {:sweet_xml, "~> 0.6"},
-      {:burnex, "~> 1.0"},
+      {:burnex, "~> 3.1"},
       {:yaml_elixir, "~> 2.9.0"},
       {:scout_apm, "~> 1.0.6"},
 
