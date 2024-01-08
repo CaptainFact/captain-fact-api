@@ -35,7 +35,7 @@ defmodule CF.RestApi.Mixfile do
   # Dependencies
   defp deps do
     [
-      {:corsica, "~> 1.0"},
+      {:corsica, "~> 2.1"},
       {:cowboy, "~> 1.0"},
       {:gettext, "~> 0.13.1"},
       {:kaur, "~> 1.1"},
