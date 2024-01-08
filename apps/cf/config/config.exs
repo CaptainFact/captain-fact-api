@@ -53,10 +53,6 @@ config :cf,
 
 config :guardian, Guardian.DB, repo: DB.Repo
 
-# Configure Rollbar (errors reporting)
-config :rollbax,
-  enabled: :log
-
 config :scout_apm,
   name: "CaptainFact",
   key: {:system, "CF_SCOUT_APM_KEY"}
