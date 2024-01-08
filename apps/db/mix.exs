@@ -48,7 +48,7 @@ defmodule DB.Mixfile do
       {:ex_aws_s3, "~> 2.0"},
       {:xml_builder, "~> 2.0", override: true},
       {:slugger, "~> 0.2"},
-      {:comeonin, "~> 4.1.1"},
+      {:comeonin, "~> 5.4.0"},
       {:bcrypt_elixir, "~> 1.0"},
       {:burnex, "~> 1.0"},
       {:hashids, "~> 2.0"},
