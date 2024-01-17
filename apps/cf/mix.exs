@@ -55,7 +55,6 @@ defmodule CF.Mixfile do
       {:bamboo, "~> 1.7.1"},
       {:hackney, "~> 1.17"},
       {:oauth2, "~> 0.9"},
-      {:rollbax, ">= 0.0.0"},
       {:sweet_xml, "~> 0.6"},
       {:burnex, "~> 3.1"},
       {:yaml_elixir, "~> 2.9.0"},

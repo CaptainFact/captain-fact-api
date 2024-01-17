@@ -1,8 +1,9 @@
 defmodule CF.Errors do
   @moduledoc """
-  Module to report errors, currenctly plugged on Rollbar with important metadata
-  added. It mostly mimics `Rollbax` API.
+  Module to report errors
   """
+
+  require Logger
 
   @type cf_error_params :: [
           user: DB.Schema.User.t(),
@@ -36,13 +37,9 @@ defmodule CF.Errors do
 
   @spec do_report(:error | :exit | :throw, any(), [any()], cf_error_params()) :: :ok
   def do_report(type, value, stacktrace, params) do
-    Rollbax.report(
-      type,
-      value,
-      stacktrace,
-      params[:custom] || %{},
-      build_occurence_data(params)
-    )
+    # Any call to Sentry, Rollbar, etc. should be done here
+    Logger.error("[ERROR][#{type}] #{inspect(value)} - #{inspect(stacktrace)}")
+    :ok
   end
 
   defp build_occurence_data(params) do
