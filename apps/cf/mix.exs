@@ -37,7 +37,7 @@ defmodule CF.Mixfile do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.3.0", override: true},
+      {:phoenix, "~> 1.4.18", override: true},
       {:phoenix_html, "~> 2.6"},
       {:gettext, "~> 0.13.1"},
       {:google_api_you_tube, "~> 0.42.0"},
