@@ -37,7 +37,7 @@ defmodule CF.ReverseProxy.Mixfile do
       {:cf_rest_api, in_umbrella: true},
       {:cf_graphql, in_umbrella: true},
       {:cf_atom_feed, in_umbrella: true},
-      {:phoenix, "~> 1.3.0"},
+      {:phoenix, "~> 1.4.18"},
       {:cowboy, "~> 1.0"},
       {:corsica, "~> 2.1"}
     ]
