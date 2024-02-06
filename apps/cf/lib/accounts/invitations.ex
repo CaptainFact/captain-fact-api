@@ -163,9 +163,7 @@ defmodule CF.Accounts.Invitations do
     frontend_url = Application.fetch_env!(:cf, :frontend_url)
 
     Logger.info(
-      "Generated #{number} invites for token #{token}. Url: #{frontend_url}/signup?invitation_token=#{
-        token
-      }"
+      "Generated #{number} invites for token #{token}. Url: #{frontend_url}/signup?invitation_token=#{token}"
     )
   end
 
