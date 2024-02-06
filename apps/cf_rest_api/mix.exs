@@ -39,12 +39,12 @@ defmodule CF.RestApi.Mixfile do
       {:cowboy, "~> 2.0"},
       {:gettext, "~> 0.13.1"},
       {:kaur, "~> 1.1"},
-      {:phoenix, "~> 1.4.18", override: true},
-      {:phoenix_html, "~> 2.6"},
-      {:phoenix_pubsub, "~> 1.0"},
+      {:phoenix, "~> 1.5.14", override: true},
+      {:phoenix_html, "~> 2.14.3"},
+      {:phoenix_pubsub, "~> 2.0"},
       {:poison, "~> 3.1"},
       {:scout_apm, "~> 1.0.6"},
-      {:plug_cowboy, "~> 2.0"},
+      {:plug_cowboy, "~> 2.1"},
 
       # ---- Internal ----
       {:cf, in_umbrella: true},

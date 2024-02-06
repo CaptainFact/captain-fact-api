@@ -8,6 +8,8 @@ defmodule CF.Graphql.Application do
 
     # Define workers and child supervisors to be supervised
     children = [
+      # Start the PubSub system
+      {Phoenix.PubSub, name: CF.Graphql.PubSub},
       # Start the endpoint when the application starts
       supervisor(CF.GraphQLWeb.Endpoint, [])
     ]

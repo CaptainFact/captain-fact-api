@@ -15,7 +15,7 @@ config :cf_graphql,
 config :cf_graphql, CF.GraphQLWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "Nl5lfMlBMvQpY3n74G9iNTxH4okMpbMWArWst9Vhj75tl+m2PuV+KPwjX0fNMaa8",
-  pubsub: [name: CF.Graphql.PubSub, adapter: Phoenix.PubSub.PG2],
+  pubsub_server: CF.Graphql.PubSub,
   server: true
 
 # Configures Elixir's Logger

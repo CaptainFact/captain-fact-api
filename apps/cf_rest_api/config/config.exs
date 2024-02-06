@@ -7,7 +7,7 @@ config :cf_rest_api,
 config :cf_rest_api, CF.RestApi.Endpoint,
   url: [host: "localhost"],
   render_errors: [view: CF.RestApi.ErrorView, accepts: ~w(json), default_format: "json"],
-  pubsub: [name: CF.RestApi.PubSub, adapter: Phoenix.PubSub.PG2],
+  pubsub_server: CF.RestApi.PubSub,
   server: true
 
 # Configure Postgres pool size
