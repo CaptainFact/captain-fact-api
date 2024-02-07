@@ -1,25 +1,27 @@
 defmodule CF.ReverseProxy.Application do
   use Application
 
+  require Logger
+
   def start(_type, _args) do
     import Supervisor.Spec, warn: false
     port = Application.get_env(:cf_reverse_proxy, :port)
 
-    websocket =
-      {Phoenix.Transports.WebSocket, {CF.RestApi.Endpoint, CF.RestApi.UserSocket, :websocket}}
+    cowboy =
+      {Plug.Cowboy,
+       scheme: :http,
+       plug: CF.ReverseProxy.Plug,
+       port: port,
+       dispatch: [
+         {:_,
+          [
+            {"/socket/websocket", Phoenix.Endpoint.Cowboy2Handler, {CF.RestApi.Endpoint, []}},
+            {"/socket/longpoll", Phoenix.Endpoint.Cowboy2Handler, {CF.RestApi.Endpoint, []}},
+            {:_, Plug.Cowboy.Handler, {CF.ReverseProxy.Plug, []}}
+          ]}
+       ]}
 
-    cowboy_options = [
-      port: port,
-      dispatch: [
-        {:_,
-         [
-           {"/socket/websocket", Phoenix.Endpoint.CowboyWebSocket, websocket},
-           {:_, Plug.Adapters.Cowboy.Handler, {CF.ReverseProxy.Plug, []}}
-         ]}
-      ]
-    ]
-
-    cowboy = Plug.Adapters.Cowboy.child_spec(:http, CF.ReverseProxy.Plug, [], cowboy_options)
+    Logger.info("Running CF.ReverseProxy with cowboy on port #{port}")
     opts = [strategy: :one_for_one, name: CF.ReverseProxy.Supervisor]
     Supervisor.start_link([cowboy], opts)
   end

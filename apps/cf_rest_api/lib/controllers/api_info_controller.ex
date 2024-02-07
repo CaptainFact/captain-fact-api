@@ -5,6 +5,7 @@ defmodule CF.RestApi.ApiInfoController do
     conn
     |> put_status(:ok)
     |> json(%{
+      app: "CF.RestApi",
       status: "✔",
       version: CF.Application.version(),
       db_version: DB.Application.version()

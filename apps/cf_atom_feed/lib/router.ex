@@ -8,7 +8,7 @@ defmodule CF.AtomFeed.Router do
   def start_link do
     config = Application.get_env(:cf_atom_feed, CF.AtomFeed.Router)
     Logger.info("Running CF.AtomFeed.Router with cowboy on port #{config[:cowboy][:port]}")
-    Plug.Adapters.Cowboy.http(CF.AtomFeed.Router, [], config[:cowboy])
+    Plug.Cowboy.http(CF.AtomFeed.Router, [], config[:cowboy])
   end
 
   get "/" do
