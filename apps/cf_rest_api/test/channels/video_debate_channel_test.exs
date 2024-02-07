@@ -8,7 +8,7 @@ defmodule CF.RestApi.VideoDebateChannelTest do
 
     {:ok, returned_video, socket} =
       subscribe_and_join(
-        socket("", %{user_id: nil}),
+        socket(CF.RestApi.UserSocket, "", %{user_id: nil}),
         VideoDebateChannel,
         "video_debate:#{video.hash_id}"
       )
@@ -26,7 +26,7 @@ defmodule CF.RestApi.VideoDebateChannelTest do
 
     {:ok, _, authed_socket} =
       subscribe_and_join(
-        socket("", %{user_id: insert(:user, %{reputation: 5000}).id}),
+        socket(CF.RestApi.UserSocket, "", %{user_id: insert(:user, %{reputation: 5000}).id}),
         VideoDebateChannel,
         topic
       )

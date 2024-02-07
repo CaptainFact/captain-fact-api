@@ -36,7 +36,7 @@ defmodule CF.RestApi.Mixfile do
   defp deps do
     [
       {:corsica, "~> 2.1"},
-      {:cowboy, "~> 1.0"},
+      {:cowboy, "~> 2.0"},
       {:gettext, "~> 0.13.1"},
       {:kaur, "~> 1.1"},
       {:phoenix, "~> 1.4.18", override: true},
@@ -44,7 +44,7 @@ defmodule CF.RestApi.Mixfile do
       {:phoenix_pubsub, "~> 1.0"},
       {:poison, "~> 3.1"},
       {:scout_apm, "~> 1.0.6"},
-      {:plug_cowboy, "~> 1.0"},
+      {:plug_cowboy, "~> 2.0"},
 
       # ---- Internal ----
       {:cf, in_umbrella: true},
