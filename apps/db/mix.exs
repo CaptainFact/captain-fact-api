@@ -50,7 +50,7 @@ defmodule DB.Mixfile do
       {:slugger, "~> 0.2"},
       {:comeonin, "~> 4.1.1"},
       {:bcrypt_elixir, "~> 1.0"},
-      {:burnex, "~> 1.0"},
+      {:burnex, "~> 3.1"},
       {:hashids, "~> 2.0"},
       {:kaur, "~> 1.1"},
       {:mime, "~> 1.2"},

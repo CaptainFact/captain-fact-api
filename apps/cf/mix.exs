@@ -37,7 +37,7 @@ defmodule CF.Mixfile do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.3.0", override: true},
+      {:phoenix, "~> 1.4.18", override: true},
       {:phoenix_html, "~> 2.6"},
       {:gettext, "~> 0.13.1"},
       {:google_api_you_tube, "~> 0.42.0"},
@@ -55,10 +55,9 @@ defmodule CF.Mixfile do
       {:bamboo, "~> 1.7.1"},
       {:hackney, "~> 1.17"},
       {:oauth2, "~> 0.9"},
-      {:rollbax, ">= 0.0.0"},
       {:sweet_xml, "~> 0.6"},
-      {:burnex, "~> 1.0"},
-      {:yaml_elixir, "~> 2.4.0"},
+      {:burnex, "~> 3.1"},
+      {:yaml_elixir, "~> 2.9.0"},
       {:scout_apm, "~> 1.0.6"},
 
       # ---- Internal ----
@@ -68,7 +67,7 @@ defmodule CF.Mixfile do
       {:exsync, "~> 0.2", only: :dev},
 
       # Test only
-      {:bypass, "~> 0.8", only: :test},
+      {:bypass, "~> 2.1.0", only: :test},
       {:mock, "~> 0.3.1", only: :test}
     ]
   end

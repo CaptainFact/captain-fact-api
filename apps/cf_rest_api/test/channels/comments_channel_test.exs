@@ -15,7 +15,12 @@ defmodule CF.RestApi.CommentsChannelTest do
   end
 
   test "Get comments when connecting", %{comments: comments, topic: topic} do
-    {:ok, response, _} = subscribe_and_join(socket("", %{user_id: nil}), CommentsChannel, topic)
+    {:ok, response, _} =
+      subscribe_and_join(
+        socket(CF.RestApi.UserSocket, "", %{user_id: nil}),
+        CommentsChannel,
+        topic
+      )
 
     assert Enum.count(response.comments) == Enum.count(comments)
   end
@@ -27,7 +32,7 @@ defmodule CF.RestApi.CommentsChannelTest do
       # Connect to socket
       {:ok, _, socket} =
         subscribe_and_join(
-          socket("", %{user_id: user.id}),
+          socket(CF.RestApi.UserSocket, "", %{user_id: user.id}),
           CommentsChannel,
           topic
         )

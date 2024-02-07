@@ -14,10 +14,6 @@ defmodule CF.RestApi.UserSocket do
   channel("statements:video:*", CF.RestApi.StatementsChannel)
   channel("comments:video:*", CF.RestApi.CommentsChannel)
 
-  ## Transports
-  transport(:websocket, Phoenix.Transports.WebSocket)
-  transport(:longpoll, Phoenix.Transports.LongPoll)
-
   # Connect with token
   def connect(%{"token" => token}, socket) do
     case authenticate(socket, GuardianImpl, token) do
