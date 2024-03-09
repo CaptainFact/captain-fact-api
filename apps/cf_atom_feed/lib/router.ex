@@ -2,6 +2,7 @@ defmodule CF.AtomFeed.Router do
   use Plug.Router
   require Logger
 
+  plug(Plug.Head)
   plug(:match)
   plug(:dispatch)
 
