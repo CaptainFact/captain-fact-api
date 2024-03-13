@@ -45,7 +45,7 @@ defmodule CF.Mixfile do
       {:bcrypt_elixir, "~> 1.0"},
       {:guardian, "~> 2.0.0"},
       {:guardian_phoenix, "~> 2.0.0"},
-      {:guardian_db, "~> 2.1.0"},
+      {:guardian_db, "~> 3.0.0"},
       {:floki, "~> 0.34.2"},
       {:html_entities, "~> 0.3"},
       {:httpoison, "~> 0.11"},
