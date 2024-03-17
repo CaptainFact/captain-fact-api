@@ -16,7 +16,8 @@ defmodule CF.Jobs.Application do
       worker(CF.Jobs.Reputation, []),
       worker(CF.Jobs.Flags, []),
       worker(CF.Jobs.Moderation, []),
-      worker(CF.Jobs.CreateNotifications, [])
+      worker(CF.Jobs.CreateNotifications, []),
+      worker(CF.Jobs.DownloadCaptions, [])
     ]
 
     # Do not start scheduler in tests
