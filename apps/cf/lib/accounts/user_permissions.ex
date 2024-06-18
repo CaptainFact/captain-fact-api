@@ -66,9 +66,7 @@ defmodule CF.Accounts.UserPermissions do
         if action_count >= limit + @limit_warning_threshold,
           do:
             Logger.warn(fn ->
-              "User #{user.username} (#{user.id}) overthrown its limit for [#{action_type} #{
-                entity
-              }] (#{action_count}/#{limit})"
+              "User #{user.username} (#{user.id}) overthrown its limit for [#{action_type} #{entity}] (#{action_count}/#{limit})"
             end)
 
         {:error, @error_limit_reached}

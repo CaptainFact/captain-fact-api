@@ -6,6 +6,8 @@ defmodule CF.RestApi.Application do
 
     # Define workers and child supervisors to be supervised
     children = [
+      # Start the PubSub system
+      {Phoenix.PubSub, name: CF.RestApi.PubSub},
       # Start the endpoint when the application starts
       supervisor(CF.RestApi.Endpoint, []),
       # Presence to track number of connected users to a channel
