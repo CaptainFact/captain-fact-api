@@ -3,5 +3,6 @@ defmodule CF.Videos.CaptionsFetcher do
   Fetch captions for videos.
   """
 
-  @callback fetch(DB.Schema.Video.t()) :: {:ok, DB.Schema.VideoCaption.t()} | {:error, binary()}
+  @callback fetch(DB.Schema.Video.t()) ::
+              {:ok, %{raw: String.t(), parsed: String.t(), format: String.t()}} | {:error, term()}
 end

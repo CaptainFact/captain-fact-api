@@ -3,6 +3,8 @@ defmodule CF.Videos do
   The boundary for the Videos system.
   """
 
+  require Logger
+
   import Ecto.Query, warn: false
   import CF.Videos.MetadataFetcher
   import CF.Videos.CaptionsFetcher
@@ -167,13 +169,40 @@ defmodule CF.Videos do
   iex> download_captions(video)
   """
   def download_captions(video = %Video{}) do
-    with {:ok, captions} <- @captions_fetcher.fetch(video) do
-      captions
-      |> VideoCaption.changeset(%{video_id: video.id})
-      |> Repo.insert()
+    # Try to fetch new captions
+    existing_captions = get_existing_captions(video)
+    captions_base = if existing_captions, do: existing_captions, else: %VideoCaption{}
 
-      {:ok, captions}
+    case @captions_fetcher.fetch(video) do
+      {:ok, captions} ->
+        captions_base
+        |> VideoCaption.changeset(Map.merge(captions, %{video_id: video.id}))
+        |> Repo.insert_or_update()
+
+      # If no Youtube caption found, insert a dummy entry in DB to prevent retrying for 30 days
+      {:error, :not_found} ->
+        unless existing_captions do
+          Repo.insert(%DB.Schema.VideoCaption{
+            video_id: video.id,
+            raw: "",
+            parsed: "",
+            format: "xml"
+          })
+        end
+
+        {:error, :not_found}
+
+      result ->
+        result
     end
+  end
+
+  defp get_existing_captions(video) do
+    VideoCaption
+    |> where([vc], vc.video_id == ^video.id)
+    |> order_by(desc: :inserted_at)
+    |> limit(1)
+    |> Repo.one()
   end
 
   defp get_metadata_fetcher(video_url) do

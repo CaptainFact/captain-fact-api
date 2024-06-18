@@ -8,6 +8,7 @@ config :cf_jobs, CF.Jobs.Scheduler,
   jobs: [
     # Reputation
     update_reputations: [
+      # every 20 minutes
       schedule: {:extended, "*/20"},
       task: {CF.Jobs.Reputation, :update, []},
       overlap: false
@@ -19,20 +20,30 @@ config :cf_jobs, CF.Jobs.Scheduler,
     ],
     # Moderation
     update_moderation: [
+      # every 5 minutes
       schedule: "*/5 * * * *",
       task: {CF.Jobs.Moderation, :update, []},
       overlap: false
     ],
     # Flags
     update_flags: [
+      # every minute
       schedule: "*/1 * * * *",
       task: {CF.Jobs.Flags, :update, []},
       overlap: false
     ],
     # Notifications
     create_notifications: [
+      # every 5 seconds
       schedule: {:extended, "*/5"},
       task: {CF.Jobs.CreateNotifications, :update, []},
+      overlap: false
+    ],
+    # Captions
+    download_captions: [
+      # every 10 minutes
+      schedule: "*/10 * * * *",
+      task: {CF.Jobs.DownloadCaptions, :update, []},
       overlap: false
     ]
   ]

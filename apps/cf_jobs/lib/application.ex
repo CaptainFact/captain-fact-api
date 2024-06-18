@@ -10,13 +10,15 @@ defmodule CF.Jobs.Application do
     :timer.sleep(1000)
 
     env = Application.get_env(:cf, :env)
+
     # Define workers and child supervisors to be supervised
     children = [
       # Jobs
       worker(CF.Jobs.Reputation, []),
       worker(CF.Jobs.Flags, []),
       worker(CF.Jobs.Moderation, []),
-      worker(CF.Jobs.CreateNotifications, [])
+      worker(CF.Jobs.CreateNotifications, []),
+      worker(CF.Jobs.DownloadCaptions, [])
     ]
 
     # Do not start scheduler in tests

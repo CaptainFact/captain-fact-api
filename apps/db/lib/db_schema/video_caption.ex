@@ -5,13 +5,14 @@ defmodule DB.Schema.VideoCaption do
   @primary_key false
   schema "videos_captions" do
     belongs_to(:video, DB.Schema.Video, primary_key: true)
-    field(:content, :string)
+    field(:raw, :string)
+    field(:parsed, {:array, :map})
     field(:format, :string)
 
     timestamps()
   end
 
-  @required_fields ~w(video_id content format)a
+  @required_fields ~w(video_id raw parsed format)a
 
   @doc """
   Builds a changeset based on the `struct` and `params`.
