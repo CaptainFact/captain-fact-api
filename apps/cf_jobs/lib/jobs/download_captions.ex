@@ -3,7 +3,6 @@ defmodule CF.Jobs.DownloadCaptions do
 
   require Logger
   import Ecto.Query
-  import ScoutApm.Tracing
 
   alias DB.Repo
   alias DB.Schema.UserAction
@@ -35,7 +34,6 @@ defmodule CF.Jobs.DownloadCaptions do
   end
 
   # --- Server callbacks ---
-  @transaction_opts [type: "background", name: "download_captions"]
   def handle_call(:download_captions, _from, _state) do
     get_videos()
     |> Enum.map(fn video ->

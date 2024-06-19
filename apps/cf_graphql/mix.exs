@@ -42,7 +42,6 @@ defmodule CF.Graphql.Mixfile do
       {:absinthe_plug, "~> 1.4.1"},
       {:kaur, "~> 1.1"},
       {:poison, "~> 3.1"},
-      {:scout_apm, "~> 1.0.6"},
 
       # Internal dependencies
       {:db, in_umbrella: true},

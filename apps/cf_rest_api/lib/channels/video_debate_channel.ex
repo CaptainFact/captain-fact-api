@@ -1,6 +1,6 @@
 defmodule CF.RestApi.VideoDebateChannel do
   use CF.RestApi, :channel
-  import ScoutApm.Tracing
+  alias CF.RestApi.Presence
 
   import CF.Actions.ActionCreator,
     only: [
@@ -26,7 +26,6 @@ defmodule CF.RestApi.VideoDebateChannel do
   alias CF.Notifications.Subscriptions
   alias CF.RestApi.{VideoView, SpeakerView, ChangesetView}
 
-  @transaction_opts [type: "web", name: "VideoDebateChannel.join"]
   def join("video_debate:" <> video_hash_id, _payload, socket) do
     Video
     |> Video.with_speakers()

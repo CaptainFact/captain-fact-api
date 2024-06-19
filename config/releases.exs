@@ -125,9 +125,6 @@ end
 
 # ---- [APP CONFIG] :cf_graphql ----
 
-config :scout_apm,
-  key: load_secret.("scout_apm_key")
-
 config :cf_graphql, CF.GraphQLWeb.Endpoint,
   url: [host: load_secret.("host")],
   secret_key_base: [host: load_secret.("secret_key_base")]
