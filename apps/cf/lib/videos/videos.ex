@@ -185,7 +185,7 @@ defmodule CF.Videos do
           Repo.insert(%DB.Schema.VideoCaption{
             video_id: video.id,
             raw: "",
-            parsed: "",
+            parsed: [],
             format: "xml"
           })
         end
