@@ -42,6 +42,7 @@ defmodule CF.RestApi.Mixfile do
       {:phoenix, "~> 1.5.14", override: true},
       {:phoenix_html, "~> 2.14.3"},
       {:phoenix_pubsub, "~> 2.0"},
+      {:jason, "~> 1.4"},
       {:poison, "~> 3.1"},
       {:scout_apm, "~> 1.0.6"},
       {:plug_cowboy, "~> 2.1"},

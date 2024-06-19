@@ -24,3 +24,4 @@ config :cf_rest_api, CF.RestApi.Endpoint,
 # Set a higher stacktrace during development. Avoid configuring such
 # in production as building large stacktraces may be expensive.
 config :phoenix, :stacktrace_depth, 20
+config :phoenix, :json_library, Jason
