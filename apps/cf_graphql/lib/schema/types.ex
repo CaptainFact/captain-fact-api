@@ -13,6 +13,7 @@ defmodule CF.Graphql.Schema.Types do
     Subscription,
     UserAction,
     User,
-    Video
+    Video,
+    VideoCaption
   })
 end

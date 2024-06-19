@@ -10,6 +10,7 @@ defmodule CF.Graphql.Resolvers.Videos do
 
   alias DB.Repo
   alias DB.Schema.Video
+  alias DB.Schema.VideoCaption
   alias DB.Schema.Statement
 
   # Queries
@@ -22,7 +23,7 @@ defmodule CF.Graphql.Resolvers.Videos do
   end
 
   def get(_root, %{hash_id: id}, _info) do
-    case CF.Videos.get_video_by_id(id) do
+    case CF.Videos.get_video_by_hash_id(id) do
       nil -> {:error, "Video #{id} doesn't exist"}
       video -> {:ok, video}
     end
@@ -66,11 +67,35 @@ defmodule CF.Graphql.Resolvers.Videos do
     end)
   end
 
+  def captions(video, _, _) do
+    batch({__MODULE__, :fetch_captions_by_video_ids}, video.id, fn results ->
+      {:ok,
+       case Map.get(results, video.id) do
+         captions when is_list(captions) ->
+           captions
+           |> List.first(captions)
+           |> Map.get(:parsed)
+           |> Enum.map(&CF.Utils.map_string_keys_to_atom_keys/1)
+
+         nil ->
+           nil
+       end}
+    end)
+  end
+
   def fetch_statements_by_videos_ids(_, videos_ids) do
     Statement
     |> where([s], s.video_id in ^videos_ids)
     |> where([s], s.is_removed == false)
     |> order_by(asc: :time)
+    |> Repo.all()
+    |> Enum.group_by(& &1.video_id)
+  end
+
+  def fetch_captions_by_video_ids(_, video_ids) do
+    VideoCaption
+    |> where([c], c.video_id in ^video_ids)
+    |> order_by(desc: :updated_at)
     |> Repo.all()
     |> Enum.group_by(& &1.video_id)
   end
