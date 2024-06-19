@@ -10,7 +10,6 @@ defmodule CF.Jobs.Moderation do
 
   require Logger
   import Ecto.Query
-  import ScoutApm.Tracing
 
   alias DB.Repo
   alias DB.Schema.ModerationUserFeedback
@@ -79,7 +78,6 @@ defmodule CF.Jobs.Moderation do
 
   # --- Internal API ---
 
-  @transaction_opts [type: "background", name: "update_moderation"]
   def handle_call(:update, _, _) do
     UserAction
     |> join(:inner, [a], uf in ModerationUserFeedback, on: uf.action_id == a.id)

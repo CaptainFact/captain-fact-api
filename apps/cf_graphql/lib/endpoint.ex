@@ -18,7 +18,6 @@ defmodule CF.GraphQLWeb.Endpoint do
     json_decoder: Poison
   )
 
-  plug(ScoutApm.Absinthe.Plug)
   plug(Plug.MethodOverride)
   plug(Plug.Head)
   plug(CF.GraphQLWeb.Router)

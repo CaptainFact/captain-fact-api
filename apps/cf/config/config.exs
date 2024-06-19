@@ -34,10 +34,6 @@ config :cf,
 
 config :guardian, Guardian.DB, repo: DB.Repo
 
-config :scout_apm,
-  name: "CaptainFact",
-  key: {:system, "CF_SCOUT_APM_KEY"}
-
 # To send records to Algolia (search engine)
 config :algoliax,
   batch_size: 500,

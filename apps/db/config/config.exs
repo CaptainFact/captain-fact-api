@@ -10,8 +10,7 @@ config :db, DB.Repo,
   adapter: Ecto.Adapters.Postgres,
   pool_size: 3,
   loggers: [
-    {Ecto.LogEntry, :log, []},
-    {ScoutApm.Instruments.EctoLogger, :log, []}
+    {Ecto.LogEntry, :log, []}
   ]
 
 # Import environment specific config

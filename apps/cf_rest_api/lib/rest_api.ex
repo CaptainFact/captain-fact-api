@@ -29,7 +29,6 @@ defmodule CF.RestApi do
   def controller do
     quote do
       use Phoenix.Controller, namespace: CF.RestApi
-      use ScoutApm.Instrumentation
 
       alias DB.Repo
       import Ecto
