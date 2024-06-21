@@ -50,6 +50,12 @@ defmodule CF.Graphql.Schema.Types.Video do
       complexity(join_complexity())
     end
 
+    @desc "Video captions"
+    field(:captions, list_of(:video_caption)) do
+      resolve(&Resolvers.Videos.captions/3)
+      complexity(join_complexity())
+    end
+
     # Video providers
 
     # YouTube

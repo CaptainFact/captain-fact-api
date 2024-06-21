@@ -76,6 +76,9 @@ defmodule CF.Videos do
   def get_video_by_id(id),
     do: Repo.get(Video, id)
 
+  def get_video_by_hash_id(hash_id),
+    do: Repo.get_by(Video, hash_id: hash_id)
+
   @doc """
   Add a new video.
   Returns video if success or {:error, reason} if something bad append.
