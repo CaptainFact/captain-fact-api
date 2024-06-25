@@ -42,7 +42,7 @@ defmodule CF.Mixfile do
       {:gettext, "~> 0.13.1"},
       {:google_api_you_tube, "~> 0.42.0"},
       {:kaur, "~> 1.1"},
-      {:bcrypt_elixir, "~> 1.0"},
+      {:bcrypt_elixir, "~> 3.0"},
       {:guardian, "~> 2.0.0"},
       {:guardian_phoenix, "~> 2.0.0"},
       {:guardian_db, "~> 2.1.0"},
