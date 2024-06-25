@@ -73,7 +73,7 @@ defmodule CF.Graphql.Resolvers.Videos do
        case Map.get(results, video.id) do
          captions when is_list(captions) ->
            captions
-           |> List.first(captions)
+           |> List.first()
            |> Map.get(:parsed)
            |> Enum.map(&CF.Utils.map_string_keys_to_atom_keys/1)
 
