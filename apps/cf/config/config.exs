@@ -42,3 +42,6 @@ config :algoliax,
 
 # Import environment specific config
 import_config "#{Mix.env()}.exs"
+
+config :cf,
+  openai_api_url: "https://api.perplexity.ai"

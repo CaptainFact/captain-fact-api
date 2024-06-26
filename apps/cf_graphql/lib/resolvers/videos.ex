@@ -99,4 +99,10 @@ defmodule CF.Graphql.Resolvers.Videos do
     |> Repo.all()
     |> Enum.group_by(& &1.video_id)
   end
+
+  def start_automatic_statements_extraction(_root, %{video_id: video_id}, _info) do
+    video = DB.Repo.get!(DB.Schema.Video, video_id)
+    CF.LLMs.StatementsCreator.process_video!(video.id)
+    {:ok, video}
+  end
 end

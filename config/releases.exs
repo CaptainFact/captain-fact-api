@@ -87,6 +87,8 @@ config :cf,
   hard_limitations_period: load_int.({"hard_limitations_period", 3 * 60 * 60}),
   invitation_system: load_bool.({"invitation_system", "false"}),
   youtube_api_key: load_secret.({"youtube_api_key", nil}),
+  openai_api_key: load_secret.("openai_api_key"),
+  openai_api_url: load_secret.("openai_api_url", "https://api.perplexity.ai"),
   oauth: [
     facebook: [
       client_id: load_secret.("facebook_app_id"),
