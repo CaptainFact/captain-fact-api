@@ -52,9 +52,10 @@ defmodule DB.Mixfile do
       {:burnex, "~> 3.1"},
       {:hashids, "~> 2.0"},
       {:kaur, "~> 1.1"},
-      {:mime, "~> 1.2"},
+      {:mime, "~> 2.0.6"},
       {:scrivener_ecto, "~> 2.0"},
       {:algoliax, "~> 0.7.1"},
+      {:httpoison, "~> 2.2"},
 
       # Dev only
       {:exsync, "~> 0.2", only: :dev},
