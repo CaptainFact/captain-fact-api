@@ -44,4 +44,8 @@ config :algoliax,
 import_config "#{Mix.env()}.exs"
 
 config :cf,
-  openai_api_url: "https://api.perplexity.ai"
+  openai_model: "gpt-4o"
+
+config :openai,
+  beta: "assistants=v2",
+  http_options: [recv_timeout: 30_000, timeout: 30_000]

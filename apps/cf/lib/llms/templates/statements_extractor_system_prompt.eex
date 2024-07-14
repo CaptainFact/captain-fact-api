@@ -9,6 +9,7 @@ Renvoie uniquement le résultat en JSON, **sans aucun commentaire ni conclusion*
 Pour être pertinente, une citation doit :
 - être vérifiable grâce à l'exposition de faits
 - faire mention d'une source ou d'un contenu que l'on peut vérifier
+- présenter une information unique (découpe les citations qui présentent plusieurs éléments)
 Et remplir au moins un des critères suivants :
 - présenter des éléments incomplets ou approximatifs
 - présenter un argument fallacieux, trompeur ou mensonger
@@ -16,6 +17,7 @@ Et remplir au moins un des critères suivants :
 
 Ne méritent pas travail de vérification :
 - les évidences comme "Le ciel est bleu !"
+- les annecdotes personelles (ex: "ça a changé ma vie")
 - les figures de style et l'humour (comme les hyperboles, les métaphores, etc)
 - les erreurs mineures
 - les opinions personnelles ("j'aime ça")
@@ -30,11 +32,12 @@ Ne méritent pas travail de vérification :
     "title": "Thinkerview - La diagonale du vide en France"
   },
   "captions": [
-    { "start": 10, "text": "Cette mesure sociale a été un désastre de la pensée ça ne m'évoque que du dégoût elle n'a fait que créer une augmentation du chômage, c'est pour moi une pure folie" },
-    { "start": 85, "text": "il y a d'autres zones en France qui sont très peuplées elle s'affiche ici et juste là et oui je sais effectivement je pense que je peux tenter une" },
+    { "start": 10, "text": "Cette mesure sociale a été un désastre de la pensée ça ne m'évoque que du dégoût elle n'a fait que créer une augmentation du chômage et a provoqué de nombreuses critiques de l'UE c'était pour moi une pure folie" },
+    { "start": 85, "text": "mais parlons de la diagonnale du vite il y a d'autres zones en France qui sont très peuplées elle s'affiche ici et juste là et oui je sais effectivement je pense que je peux tenter une" },
     { "start": 89, "text": "reconversion à devenir présentateur météo" },
     { "start": 94, "text": "dans les zones que vous voyez ici on compte seulement 6,5% de la population française métropolitaine pourtant et bien ces espaces" },
-    { "start": 102, "text": "représentent 42% du territoire national mais alors pourquoi la diagonale du vide comme" }
+    { "start": 102, "text": "représentent 42% du territoire national mais alors pourquoi la diagonale du vide comme" },
+    { "start": 110, "text": "nom? Ça a changé ma vie quand je l'ai découvert" }
   ]
 }
 ```
@@ -45,6 +48,7 @@ Ne méritent pas travail de vérification :
 {
   "statements": [
     { "time": 10, "text": "Cette mesure sociale [...] n'a fait que créer une augmentation du chômage" },
+    { "time": 10, "text": "Cette mesure sociale [...] a provoqué de nombreuses critiques de l'UE" },
     { "time": 94, "text": "ici on compte seulement 6,5% de la population française métropolitaine" },
     { "time": 94, "text": "ces espaces représentent 42% du territoire national" }
   ],

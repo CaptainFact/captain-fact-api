@@ -7,25 +7,7 @@ defmodule CF.LLMs.StatementsCreator do
   require EEx
   require Logger
 
-  @max_caption_length 1000
-
-  @model_lama_3_small %{
-    name: "llama-3-sonar-small-32k-chat",
-    parameter_count: "8B",
-    context_length: 32768
-  }
-
-  @model_lama_3_large %{
-    name: "llama-3-sonar-large-32k-chat",
-    parameter_count: "70B",
-    context_length: 32768
-  }
-
-  @model_mistral_7b %{
-    name: "mistral-7b-instruct",
-    parameter_count: "8x7B",
-    context_length: 16384
-  }
+  @captions_chunk_size 300
 
   # Load prompt messages templates
   EEx.function_from_file(
@@ -78,78 +60,44 @@ defmodule CF.LLMs.StatementsCreator do
   Chunk captions everytime we reach the max caption length
   """
   defp chunk_captions(captions) do
-    # TODO: Base on strings lengths + @max_caption_length
-    Enum.chunk_every(captions, 50)
+    # TODO: Add last captions from previous batch to preserve context
+    Enum.chunk_every(captions, @captions_chunk_size)
   end
 
   defp get_llm_suggested_statements(video, captions, retries \\ 0) do
-    api_key = Application.get_env(:cf, :openai_api_key)
-    api_url = Application.get_env(:cf, :openai_api_url)
-
-    unless api_key && api_url do
-      raise "OpenAI API configuration missing"
-    end
-
-    try do
-      headers = [
-        {"Authorization", "Bearer #{api_key}"},
-        {"Content-Type", "application/json"},
-        {"Accept", "application/json"}
-      ]
-
-      system_prompt = generate_system_prompt()
-      user_prompt = generate_user_prompt(video, captions)
-
-      body =
+    OpenAI.chat_completion(
+      model: Application.get_env(:cf, :openai_model),
+      response_format: %{type: "json_object"},
+      stream: false,
+      messages: [
         %{
-          "model" => @model_lama_3_large[:name],
-          "max_tokens" =>
-            @model_lama_3_large[:context_length] -
-              String.length(system_prompt) - String.length(user_prompt) - 500,
-          "stream" => false,
-          "messages" => [
-            %{
-              "role" => "system",
-              "content" => system_prompt
-            },
-            %{
-              "role" => "user",
-              "content" => user_prompt
-            }
-          ]
+          role: "system",
+          content: generate_system_prompt()
+        },
+        %{
+          role: "user",
+          content: generate_user_prompt(video, captions)
         }
-        |> Jason.encode!()
+      ]
+    )
+    |> case do
+      {:ok, %{choices: choices}} ->
+        choices
+        |> List.first()
+        |> get_in(["message", "content"])
+        |> get_json_str_from_content!()
+        |> Jason.decode!()
+        |> Map.get("statements")
+        |> check_statements_input_format!()
 
-      case HTTPoison.post("#{api_url}/chat/completions", body, headers,
-             timeout: 30_000,
-             recv_timeout: 30_000
-           ) do
-        {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-          body
-          |> Jason.decode!()
-          |> Map.get("choices")
-          |> List.first()
-          |> get_in(["message", "content"])
-          |> get_json_str_from_content!()
-          |> Jason.decode!()
-          |> Map.get("statements")
-          |> check_statements_input_format!()
-
-        {:ok, %HTTPoison.Response{status_code: status_code, body: body}} ->
-          raise "Network error: #{status_code} - #{inspect(body)}"
-
-        {:error, %HTTPoison.Error{reason: reason}} ->
-          raise inspect(reason)
-      end
-    rescue
-      error ->
+      {:error, error} ->
         if retries > 0 do
           Logger.warn("Failed to get LLM suggested statements: #{inspect(error)}. Retrying...")
           Process.sleep(1000)
           get_llm_suggested_statements(video, captions, retries - 1)
         else
           Logger.error(inspect(error))
-          reraise error, __STACKTRACE__
+          raise error
         end
     end
   end

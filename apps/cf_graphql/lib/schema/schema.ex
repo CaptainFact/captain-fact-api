@@ -90,7 +90,6 @@ defmodule CF.Graphql.Schema do
       resolve(&Resolvers.Notifications.update_subscription/3)
     end
 
-    # startAutomaticStatementsExtraction
     @desc "Use this to start the automatic statements extraction job. Requires elevated permissions."
     field :start_automatic_statements_extraction, :video do
       middleware(Middleware.RequireAuthentication)
