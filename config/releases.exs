@@ -98,7 +98,7 @@ config :cf,
 
 config :openai,
   api_key: load_secret.("openai_api_key"),
-  organization_key: load_secret("openai_organization_key")
+  organization_key: load_secret.("openai_organization_key")
 
 config :cf, CF.Authenticator.GuardianImpl, secret_key: load_secret.("secret_key_base")
 
