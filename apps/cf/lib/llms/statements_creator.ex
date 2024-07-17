@@ -56,9 +56,7 @@ defmodule CF.LLMs.StatementsCreator do
     end
   end
 
-  @doc """
-  Chunk captions everytime we reach the max caption length
-  """
+  # Chunk captions each time we reach the max caption length
   defp chunk_captions(captions) do
     # TODO: Add last captions from previous batch to preserve context
     Enum.chunk_every(captions, @captions_chunk_size)
