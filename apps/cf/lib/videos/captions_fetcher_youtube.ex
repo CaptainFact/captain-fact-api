@@ -7,6 +7,7 @@ defmodule CF.Videos.CaptionsFetcherYoutube do
   @behaviour CF.Videos.CaptionsFetcher
 
   require Logger
+  import SweetXml
 
   @impl true
   def fetch(%{youtube_id: youtube_id, language: language}) do
@@ -69,31 +70,29 @@ defmodule CF.Videos.CaptionsFetcherYoutube do
 
   defp process_transcript(transcript) do
     transcript
-    |> String.replace(~r/^<\?xml version="1.0" encoding="utf-8"\?><transcript>/, "")
-    |> String.replace("</transcript>", "")
-    |> String.split("</text>")
-    |> Enum.filter(&(String.trim(&1) != ""))
-    |> Enum.map(&process_line/1)
+    |> SweetXml.xpath(
+      ~x"//transcript/text"l,
+      text: ~x"./text()"s |> transform_by(&clean_text/1),
+      start: ~x"./@start"s |> transform_by(&parse_float/1),
+      duration: ~x"./@dur"os |> transform_by(&parse_float/1)
+    )
+    |> Enum.filter(fn %{text: text, start: start} ->
+      start != nil and text != nil and text != ""
+    end)
   end
 
-  defp process_line(line) do
-    %{"start" => start} = Regex.named_captures(~r/start="(?<start>[\d.]+)"/, line)
-    %{"dur" => dur} = Regex.named_captures(~r/dur="(?<dur>[\d.]+)"/, line)
-
-    text =
-      line
-      |> String.replace("&amp;", "&")
-      |> String.replace(~r/<text.+>/, "")
-      |> String.replace(~r"</?[^>]+(>|$)", "")
-      |> HtmlEntities.decode()
-      |> String.trim()
-
-    %{start: parse_float(start), duration: parse_float(dur), text: text}
+  defp clean_text(text) do
+    text
+    |> String.replace("&amp;", "&")
+    |> HtmlEntities.decode()
+    |> String.trim()
   end
 
   defp parse_float(val) do
-    {num, _} = Float.parse(val)
-    num
+    case Float.parse(val) do
+      {num, _} -> num
+      _ -> nil
+    end
   end
 
   # Below is an implementation using the official YouTube API, but it requires OAuth2 authentication.

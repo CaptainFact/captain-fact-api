@@ -60,6 +60,7 @@ defmodule CF.Mixfile do
       {:yaml_elixir, "~> 2.9.0"},
       {:jason, "~> 1.4"},
       {:openai, "~> 0.6.1"},
+      {:sweet_xml, "~> 0.7.4"},
 
       # ---- Internal ----
       {:db, in_umbrella: true},

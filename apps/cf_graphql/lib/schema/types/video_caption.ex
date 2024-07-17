@@ -13,6 +13,6 @@ defmodule CF.Graphql.Schema.Types.VideoCaption do
     @desc "Caption start time (in seconds)"
     field(:start, non_null(:float))
     @desc "Caption duration (in seconds)"
-    field(:duration, non_null(:float))
+    field(:duration, :float)
   end
 end
