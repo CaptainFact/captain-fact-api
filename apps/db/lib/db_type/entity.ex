@@ -8,5 +8,6 @@ defenum(
   comment: 4,
   fact: 5,
   user_action: 6,
-  user: 7
+  user: 7,
+  unlisted_video: 8
 )
