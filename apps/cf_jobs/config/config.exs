@@ -41,8 +41,8 @@ config :cf_jobs, CF.Jobs.Scheduler,
     ],
     # Captions
     download_captions: [
-      # every 10 minutes
-      schedule: "*/10 * * * *",
+      # every minute
+      schedule: "*/1 * * * *",
       task: {CF.Jobs.DownloadCaptions, :update, []},
       overlap: false
     ]

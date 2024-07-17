@@ -1,0 +1,11 @@
+```json
+{
+  "video": {
+    "title": "<%= video.id %>"
+  },
+  "captions": <%= captions |> Enum.map(fn caption -> %{
+    "start": floor(caption["start"]),
+    "text": String.trim(caption["text"])
+  } end) |> Jason.encode! %>
+}
+```

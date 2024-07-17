@@ -87,6 +87,7 @@ config :cf,
   hard_limitations_period: load_int.({"hard_limitations_period", 3 * 60 * 60}),
   invitation_system: load_bool.({"invitation_system", "false"}),
   youtube_api_key: load_secret.({"youtube_api_key", nil}),
+  openai_model: load_secret.("openai_model"),
   oauth: [
     facebook: [
       client_id: load_secret.("facebook_app_id"),
@@ -94,6 +95,10 @@ config :cf,
       redirect_uri: Path.join(frontend_url, "login/callback/facebook")
     ]
   ]
+
+config :openai,
+  api_key: load_secret.("openai_api_key"),
+  organization_key: load_secret("openai_organization_key")
 
 config :cf, CF.Authenticator.GuardianImpl, secret_key: load_secret.("secret_key_base")
 

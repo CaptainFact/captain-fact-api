@@ -42,3 +42,10 @@ config :algoliax,
 
 # Import environment specific config
 import_config "#{Mix.env()}.exs"
+
+config :cf,
+  openai_model: "gpt-4o"
+
+config :openai,
+  beta: "assistants=v2",
+  http_options: [recv_timeout: 30_000, timeout: 30_000]
