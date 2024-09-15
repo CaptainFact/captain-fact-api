@@ -18,7 +18,8 @@ defmodule CF.RestApi.StatementView do
       id: statement.id,
       text: statement.text,
       time: statement.time,
-      speaker_id: statement.speaker_id
+      speaker_id: statement.speaker_id,
+      is_draft: statement.is_draft
     }
   end
 
@@ -27,6 +28,7 @@ defmodule CF.RestApi.StatementView do
       id: statement.id,
       text: statement.text,
       time: statement.time,
+      is_draft: statement.is_draft,
       speaker: render_one(statement.speaker, CF.RestApi.SpeakerView, "speaker.json"),
       comments: render_many(statement.comments, CF.RestApi.CommentView, "comment.json")
     }

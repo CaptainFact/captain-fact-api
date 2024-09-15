@@ -16,6 +16,9 @@ defmodule CF.Graphql.Schema.Types.Statement do
     field(:text, non_null(:string))
     @desc "Statement timecode, in seconds"
     field(:time, non_null(:integer))
+    @desc "Whether the statement is in draft mode"
+    field(:is_draft, non_null(:boolean))
+
     @desc "Statement's speaker. Null if statement describes picture"
     field :speaker, :speaker do
       resolve(assoc(:speaker))

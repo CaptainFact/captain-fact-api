@@ -10,6 +10,7 @@ defmodule DB.Schema.Statement do
     field(:text, :string)
     field(:time, :integer)
     field(:is_removed, :boolean, default: false)
+    field(:is_draft, :boolean, default: false)
 
     belongs_to(:video, DB.Schema.Video)
     belongs_to(:speaker, DB.Schema.Speaker)
@@ -20,7 +21,7 @@ defmodule DB.Schema.Statement do
   end
 
   @required_fields ~w(text time video_id)a
-  @optional_fields ~w(speaker_id)a
+  @optional_fields ~w(speaker_id is_draft)a
 
   # Define queries
 
@@ -56,6 +57,12 @@ defmodule DB.Schema.Statement do
 
       {:commented, true}, query ->
         from(s in query, inner_join: c in assoc(s, :comments), group_by: s.id)
+
+      {:is_draft, true}, query ->
+        from(s in query, where: s.is_draft == true)
+
+      {:is_draft, false}, query ->
+        from(s in query, where: s.is_draft == false)
 
       {:speaker_id, nil}, query ->
         from(s in query, where: is_nil(s.speaker_id))

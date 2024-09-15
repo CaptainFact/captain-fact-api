@@ -218,6 +218,10 @@ defmodule CF.Actions.ActionCreator do
     )
   end
 
+  def action_start_automatic_statements_extraction(user_id, video_id) do
+    action(user_id, :video, :start_automatic_statements_extraction, video_id: video_id)
+  end
+
   def action_email_confirmed(user_id) do
     admin_action(:user, :email_confirmed, target_user_id: user_id)
   end
