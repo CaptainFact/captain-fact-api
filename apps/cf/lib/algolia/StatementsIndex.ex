@@ -26,7 +26,7 @@ defmodule CF.Algolia.StatementsIndex do
   """
   @impl Algoliax.Indexer
   def to_be_indexed?(statement) do
-    not statement.is_removed
+    not (statement.is_removed or statement.is_draft)
   end
 
   @impl Algoliax.Indexer
