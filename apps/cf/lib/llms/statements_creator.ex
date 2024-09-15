@@ -30,29 +30,38 @@ defmodule CF.LLMs.StatementsCreator do
   Create statements from a video that has captions using LLMs
   """
   def process_video!(video_id) do
-    DB.Schema.Video
-    |> join(:inner, [v], vc in DB.Schema.VideoCaption, on: v.id == vc.video_id)
-    |> where([v, vc], v.id == ^video_id)
-    |> order_by([v, vc], desc: vc.inserted_at)
-    |> limit(1)
-    |> select([v, vc], {v, vc})
-    |> DB.Repo.one()
-    |> case do
+    video = DB.Repo.get(DB.Schema.Video, video_id)
+    video_caption = fetch_or_download_captions(video)
+
+    if video_caption != nil do
+      video_caption.parsed
+      |> chunk_captions()
+      |> Enum.map(fn captions ->
+        video
+        |> get_llm_suggested_statements(captions)
+        |> filter_known_statements(video)
+        |> create_statements_from_inputs(video)
+        |> broadcast_statements(video)
+
+        Process.sleep(500)
+      end)
+    end
+  end
+
+  defp fetch_or_download_captions(video) do
+    case DB.Schema.VideoCaption
+         |> where([vc], vc.video_id == ^video.id)
+         |> order_by(desc: :inserted_at)
+         |> limit(1)
+         |> DB.Repo.one() do
       nil ->
-        raise "Video or captions not found"
+        case CF.Videos.download_captions(video) do
+          {:ok, video_caption} -> video_caption
+          _ -> nil
+        end
 
-      {video, video_caption} ->
-        video_caption.parsed
-        |> chunk_captions()
-        |> Enum.map(fn captions ->
-          video
-          |> get_llm_suggested_statements(captions)
-          |> filter_known_statements(video)
-          |> create_statements_from_inputs(video)
-          |> broadcast_statements(video)
-
-          Process.sleep(500)
-        end)
+      video_caption ->
+        video_caption
     end
   end
 

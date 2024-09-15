@@ -5,12 +5,9 @@ defmodule CF.Jobs.DownloadCaptions do
   import Ecto.Query
 
   alias DB.Repo
-  alias DB.Schema.UserAction
   alias DB.Schema.Video
   alias DB.Schema.VideoCaption
   alias DB.Schema.UsersActionsReport
-
-  alias CF.Jobs.ReportManager
 
   @name :download_captions
   @analyser_id UsersActionsReport.analyser_id(@name)
@@ -55,7 +52,7 @@ defmodule CF.Jobs.DownloadCaptions do
         on: captions.video_id == v.id,
         where:
           is_nil(captions.id) or
-            captions.inserted_at < ^DateTime.add(DateTime.utc_now(), -30 * 24 * 60 * 60, :second),
+            captions.updated_at < ^DateTime.add(DateTime.utc_now(), -30 * 24 * 60 * 60, :second),
         group_by: v.id,
         order_by: [desc: v.inserted_at]
       )
