@@ -64,7 +64,7 @@ defmodule CF.LLMs.StatementsCreator do
     Enum.chunk_every(captions, @captions_chunk_size)
   end
 
-  defp get_llm_suggested_statements(video, captions, retries \\ 0) do
+  defp get_llm_suggested_statements(video, captions, retries \\ 5) do
     OpenAI.chat_completion(
       model: Application.get_env(:cf, :openai_model),
       response_format: %{type: "json_object"},
@@ -135,10 +135,11 @@ defmodule CF.LLMs.StatementsCreator do
         Enum.map(statements_inputs, fn %{"text" => text, "time" => time} ->
           %{
             video_id: video.id,
-            text: text,
+            text: CF.Utils.truncate(text, 280),
             time: time,
             inserted_at: inserted_at,
-            updated_at: inserted_at
+            updated_at: inserted_at,
+            is_draft: true
           }
         end),
         returning: true

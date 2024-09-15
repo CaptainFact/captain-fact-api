@@ -9,6 +9,7 @@ defmodule CF.Graphql.Schema.InputObjects.StatementFilter do
   @desc "Props to filter statements on"
   input_object :statement_filter do
     field(:commented, :boolean)
+    field(:is_draft, :boolean)
     field(:speaker_id, :id)
   end
 end

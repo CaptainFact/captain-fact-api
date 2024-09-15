@@ -36,6 +36,14 @@ defmodule CF.Utils do
   def map_string_keys_to_atom_keys(value),
     do: value
 
+  def truncate(text, max_length, replacement \\ "…") do
+    if String.length(text) > max_length do
+      String.slice(text, 0, max_length - String.length(replacement)) <> replacement
+    else
+      text
+    end
+  end
+
   # Convert key to atom if key is in binary format
 
   defp convert_key_to_atom(key) when is_binary(key),
