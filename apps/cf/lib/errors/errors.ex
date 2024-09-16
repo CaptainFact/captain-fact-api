@@ -36,30 +36,9 @@ defmodule CF.Errors do
   end
 
   @spec do_report(:error | :exit | :throw, any(), [any()], cf_error_params()) :: :ok
-  def do_report(type, value, stacktrace, params) do
+  def do_report(type, value, stacktrace, _params) do
     # Any call to Sentry, Rollbar, etc. should be done here
     Logger.error("[ERROR][#{type}] #{inspect(value)} - #{inspect(stacktrace)}")
     :ok
   end
-
-  defp build_occurence_data(params) do
-    default_occurrence_data()
-    |> add_user(params[:user])
-    |> Map.merge(params[:data] || %{})
-  end
-
-  defp default_occurrence_data() do
-    %{
-      "code_version" => CF.Application.version()
-    }
-  end
-
-  defp add_user(base, nil),
-    do: base
-
-  defp add_user(base, %{id: id, username: username}),
-    do: Map.merge(base, %{"person" => %{"id" => Integer.to_string(id), "username" => username}})
-
-  defp add_user(base, %{id: id}),
-    do: Map.merge(base, %{"person" => %{"id" => Integer.to_string(id)}})
 end
