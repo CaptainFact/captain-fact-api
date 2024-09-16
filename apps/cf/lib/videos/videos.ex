@@ -166,10 +166,7 @@ defmodule CF.Videos do
 
   @doc """
   Download and store captions for a video.
-  Returns captions if success or {:error, reason} if something bad happend.
-
-  Usage:
-  iex> download_captions(video)
+  Returns captions if success or {:error, reason} if something bad happened.
   """
   def download_captions(video = %Video{}) do
     # Try to fetch new captions
@@ -181,6 +178,19 @@ defmodule CF.Videos do
         captions_base
         |> VideoCaption.changeset(Map.merge(captions, %{video_id: video.id}))
         |> Repo.insert_or_update()
+        |> case do
+          # The Atoms become strings when saving/loading from the DB, let's make things consistent
+          {:error, changeset} ->
+            {:error, changeset}
+
+          {:ok, _video_caption} ->
+            video
+            |> get_existing_captions()
+            |> case do
+              nil -> {:error, :not_found}
+              existing -> {:ok, existing}
+            end
+        end
 
       # If no Youtube caption found, insert a dummy entry in DB to prevent retrying for 30 days
       {:error, :not_found} ->
@@ -194,16 +204,13 @@ defmodule CF.Videos do
         end
 
         {:error, :not_found}
-
-      result ->
-        result
     end
   end
 
   defp get_existing_captions(video) do
     VideoCaption
     |> where([vc], vc.video_id == ^video.id)
-    |> order_by(desc: :inserted_at)
+    |> order_by(desc: :updated_at)
     |> limit(1)
     |> Repo.one()
   end
