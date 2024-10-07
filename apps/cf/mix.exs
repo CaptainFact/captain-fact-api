@@ -61,6 +61,7 @@ defmodule CF.Mixfile do
       {:jason, "~> 1.4"},
       {:openai, "~> 0.6.1"},
       {:sweet_xml, "~> 0.7.4"},
+      {:goth, "~> 1.3"},
 
       # ---- Internal ----
       {:db, in_umbrella: true},

@@ -97,37 +97,16 @@ defmodule CF.Videos.CaptionsFetcherYoutube do
 
   # Below is an implementation using the official YouTube API, but it requires OAuth2 authentication.
   # It is left here for reference, in case we loose access to the unofficial API.
-  # defp fetch_captions_content_with_official_api(video_id, locale) do
-  #   # TODO: Continue dev here. See https://www.perplexity.ai/search/Can-you-show-jioyCtw.S4yrL8mlIBdqGg
-  #   {:ok, token} = Goth.Token.for_scope("https://www.googleapis.com/auth/youtube.force-ssl")
-  #   conn = YouTubeConnection.new(token.token)
-  # {:ok, captions} = GoogleApi.YouTube.V3.Api.Captions.youtube_captions_list(conn, ["snippet"], video_id, [])
-  # {
-  #   "kind": "youtube#captionListResponse",
-  #   "etag": "kMTAKpyU_VGu7GxgEnxXHqcuEXM",
-  #   "items": [
-  #     {
-  #       "kind": "youtube#caption",
-  #       "etag": "tWo68CIcRRFZA0oXPt8HGxCYia4",
-  #       "id": "AUieDaZJxYug0L5YNAw_31GbXz73b0CPXCDFlsPNSNe7KQvuv1g",
-  #       "snippet": {
-  #         "videoId": "v2IoEhuho2k",
-  #         "lastUpdated": "2024-06-16T18:45:12.56697Z",
-  #         "trackKind": "asr",
-  #         "language": "fr",
-  #         "name": "",
-  #         "audioTrackType": "unknown",
-  #         "isCC": false,
-  #         "isLarge": false,
-  #         "isEasyReader": false,
-  #         "isDraft": false,
-  #         "isAutoSynced": false,
-  #         "status": "serving"
-  #       }
-  #     }
-  #   ]
-  # }
-  # caption_id = List.first(captions.items).id # TODO inspect to pick the right caption
-  # {:ok, caption} = GoogleApi.YouTube.V3.Api.Captions.youtube_captions_download(conn, caption_id, [])
-  # end
+  def fetch_captions_content_with_official_api(video_id, locale) do
+    {:ok, token} = Goth.fetch(CF.Goth)
+    conn = GoogleApi.YouTube.V3.Connection.new(token.token)
+
+    IO.inspect(token)
+
+    {:ok, result} = GoogleApi.YouTube.V3.Api.Captions.youtube_captions_list(conn, ["snippet"], video_id, [])
+    IO.inspect(Enum.count(result.items))
+    caption_id = List.first(result.items).id
+    {:ok, caption} =
+      GoogleApi.YouTube.V3.Api.Captions.youtube_captions_download(conn, caption_id, []) #FAILS, you can only download captions for your own videos :-(
+  end
 end
