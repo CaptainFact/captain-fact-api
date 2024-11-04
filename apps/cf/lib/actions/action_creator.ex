@@ -10,6 +10,7 @@ defmodule CF.Actions.ActionCreator do
   alias DB.Schema.Speaker
   alias DB.Schema.Statement
   alias DB.Schema.Comment
+  alias DB.Schema.VideoCaption
   alias CF.Actions.ReputationChange
 
   # Create
@@ -172,6 +173,19 @@ defmodule CF.Actions.ActionCreator do
       statement_id: comment.statement_id,
       comment_id: comment.id,
       target_user_id: comment.user_id
+    )
+  end
+
+  def action_upload_video_captions(user_id, video_id, caption = %VideoCaption{}) do
+    action(
+      user_id,
+      :video_caption,
+      :upload,
+      video_id: video_id,
+      changes: %{
+        "format" => caption.format,
+        "parsed" => caption.parsed
+      }
     )
   end
 
