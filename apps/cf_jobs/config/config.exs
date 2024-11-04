@@ -38,11 +38,9 @@ config :cf_jobs, CF.Jobs.Scheduler,
       schedule: {:extended, "*/5"},
       task: {CF.Jobs.CreateNotifications, :update, []},
       overlap: false
-    ]
     # Captions
     # download_captions: [
-    #   # every minute
-    #   schedule: "*/1 * * * *",
+    #   schedule: "@daily",
     #   task: {CF.Jobs.DownloadCaptions, :update, []},
     #   overlap: false
     # ]

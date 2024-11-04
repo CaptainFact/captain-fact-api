@@ -109,6 +109,16 @@ defmodule CF.Graphql.Schema do
       arg(:unlisted, non_null(:boolean))
 
       resolve(&Resolvers.Videos.edit/3)
-    end
+         end
+
+    field :set_video_captions, :video do
+      middleware(Middleware.RequireAuthentication)
+      middleware(Middleware.RequireReputation, 450)
+
+      arg(:video_id, non_null(:id))
+      arg(:captions, non_null(list_of(:video_caption_input)))
+
+      resolve(&Resolvers.Videos.set_captions/3)
+
   end
 end

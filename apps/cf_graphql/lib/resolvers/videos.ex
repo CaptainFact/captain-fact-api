@@ -115,6 +115,7 @@ defmodule CF.Graphql.Resolvers.Videos do
     {:ok, video}
   end
 
+
   def edit(_root, %{id: id, unlisted: unlisted}, %{
         context: %{user: user}
       }) do
@@ -136,5 +137,32 @@ defmodule CF.Graphql.Resolvers.Videos do
       {:error, _} ->
         {:error, "Failed to update video"}
     end
+
+  def set_captions(_root, %{video_id: video_id, captions: captions_input}, %{
+        context: %{user: user}
+      }) do
+    video = DB.Repo.get!(DB.Schema.Video, video_id)
+
+    Multi.new()
+    |> Multi.insert(
+      :caption,
+      VideoCaption.changeset(%VideoCaption{
+        video_id: video.id,
+        raw: captions_input,
+        parsed: captions_input,
+        format: "user-provided"
+      })
+    )
+    |> Multi.run(
+      :action,
+      fn _repo, %{caption: caption} ->
+        CF.Actions.ActionCreator.action_upload_video_captions(user.id, video.id, caption)
+        |> DB.Repo.insert!()
+
+        {:ok, caption}
+      end
+    )
+
+    {:ok, video}
   end
 end

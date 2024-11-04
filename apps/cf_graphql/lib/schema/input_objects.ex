@@ -3,6 +3,7 @@ defmodule CF.Graphql.Schema.InputObjects do
 
   import_types(CF.Graphql.Schema.InputObjects.{
     VideoFilter,
-    StatementFilter
+    StatementFilter,
+    VideoCaption
   })
 end
