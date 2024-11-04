@@ -38,6 +38,8 @@ defmodule CF.Graphql.Schema.Types.Video do
     field(:inserted_at, :string)
     @desc "Define if video has been added by a partner or a regular user"
     field(:is_partner, :boolean)
+    @desc "Define if video is unlisted"
+    field(:unlisted, non_null(:boolean))
     @desc "List all non-removed speakers for this video"
     field :speakers, list_of(:speaker) do
       resolve(assoc(:speakers))
