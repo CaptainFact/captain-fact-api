@@ -40,12 +40,12 @@ config :cf_jobs, CF.Jobs.Scheduler,
       overlap: false
     ],
     # Captions
-    download_captions: [
-      # every minute
-      schedule: "*/1 * * * *",
-      task: {CF.Jobs.DownloadCaptions, :update, []},
-      overlap: false
-    ]
+    # download_captions: [
+    #   # every hour
+    #   schedule: "@hourly",
+    #   task: {CF.Jobs.DownloadCaptions, :update, []},
+    #   overlap: false
+    # ]
   ]
 
 # Configure Postgres pool size
