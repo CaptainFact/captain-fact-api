@@ -114,4 +114,27 @@ defmodule CF.Graphql.Resolvers.Videos do
     CF.LLMs.StatementsCreator.process_video!(video.id)
     {:ok, video}
   end
+
+  def edit(_root, %{id: id, unlisted: unlisted}, %{
+        context: %{user: user}
+      }) do
+    base_video = DB.Repo.get!(DB.Schema.Video, id)
+    changeset = Ecto.Changeset.change(base_video, %{unlisted: unlisted})
+
+    Ecto.Multi.new()
+    |> Ecto.Multi.update(:video, fn _repo ->
+      changeset
+    end)
+    |> Ecto.Multi.run(:action, fn _repo, %{video: video} ->
+      Repo.insert(CF.Actions.ActionCreator.action_update(user.id, changeset))
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{video: video}} ->
+        {:ok, video}
+
+      {:error, _} ->
+        {:error, "Failed to update video"}
+    end
+  end
 end
