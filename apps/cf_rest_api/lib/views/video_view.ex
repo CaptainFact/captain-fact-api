@@ -43,7 +43,8 @@ defmodule CF.RestApi.VideoView do
       speakers: render_many(video.speakers, CF.RestApi.SpeakerView, "speaker.json"),
       language: video.language,
       is_partner: video.is_partner,
-      is_subscribed: is_subscribed
+      is_subscribed: is_subscribed,
+      unlisted: video.unlisted
     }
   end
 end

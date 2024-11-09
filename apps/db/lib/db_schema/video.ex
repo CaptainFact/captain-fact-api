@@ -151,11 +151,22 @@ defmodule DB.Schema.Video do
     |> cast(params, [:url, :title, :language])
     |> validate_required([:url, :title])
     |> parse_video_url()
-    |> validate_length(:title, min: 5, max: 120)
+    |> update_change(:title, &truncate_title/1)
+    |> validate_length(:title, min: 5, max: 130)
     |> unique_constraint(:videos_youtube_id_index)
     |> unique_constraint(:videos_facebook_id_index)
     # Change locales like "en-US" to "en"
     |> update_change(:language, &format_language/1)
+  end
+
+  defp truncate_title(title) do
+    trimmed = String.trim(title)
+
+    if String.length(trimmed) > 130 do
+      String.slice(trimmed, 0..128) <> "…"
+    else
+      trimmed
+    end
   end
 
   defp format_language("zxx"), do: nil

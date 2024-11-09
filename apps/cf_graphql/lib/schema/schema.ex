@@ -99,5 +99,16 @@ defmodule CF.Graphql.Schema do
 
       resolve(&Resolvers.Videos.start_automatic_statements_extraction/3)
     end
+
+    field :edit_video, :video do
+      middleware(Middleware.RequireAuthentication)
+      # MIN_REPUTATION_UPDATE_VIDEO
+      middleware(Middleware.RequireReputation, 75)
+
+      arg(:id, non_null(:id))
+      arg(:unlisted, non_null(:boolean))
+
+      resolve(&Resolvers.Videos.edit/3)
+    end
   end
 end
