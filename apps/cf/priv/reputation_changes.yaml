@@ -16,19 +16,19 @@ revert_vote_up:
 # Vote DOWN. Please ensure vote_down and revert_vote_down values match !
 
 vote_down:
-  comment:  [-1, -2]
-  fact:     [-1, -3]
+  comment:  [0, -2]
+  fact:     [0, -3]
 
 revert_vote_down:
-  comment:  [+1 , +2]
-  fact:     [+1 , +3]
+  comment:  [0 , +2]
+  fact:     [0 , +3]
 
 # ---- Moderation ----
 
 # Target user got its comment banned
 
 action_banned_bad_language:     [0, -25]
-action_banned_spam:             [0, -30]
+action_banned_spam:             [0, -25]
 action_banned_irrelevant:       [0, -10]
 action_banned_not_constructive: [0, -5]
 
@@ -39,4 +39,4 @@ confirmed_flag: [0, +3]
 
 # ---- Misc ----
 
-email_confirmed: [0, +15]
+email_confirmed: [0, 0]
