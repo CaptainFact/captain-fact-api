@@ -18,7 +18,7 @@ defmodule CF.Accounts.UserPermissions do
   @error_limit_reached "limit_reached"
 
   @limit_warning_threshold 5
-  @levels [-30, -5, 15, 30, 75, 125, 200, 500, 1000]
+  @levels [-50, 15, 30, 50, 75, 125, 250, 500, 1000]
   @reverse_levels Enum.reverse(@levels)
   @nb_levels Enum.count(@levels)
   @lowest_acceptable_reputation List.first(@levels)
