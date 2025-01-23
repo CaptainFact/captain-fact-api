@@ -23,7 +23,7 @@ defmodule CF.Jobs.Application do
 
     # Do not start scheduler in tests
     children =
-      if env == :test,
+      if env == :test or Application.get_env(:cf, :disable_scheduler),
         do: children,
         else: children ++ [worker(CF.Jobs.Scheduler, [])]
 
