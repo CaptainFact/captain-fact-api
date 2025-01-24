@@ -86,7 +86,18 @@ defmodule DB.Schema.User do
     |> common_changeset(params)
     |> validate_length(:password, min: 6, max: 256)
     |> put_encrypted_pw
+    |> set_unconfirmed_if_new_email(model, params)
   end
+
+  defp set_unconfirmed_if_new_email(changeset, model, %{"email" => email}) do
+    if model && !is_nil(email) && email != model.email do
+      put_change(changeset, :email_confirmed, false)
+    else
+      changeset
+    end
+  end
+
+  defp set_unconfirmed_if_new_email(changeset, _model, _params), do: changeset
 
   @doc """
   Generate a changeset to update `reputation` and `today_reputation_gain` without verifying daily limits
