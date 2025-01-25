@@ -11,12 +11,6 @@ defmodule CF.ReverseProxy.Plug do
   )
 
   @default_host CF.RestApi.Endpoint
-  @base_host_regex ~r/^(?<service>rest|graphql|feed)\./
-  @subdomains %{
-    "graphql" => CF.GraphQLWeb.Endpoint,
-    "rest" => CF.RestApi.Endpoint,
-    "feed" => CF.AtomFeed.Router
-  }
 
   def init(opts), do: opts
 
@@ -26,6 +20,13 @@ defmodule CF.ReverseProxy.Plug do
   # https://github.com/jesseshieh/master_proxy
 
   if Application.get_env(:cf, :env) == :dev do
+    @base_host_regex ~r/^(?<service>rest|graphql|feed)\./
+    @subdomains %{
+      "graphql" => CF.GraphQLWeb.Endpoint,
+      "rest" => CF.RestApi.Endpoint,
+      "feed" => CF.AtomFeed.Router
+    }
+
     # Dev requests are routed through here
     def call(conn, _) do
       if conn.request_path == "/status" do
