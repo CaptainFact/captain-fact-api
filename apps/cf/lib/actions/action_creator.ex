@@ -71,10 +71,10 @@ defmodule CF.Actions.ActionCreator do
     )
   end
 
-  def action_add(user_id, video = %Video{}) do
+  def action_add(user_id, video_entity, video = %Video{}) do
     action(
       user_id,
-      :video,
+      video_entity,
       :add,
       video_id: video.id,
       changes: %{
@@ -96,10 +96,10 @@ defmodule CF.Actions.ActionCreator do
     )
   end
 
-  def action_update(user_id, %{data: video = %Video{}, changes: changes}) do
+  def action_update(user_id, video_entity, %{data: video = %Video{}, changes: changes}) do
     action(
       user_id,
-      :video,
+      video_entity,
       :update,
       video_id: video.id,
       changes: changes
