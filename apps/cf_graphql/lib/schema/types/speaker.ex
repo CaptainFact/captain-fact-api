@@ -4,7 +4,9 @@ defmodule CF.Graphql.Schema.Types.Speaker do
   """
 
   use Absinthe.Schema.Notation
-  use Absinthe.Ecto, repo: DB.Repo
+
+  import Absinthe.Resolution.Helpers, only: [dataloader: 1]
+  import Absinthe.Resolution.Helpers, only: [dataloader: 1]
   import CF.Graphql.Schema.Utils
   alias CF.Graphql.Resolvers
 
@@ -26,7 +28,7 @@ defmodule CF.Graphql.Schema.Types.Speaker do
     field(:picture, :string, do: resolve(&Resolvers.Speakers.picture/3))
     @desc "List of speaker's videos"
     field :videos, list_of(:video) do
-      resolve(assoc(:videos))
+      resolve(dataloader(DB.Repo))
       complexity(join_complexity())
     end
   end

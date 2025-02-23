@@ -4,7 +4,8 @@ defmodule CF.Graphql.Schema.Types.Comment do
   """
 
   use Absinthe.Schema.Notation
-  use Absinthe.Ecto, repo: DB.Repo
+
+  import Absinthe.Resolution.Helpers, only: [dataloader: 1]
   import CF.Graphql.Schema.Utils
   alias CF.Graphql.Resolvers
 
@@ -13,7 +14,7 @@ defmodule CF.Graphql.Schema.Types.Comment do
     field(:id, non_null(:id))
     @desc "User who made the comment"
     field :user, :user do
-      resolve(assoc(:user))
+      resolve(dataloader(DB.Repo))
       complexity(join_complexity())
     end
 
@@ -31,7 +32,7 @@ defmodule CF.Graphql.Schema.Types.Comment do
 
     @desc "Source of the scomment. If null, a text must be set"
     field :source, :source do
-      resolve(assoc(:source))
+      resolve(dataloader(DB.Repo))
       complexity(join_complexity())
     end
 

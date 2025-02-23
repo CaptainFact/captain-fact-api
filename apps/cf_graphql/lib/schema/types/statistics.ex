@@ -5,7 +5,6 @@ defmodule CF.Graphql.Schema.Types.Statistics do
   """
 
   use Absinthe.Schema.Notation
-  use Absinthe.Ecto, repo: DB.Repo
   alias CF.Graphql.Resolvers
 
   @desc "Statistics about the platform community"

@@ -27,6 +27,7 @@ defenum(
   email_confirmed: 100,
   collective_moderation: 101,
   start_automatic_statements_extraction: 102,
+  upload: 103,
   # Deprecated. Can safelly be re-used
   action_banned: 102,
   abused_flag: 103,

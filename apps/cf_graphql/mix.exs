@@ -38,8 +38,8 @@ defmodule CF.Graphql.Mixfile do
       {:plug, "~> 1.7"},
       {:cowboy, "~> 2.0"},
       {:corsica, "~> 2.1"},
-      {:absinthe_ecto, "~> 0.1.3"},
-      {:absinthe_plug, "~> 1.4.1"},
+      {:absinthe_plug, "~> 1.5"},
+      {:dataloader, "~> 2.0.2"},
       {:kaur, "~> 1.1"},
       {:poison, "~> 3.1"},
 

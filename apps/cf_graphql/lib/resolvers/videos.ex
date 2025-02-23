@@ -8,6 +8,7 @@ defmodule CF.Graphql.Resolvers.Videos do
   import Ecto.Query
   import Absinthe.Resolution.Helpers, only: [batch: 3]
 
+  alias Ecto.Multi
   alias DB.Repo
   alias DB.Schema.Video
   alias DB.Schema.VideoCaption
@@ -115,7 +116,6 @@ defmodule CF.Graphql.Resolvers.Videos do
     {:ok, video}
   end
 
-
   def edit(_root, %{id: id, unlisted: unlisted}, %{
         context: %{user: user}
       }) do
@@ -137,32 +137,49 @@ defmodule CF.Graphql.Resolvers.Videos do
       {:error, _} ->
         {:error, "Failed to update video"}
     end
+  end
 
-  def set_captions(_root, %{video_id: video_id, captions: captions_input}, %{
-        context: %{user: user}
-      }) do
-    video = DB.Repo.get!(DB.Schema.Video, video_id)
+  def set_captions(
+        _root,
+        %{video_id: video_id, captions: %{path: path, content_type: content_type}},
+        %{
+          context: %{user: user}
+        }
+      ) do
+    cond do
+      content_type != "text/xml" ->
+        {:error, "Unsupported content type: #{content_type}"}
 
-    Multi.new()
-    |> Multi.insert(
-      :caption,
-      VideoCaption.changeset(%VideoCaption{
-        video_id: video.id,
-        raw: captions_input,
-        parsed: captions_input,
-        format: "user-provided"
-      })
-    )
-    |> Multi.run(
-      :action,
-      fn _repo, %{caption: caption} ->
-        CF.Actions.ActionCreator.action_upload_video_captions(user.id, video.id, caption)
-        |> DB.Repo.insert!()
+      File.stat!(path).size > 10_000_000 ->
+        {:error, "File must be < 10MB"}
 
-        {:ok, caption}
-      end
-    )
+      true ->
+        video = DB.Repo.get!(DB.Schema.Video, video_id)
+        captions_file_content = File.read!(path)
+        parsed = CF.Videos.CaptionsSrv1Parser.parse_file(captions_file_content)
 
-    {:ok, video}
+        Multi.new()
+        |> Multi.insert(
+          :caption,
+          VideoCaption.changeset(%VideoCaption{
+            video_id: video.id,
+            raw: captions_file_content,
+            parsed: parsed,
+            format: "xml"
+          })
+        )
+        |> Multi.run(
+          :action,
+          fn _repo, %{caption: caption} ->
+            CF.Actions.ActionCreator.action_upload_video_captions(user.id, video.id, caption)
+            |> DB.Repo.insert!()
+
+            {:ok, caption}
+          end
+        )
+        |> DB.Repo.transaction()
+
+        {:ok, video}
+    end
   end
 end

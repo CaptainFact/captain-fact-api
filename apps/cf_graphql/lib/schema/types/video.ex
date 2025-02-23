@@ -4,11 +4,10 @@ defmodule CF.Graphql.Schema.Types.Video do
   """
 
   use Absinthe.Schema.Notation
-  use Absinthe.Ecto, repo: DB.Repo
+
+  import Absinthe.Resolution.Helpers, only: [dataloader: 1]
   import CF.Graphql.Schema.Utils
   alias CF.Graphql.Resolvers
-
-  import_types(CF.Graphql.Schema.Types.{Paginated, Statement, Speaker})
 
   @desc "Identifies a video. Only Youtube is supported at the moment"
   object :video do
@@ -42,7 +41,7 @@ defmodule CF.Graphql.Schema.Types.Video do
     field(:unlisted, non_null(:boolean))
     @desc "List all non-removed speakers for this video"
     field :speakers, list_of(:speaker) do
-      resolve(assoc(:speakers))
+      resolve(dataloader(DB.Repo))
       complexity(join_complexity())
     end
 
