@@ -36,6 +36,7 @@ defmodule CF.Jobs.DownloadCaptions do
     |> Enum.map(fn video ->
       Logger.info("Downloading captions for video #{video.id}")
       CF.Videos.download_captions(video)
+      Process.sleep(1000)
     end)
 
     {:reply, :ok, :ok}
