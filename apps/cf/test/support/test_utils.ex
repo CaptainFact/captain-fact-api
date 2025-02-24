@@ -36,7 +36,7 @@ defmodule CF.TestUtils do
     end
   end
 
-  def refute_deleted(%Comment{id: id}) do
+  def assert_not_deleted(%Comment{id: id}) do
     {comment, _} = get_comment_and_actions(id)
     assert comment != nil
 

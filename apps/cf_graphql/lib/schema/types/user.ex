@@ -4,17 +4,24 @@ defmodule CF.Graphql.Schema.Types.User do
   """
 
   use Absinthe.Schema.Notation
-  use Absinthe.Ecto, repo: DB.Repo
 
   import CF.Graphql.Schema.Utils
   alias CF.Graphql.Schema.Middleware
   alias CF.Graphql.Resolvers
 
-  import_types(CF.Graphql.Schema.Types.Paginated)
-  import_types(CF.Graphql.Schema.Types.Notification)
+  @desc "The notifications status"
+  enum :notifications_filter do
+    value(:all, description: "All notifications")
+    value(:seen, description: "Seen notifications")
+    value(:unseen, description: "Unseen notifications")
+  end
 
-  enum(:notifications_filter, values: [:all, :seen, :unseen])
-  enum(:activity_log_direction, values: [:all, :author, :target])
+  @desc "Whether the user was a target or an author of the action"
+  enum :activity_log_direction do
+    value(:all, description: "All actions")
+    value(:author, description: "Actions taken by the author")
+    value(:target, description: "Actions taken against the target")
+  end
 
   @desc "A user registered on the website"
   object :user do

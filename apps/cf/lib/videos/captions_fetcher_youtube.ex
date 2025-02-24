@@ -9,6 +9,8 @@ defmodule CF.Videos.CaptionsFetcherYoutube do
   require Logger
   import SweetXml
 
+  @user_agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/135.0"
+
   @impl true
   def fetch(%{youtube_id: youtube_id, language: language}) do
     with {:ok, data} <- fetch_youtube_data(youtube_id),
@@ -27,7 +29,7 @@ defmodule CF.Videos.CaptionsFetcherYoutube do
   defp fetch_youtube_data(video_id) do
     url = "https://www.youtube.com/watch?v=#{video_id}"
 
-    case HTTPoison.get(url, []) do
+    case HTTPoison.get(url, [{"User-Agent", @user_agent}]) do
       {:ok, %HTTPoison.Response{body: body}} ->
         {:ok, body}
 
@@ -59,7 +61,7 @@ defmodule CF.Videos.CaptionsFetcherYoutube do
   end
 
   defp fetch_transcript(base_url) do
-    case HTTPoison.get(base_url, []) do
+    case HTTPoison.get(base_url, [{"User-Agent", @user_agent}]) do
       {:ok, %HTTPoison.Response{body: body}} ->
         {:ok, body}
 
@@ -69,30 +71,7 @@ defmodule CF.Videos.CaptionsFetcherYoutube do
   end
 
   defp process_transcript(transcript) do
-    transcript
-    |> SweetXml.xpath(
-      ~x"//transcript/text"l,
-      text: ~x"./text()"s |> transform_by(&clean_text/1),
-      start: ~x"./@start"s |> transform_by(&parse_float/1),
-      duration: ~x"./@dur"os |> transform_by(&parse_float/1)
-    )
-    |> Enum.filter(fn %{text: text, start: start} ->
-      start != nil and text != nil and text != ""
-    end)
-  end
-
-  defp clean_text(text) do
-    text
-    |> String.replace("&amp;", "&")
-    |> HtmlEntities.decode()
-    |> String.trim()
-  end
-
-  defp parse_float(val) do
-    case Float.parse(val) do
-      {num, _} -> num
-      _ -> nil
-    end
+    CF.Videos.CaptionsSrv1Parser.parse_file(transcript)
   end
 
   # Below is an implementation using the official YouTube API, but it requires OAuth2 authentication.

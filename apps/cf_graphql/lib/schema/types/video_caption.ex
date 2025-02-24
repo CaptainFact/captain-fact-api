@@ -4,7 +4,6 @@ defmodule CF.Graphql.Schema.Types.VideoCaption do
   """
 
   use Absinthe.Schema.Notation
-  use Absinthe.Ecto, repo: DB.Repo
 
   @desc "Information about the application"
   object :video_caption do

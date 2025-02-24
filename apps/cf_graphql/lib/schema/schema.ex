@@ -2,9 +2,42 @@ defmodule CF.Graphql.Schema do
   use Absinthe.Schema
   alias CF.Graphql.Resolvers
   alias CF.Graphql.Schema.Middleware
+  import Absinthe.Resolution.Helpers, only: [dataloader: 1]
 
-  import_types(CF.Graphql.Schema.Types)
-  import_types(CF.Graphql.Schema.InputObjects)
+  import_types(Absinthe.Plug.Types)
+
+  import_types(CF.Graphql.Schema.Types.{
+    AppInfo,
+    Comment,
+    Notification,
+    Paginated,
+    Source,
+    Speaker,
+    Statement,
+    Statistics,
+    Subscription,
+    UserAction,
+    User,
+    Video,
+    VideoCaption
+  })
+
+  import_types(CF.Graphql.Schema.InputObjects.{
+    VideoFilter,
+    StatementFilter
+  })
+
+  def context(ctx) do
+    loader =
+      Dataloader.new()
+      |> Dataloader.add_source(DB.Repo, Dataloader.Ecto.new(DB.Repo))
+
+    Map.put(ctx, :loader, loader)
+  end
+
+  def plugins do
+    [Absinthe.Middleware.Dataloader | Absinthe.Plugin.defaults()]
+  end
 
   # Query API
 
@@ -109,6 +142,16 @@ defmodule CF.Graphql.Schema do
       arg(:unlisted, non_null(:boolean))
 
       resolve(&Resolvers.Videos.edit/3)
+    end
+
+    field :set_video_captions, :video do
+      middleware(Middleware.RequireAuthentication)
+      middleware(Middleware.RequireReputation, 450)
+
+      arg(:video_id, non_null(:id))
+      arg(:captions, non_null(:upload))
+
+      resolve(&Resolvers.Videos.set_captions/3)
     end
   end
 end

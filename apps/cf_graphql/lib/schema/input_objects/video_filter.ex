@@ -4,7 +4,6 @@ defmodule CF.Graphql.Schema.InputObjects.VideoFilter do
   """
 
   use Absinthe.Schema.Notation
-  use Absinthe.Ecto, repo: DB.Repo
 
   @desc "Props to filter videos on"
   input_object :video_filter do

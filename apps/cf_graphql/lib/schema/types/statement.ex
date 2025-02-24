@@ -4,10 +4,9 @@ defmodule CF.Graphql.Schema.Types.Statement do
   """
 
   use Absinthe.Schema.Notation
-  use Absinthe.Ecto, repo: DB.Repo
-  import CF.Graphql.Schema.Utils
 
-  import_types(CF.Graphql.Schema.Types.{Paginated, Speaker, Comment})
+  import Absinthe.Resolution.Helpers, only: [dataloader: 1]
+  import CF.Graphql.Schema.Utils
 
   @desc "A transcript or a description of the picture"
   object :statement do
@@ -21,19 +20,19 @@ defmodule CF.Graphql.Schema.Types.Statement do
 
     @desc "Statement's speaker. Null if statement describes picture"
     field :speaker, :speaker do
-      resolve(assoc(:speaker))
+      resolve(dataloader(DB.Repo))
       complexity(join_complexity())
     end
 
     @desc "List of users comments and facts for this statement"
     field :comments, list_of(:comment) do
-      resolve(assoc(:comments))
+      resolve(dataloader(DB.Repo))
       complexity(join_complexity())
     end
 
     @desc "The video associated with this statement"
     field :video, :video do
-      resolve(assoc(:video))
+      resolve(dataloader(DB.Repo))
       complexity(join_complexity())
     end
   end
