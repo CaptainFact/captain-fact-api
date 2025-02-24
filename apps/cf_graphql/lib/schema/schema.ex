@@ -54,6 +54,12 @@ defmodule CF.Graphql.Schema do
       resolve(&Resolvers.Users.get_logged_in/3)
     end
 
+    @desc "Check an url X-Frame-Options"
+    field :is_iframe_allowed, :boolean do
+      arg(:url, :string)
+      resolve(&Resolvers.Comments.is_iframe_allowed/3)
+    end
+
     @desc "Get app info"
     field :app_info, :app_info do
       resolve(&Resolvers.AppInfo.info/3)

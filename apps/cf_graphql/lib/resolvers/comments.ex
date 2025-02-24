@@ -18,4 +18,29 @@ defmodule CF.Graphql.Resolvers.Comments do
     |> Repo.all()
     |> Enum.into(%{})
   end
+
+  def is_iframe_allowed(_root, %{url: url}, _info) do
+    case HTTPoison.head(url) do
+      {:ok, %HTTPoison.Response{status_code: 200, headers: headers}} ->
+        headers
+        |> Enum.into(%{})
+        |> Map.get("X-Frame-Options")
+        |> case do
+          nil ->
+            {:ok, true}
+
+          value ->
+            case String.match?(value, ~r/deny|sameorigin/i) do
+              true -> {:ok, false}
+              false -> {:ok, true}
+            end
+
+          _ ->
+            {:ok, false}
+        end
+
+      _ ->
+        {:ok, false}
+    end
+  end
 end
