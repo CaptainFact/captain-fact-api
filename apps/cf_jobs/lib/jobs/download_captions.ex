@@ -47,7 +47,7 @@ defmodule CF.Jobs.DownloadCaptions do
   defp get_videos() do
     Repo.all(
       from(v in Video,
-        limit: 15,
+        limit: 5,
         left_join: captions in VideoCaption,
         on: captions.video_id == v.id,
         where:

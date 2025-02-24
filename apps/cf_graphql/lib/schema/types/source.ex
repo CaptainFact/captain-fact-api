@@ -4,7 +4,6 @@ defmodule CF.Graphql.Schema.Types.Source do
   """
 
   use Absinthe.Schema.Notation
-  use Absinthe.Ecto, repo: DB.Repo
 
   @desc "An URL pointing toward a source (article, video, pdf...)"
   object :source do

@@ -4,8 +4,8 @@ defmodule CF.Graphql.Schema.Types.Subscription do
   """
 
   use Absinthe.Schema.Notation
-  use Absinthe.Ecto, repo: DB.Repo
 
+  import Absinthe.Resolution.Helpers, only: [dataloader: 1]
   import CF.Graphql.Schema.Utils
   alias DB.Type.VideoHashId
 
@@ -49,19 +49,19 @@ defmodule CF.Graphql.Schema.Types.Subscription do
     @desc "Associated video"
     field :video, :video do
       complexity(join_complexity())
-      resolve(assoc(:video))
+      resolve(dataloader(DB.Repo))
     end
 
     @desc "Associated statement"
     field :statement, :statement do
       complexity(join_complexity())
-      resolve(assoc(:statement))
+      resolve(dataloader(DB.Repo))
     end
 
     @desc "Associated comment"
     field :comment, :comment do
       complexity(join_complexity())
-      resolve(assoc(:comment))
+      resolve(dataloader(DB.Repo))
     end
   end
 end

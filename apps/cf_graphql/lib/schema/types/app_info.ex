@@ -4,7 +4,6 @@ defmodule CF.Graphql.Schema.Types.AppInfo do
   """
 
   use Absinthe.Schema.Notation
-  use Absinthe.Ecto, repo: DB.Repo
 
   @desc "Information about the application"
   object :app_info do

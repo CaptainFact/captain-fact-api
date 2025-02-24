@@ -4,7 +4,6 @@ defmodule CF.Graphql.Schema.Types.Paginated do
   """
 
   use Absinthe.Schema.Notation
-  use Absinthe.Ecto, repo: DB.Repo
 
   object :paginated do
     field(:page_number, :integer)
