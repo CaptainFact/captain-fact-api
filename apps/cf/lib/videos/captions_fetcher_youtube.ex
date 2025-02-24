@@ -9,6 +9,8 @@ defmodule CF.Videos.CaptionsFetcherYoutube do
   require Logger
   import SweetXml
 
+  @user_agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/135.0"
+
   @impl true
   def fetch(%{youtube_id: youtube_id, language: language}) do
     with {:ok, data} <- fetch_youtube_data(youtube_id),
@@ -27,7 +29,7 @@ defmodule CF.Videos.CaptionsFetcherYoutube do
   defp fetch_youtube_data(video_id) do
     url = "https://www.youtube.com/watch?v=#{video_id}"
 
-    case HTTPoison.get(url, []) do
+    case HTTPoison.get(url, [{"User-Agent", @user_agent}]) do
       {:ok, %HTTPoison.Response{body: body}} ->
         {:ok, body}
 
@@ -59,7 +61,7 @@ defmodule CF.Videos.CaptionsFetcherYoutube do
   end
 
   defp fetch_transcript(base_url) do
-    case HTTPoison.get(base_url, []) do
+    case HTTPoison.get(base_url, [{"User-Agent", @user_agent}]) do
       {:ok, %HTTPoison.Response{body: body}} ->
         {:ok, body}
 
