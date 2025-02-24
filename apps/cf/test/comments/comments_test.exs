@@ -141,7 +141,7 @@ defmodule CF.Comments.CommentsTest do
         Comments.delete_comment(random_user, comment.statement.video_id, comment)
       end
 
-      refute_deleted(comment)
+      assert_not_deleted(comment)
 
       Comments.delete_comment(comment.user, comment.statement.video_id, comment)
       assert_deleted(comment)
@@ -168,7 +168,7 @@ defmodule CF.Comments.CommentsTest do
         Comments.delete_comment(comment.user, comment.statement.video_id, comment)
       end
 
-      refute_deleted(comment)
+      assert_not_deleted(comment)
     end
 
     test "but an admin can" do

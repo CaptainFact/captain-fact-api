@@ -44,7 +44,7 @@ defmodule CF.Jobs.ModerationTest do
     CF.Jobs.Moderation.update()
     CF.Jobs.Reputation.update()
 
-    refute_deleted(comment)
+    assert_not_deleted(comment)
     # Un-report comment
     assert Repo.get!(Comment, comment.id).is_reported == false
     # Flags are cleared
@@ -63,7 +63,7 @@ defmodule CF.Jobs.ModerationTest do
     CF.Jobs.Moderation.update()
     CF.Jobs.Reputation.update()
 
-    refute_deleted(comment)
+    assert_not_deleted(comment)
     # Stays reported
     assert Repo.get!(Comment, comment.id).is_reported == true
     # Doesn't clear flags
