@@ -1,4 +1,4 @@
-FROM elixir:1.12.3-alpine
+FROM elixir:1.14.5-alpine
 RUN apk update && apk upgrade
 RUN apk add bash imagemagick curl gcc make libc-dev libgcc && rm -rf /var/cache/apk/*
 
