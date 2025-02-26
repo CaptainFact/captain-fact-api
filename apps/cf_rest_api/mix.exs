@@ -40,7 +40,7 @@ defmodule CF.RestApi.Mixfile do
       {:gettext, "~> 0.13.1"},
       {:kaur, "~> 1.1"},
       {:phoenix, "~> 1.5.14", override: true},
-      {:phoenix_html, "~> 2.14.3"},
+      {:phoenix_html, "~> 3.3.4"},
       {:phoenix_pubsub, "~> 2.0"},
       {:jason, "~> 1.4"},
       {:poison, "~> 3.1"},
