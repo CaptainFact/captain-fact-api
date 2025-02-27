@@ -4,14 +4,8 @@ defmodule CF.AtomFeed.Application do
   # See https://hexdocs.pm/elixir/Application.html
   # for more information on OTP Applications
   def start(_type, _args) do
-    import Supervisor.Spec
-
-    children = []
     config = Application.get_env(:cf_atom_feed, CF.AtomFeed.Router)
-
-    if config[:cowboy] do
-      children = [supervisor(CF.AtomFeed.Router, []) | children]
-    end
+    children = if config[:cowboy], do: [{CF.AtomFeed.Router, []}], else: []
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

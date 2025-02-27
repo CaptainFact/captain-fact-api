@@ -4,7 +4,7 @@ defmodule DB.Schema.SpeakerTest do
   alias DB.Schema.Speaker
 
   @valid_attrs %{
-    full_name: "#{Faker.Name.first_name()} #{Faker.Name.last_name()}",
+    full_name: "#{Faker.Person.first_name()} #{Faker.Person.last_name()}",
     wikidata_item_id: nil
   }
   @invalid_attrs %{}
