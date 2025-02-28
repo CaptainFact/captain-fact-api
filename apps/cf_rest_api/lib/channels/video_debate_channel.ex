@@ -29,6 +29,7 @@ defmodule CF.RestApi.VideoDebateChannel do
   def join("video_debate:" <> video_hash_id, _payload, socket) do
     Video
     |> Video.with_speakers()
+    |> Video.with_categories()
     |> Repo.get_by(hash_id: video_hash_id)
     |> case do
       nil ->

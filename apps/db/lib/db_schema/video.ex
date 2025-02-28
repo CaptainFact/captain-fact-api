@@ -7,7 +7,7 @@ defmodule DB.Schema.Video do
   import Ecto.{Changeset, Query}
 
   alias DB.Type.VideoHashId
-  alias DB.Schema.{Speaker, Statement, VideoSpeaker}
+  alias DB.Schema.{Category, Speaker, Statement, VideoSpeaker}
 
   schema "videos" do
     field(:title, :string)
@@ -26,6 +26,7 @@ defmodule DB.Schema.Video do
     field(:facebook_id, :string)
     field(:facebook_offset, :integer, default: 0)
 
+    many_to_many(:categories, Category, join_through: "categories_videos", on_delete: :delete_all)
     many_to_many(:speakers, Speaker, join_through: VideoSpeaker, on_delete: :delete_all)
     has_many(:statements, Statement, on_delete: :delete_all)
 
@@ -84,6 +85,13 @@ defmodule DB.Schema.Video do
   """
   def with_statements(query) do
     from(v in query, preload: [:statements])
+  end
+
+  @doc """
+  Preloads categories for given video query
+  """
+  def with_categories(query) do
+    from(v in query, preload: [:categories])
   end
 
   # Utils
