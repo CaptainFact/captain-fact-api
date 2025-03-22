@@ -9,7 +9,7 @@ jobs:
   lint:
     runs-on: ubuntu-20.04 # Remember to update this when changing Erlang version. See https://github.com/erlef/setup-beam
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - uses: erlef/setup-beam@v1
         with:
           version-file: .tool-versions
@@ -30,8 +30,8 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/cache@v1
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
         with:
           path: deps
           key: ${{ runner.os }}-mix-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}

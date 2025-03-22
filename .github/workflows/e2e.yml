@@ -32,7 +32,7 @@ jobs:
           path: frontend
       # Setup API
       - name: Restore Elixir cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ./api/deps
           key: ${{ runner.os }}-mix-${{ env.cache-name }}-${{ hashFiles('**/mix.lock') }}
@@ -40,7 +40,7 @@ jobs:
             ${{ runner.os }}-mix-${{ env.cache-name }}-
             ${{ runner.os }}-mix-
       - name: Restore Elixir build folder
-        uses: actions/cache@v1
+        uses: actions/cache@v4
         with:
           path: ./api/build
           key: ${{ runner.os }}-mix-${{ env.cache-name }}-${{ hashFiles('**/mix.lock') }}
