@@ -3,12 +3,16 @@ import Config
 # ---- Helpers ----
 
 # Try to load `secret_name` from `/run/secrets/secret_name`.
+# If it fails, fallback to load it from env variable aliased by `CF_ALIAS_SECRET_NAME`.
 # If it fails, fallback to load it from env variable `CF_SECRET_NAME`.
 # If it fails too, fallback on `default`.
 do_load_secret = fn secret_name ->
   cond do
     File.exists?("/run/secrets/#{secret_name}") ->
       File.read!("/run/secrets/#{secret_name}")
+
+    System.get_env("CF_ALIAS_#{String.upcase(secret_name)}") && System.get_env(System.get_env("CF_ALIAS_#{String.upcase(secret_name)}")) ->
+      System.get_env(System.get_env("CF_ALIAS_#{String.upcase(secret_name)}"))
 
     System.get_env("CF_#{String.upcase(secret_name)}") ->
       System.get_env("CF_#{String.upcase(secret_name)}")
@@ -65,7 +69,8 @@ config :db, DB.Repo,
   hostname: load_secret.("db_hostname"),
   username: load_secret.("db_username"),
   password: load_secret.("db_password"),
-  database: load_secret.("db_name")
+  database: load_secret.("db_name"),
+  port: load_int.({"db_port", 5432})
 
 config :ex_aws,
   access_key_id: [load_secret.("s3_access_key_id"), :instance_role],
