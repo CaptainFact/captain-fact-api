@@ -9,11 +9,11 @@ defmodule CF.Application do
     # Define workers and child supervisors to be supervised
     children = [
       # Other custom supervisors
-      supervisor(CF.Sources.Fetcher, []),
+      {CF.Sources.Fetcher, []},
       # Misc workers
-      worker(CF.Accounts.UsernameGenerator, []),
+      {CF.Accounts.UsernameGenerator, []},
       # Sweep tokens from db
-      worker(Guardian.DB.Token.SweeperServer, [])
+      {Guardian.DB.Token.SweeperServer, []}
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html

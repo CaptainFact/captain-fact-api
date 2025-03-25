@@ -66,4 +66,7 @@ defmodule DB.Type.FlagReason do
     |> Enum.find(fn {_, id} -> id == reason_id end)
     |> elem(0)
   end
+
+  # Implement the embed_as/1 function required by the Ecto.Type behaviour
+  def embed_as(_), do: :dump
 end

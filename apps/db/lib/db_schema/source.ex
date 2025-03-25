@@ -65,7 +65,7 @@ defmodule DB.Schema.Source do
   end
 
   defp validate_file_mime_type(:file_mime_type, mime_type) do
-    if MIME.valid?(mime_type) do
+    if MIME.extensions(mime_type) != [] do
       []
     else
       [file_mime_type: "Invalid MIME type"]

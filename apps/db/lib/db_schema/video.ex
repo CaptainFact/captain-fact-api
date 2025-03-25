@@ -308,13 +308,4 @@ defmodule DB.Schema.Video do
         )
     end)
   end
-
-  # Return IDs of videos with at least 3 statements
-  defp popular_videos_subquery do
-    Video
-    |> join(:inner, [v], s in assoc(v, :statements))
-    |> select([:id])
-    |> group_by([v], v.id)
-    |> having([v, s], count(s.id) >= 3)
-  end
 end
