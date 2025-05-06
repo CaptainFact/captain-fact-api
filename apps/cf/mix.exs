@@ -50,7 +50,7 @@ defmodule CF.Mixfile do
       {:html_entities, "~> 0.3"},
       {:httpoison, "~> 2.2"},
       {:poison, "~> 3.1"},
-      {:csv, "~> 1.4.4"},
+      {:csv, "~> 3.2.2"},
       {:not_qwerty123, "~> 2.2"},
       {:bamboo, "~> 1.7.1"},
       {:hackney, "~> 1.17"},
