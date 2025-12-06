@@ -9,4 +9,7 @@ defmodule CF.RestApi.CORS do
         origin in origins
     end
   end
+
+  @spec check_origin(Plug.Conn.t(), String.t()) :: boolean()
+  def check_origin(_conn, origin), do: check_origin(origin)
 end

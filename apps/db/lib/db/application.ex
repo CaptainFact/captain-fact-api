@@ -5,13 +5,11 @@ defmodule DB.Application do
   require Logger
 
   def start(_type, _args) do
-    import Supervisor.Spec, warn: false
-
     # Define workers and child supervisors to be supervised
     children = [
       # Starts a worker by calling: DB.Worker.start_link(arg1, arg2, arg3)
-      # worker(DB.Worker, [arg1, arg2, arg3]),
-      supervisor(DB.Repo, [])
+      # {DB.Worker, [arg1, arg2, arg3]},
+      {DB.Repo, []}
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html

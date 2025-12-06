@@ -54,6 +54,8 @@ defmodule DB.Type.FlagReason do
     reason1 == reason2
   end
 
+  def embed_as(_format), do: :self
+
   # ---- Custom functions ----
 
   @doc """

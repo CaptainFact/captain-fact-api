@@ -10,9 +10,17 @@ defmodule CF.Sources.Fetcher do
 
   # ---- Public API ----
 
-  def start_link() do
-    import Supervisor.Spec
+  def child_spec(opts) do
+    %{
+      id: __MODULE__,
+      start: {__MODULE__, :start_link, [opts]},
+      type: :supervisor,
+      restart: :permanent,
+      shutdown: 500
+    }
+  end
 
+  def start_link(_opts \\ []) do
     Supervisor.start_link(
       [
         :hackney_pool.child_spec(
@@ -20,7 +28,7 @@ defmodule CF.Sources.Fetcher do
           timeout: @request_timeout,
           max_connections: @max_connections
         ),
-        worker(CF.Sources.Fetcher.LinkChecker, [])
+        CF.Sources.Fetcher.LinkChecker
       ],
       strategy: :one_for_all,
       name: __MODULE__
@@ -75,7 +83,7 @@ defmodule CF.Sources.Fetcher do
            hackney: [pool: pool_name()]
          ) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        {:ok, source_params_from_tree(Floki.parse(body))}
+        {:ok, source_params_from_tree(Floki.parse_document(body))}
 
       {:ok, %HTTPoison.Response{status_code: 404}} ->
         {:error, :not_found}
@@ -137,10 +145,12 @@ defmodule CF.Sources.Fetcher do
   # Link checker
 
   defmodule LinkChecker do
+    use Agent
+
     @doc """
     Agent that record which links are currently fetched
     """
-    def start_link() do
+    def start_link(_opts \\ []) do
       Agent.start_link(fn -> MapSet.new() end, name: Fetcher.link_checker_name())
     end
 

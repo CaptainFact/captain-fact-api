@@ -5,9 +5,6 @@ defmodule CF.Graphql.Resolvers.Statements do
 
   alias Kaur.Result
 
-  import Ecto.Query
-  import Absinthe.Resolution.Helpers, only: [batch: 3]
-
   alias DB.Repo
   alias DB.Schema.Statement
 

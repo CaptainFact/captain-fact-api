@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 dev_secret = "8C6FsJwjV11d+1WPUIbkEH6gB/VavJrcXWoPLujgpclfxjkLkoNFSjVU9XfeNm6s"
 

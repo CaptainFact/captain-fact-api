@@ -16,7 +16,7 @@ defmodule DB.Schema.Source do
   @url_max_length 2048
 
   # Allow to add localhost urls as sources during tests
-  @url_regex if Application.get_env(:db, :env) == :test,
+  @url_regex if Application.compile_env(:db, :env, :prod) == :test,
                do:
                  ~r/(^https?:\/\/[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*))|localhost/,
                else:
@@ -65,7 +65,7 @@ defmodule DB.Schema.Source do
   end
 
   defp validate_file_mime_type(:file_mime_type, mime_type) do
-    if MIME.valid?(mime_type) do
+    if MIME.extensions(mime_type) != [] do
       []
     else
       [file_mime_type: "Invalid MIME type"]

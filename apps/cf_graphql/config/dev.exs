@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 config :cf_graphql, CF.GraphQLWeb.Endpoint,
   http: [port: 4002],

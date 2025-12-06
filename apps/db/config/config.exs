@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 # General application configuration
 config :db,
@@ -14,4 +14,4 @@ config :db, DB.Repo,
   ]
 
 # Import environment specific config
-import_config "#{Mix.env()}.exs"
+Config.import_config("#{Mix.env()}.exs")

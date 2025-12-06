@@ -122,7 +122,7 @@ defmodule DB.Schema.Video do
     do: "https://www.facebook.com/video.php?v=#{id}"
 
   # Add a special case for building test URLs
-  if Application.get_env(:db, :env) == :test do
+  if Application.compile_env(:db, :env, :prod) == :test do
     def build_url(%{youtube_id: id, facebook_id: fb_id}),
       do: "__TEST__/#{id || fb_id}"
   end
@@ -307,14 +307,5 @@ defmodule DB.Schema.Video do
               """)
         )
     end)
-  end
-
-  # Return IDs of videos with at least 3 statements
-  defp popular_videos_subquery do
-    Video
-    |> join(:inner, [v], s in assoc(v, :statements))
-    |> select([:id])
-    |> group_by([v], v.id)
-    |> having([v, s], count(s.id) >= 3)
   end
 end

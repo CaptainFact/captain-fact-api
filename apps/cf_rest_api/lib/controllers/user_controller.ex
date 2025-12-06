@@ -8,7 +8,6 @@ defmodule CF.RestApi.UserController do
   alias CF.Accounts.Invitations
   alias CF.Accounts.UserPermissions
   alias CF.Authenticator.GuardianImpl
-  alias CF.RestApi.UserView
 
   alias Kaur.Result
 

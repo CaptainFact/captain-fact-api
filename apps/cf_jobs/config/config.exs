@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 # Configure scheduler
 config :cf_jobs, CF.Jobs.Scheduler,
@@ -52,4 +52,4 @@ config :cf_jobs, CF.Jobs.Scheduler,
 config :db, DB.Repo, pool_size: 3
 
 # Import environment specific config
-import_config "#{Mix.env()}.exs"
+Config.import_config("#{Mix.env()}.exs")

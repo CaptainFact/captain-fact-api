@@ -1,9 +1,9 @@
 # This file is responsible for configuring your application
-# and its dependencies with the aid of the Mix.Config module.
+# and its dependencies with the aid of the Config module.
 #
 # This configuration file is loaded before any dependency and
 # is restricted to this project.
-use Mix.Config
+import Config
 
 # General application configuration
 config :cf,
@@ -41,7 +41,7 @@ config :algoliax,
   application_id: "N5GW2EAIFX"
 
 # Import environment specific config
-import_config "#{Mix.env()}.exs"
+Config.import_config("#{Mix.env()}.exs")
 
 config :cf,
   openai_model: "gpt-4o"

@@ -1,4 +1,6 @@
 defmodule CF.Accounts.UsernameGenerator do
+  use Agent
+
   @moduledoc """
   Generates a unique username based on user id
   """
@@ -6,7 +8,7 @@ defmodule CF.Accounts.UsernameGenerator do
   @name __MODULE__
   @username_prefix "NewUser-"
 
-  def start_link do
+  def start_link(_opts \\ []) do
     Agent.start_link(
       fn ->
         Hashids.new(

@@ -2,16 +2,14 @@ defmodule CF.RestApi.Application do
   use Application
 
   def start(_type, _args) do
-    import Supervisor.Spec
-
     # Define workers and child supervisors to be supervised
     children = [
       # Start the PubSub system
       {Phoenix.PubSub, name: CF.RestApi.PubSub},
       # Start the endpoint when the application starts
-      supervisor(CF.RestApi.Endpoint, []),
+      {CF.RestApi.Endpoint, []},
       # Presence to track number of connected users to a channel
-      supervisor(CF.RestApi.Presence, [])
+      {CF.RestApi.Presence, []}
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html

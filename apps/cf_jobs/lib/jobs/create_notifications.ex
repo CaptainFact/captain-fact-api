@@ -1,4 +1,6 @@
 defmodule CF.Jobs.CreateNotifications do
+  use GenServer
+
   @moduledoc """
   Eat `UserAction` items, digest them using `Subscriptions` and poop
   notifications in Database.
@@ -41,8 +43,8 @@ defmodule CF.Jobs.CreateNotifications do
   @spec name() :: :create_notifications
   def name, do: @name
 
-  @spec start_link() :: :ignore | {:error, any()} | {:ok, pid()}
-  def start_link() do
+  @spec start_link(any()) :: :ignore | {:error, any()} | {:ok, pid()}
+  def start_link(_opts \\ []) do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 

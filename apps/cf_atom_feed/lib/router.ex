@@ -6,7 +6,17 @@ defmodule CF.AtomFeed.Router do
   plug(:match)
   plug(:dispatch)
 
-  def start_link do
+  def child_spec(opts) do
+    %{
+      id: __MODULE__,
+      start: {__MODULE__, :start_link, [opts]},
+      type: :worker,
+      restart: :permanent,
+      shutdown: 500
+    }
+  end
+
+  def start_link(_opts \\ []) do
     config = Application.get_env(:cf_atom_feed, CF.AtomFeed.Router)
     Logger.info("Running CF.AtomFeed.Router with cowboy on port #{config[:cowboy][:port]}")
     Plug.Cowboy.http(CF.AtomFeed.Router, [], config[:cowboy])

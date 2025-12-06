@@ -1,5 +1,5 @@
 defmodule CF.RestApi.SecurityHeaders do
-  @x_frame_options if Application.get_env(:cf, :env) == :dev,
+  @x_frame_options if Application.compile_env(:cf, :env, :prod) == :dev,
                      do: "SAMEORIGIN",
                      else: "DENY"
 

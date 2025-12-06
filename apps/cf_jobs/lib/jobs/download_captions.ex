@@ -1,4 +1,6 @@
 defmodule CF.Jobs.DownloadCaptions do
+  use GenServer
+
   @behaviour CF.Jobs.Job
 
   require Logger
@@ -7,16 +9,14 @@ defmodule CF.Jobs.DownloadCaptions do
   alias DB.Repo
   alias DB.Schema.Video
   alias DB.Schema.VideoCaption
-  alias DB.Schema.UsersActionsReport
 
   @name :download_captions
-  @analyser_id UsersActionsReport.analyser_id(@name)
 
   # --- Client API ---
 
   def name, do: @name
 
-  def start_link() do
+  def start_link(_opts \\ []) do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
