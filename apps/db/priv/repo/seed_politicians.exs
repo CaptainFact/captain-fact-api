@@ -77,7 +77,7 @@ defmodule SeedPoliticians do
         end)
 
       {:error, reason} ->
-        Logger.warn(fn ->
+        Logger.warning(fn ->
           "Fetch picture #{picture_url} failed for #{speaker.full_name} (#{reason})"
         end)
     end

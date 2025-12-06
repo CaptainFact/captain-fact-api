@@ -40,12 +40,14 @@ defmodule CF.RestApi.UserController do
       {:error, changeset = %Ecto.Changeset{}} ->
         conn
         |> put_status(:bad_request)
-        |> render(CF.RestApi.ChangesetView, "error.json", changeset: changeset)
+        |> put_view(CF.RestApi.ChangesetView)
+        |> render("error.json", changeset: changeset)
 
       {:error, message} ->
         conn
         |> put_status(:bad_request)
-        |> render(CF.RestApi.ErrorView, "error.json", %{message: message})
+        |> put_view(CF.RestApi.ErrorView)
+        |> render("error.json", %{message: message})
     end
   end
 
@@ -57,7 +59,7 @@ defmodule CF.RestApi.UserController do
   end
 
   def show_me(conn, _params) do
-    render(conn, UserView, :show, user: GuardianImpl.Plug.current_resource(conn))
+    render(conn, :show, user: GuardianImpl.Plug.current_resource(conn))
   end
 
   def update(conn, params) do
@@ -71,7 +73,8 @@ defmodule CF.RestApi.UserController do
       {:error, changeset} ->
         conn
         |> put_status(:unprocessable_entity)
-        |> render(CF.RestApi.ChangesetView, :error, changeset: changeset)
+        |> put_view(CF.RestApi.ChangesetView)
+        |> render(:error, changeset: changeset)
     end
   end
 
@@ -109,7 +112,7 @@ defmodule CF.RestApi.UserController do
          true <- achievement_id in @user_unlockable_achievements,
          {:ok, user} <-
            Accounts.unlock_achievement(GuardianImpl.Plug.current_resource(conn), achievement_id) do
-      render(conn, UserView, :show, user: user)
+      render(conn, :show, user: user)
     else
       _ ->
         send_resp(
@@ -130,11 +133,12 @@ defmodule CF.RestApi.UserController do
       fn reason ->
         conn
         |> put_status(:unprocessable_entity)
-        |> render(CF.RestApi.ChangesetView, "error.json", %{changeset: reason})
+        |> put_view(CF.RestApi.ChangesetView)
+        |> render("error.json", %{changeset: reason})
       end,
       fn user ->
         conn
-        |> render(UserView, :show, user: user)
+        |> render(:show, user: user)
       end
     )
   end
@@ -147,11 +151,12 @@ defmodule CF.RestApi.UserController do
       fn reason ->
         conn
         |> put_status(:unprocessable_entity)
-        |> render(CF.RestApi.ChangesetView, "error.json", %{changeset: reason})
+        |> put_view(CF.RestApi.ChangesetView)
+        |> render("error.json", %{changeset: reason})
       end,
       fn user ->
         conn
-        |> render(UserView, :show, user: user)
+        |> render(:show, user: user)
       end
     )
   end
@@ -166,7 +171,7 @@ defmodule CF.RestApi.UserController do
       end,
       fn user ->
         conn
-        |> render(UserView, :show, user: user)
+        |> render(:show, user: user)
       end
     )
   end
@@ -185,12 +190,12 @@ defmodule CF.RestApi.UserController do
 
   def reset_password_verify(conn, %{"token" => token}) do
     user = Accounts.check_reset_password_token!(token)
-    render(conn, UserView, :show, %{user: user})
+    render(conn, :show, user: user)
   end
 
   def reset_password_confirm(conn, %{"token" => token, "password" => password}) do
     user = Accounts.confirm_password_reset!(token, password)
-    render(conn, UserView, :show, %{user: user})
+    render(conn, :show, user: user)
   end
 
   # ---- Invitations ----

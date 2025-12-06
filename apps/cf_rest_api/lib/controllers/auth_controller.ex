@@ -29,7 +29,8 @@ defmodule CF.RestApi.AuthController do
       nil ->
         conn
         |> put_status(:unauthorized)
-        |> render(ErrorView, "error.json", message: @err_invalid_email_password)
+        |> put_view(ErrorView)
+        |> render("error.json", message: @err_invalid_email_password)
 
       user ->
         signin_user(conn, user)
@@ -56,7 +57,8 @@ defmodule CF.RestApi.AuthController do
       {:error, message} ->
         conn
         |> put_status(:unauthorized)
-        |> render(ErrorView, "error.json", message: message)
+        |> put_view(ErrorView)
+        |> render("error.json", message: message)
 
       user ->
         signin_user(conn, user)
@@ -72,7 +74,9 @@ defmodule CF.RestApi.AuthController do
 
     Authenticator.dissociate_third_party(user, provider)
     |> Result.and_then(fn updated_user ->
-      render(conn, UserView, :show, user: updated_user)
+      conn
+      |> put_view(UserView)
+      |> render(:show, user: updated_user)
     end)
   end
 
@@ -92,13 +96,15 @@ defmodule CF.RestApi.AuthController do
   def unauthenticated(conn, _params) do
     conn
     |> put_status(:unauthorized)
-    |> render(ErrorView, "401.json")
+    |> put_view(ErrorView)
+    |> render("401.json")
   end
 
   def unauthorized(conn, _params) do
     conn
     |> put_status(:forbidden)
-    |> render(ErrorView, "403.json")
+    |> put_view(ErrorView)
+    |> render("403.json")
   end
 
   # ---- Private ----
@@ -114,10 +120,13 @@ defmodule CF.RestApi.AuthController do
       nil ->
         conn
         |> put_status(:bad_request)
-        |> render(ErrorView, "error.json", message: @err_authentication_failed)
+        |> put_view(ErrorView)
+        |> render("error.json", message: @err_authentication_failed)
 
       token ->
-        render(conn, UserView, "user_with_token.json", %{user: user, token: token})
+        conn
+        |> put_view(UserView)
+        |> render("user_with_token.json", %{user: user, token: token})
     end
   end
 

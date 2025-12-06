@@ -18,7 +18,7 @@ defmodule CF.AtomFeed.StatementsTest do
     assert String.starts_with?(feed, """
            <?xml version="1.0" encoding="UTF-8"?>
            <feed xmlns="http://www.w3.org/2005/Atom">
-             <link href="https://feed.captainfact.io/statements/" rel="self"/>
+             <link rel="self" href="https://feed.captainfact.io/statements/"/>
              <author>
                <name>CaptainFact</name>
                <email>atom-feed@captainfact.io</email>

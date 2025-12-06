@@ -18,7 +18,7 @@ defmodule CF.AtomFeed.CommentsTest do
     assert feed =~ """
            <?xml version="1.0" encoding="UTF-8"?>
            <feed xmlns="http://www.w3.org/2005/Atom">
-             <link href="https://feed.captainfact.io/comments/" rel="self"/>
+             <link rel="self" href="https://feed.captainfact.io/comments/"/>
              <author>
                <name>CaptainFact</name>
                <email>atom-feed@captainfact.io</email>

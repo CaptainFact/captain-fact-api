@@ -51,12 +51,12 @@ defmodule CF.SpeakersTest do
     test "merges profiles and related data" do
       speaker1 = insert(:speaker, %{title: "speaker_1"})
       speaker2 = insert(:speaker, %{title: nil})
-      speaker1_statements = insert_list(3, :statement, speaker: speaker1)
-      speaker2_statements = insert_list(4, :statement, speaker: speaker2)
-      speaker1_videos = insert_list(3, :video_speaker, speaker: speaker1)
-      speaker2_videos = insert_list(4, :video_speaker, speaker: speaker2)
-      speaker1_users = insert_list(3, :user, speaker: speaker1)
-      speaker2_users = insert_list(4, :user, speaker: speaker2)
+      insert_list(3, :statement, speaker: speaker1)
+      insert_list(4, :statement, speaker: speaker2)
+      insert_list(3, :video_speaker, speaker: speaker1)
+      insert_list(4, :video_speaker, speaker: speaker2)
+      insert_list(3, :user, speaker: speaker1)
+      insert_list(4, :user, speaker: speaker2)
 
       {:ok, result} = Speakers.merge_speakers(speaker1, speaker2)
 

@@ -15,7 +15,9 @@ defmodule CF.RestApi.ModerationController do
         send_resp(conn, 204, "")
 
       entry ->
-        render(conn, ModerationEntryView, :show, moderation_entry: entry)
+        conn
+        |> put_view(ModerationEntryView)
+        |> render(:show, moderation_entry: entry)
     end
   end
 

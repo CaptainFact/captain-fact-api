@@ -63,7 +63,7 @@ defmodule CF.Notifications.NotificationBuilder do
     do: :removed_statement
 
   defp notification_type(%{type: type, entity: entity}, _) do
-    Logger.warn("Don't know how to generate a notification for #{type} #{entity}")
+    Logger.warning("Don't know how to generate a notification for #{type} #{entity}")
     :default
   end
 end

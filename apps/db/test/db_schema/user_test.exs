@@ -80,7 +80,7 @@ defmodule DB.Schema.UserTest do
   end
 
   test "username cannot contains illegal characters" do
-    ' !*();:@&=+$,/?#[].\'\\'
+    ~c" !*();:@&=+$,/?#[].'\\"
     |> Enum.map(fn char ->
       changeset =
         User.registration_changeset(%User{}, %{
@@ -94,7 +94,7 @@ defmodule DB.Schema.UserTest do
   end
 
   test "name cannot contains illegal characters" do
-    '!*();:@&=+$,/?#[].\'\\0123456789'
+    ~c"!*();:@&=+$,/?#[].'\\0123456789"
     |> Enum.map(fn char ->
       changeset =
         User.registration_changeset(%User{}, %{@valid_attrs | name: "xxxx#{<<char::utf8>>}xx"})

@@ -3,7 +3,6 @@ defmodule CF.Jobs.ReputationTest do
   doctest CF.Jobs.Reputation
 
   alias DB.Schema.User
-  alias CF.Actions
   alias CF.Actions.ReputationChange
   alias CF.Jobs.Reputation
 

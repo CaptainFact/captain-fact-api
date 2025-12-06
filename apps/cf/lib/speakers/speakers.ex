@@ -83,7 +83,7 @@ defmodule CF.Speakers do
       {:ok, wikimedia_url_from_filename(filename)}
     else
       {:error, error = %HTTPoison.Error{}} ->
-        Logger.warn("Wikidata query failed: #{error.reason}")
+        Logger.warning("Wikidata query failed: #{error.reason}")
         {:error, "Connection failed"}
 
       _e ->

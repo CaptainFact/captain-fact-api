@@ -122,7 +122,7 @@
                                             <td style="word-wrap:break-word;font-size:0px;padding:0px 20px 0px 20px;" align="left">
                                               <div style="font-size:14px;cursor:auto;color:#000000;font-family:Ubuntu, Lato, Tahoma, sans-serif;line-height:22px;text-align:left;">
                                                 <br>
-                                                <%= render @view_module, @view_template, assigns %>
+                                                <%= @inner_content %>
                                                 <br>
                                               </div>
                                             </td>

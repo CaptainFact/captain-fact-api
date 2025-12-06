@@ -101,7 +101,7 @@ defmodule CF.LLMs.StatementsCreator do
 
       {:error, error} ->
         if retries > 0 do
-          Logger.warn("Failed to get LLM suggested statements: #{inspect(error)}. Retrying...")
+          Logger.warning("Failed to get LLM suggested statements: #{inspect(error)}. Retrying...")
           Process.sleep(1000)
           get_llm_suggested_statements(video, captions, retries - 1)
         else

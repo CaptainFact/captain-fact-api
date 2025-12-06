@@ -9,7 +9,8 @@ defmodule CF.RestApi.SpeakerController do
       nil ->
         conn
         |> put_status(:not_found)
-        |> render(CF.RestApi.ErrorView, "404.json")
+        |> put_view(CF.RestApi.ErrorView)
+        |> render("404.json")
 
       speaker ->
         render(conn, "show.json", speaker: speaker)
