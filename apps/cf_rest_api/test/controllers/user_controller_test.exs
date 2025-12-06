@@ -249,7 +249,7 @@ defmodule CF.RestApi.UserControllerTest do
       :user
       |> insert
       |> build_authenticated_conn
-      |> post("users/me/onboarding/complete_step", %{step: 12})
+      |> post("/users/me/onboarding/complete_step", %{step: 12})
       |> json_response(:ok)
     end
 
@@ -257,7 +257,7 @@ defmodule CF.RestApi.UserControllerTest do
       :user
       |> insert()
       |> build_authenticated_conn
-      |> post("users/me/onboarding/complete_step", %{step: 72})
+      |> post("/users/me/onboarding/complete_step", %{step: 72})
       |> json_response(:unprocessable_entity)
     end
   end
@@ -267,7 +267,7 @@ defmodule CF.RestApi.UserControllerTest do
       :user
       |> insert
       |> build_authenticated_conn
-      |> post("users/me/onboarding/complete_steps", %{steps: [1, 3, 5]})
+      |> post("/users/me/onboarding/complete_steps", %{steps: [1, 3, 5]})
       |> json_response(:ok)
     end
 
@@ -275,7 +275,7 @@ defmodule CF.RestApi.UserControllerTest do
       :user
       |> insert
       |> build_authenticated_conn
-      |> post("users/me/onboarding/complete_steps", %{steps: [1, 3, 76]})
+      |> post("/users/me/onboarding/complete_steps", %{steps: [1, 3, 76]})
       |> json_response(:unprocessable_entity)
     end
   end

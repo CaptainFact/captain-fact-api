@@ -37,7 +37,7 @@ defmodule DB.ReleaseTasks do
       Logger.info("Running seed script..")
       Code.eval_file(seed_script)
     else
-      Logger.warn("Seed script not found")
+      Logger.warning("Seed script not found")
     end
 
     # Signal shutdown
@@ -55,7 +55,12 @@ defmodule DB.ReleaseTasks do
       "https://raw.githubusercontent.com/CaptainFact/captain-fact-data/master/Wikidata/data/politicians_born_after_1945_having_a_picture.csv"
 
     filename = "politicians.csv"
-    %HTTPoison.Response{body: csv_content} = HTTPoison.get!(url)
+
+    csv_content =
+      url
+      |> HTTPoison.get!()
+      |> Map.fetch!(:body)
+
     File.write!(filename, csv_content)
     apply(module, :seed, [filename])
   end

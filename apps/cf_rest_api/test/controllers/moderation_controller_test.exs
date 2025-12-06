@@ -84,7 +84,11 @@ defmodule CF.RestApi.ModerationControllerTest do
     authed_conn = build_authenticated_conn(new_user)
 
     make_request = fn ->
-      post(authed_conn, "moderation/feedback", %{"value" => 1, "action_id" => 1, "reason" => 1})
+      post(authed_conn, "/moderation/feedback", %{
+        "value" => 1,
+        "action_id" => 1,
+        "reason" => 1
+      })
     end
 
     assert_raise(

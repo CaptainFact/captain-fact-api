@@ -118,7 +118,13 @@ defmodule CF.Authenticator.OAuth do
       fb_user_id: infos.uid,
       name: infos.name,
       email: infos.email,
-      password: NotQwerty123.RandomPassword.gen_password()
+      password: strong_random_password()
     }
+  end
+
+  defp strong_random_password do
+    :crypto.strong_rand_bytes(16)
+    |> Base.url_encode64()
+    |> binary_part(0, 16)
   end
 end

@@ -25,7 +25,7 @@ defmodule DB.Factory do
 
   def user_factory do
     %User{
-      name: Faker.Name.first_name(),
+      name: Faker.Person.first_name(),
       username: "User-#{random_string(10)}",
       email: Faker.Internet.email(),
       encrypted_password: "$2b$12$fe55IfCdqNzKp1wMIJDwVeG3f7guOduEE5HS2C9IJyfkuk3avbjQG",
@@ -65,8 +65,8 @@ defmodule DB.Factory do
 
   def speaker_factory do
     %Speaker{
-      full_name: Faker.Name.name(),
-      title: Faker.Name.title(),
+      full_name: Faker.Person.name(),
+      title: Faker.Person.title(),
       country: Faker.Address.country_code()
     }
   end

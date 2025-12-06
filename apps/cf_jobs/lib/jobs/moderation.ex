@@ -151,12 +151,16 @@ defmodule CF.Jobs.Moderation do
     if comment do
       confirm_refute_dispatch(entry, comment)
     else
-      Logger.warn("[ModerationUpdater] Can't find comment ##{entry.action.comment_id} for delete")
+      Logger.warning(
+        "[ModerationUpdater] Can't find comment ##{entry.action.comment_id} for delete"
+      )
     end
   end
 
   defp process_entry(%{action: %{type: type, entity: entity}}) do
-    Logger.warn("[ModerationUpdater] Got an unknown type/entity as Feedback: #{type}/#{entity}")
+    Logger.warning(
+      "[ModerationUpdater] Got an unknown type/entity as Feedback: #{type}/#{entity}"
+    )
   end
 
   # Take an entry with established consensus and decide if we should confirm or refute

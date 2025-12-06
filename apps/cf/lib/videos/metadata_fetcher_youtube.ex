@@ -27,7 +27,7 @@ defmodule CF.Videos.MetadataFetcher.Youtube do
 
     case Application.get_env(:cf, :youtube_api_key) do
       nil ->
-        Logger.warn("No YouTube API key provided. Falling back to HTML fetcher")
+        Logger.warning("No YouTube API key provided. Falling back to HTML fetcher")
         MetadataFetcher.Opengraph.fetch_video_metadata(url)
 
       api_key ->

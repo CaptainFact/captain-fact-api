@@ -7,7 +7,7 @@ env:
 
 jobs:
   cypress:
-    runs-on: ubuntu-20.04 # Remember to update this when changing Erlang version. See https://github.com/erlef/setup-beam
+    runs-on: ubuntu-22.04 # Remember to update this when changing Erlang version. See https://github.com/erlef/setup-beam
     services:
       db:
         image: captainfact/dev-db:latest
