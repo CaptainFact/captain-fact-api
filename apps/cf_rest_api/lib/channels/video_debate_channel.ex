@@ -24,6 +24,7 @@ defmodule CF.RestApi.VideoDebateChannel do
   alias CF.Speakers
   alias CF.Accounts.UserPermissions
   alias CF.Notifications.Subscriptions
+  alias CF.Graphql.Subscriptions, as: GraphqlSubscriptions
   alias CF.RestApi.{VideoView, SpeakerView, ChangesetView}
 
   def join("video_debate:" <> video_hash_id, _payload, socket) do
@@ -81,6 +82,7 @@ defmodule CF.RestApi.VideoDebateChannel do
           |> View.render_one(VideoView, "video.json")
 
         broadcast!(socket, "video_updated", %{video: rendered_video})
+        GraphqlSubscriptions.publish_video_updated(video)
         {:reply, :ok, socket}
 
       {:error, _} ->
@@ -102,6 +104,7 @@ defmodule CF.RestApi.VideoDebateChannel do
       {:ok, %{}} ->
         rendered_speaker = SpeakerView.render("show.json", speaker: speaker)
         broadcast!(socket, "speaker_added", rendered_speaker)
+        GraphqlSubscriptions.publish_speaker_added(speaker, video_id)
         CF.Algolia.VideosIndex.reindex_by_id(video_id)
         {:reply, :ok, socket}
 
@@ -137,6 +140,7 @@ defmodule CF.RestApi.VideoDebateChannel do
         # Broadcast the speaker
         rendered_speaker = SpeakerView.render("show.json", speaker: speaker)
         broadcast!(socket, "speaker_added", rendered_speaker)
+        GraphqlSubscriptions.publish_speaker_added(speaker, video_id)
         CF.Algolia.VideosIndex.reindex_by_id(video_id)
         CF.Algolia.SpeakersIndex.save_object(speaker)
         {:reply, :ok, socket}
@@ -172,6 +176,7 @@ defmodule CF.RestApi.VideoDebateChannel do
 
             rendered_speaker = View.render_one(speaker, SpeakerView, "speaker.json")
             broadcast!(socket, "speaker_updated", rendered_speaker)
+            GraphqlSubscriptions.publish_speaker_updated(speaker, video_id)
             CF.Algolia.SpeakersIndex.save_object(speaker)
             CF.Algolia.VideosIndex.reindex_all_speaker_videos(speaker.id)
             CF.Algolia.StatementsIndex.reindex_all_speaker_statements(speaker.id)
@@ -192,6 +197,7 @@ defmodule CF.RestApi.VideoDebateChannel do
     do_remove_speaker(socket, speaker)
     CF.Algolia.VideosIndex.reindex_by_id(socket.assigns.video_id)
     broadcast!(socket, "speaker_removed", %{id: id})
+    GraphqlSubscriptions.publish_speaker_removed(id, socket.assigns.video_id)
     {:reply, :ok, socket}
   end
 
@@ -251,6 +257,7 @@ defmodule CF.RestApi.VideoDebateChannel do
         {:ok, speaker} ->
           rendered_speaker = View.render_one(speaker, SpeakerView, "speaker.json")
           broadcast!(socket, "speaker_updated", rendered_speaker)
+          GraphqlSubscriptions.publish_speaker_updated(speaker, socket.assigns.video_id)
 
         _ ->
           # We don't care about errors here

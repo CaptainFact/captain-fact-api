@@ -34,7 +34,7 @@ defmodule CF.Graphql.Schema.Types.Video do
     @desc "Language of the video represented as a two letters locale"
     field(:language, :string)
     @desc "Video insert datetime"
-    field(:inserted_at, :string)
+    field(:inserted_at, non_null(:naive_datetime))
     @desc "Define if video has been added by a partner or a regular user"
     field(:is_partner, :boolean)
     @desc "Define if video is unlisted"

@@ -11,6 +11,7 @@ defmodule CF.RestApi.StatementsChannel do
 
   alias CF.Statements
   alias CF.Accounts.UserPermissions
+  alias CF.Graphql.Subscriptions
 
   alias CF.RestApi.{StatementView, ErrorView}
 
@@ -49,6 +50,7 @@ defmodule CF.RestApi.StatementsChannel do
       {:ok, %{statement: statement}} ->
         rendered_statement = StatementView.render("show.json", statement: statement)
         broadcast!(socket, "statement_added", rendered_statement)
+        Subscriptions.publish_statement_added(statement)
         CF.Algolia.StatementsIndex.save_object(statement)
         {:reply, {:ok, rendered_statement}, socket}
 
@@ -64,6 +66,7 @@ defmodule CF.RestApi.StatementsChannel do
       {:ok, statement} ->
         rendered_statement = StatementView.render("show.json", statement: statement)
         broadcast!(socket, "statement_updated", rendered_statement)
+        Subscriptions.publish_statement_updated(statement)
         CF.Algolia.StatementsIndex.save_object(statement)
         {:reply, :ok, socket}
 
@@ -84,6 +87,7 @@ defmodule CF.RestApi.StatementsChannel do
     |> case do
       {:ok, _} ->
         broadcast!(socket, "statement_removed", %{id: id})
+        Subscriptions.publish_statement_removed(id, socket.assigns.video_id)
         CF.Algolia.StatementsIndex.delete_object(statement)
         {:reply, :ok, socket}
 

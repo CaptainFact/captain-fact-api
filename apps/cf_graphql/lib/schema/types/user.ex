@@ -5,6 +5,8 @@ defmodule CF.Graphql.Schema.Types.User do
 
   use Absinthe.Schema.Notation
 
+  import_types(Absinthe.Type.Custom)
+
   import CF.Graphql.Schema.Utils
   alias CF.Graphql.Schema.Middleware
   alias CF.Graphql.Resolvers
@@ -50,7 +52,9 @@ defmodule CF.Graphql.Schema.Types.User do
     field(:achievements, list_of(:integer))
 
     @desc "User's registration datetime"
-    field(:registered_at, :string, do: fn u, _, _ -> {:ok, u.inserted_at} end)
+    field(:registered_at, non_null(:naive_datetime),
+      do: resolve(fn u, _, _ -> {:ok, u.inserted_at} end)
+    )
 
     @desc "User activity log"
     field :actions, :activity_log do

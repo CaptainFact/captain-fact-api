@@ -1,6 +1,6 @@
 defmodule CF.Graphql.Schema do
   use Absinthe.Schema
-  alias CF.Graphql.Resolvers
+  alias CF.Graphql.{Resolvers, Subscriptions}
   alias CF.Graphql.Schema.Middleware
 
   import_types(Absinthe.Plug.Types)
@@ -15,6 +15,7 @@ defmodule CF.Graphql.Schema do
     Statement,
     Statistics,
     Subscription,
+    SubscriptionEvents,
     UserAction,
     User,
     Video,
@@ -151,5 +152,165 @@ defmodule CF.Graphql.Schema do
 
       resolve(&Resolvers.Videos.set_captions/3)
     end
+
+    @desc "Create a new statement on a video"
+    field :create_statement, :statement do
+      middleware(Middleware.RequireAuthentication)
+
+      arg(:video_id, non_null(:id))
+      arg(:text, non_null(:string))
+      arg(:time, non_null(:integer))
+      arg(:speaker_id, :id)
+      arg(:is_draft, :boolean)
+
+      resolve(&Resolvers.Statements.create/3)
+    end
+
+    @desc "Update an existing statement"
+    field :update_statement, :statement do
+      middleware(Middleware.RequireAuthentication)
+
+      arg(:id, non_null(:id))
+      arg(:text, :string)
+      arg(:time, :integer)
+      arg(:speaker_id, :id)
+      arg(:is_draft, :boolean)
+
+      resolve(&Resolvers.Statements.update/3)
+    end
+
+    @desc "Delete an existing statement"
+    field :delete_statement, :statement_removed do
+      middleware(Middleware.RequireAuthentication)
+      middleware(Middleware.RequireReputation, 75)
+
+      arg(:id, non_null(:id))
+
+      resolve(&Resolvers.Statements.delete/3)
+    end
+
+    @desc "Create a new comment on a statement"
+    field :create_comment, :comment do
+      middleware(Middleware.RequireAuthentication)
+
+      arg(:statement_id, non_null(:id))
+      arg(:text, :string)
+      arg(:source, :string)
+      arg(:reply_to_id, :id)
+      arg(:approve, :boolean)
+
+      resolve(&Resolvers.Comments.create/3)
+    end
+
+    @desc "Delete an existing comment"
+    field :delete_comment, :comment_removed do
+      middleware(Middleware.RequireAuthentication)
+
+      arg(:id, non_null(:id))
+
+      resolve(&Resolvers.Comments.delete/3)
+    end
+
+    @desc "Vote on a comment"
+    field :vote_comment, :comment do
+      middleware(Middleware.RequireAuthentication)
+
+      arg(:comment_id, non_null(:id))
+      arg(:value, non_null(:integer))
+
+      resolve(&Resolvers.Comments.vote/3)
+    end
+  end
+
+  subscription do
+    @desc "Listen for statements added on a video"
+    field :statement_added, :statement do
+      arg(:video_id, non_null(:id))
+      config(&topic_by_video/2)
+    end
+
+    @desc "Listen for statements updated on a video"
+    field :statement_updated, :statement do
+      arg(:video_id, non_null(:id))
+      config(&topic_by_video/2)
+    end
+
+    @desc "Listen for statements removed on a video"
+    field :statement_removed, :statement_removed do
+      arg(:video_id, non_null(:id))
+      config(&topic_by_video/2)
+    end
+
+    @desc "Listen for comments added on a video"
+    field :comment_added, :comment do
+      arg(:video_id, non_null(:id))
+      config(&topic_by_video/2)
+    end
+
+    @desc "Listen for comments updated on a video"
+    field :comment_updated, :comment do
+      arg(:video_id, non_null(:id))
+      config(&topic_by_video/2)
+    end
+
+    @desc "Listen for comments removed on a video"
+    field :comment_removed, :comment_removed do
+      arg(:video_id, non_null(:id))
+      config(&topic_by_video/2)
+    end
+
+    @desc "Listen for comment score changes on a video"
+    field :comment_score_diff, :comment_score_diff do
+      arg(:video_id, non_null(:id))
+      config(&topic_by_video/2)
+    end
+
+    @desc "Listen for video updates"
+    field :video_updated, :video do
+      arg(:video_id, non_null(:id))
+      config(&topic_by_video/2)
+    end
+
+    @desc "Listen for speakers added on a video"
+    field :speaker_added, :speaker do
+      arg(:video_id, non_null(:id))
+      config(&topic_by_video/2)
+    end
+
+    @desc "Listen for speakers updated on a video"
+    field :speaker_updated, :speaker do
+      arg(:video_id, non_null(:id))
+      config(&topic_by_video/2)
+    end
+
+    @desc "Listen for speakers removed on a video"
+    field :speaker_removed, :speaker_removed do
+      arg(:video_id, non_null(:id))
+      config(&topic_by_video/2)
+    end
+
+    @desc "Listen for actions added to a video history"
+    field :video_history_action_added, :user_action do
+      arg(:video_id, non_null(:id))
+      config(&topic_by_video_history/2)
+    end
+
+    @desc "Listen for actions added to a statement history"
+    field :statement_history_action_added, :user_action do
+      arg(:statement_id, non_null(:id))
+      config(&topic_by_statement_history/2)
+    end
+  end
+
+  defp topic_by_video(%{video_id: video_id}, _resolution) do
+    {:ok, topic: Subscriptions.video_topic(video_id)}
+  end
+
+  defp topic_by_video_history(%{video_id: video_id}, _resolution) do
+    {:ok, topic: Subscriptions.video_history_topic(video_id)}
+  end
+
+  defp topic_by_statement_history(%{statement_id: statement_id}, _resolution) do
+    {:ok, topic: Subscriptions.statement_history_topic(statement_id)}
   end
 end

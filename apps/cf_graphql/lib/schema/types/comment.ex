@@ -23,7 +23,7 @@ defmodule CF.Graphql.Schema.Types.Comment do
     @desc "Can be true / false (facts) or null (comment)"
     field(:approve, :boolean)
     @desc "Datetime at which the comment has been added"
-    field(:inserted_at, :string)
+    field(:inserted_at, non_null(:naive_datetime))
     @desc "Score of the comment / fact, based on users votes"
     field :score, non_null(:integer) do
       resolve(&Resolvers.Comments.score/3)
@@ -38,5 +38,7 @@ defmodule CF.Graphql.Schema.Types.Comment do
 
     @desc "If this comment is a reply, this will point toward the comment being replied to"
     field(:reply_to_id, :id)
+    @desc "ID of the statement this comment belongs to"
+    field(:statement_id, :id)
   end
 end

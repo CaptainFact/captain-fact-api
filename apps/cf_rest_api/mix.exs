@@ -47,6 +47,7 @@ defmodule CF.RestApi.Mixfile do
       {:plug_cowboy, "~> 2.7.2"},
 
       # ---- Internal ----
+      {:cf_graphql, in_umbrella: true},
       {:cf, in_umbrella: true},
       {:db, in_umbrella: true}
     ]

@@ -18,7 +18,7 @@ defmodule CF.Statements do
   """
   def update!(user_id, statement = %Statement{is_removed: false}, changes) do
     UserPermissions.check!(user_id, :update, :statement)
-    changeset = Statement.changeset(statement, changes)
+    changeset = Statement.changeset_update(statement, changes)
 
     if changeset.changes == %{} do
       Result.ok(statement)

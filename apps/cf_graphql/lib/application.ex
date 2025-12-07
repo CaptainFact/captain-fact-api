@@ -9,7 +9,8 @@ defmodule CF.Graphql.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: CF.Graphql.PubSub},
       # Start the endpoint when the application starts
-      {CF.GraphQLWeb.Endpoint, []}
+      {CF.GraphQLWeb.Endpoint, []},
+      {Absinthe.Subscription, CF.GraphQLWeb.Endpoint}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

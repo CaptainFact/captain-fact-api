@@ -37,9 +37,24 @@ defmodule CF.Comments do
   source fetcher should be moved to a job.
   """
   def add_comment(user, video_id, params, source_url \\ nil, source_fetch_callback \\ nil) do
-    # TODO [Security] What if reply_to_id refer to a comment that is on a different statement ?
     UserPermissions.check!(user, :create, :comment)
     source_url = source_url && Source.prepare_url(source_url)
+
+    # Handle the case where reply_to_id refer to a comment that is on a different statement
+    if Map.get(params, :reply_to_id) do
+      reply_to = Repo.get!(Comment, Map.get(params, :reply_to_id))
+
+      cond do
+        is_nil(reply_to) ->
+          raise "Reply to comment not found"
+
+        reply_to.statement_id != params.statement_id ->
+          raise "Reply to comment on a different statement"
+
+        true ->
+          true
+      end
+    end
 
     # Load source from DB or create a changeset to make a new one
     source =
