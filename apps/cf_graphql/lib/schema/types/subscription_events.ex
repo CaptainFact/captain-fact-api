@@ -22,6 +22,11 @@ defmodule CF.Graphql.Schema.Types.SubscriptionEvents do
     field(:reply_to_id, :id)
   end
 
+  @desc "Reference to a flagged comment"
+  object :comment_flagged do
+    field(:id, non_null(:id))
+  end
+
   @desc "Reference to a comment involved in a score update"
   object :comment_reference do
     field(:id, non_null(:id))
@@ -35,4 +40,3 @@ defmodule CF.Graphql.Schema.Types.SubscriptionEvents do
     field(:diff, non_null(:integer))
   end
 end
-

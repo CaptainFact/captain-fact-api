@@ -8,6 +8,7 @@ defmodule CF.Graphql.Schema do
   import_types(CF.Graphql.Schema.Types.{
     AppInfo,
     Comment,
+    JSON,
     Notification,
     Paginated,
     Source,
@@ -94,6 +95,14 @@ defmodule CF.Graphql.Schema do
     @desc "Get all_statistics"
     field :all_statistics, :statistics do
       resolve(&Resolvers.Statistics.default/3)
+    end
+
+    @desc "Search for speakers by name"
+    field :search_speakers, list_of(:speaker) do
+      arg(:query, non_null(:string))
+      arg(:limit, :integer, default_value: 5)
+
+      resolve(&Resolvers.Speakers.search_speakers/3)
     end
   end
 
@@ -219,6 +228,36 @@ defmodule CF.Graphql.Schema do
       arg(:value, non_null(:integer))
 
       resolve(&Resolvers.Comments.vote/3)
+    end
+
+    @desc "Flag a comment"
+    field :flag_comment, :comment_flagged do
+      middleware(Middleware.RequireAuthentication)
+
+      arg(:comment_id, non_null(:id))
+      arg(:reason, non_null(:integer))
+
+      resolve(&Resolvers.Comments.flag/3)
+    end
+
+    @desc "Add an existing speaker to a video"
+    field :add_speaker_to_video, :speaker do
+      middleware(Middleware.RequireAuthentication)
+
+      arg(:video_id, non_null(:id))
+      arg(:speaker_id, non_null(:id))
+
+      resolve(&Resolvers.Speakers.add_speaker_to_video/3)
+    end
+
+    @desc "Create a new speaker and add it to a video"
+    field :create_speaker, :speaker do
+      middleware(Middleware.RequireAuthentication)
+
+      arg(:video_id, non_null(:id))
+      arg(:full_name, non_null(:string))
+
+      resolve(&Resolvers.Speakers.create_speaker/3)
     end
   end
 

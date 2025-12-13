@@ -7,6 +7,7 @@ defmodule CF.Graphql.Resolvers.Comments do
   alias DB.Schema.Statement
   alias CF.Comments
   alias CF.Graphql.Subscriptions
+  alias CF.Moderation.Flagger
 
   def score(comment, _args, _info) do
     batch({__MODULE__, :comments_scores}, comment.id, fn results ->
@@ -88,6 +89,15 @@ defmodule CF.Graphql.Resolvers.Comments do
       {:error, reason} ->
         {:error, reason}
     end
+  end
+
+  def flag(_root, %{comment_id: comment_id, reason: reason}, %{context: %{user: user}}) do
+    # Get comment and preload statement to access video_id
+    comment = Repo.get!(Comment, comment_id) |> Repo.preload(:statement)
+    video_id = comment.statement.video_id
+
+    Flagger.flag!(user.id, video_id, comment_id, reason)
+    {:ok, %{id: comment_id}}
   end
 
   # Helper function to calculate vote value diff (matches comments_channel.ex logic)

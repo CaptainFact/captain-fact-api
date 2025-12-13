@@ -27,7 +27,7 @@ defmodule CF.GraphQLWeb.Router do
 
     forward(
       "/",
-      Absinthe.Plug,
+      CF.Graphql.CustomAbsinthePlug,
       schema: CF.Graphql.Schema,
       analyze_complexity: true,
       max_complexity: 400

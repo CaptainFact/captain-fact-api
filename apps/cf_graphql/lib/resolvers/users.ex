@@ -12,6 +12,8 @@ defmodule CF.Graphql.Resolvers.Users do
   alias DB.Repo
   alias DB.Schema.User
   alias DB.Schema.UserAction
+  alias DB.Schema.Vote
+  alias DB.Schema.Video
 
   @doc """
   Resolve a user by its id or username
@@ -91,6 +93,40 @@ defmodule CF.Graphql.Resolvers.Users do
   """
   def videos_added(user, %{offset: offset, limit: limit}, _) do
     {:ok, CF.Videos.added_by_user(user, page: offset, page_size: limit)}
+  end
+
+  @spec votes(nil | %{:id => any(), optional(any()) => any()}, any(), any()) :: {:ok, any()}
+  @doc """
+  Get user's votes on comments for a specific video as a map (commentId => vote value).
+  Returns all votes if neither video_id nor video_hash_id are provided.
+  """
+  def votes(nil, _, _), do: {:ok, %{}}
+
+  def votes(user, args, _) do
+    video_id = Map.get(args, :video_id)
+    video_hash_id = Map.get(args, :video_hash_id)
+
+    query = Vote.user_votes(Vote, user)
+
+    query =
+      cond do
+        video_id ->
+          Vote.video_votes(query, %{id: video_id})
+
+        video_hash_id ->
+          Vote.video_votes(query, %{hash_id: video_hash_id})
+
+        true ->
+          query
+      end
+
+    votes =
+      query
+      |> select([v], {v.comment_id, v.value})
+      |> Repo.all()
+      |> Enum.into(%{})
+
+    {:ok, votes}
   end
 
   defp filter_by_user_action_direction(query, user, direction) when direction == :all,

@@ -98,6 +98,13 @@ defmodule CF.Graphql.Schema.Types.User do
       arg(:limit, :integer, default_value: 10)
       resolve(&Resolvers.Users.videos_added/3)
     end
+
+    @desc "User's votes on comments as a map (commentId => vote value)"
+    field :votes, :json do
+      arg(:video_hash_id, :id)
+      arg(:video_id, :id)
+      resolve(&Resolvers.Users.votes/3)
+    end
   end
 
   @desc "A paginated list of user actions"
