@@ -14,7 +14,7 @@ defmodule CF.Graphql.Resolvers.Statements do
   alias CF.Algolia.StatementsIndex
   alias CF.Statements
 
-  import CF.Actions.ActionCreator, only: [action_remove: 2]
+  import CF.Actions.ActionCreator, only: [action_remove: 2, action_restore: 2]
 
   # Queries
 
@@ -82,6 +82,28 @@ defmodule CF.Graphql.Resolvers.Statements do
         Subscriptions.publish_statement_removed(id, statement.video_id)
         StatementsIndex.delete_object(statement)
         {:ok, %{id: id}}
+
+      {:error, _operation, reason, _changes} ->
+        {:error, reason}
+    end
+  end
+
+  def restore(_root, %{id: id}, %{context: %{user: user}}) do
+    user_id = user.id
+    UserPermissions.check!(user_id, :restore, :statement)
+    statement = Repo.get_by!(Statement, id: id, is_removed: true)
+
+    Multi.new()
+    |> Multi.update(:statement, Statement.changeset_restore(statement))
+    |> Multi.insert(:action_restore, action_restore(user_id, statement))
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{action_restore: action, statement: statement}} ->
+        Subscriptions.publish_video_history_action(action, statement.video_id)
+        Subscriptions.publish_statement_history_action(action, statement.id)
+        Subscriptions.publish_statement_added(statement)
+        StatementsIndex.save_object(statement)
+        {:ok, statement}
 
       {:error, _operation, reason, _changes} ->
         {:error, reason}

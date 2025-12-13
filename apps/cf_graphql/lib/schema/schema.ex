@@ -104,6 +104,19 @@ defmodule CF.Graphql.Schema do
 
       resolve(&Resolvers.Speakers.search_speakers/3)
     end
+
+    @desc "Get a single speaker"
+    field :speaker, :speaker do
+      arg(:id, :id)
+      arg(:slug, :string)
+      resolve(&Resolvers.Speakers.get/3)
+    end
+
+    @desc "Get history actions for a video"
+    field :video_history_actions, list_of(:user_action) do
+      arg(:video_id, non_null(:id))
+      resolve(&Resolvers.History.video_history_actions/3)
+    end
   end
 
   # Mutation API
@@ -198,6 +211,15 @@ defmodule CF.Graphql.Schema do
       resolve(&Resolvers.Statements.delete/3)
     end
 
+    @desc "Restore a deleted statement"
+    field :restore_statement, :statement do
+      middleware(Middleware.RequireAuthentication)
+
+      arg(:id, non_null(:id))
+
+      resolve(&Resolvers.Statements.restore/3)
+    end
+
     @desc "Create a new comment on a statement"
     field :create_comment, :comment do
       middleware(Middleware.RequireAuthentication)
@@ -258,6 +280,38 @@ defmodule CF.Graphql.Schema do
       arg(:full_name, non_null(:string))
 
       resolve(&Resolvers.Speakers.create_speaker/3)
+    end
+
+    @desc "Remove a speaker from a video"
+    field :remove_speaker_from_video, :speaker_removed do
+      middleware(Middleware.RequireAuthentication)
+
+      arg(:video_id, non_null(:id))
+      arg(:speaker_id, non_null(:id))
+
+      resolve(&Resolvers.Speakers.remove_speaker_from_video/3)
+    end
+
+    @desc "Restore a removed speaker"
+    field :restore_speaker, :speaker do
+      middleware(Middleware.RequireAuthentication)
+
+      arg(:speaker_id, non_null(:id))
+      arg(:video_id, non_null(:id))
+
+      resolve(&Resolvers.Speakers.restore_speaker/3)
+    end
+
+    @desc "Update an existing speaker"
+    field :update_speaker, :speaker do
+      middleware(Middleware.RequireAuthentication)
+
+      arg(:id, non_null(:id))
+      arg(:full_name, :string)
+      arg(:title, :string)
+      arg(:wikidata_item_id, :string)
+
+      resolve(&Resolvers.Speakers.update_speaker/3)
     end
   end
 
