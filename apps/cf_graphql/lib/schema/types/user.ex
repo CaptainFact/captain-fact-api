@@ -51,6 +51,9 @@ defmodule CF.Graphql.Schema.Types.User do
     @desc "A list of user's achievements as a list of integers"
     field(:achievements, list_of(:integer))
 
+    @desc "User's speaker ID (if any)"
+    field(:speaker_id, :string)
+
     @desc "User's registration datetime"
     field(:registered_at, non_null(:naive_datetime),
       do: resolve(fn u, _, _ -> {:ok, u.inserted_at} end)

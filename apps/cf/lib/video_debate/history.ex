@@ -11,6 +11,7 @@ defmodule CF.VideoDebate.History do
     |> preload(:user)
     |> where([a], a.video_id == ^video_id)
     |> where([a], a.entity in ^@allowed_entities)
+    |> order_by([a], desc: a.inserted_at)
     |> Repo.all()
   end
 
@@ -19,6 +20,7 @@ defmodule CF.VideoDebate.History do
     |> preload(:user)
     |> where([a], a.entity == ^:statement)
     |> where([a], a.statement_id == ^statement_id)
+    |> order_by([a], desc: a.inserted_at)
     |> Repo.all()
   end
 end
