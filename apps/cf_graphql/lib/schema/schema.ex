@@ -117,6 +117,12 @@ defmodule CF.Graphql.Schema do
       arg(:video_id, non_null(:id))
       resolve(&Resolvers.History.video_history_actions/3)
     end
+
+    @desc "Get history actions for a statement"
+    field :statement_history_actions, list_of(:user_action) do
+      arg(:statement_id, non_null(:id))
+      resolve(&Resolvers.History.statement_history_actions/3)
+    end
   end
 
   # Mutation API
@@ -163,6 +169,17 @@ defmodule CF.Graphql.Schema do
       arg(:unlisted, non_null(:boolean))
 
       resolve(&Resolvers.Videos.edit/3)
+    end
+
+    @desc "Shift all statements of a video by a given offset"
+    field :shift_statements, :video do
+      middleware(Middleware.RequireAuthentication)
+      middleware(Middleware.RequireReputation, 75)
+
+      arg(:video_id, non_null(:id))
+      arg(:youtube_offset, non_null(:integer))
+
+      resolve(&Resolvers.Videos.shift_statements/3)
     end
 
     field :set_video_captions, :video do

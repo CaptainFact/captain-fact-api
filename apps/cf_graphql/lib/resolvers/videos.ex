@@ -140,6 +140,18 @@ defmodule CF.Graphql.Resolvers.Videos do
     end
   end
 
+  def shift_statements(_root, %{video_id: video_id, youtube_offset: youtube_offset}, %{
+        context: %{user: user}
+      }) do
+    case CF.Videos.shift_statements(user, video_id, %{youtube_offset: youtube_offset}) do
+      {:ok, video} ->
+        {:ok, video}
+
+      {:error, _reason} ->
+        {:error, "Failed to shift statements"}
+    end
+  end
+
   def set_captions(
         _root,
         %{video_id: video_id, captions: %{path: path, content_type: content_type}},
