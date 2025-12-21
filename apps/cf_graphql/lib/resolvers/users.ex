@@ -6,6 +6,7 @@ defmodule CF.Graphql.Resolvers.Users do
   import Ecto.Query
 
   alias CF.Moderation
+  alias CF.Accounts.UserPermissions
 
   alias Kaur.Result
 
@@ -93,6 +94,18 @@ defmodule CF.Graphql.Resolvers.Users do
   """
   def videos_added(user, %{offset: offset, limit: limit}, _) do
     {:ok, CF.Videos.added_by_user(user, page: offset, page_size: limit)}
+  end
+
+  @doc """
+  Get the number of available flags for this user.
+  Returns -1 for unlimited flags (publishers) or the remaining number of flags.
+  Returns 0 if the user cannot flag comments.
+  """
+  def available_flags(user, _, _) do
+    case UserPermissions.check(user, :flag, :comment) do
+      {:ok, num_available} -> {:ok, num_available}
+      {:error, _reason} -> {:ok, 0}
+    end
   end
 
   @spec votes(nil | %{:id => any(), optional(any()) => any()}, any(), any()) :: {:ok, any()}

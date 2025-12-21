@@ -54,6 +54,9 @@ defmodule CF.Graphql.Schema.Types.User do
     @desc "User's speaker ID (if any)"
     field(:speaker_id, :string)
 
+    @desc "Whether the user is a publisher"
+    field(:is_publisher, :boolean)
+
     @desc "User's registration datetime"
     field(:registered_at, non_null(:naive_datetime),
       do: resolve(fn u, _, _ -> {:ok, u.inserted_at} end)
@@ -107,6 +110,12 @@ defmodule CF.Graphql.Schema.Types.User do
       arg(:video_hash_id, :id)
       arg(:video_id, :id)
       resolve(&Resolvers.Users.votes/3)
+    end
+
+    @desc "Number of comment flags available for this user (-1 means unlimited)"
+    field :available_flags, :integer do
+      middleware(Middleware.RequireAuthentication)
+      resolve(&Resolvers.Users.available_flags/3)
     end
   end
 
