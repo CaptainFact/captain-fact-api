@@ -123,6 +123,12 @@ defmodule CF.Graphql.Schema do
       arg(:statement_id, non_null(:id))
       resolve(&Resolvers.History.statement_history_actions/3)
     end
+
+    @desc "Search for a video by URL. Returns the video if it exists, null otherwise."
+    field :search_video, :video do
+      arg(:url, non_null(:string))
+      resolve(&Resolvers.Videos.search/3)
+    end
   end
 
   # Mutation API
@@ -158,6 +164,17 @@ defmodule CF.Graphql.Schema do
       arg(:video_id, non_null(:id))
 
       resolve(&Resolvers.Videos.start_automatic_statements_extraction/3)
+    end
+
+    @desc "Create a new video. If it already exists, returns the existing video."
+    field :create_video, :video do
+      middleware(Middleware.RequireAuthentication)
+      middleware(Middleware.RequireReputation, 75)
+
+      arg(:url, non_null(:string))
+      arg(:unlisted, non_null(:boolean))
+
+      resolve(&Resolvers.Videos.create/3)
     end
 
     field :edit_video, :video do
