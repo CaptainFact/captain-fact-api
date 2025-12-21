@@ -16,7 +16,7 @@ defmodule CF.Sources.Fetcher do
       start: {__MODULE__, :start_link, [opts]},
       type: :supervisor,
       restart: :permanent,
-      shutdown: 500
+      shutdown: 2000
     }
   end
 
@@ -60,15 +60,15 @@ defmodule CF.Sources.Fetcher do
 
   def get_queue, do: Fetcher.LinkChecker.get_queue()
 
-  @url_regex ~r/^https?:\/\/[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/
-
   defp fetch(url, callback) do
-    without_domain = Regex.replace(@url_regex, url, "\\1")
-    path = Regex.replace(~r/\?.+$/, without_domain, "")
+    uri = URI.parse(url)
 
-    case do_fetch_source_metadata(url, MIME.from_path(path)) do
-      {:error, _} -> :error
-      {:ok, result} -> callback.(result)
+    case do_fetch_source_metadata(url, MIME.from_path(uri.path)) do
+      {:error, err} ->
+        :error
+
+      {:ok, result} ->
+        callback.(result)
     end
   end
 
@@ -77,13 +77,13 @@ defmodule CF.Sources.Fetcher do
   defp do_fetch_source_metadata(url, mime_types) when mime_types in @fetchable_mime_types do
     case HTTPoison.get(
            url,
-           [],
+           [{"User-Agent", "CaptainFact/2.0"}],
            follow_redirect: true,
            max_redirect: 5,
            hackney: [pool: pool_name()]
          ) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        {:ok, source_params_from_tree(Floki.parse_document(body))}
+        {:ok, source_params_from_tree(Floki.parse_document!(body))}
 
       {:ok, %HTTPoison.Response{status_code: 404}} ->
         {:error, :not_found}
