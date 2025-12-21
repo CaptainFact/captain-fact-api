@@ -3,7 +3,7 @@ defmodule CF.Umbrella.Mixfile do
 
   def project do
     [
-      version: "1.2.0",
+      version: "2.0.0",
       apps_path: "apps",
       deps_path: "deps",
       build_embedded: Mix.env() == :prod,

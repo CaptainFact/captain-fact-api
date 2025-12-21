@@ -93,8 +93,10 @@ defmodule CF.Comments do
         full_comment = comment
 
         # If new source, fetch metadata
-        if source && is_nil(Map.get(source, :id)),
-          do: fetch_source_metadata_and_update_comment(comment, source_fetch_callback)
+        if source && is_nil(Map.get(source, :id)) do
+          callback = source_fetch_callback || fn _comment -> :ok end
+          fetch_source_metadata_and_update_comment(comment, callback)
+        end
 
         # Return comment
         full_comment
@@ -266,11 +268,14 @@ defmodule CF.Comments do
   defp reverse_vote_type(:vote_down), do: :revert_vote_down
   defp reverse_vote_type(:self_vote), do: :revert_self_vote
 
-  defp fetch_source_metadata_and_update_comment(%Comment{source: nil}, _), do: nil
+  defp fetch_source_metadata_and_update_comment(%Comment{source: nil}, _callback), do: nil
 
   defp fetch_source_metadata_and_update_comment(comment = %Comment{source: base_source}, callback) do
     Sources.update_source_metadata(base_source, fn updated_source ->
-      callback.(Map.merge(comment, %{source: updated_source, source_id: updated_source.id}))
+      updated_comment =
+        Map.merge(comment, %{source: updated_source, source_id: updated_source.id})
+
+      callback.(updated_comment)
     end)
   end
 end

@@ -41,17 +41,25 @@ defmodule CF.Graphql.Resolvers.Comments do
 
     source_url = Map.get(args, :source)
 
-    # Comments.add_comment returns the comment directly or {:error, reason}
-    case Comments.add_comment(user, video_id, params, source_url) do
-      {:error, reason} ->
-        {:error, reason}
+    # Callback to broadcast comment_updated when source metadata is fetched
+    update_callback = fn updated_comment ->
+      updated_comment = Repo.preload(updated_comment, [:source, :user, :statement])
+      Subscriptions.publish_comment_updated(updated_comment, video_id)
+    end
 
-      comment ->
-        # Preload associations for GraphQL response
-        comment = Repo.preload(comment, [:source, :user, :statement])
+    try do
+      case Comments.add_comment(user, video_id, params, source_url, update_callback) do
+        {:error, reason} ->
+          {:error, reason}
 
-        Subscriptions.publish_comment_added(comment, video_id)
-        {:ok, comment}
+        comment ->
+          comment = Repo.preload(comment, [:source, :user, :statement])
+          Subscriptions.publish_comment_added(comment, video_id)
+          {:ok, comment}
+      end
+    rescue
+      exception ->
+        {:error, exception}
     end
   end
 
