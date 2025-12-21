@@ -39,9 +39,6 @@ defmodule CF.Graphql.Resolvers.Users do
     {:ok, user}
   end
 
-  @doc """
-  Get logged in user
-  """
   def get_logged_in(_, _, _) do
     {:ok, nil}
   end

@@ -22,7 +22,7 @@ defmodule CF.RestApi.AuthController do
   @err_invalid_email_password "invalid_email_password"
 
   @doc """
-  Auth with identity (name|email + password)
+  Handle authentication callback for identity or OAuth providers
   """
   def callback(conn, %{"provider" => "identity", "email" => email, "password" => password}) do
     case Authenticator.get_user_for_email_or_name_password(email, password) do
@@ -37,11 +37,10 @@ defmodule CF.RestApi.AuthController do
     end
   end
 
-  @doc """
-  Auth with third party provider (OAuth, only Facebook for now).
-  If user is connected -> associate account with third party
-  If not -> get or create account from third party infos
-  """
+  def callback(_conn, %{"provider" => provider}) when provider in ["facebook"] do
+    # This will be handled by the OAuth callback below
+  end
+
   def callback(conn, params = %{"provider" => provider_str, "code" => code}) do
     user = GuardianImpl.Plug.current_resource(conn)
     provider = provider_atom!(provider_str)

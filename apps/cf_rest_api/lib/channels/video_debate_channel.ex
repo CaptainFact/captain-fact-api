@@ -49,7 +49,7 @@ defmodule CF.RestApi.VideoDebateChannel do
   end
 
   @doc """
-  Register a public connection in presence tracker
+  Register a connection in presence tracker (public or user)
   """
   def handle_info(:after_join, socket = %{assigns: %{user_id: nil}}) do
     push(socket, "presence_state", Presence.list(socket))
@@ -57,9 +57,6 @@ defmodule CF.RestApi.VideoDebateChannel do
     {:noreply, socket}
   end
 
-  @doc """
-  Register a user connection in presence tracker
-  """
   def handle_info(:after_join, socket = %{assigns: %{user_id: user_id}}) do
     push(socket, "presence_state", Presence.list(socket))
     {:ok, _} = Presence.track(socket, :users, %{user_id: user_id})
@@ -71,7 +68,7 @@ defmodule CF.RestApi.VideoDebateChannel do
   end
 
   @doc """
-  Shift all video's statements
+  Handle authenticated channel messages
   """
   def handle_in_authenticated!("shift_statements", offsets, socket) do
     user = Repo.get(DB.Schema.User, socket.assigns.user_id)
@@ -91,9 +88,6 @@ defmodule CF.RestApi.VideoDebateChannel do
     end
   end
 
-  @doc """
-  Add an existing speaker to the video
-  """
   def handle_in_authenticated!("new_speaker", %{"id" => id}, socket) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
     UserPermissions.check!(user_id, :add, :speaker)
@@ -118,9 +112,6 @@ defmodule CF.RestApi.VideoDebateChannel do
     end
   end
 
-  @doc """
-  Create a new speaker and add it to the video
-  """
   def handle_in_authenticated!("new_speaker", params, socket) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
     UserPermissions.check!(user_id, :create, :speaker)

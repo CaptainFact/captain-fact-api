@@ -3,7 +3,7 @@ defmodule CF.RestApi.Endpoint do
 
   socket("/socket", CF.RestApi.UserSocket, websocket: true, longpoll: false)
 
-  if Application.get_env(:arc, :storage) == Arc.Storage.Local,
+  if Application.compile_env(:arc, :storage, nil) == Arc.Storage.Local,
     do: plug(Plug.Static, at: "/resources", from: "./resources", gzip: false)
 
   plug(Plug.RequestId)
@@ -14,7 +14,7 @@ defmodule CF.RestApi.Endpoint do
     Corsica,
     max_age: 3600,
     allow_headers: ~w(Accept Content-Type Authorization Origin),
-    origins: {CF.RestApi.CORS, :check_origin}
+    origins: {CF.RestApi.CORS, :check_origin, []}
   )
 
   plug(

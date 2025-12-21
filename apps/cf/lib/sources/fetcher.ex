@@ -10,9 +10,17 @@ defmodule CF.Sources.Fetcher do
 
   # ---- Public API ----
 
-  def start_link() do
-    import Supervisor.Spec
+  def child_spec(opts) do
+    %{
+      id: __MODULE__,
+      start: {__MODULE__, :start_link, [opts]},
+      type: :supervisor,
+      restart: :permanent,
+      shutdown: 2000
+    }
+  end
 
+  def start_link(_opts \\ []) do
     Supervisor.start_link(
       [
         :hackney_pool.child_spec(
@@ -20,7 +28,7 @@ defmodule CF.Sources.Fetcher do
           timeout: @request_timeout,
           max_connections: @max_connections
         ),
-        worker(CF.Sources.Fetcher.LinkChecker, [])
+        CF.Sources.Fetcher.LinkChecker
       ],
       strategy: :one_for_all,
       name: __MODULE__
@@ -52,15 +60,15 @@ defmodule CF.Sources.Fetcher do
 
   def get_queue, do: Fetcher.LinkChecker.get_queue()
 
-  @url_regex ~r/^https?:\/\/[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/
-
   defp fetch(url, callback) do
-    without_domain = Regex.replace(@url_regex, url, "\\1")
-    path = Regex.replace(~r/\?.+$/, without_domain, "")
+    uri = URI.parse(url)
 
-    case do_fetch_source_metadata(url, MIME.from_path(path)) do
-      {:error, _} -> :error
-      {:ok, result} -> callback.(result)
+    case do_fetch_source_metadata(url, MIME.from_path(uri.path)) do
+      {:error, err} ->
+        :error
+
+      {:ok, result} ->
+        callback.(result)
     end
   end
 
@@ -69,13 +77,13 @@ defmodule CF.Sources.Fetcher do
   defp do_fetch_source_metadata(url, mime_types) when mime_types in @fetchable_mime_types do
     case HTTPoison.get(
            url,
-           [],
+           [{"User-Agent", "CaptainFact/2.0"}],
            follow_redirect: true,
            max_redirect: 5,
            hackney: [pool: pool_name()]
          ) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        {:ok, source_params_from_tree(Floki.parse(body))}
+        {:ok, source_params_from_tree(Floki.parse_document!(body))}
 
       {:ok, %HTTPoison.Response{status_code: 404}} ->
         {:error, :not_found}
@@ -137,10 +145,12 @@ defmodule CF.Sources.Fetcher do
   # Link checker
 
   defmodule LinkChecker do
+    use Agent
+
     @doc """
     Agent that record which links are currently fetched
     """
-    def start_link() do
+    def start_link(_opts \\ []) do
       Agent.start_link(fn -> MapSet.new() end, name: Fetcher.link_checker_name())
     end
 

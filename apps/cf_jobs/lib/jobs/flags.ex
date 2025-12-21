@@ -1,4 +1,6 @@
 defmodule CF.Jobs.Flags do
+  use GenServer
+
   @moduledoc """
   Analyse flags periodically to report innapropriate content
 
@@ -26,7 +28,7 @@ defmodule CF.Jobs.Flags do
 
   def name, do: @name
 
-  def start_link() do
+  def start_link(_opts \\ []) do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 

@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 dev_secret = "8C6FsJwjV11d+1WPUIbkEH6gB/VavJrcXWoPLujgpclfxjkLkoNFSjVU9XfeNm6s"
 
@@ -32,5 +32,5 @@ config :cf, CF.Mailer, adapter: Bamboo.LocalAdapter
 
 # Import local secrets if any - use wildcard to ignore errors
 for config <- "*dev.secret.exs" |> Path.expand(__DIR__) |> Path.wildcard() do
-  import_config config
+  Config.import_config(config)
 end

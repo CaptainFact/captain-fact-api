@@ -24,7 +24,7 @@ defmodule CF.Accounts do
   @request_validity 48 * 60 * 60
 
   # Configure Fetching of user picture on Gravatar
-  @fetch_default_picture Application.get_env(:cf, :fetch_default_user_picture, true)
+  @fetch_default_picture Application.compile_env(:cf, :fetch_default_user_picture, true)
 
   # ---- User creation ----
 

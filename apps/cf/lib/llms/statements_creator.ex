@@ -65,9 +65,6 @@ defmodule CF.LLMs.StatementsCreator do
     end
   end
 
-  @doc """
-  Chunk captions everytime we reach the max caption length
-  """
   defp chunk_captions(captions) do
     # TODO: Add last captions from previous batch to preserve context
     Enum.chunk_every(captions, @captions_chunk_size)
@@ -138,7 +135,7 @@ defmodule CF.LLMs.StatementsCreator do
   defp create_statements_from_inputs(statements_inputs, video) do
     inserted_at = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
 
-    {nb_statements, statements} =
+    {_nb_statements, statements} =
       DB.Repo.insert_all(
         DB.Schema.Statement,
         Enum.map(statements_inputs, fn %{"text" => text, "time" => time} ->

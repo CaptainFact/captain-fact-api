@@ -2,7 +2,6 @@ defmodule CF.Graphql.Schema do
   use Absinthe.Schema
   alias CF.Graphql.Resolvers
   alias CF.Graphql.Schema.Middleware
-  import Absinthe.Resolution.Helpers, only: [dataloader: 1]
 
   import_types(Absinthe.Plug.Types)
 
@@ -44,7 +43,6 @@ defmodule CF.Graphql.Schema do
   query do
     @desc "[Deprecated] Get all videos"
     @deprecated "Please update to the paginated version (videos). This will be removed in 0.9."
-    @since "0.8.16"
     field :all_videos, list_of(:video) do
       arg(:filters, :video_filter)
       arg(:limit, :integer)

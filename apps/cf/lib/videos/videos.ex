@@ -21,7 +21,7 @@ defmodule CF.Videos do
   alias CF.Accounts.UserPermissions
   alias CF.Videos.MetadataFetcher
 
-  @captions_fetcher Application.get_env(:cf, :captions_fetcher)
+  @captions_fetcher Application.compile_env(:cf, :captions_fetcher, nil)
 
   @doc """
   TODO with_speakers param is only required by REST API

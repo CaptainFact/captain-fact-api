@@ -105,7 +105,7 @@ defmodule CF.Authenticator.OAuth.Facebook do
   end
 
   defp hmac(data, type, key) do
-    :crypto.hmac(type, key, data)
+    :crypto.mac(:hmac, type, key, data)
   end
 
   # ---- Private ----

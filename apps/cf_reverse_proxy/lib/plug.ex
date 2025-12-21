@@ -10,14 +10,6 @@ defmodule CF.ReverseProxy.Plug do
     origins: [~r/(.*)\.captainfact\.io$/]
   )
 
-  @default_host CF.RestApi.Endpoint
-  @base_host_regex ~r/^(?<service>rest|graphql|feed)\./
-  @subdomains %{
-    "graphql" => CF.GraphQLWeb.Endpoint,
-    "rest" => CF.RestApi.Endpoint,
-    "feed" => CF.AtomFeed.Router
-  }
-
   def init(opts), do: opts
 
   # See https://github.com/wojtekmach/acme_bank/blob/master/apps/master_proxy/lib/master_proxy/plug.ex
@@ -25,7 +17,7 @@ defmodule CF.ReverseProxy.Plug do
   # https://elixirforum.com/t/umbrella-with-2-phoenix-apps-how-to-forward-request-from-1-to-2-and-vice-versa/1797/18?u=betree
   # https://github.com/jesseshieh/master_proxy
 
-  if Application.get_env(:cf, :env) == :dev do
+  if Application.compile_env(:cf, :env, :prod) == :dev do
     # Dev requests are routed through here
     def call(conn, _) do
       if conn.request_path == "/status" do

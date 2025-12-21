@@ -37,7 +37,8 @@ defmodule CF.Graphql.Resolvers.Videos do
     end
   end
 
-  @deprecated "Use paginated_list/3"
+  # Deprecated: Use paginated_list/3 instead
+  # Keeping for backward compatibility with deprecated all_videos field
   def list(_root, args, _info) do
     Video
     |> Video.query_list(Map.get(args, :filters, []), args[:limit])
@@ -126,7 +127,7 @@ defmodule CF.Graphql.Resolvers.Videos do
     |> Ecto.Multi.update(:video, fn _repo ->
       changeset
     end)
-    |> Ecto.Multi.run(:action, fn _repo, %{video: video} ->
+    |> Ecto.Multi.run(:action, fn _repo, %{video: _video} ->
       Repo.insert(CF.Actions.ActionCreator.action_update(user.id, changeset))
     end)
     |> Repo.transaction()

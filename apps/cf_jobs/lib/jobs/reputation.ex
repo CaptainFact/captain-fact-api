@@ -1,4 +1,6 @@
 defmodule CF.Jobs.Reputation do
+  use GenServer
+
   @moduledoc """
   Updates a user reputation periodically, verifying at the same time that the maximum reputation
   gain per day quota is respected.
@@ -28,7 +30,7 @@ defmodule CF.Jobs.Reputation do
 
   def name, do: @name
 
-  def start_link() do
+  def start_link(_opts \\ []) do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
