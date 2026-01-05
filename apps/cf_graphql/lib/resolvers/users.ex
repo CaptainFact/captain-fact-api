@@ -89,6 +89,11 @@ defmodule CF.Graphql.Resolvers.Users do
     |> Result.ok()
   end
 
+  @spec videos_added(
+          atom() | %{:id => any(), optional(any()) => any()},
+          %{:limit => any(), :offset => any(), optional(any()) => any()},
+          any()
+        ) :: {:ok, Scrivener.Page.t()}
   @doc """
   Get videos added by this user
   """

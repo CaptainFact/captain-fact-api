@@ -8,7 +8,9 @@ defmodule CF.Graphql.Schema do
   import_types(CF.Graphql.Schema.Types.{
     AppInfo,
     Comment,
+    Flag,
     JSON,
+    ModerationEntry,
     Notification,
     Paginated,
     Source,
@@ -128,6 +130,12 @@ defmodule CF.Graphql.Schema do
     field :search_video, :video do
       arg(:url, non_null(:string))
       resolve(&Resolvers.Videos.search/3)
+    end
+
+    @desc "Get a random action requiring moderation"
+    field :random_moderation, :moderation_entry do
+      middleware(Middleware.RequireAuthentication)
+      resolve(&Resolvers.Moderation.random/3)
     end
   end
 
@@ -291,7 +299,7 @@ defmodule CF.Graphql.Schema do
       middleware(Middleware.RequireAuthentication)
 
       arg(:comment_id, non_null(:id))
-      arg(:reason, non_null(:integer))
+      arg(:reason, non_null(:flag_reason))
 
       resolve(&Resolvers.Comments.flag/3)
     end
@@ -346,6 +354,17 @@ defmodule CF.Graphql.Schema do
       arg(:wikidata_item_id, :string)
 
       resolve(&Resolvers.Speakers.update_speaker/3)
+    end
+
+    @desc "Moderate a flagged action"
+    field :moderate_action, :moderation_feedback do
+      middleware(Middleware.RequireAuthentication)
+
+      arg(:action_id, non_null(:id))
+      arg(:reason, non_null(:integer))
+      arg(:value, non_null(:integer))
+
+      resolve(&Resolvers.Moderation.moderate_action/3)
     end
   end
 

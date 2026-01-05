@@ -9,6 +9,14 @@ defmodule CF.Graphql.Schema.Types.Comment do
   import CF.Graphql.Schema.Utils
   alias CF.Graphql.Resolvers
 
+  @desc "Reason for flagging a comment"
+  enum :flag_reason do
+    value(:bad_language, description: "Personal attack or inappropriate language", as: 1)
+    value(:spam, description: "Unwanted commercial content or spam", as: 2)
+    value(:irrelevant, description: "Irrelevant", as: 3)
+    value(:not_constructive, description: "Not constructive", as: 4)
+  end
+
   @desc "A user's comment. A comment will be considered being a fact if it has a source"
   object :comment do
     field(:id, non_null(:id))

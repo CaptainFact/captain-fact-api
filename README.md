@@ -30,10 +30,9 @@ root `captain-fact-api` folder.
 
 ## Start DB
 
-Create / launch a PostgreSQL instance on your local machine. If you have
-Docker installed, you can use the pre-Seed PostgreSQL Docker image:
+Create or launch a PostgreSQL instance (e.g. local install or Docker). With Docker:
 
-`docker run -d --name cf_dev_db -p 5432:5432 captainfact/dev-db:latest`
+`docker run -d --name cf_dev_db -p 5432:5432 -e POSTGRES_HOST_AUTH_METHOD=trust -e POSTGRES_DB=captain_fact_dev postgres:16`
 
 ## Start API
 

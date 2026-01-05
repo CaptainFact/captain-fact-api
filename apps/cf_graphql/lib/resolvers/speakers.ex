@@ -187,8 +187,23 @@ defmodule CF.Graphql.Resolvers.Speakers do
     |> Repo.update()
     |> case do
       {:ok, updated_speaker} ->
-        Subscriptions.publish_speaker_updated(updated_speaker, nil)
-        CF.Algolia.SpeakersIndex.save_object(updated_speaker)
+        # Publish subscription updates asynchronously
+        Task.start(fn ->
+          speaker_video_ids =
+            Repo.all(
+              from(vs in VideoSpeaker, where: vs.speaker_id == ^speaker.id, select: vs.video_id)
+            )
+
+          Enum.each(speaker_video_ids, fn video_id ->
+            Subscriptions.publish_speaker_updated(updated_speaker, video_id)
+          end)
+        end)
+
+        # Update search index asynchronously
+        Task.start(fn ->
+          CF.Algolia.SpeakersIndex.save_object(updated_speaker)
+        end)
+
         {:ok, updated_speaker}
 
       {:error, changeset} ->

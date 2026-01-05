@@ -99,13 +99,19 @@ defmodule CF.Graphql.Resolvers.Comments do
     end
   end
 
-  def flag(_root, %{comment_id: comment_id, reason: reason}, %{context: %{user: user}}) do
+  def flag(_root, %{comment_id: comment_id_str, reason: reason}, %{context: %{user: user}}) do
     # Get comment and preload statement to access video_id
-    comment = Repo.get!(Comment, comment_id) |> Repo.preload(:statement)
-    video_id = comment.statement.video_id
+    comment_id = String.to_integer(comment_id_str)
+    video_id =
+      Comment
+      |> join(:inner, [c], s in assoc(c, :statement))
+      |> select([c, s], s.video_id)
+      |> where([c, s], c.id == ^comment_id)
+      |> Repo.one!()
 
+    IO.inspect(%{comment_id: comment_id, reason: reason, video_id: video_id})
     Flagger.flag!(user.id, video_id, comment_id, reason)
-    {:ok, %{id: comment_id}}
+    {:ok, %{id: comment_id, video_id: video_id}}
   end
 
   # Helper function to calculate vote value diff (matches comments_channel.ex logic)

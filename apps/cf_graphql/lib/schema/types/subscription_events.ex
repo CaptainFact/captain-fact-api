@@ -27,6 +27,11 @@ defmodule CF.Graphql.Schema.Types.SubscriptionEvents do
     field(:id, non_null(:id))
   end
 
+  @desc "Reference to a moderated action"
+  object :moderation_feedback do
+    field(:id, non_null(:id))
+  end
+
   @desc "Reference to a comment involved in a score update"
   object :comment_reference do
     field(:id, non_null(:id))
