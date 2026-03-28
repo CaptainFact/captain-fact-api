@@ -13,7 +13,6 @@ defmodule CF.RestApi.CommentsChannel do
 
   alias CF.Moderation.Flagger
   alias CF.Comments
-  alias CF.Graphql.Subscriptions
 
   @event_comment_updated "comment_updated"
   @event_comment_removed "comment_removed"
@@ -38,7 +37,6 @@ defmodule CF.RestApi.CommentsChannel do
         channel = comments_channel(comment.statement.video_id)
         msg = msg_partial_update(comment, updated_fields)
         Endpoint.broadcast(channel, @event_comment_updated, msg)
-        Subscriptions.publish_comment_updated(comment, comment.statement.video_id)
     end
   end
 
@@ -49,8 +47,6 @@ defmodule CF.RestApi.CommentsChannel do
     comment.statement.video_id
     |> comments_channel()
     |> Endpoint.broadcast(@event_comment_removed, msg_comment_remove(comment))
-
-    Subscriptions.publish_comment_removed(comment, comment.statement.video_id)
   end
 
   defp comments_channel(video_id) when is_integer(video_id) do
@@ -83,11 +79,9 @@ defmodule CF.RestApi.CommentsChannel do
         comment = Repo.preload(comment, [:source, :user])
         rendered_comment = CommentView.render("comment.json", comment: comment)
         broadcast!(socket, @event_comment_updated, rendered_comment)
-        Subscriptions.publish_comment_updated(comment, socket.assigns.video_id)
       end)
 
     broadcast!(socket, "comment_added", CommentView.render("comment.json", comment: comment))
-    Subscriptions.publish_comment_added(comment, socket.assigns.video_id)
     {:reply, :ok, socket}
   end
 
@@ -101,7 +95,6 @@ defmodule CF.RestApi.CommentsChannel do
 
       _ ->
         broadcast!(socket, @event_comment_removed, msg_comment_remove(comment))
-        Subscriptions.publish_comment_removed(comment, socket.assigns.video_id)
         {:reply, :ok, socket}
     end
   end
@@ -114,7 +107,6 @@ defmodule CF.RestApi.CommentsChannel do
       {:ok, comment, vote, prev_value} ->
         msg = msg_score_diff(comment, value_diff(prev_value, vote.value))
         broadcast!(socket, @event_score_diff, msg)
-        Subscriptions.publish_comment_score_diff(comment, msg.diff, socket.assigns.video_id)
         {:reply, :ok, socket}
 
       {:error, _} ->

@@ -226,27 +226,31 @@ defmodule CF.RestApi.UserControllerTest do
     |> response(:not_found)
   end
 
-  test "GET /users/me/available_flags" do
-    user = build(:user) |> Map.put(:reputation, 4200) |> insert()
+  describe "available_flags" do
+    @describetag skip: "GET /users/me/available_flags is disabled in router"
 
-    available =
-      user
-      |> build_authenticated_conn()
-      |> get("/users/me/available_flags")
-      |> json_response(:ok)
-      |> Map.get("flags_available")
+    test "GET /users/me/available_flags" do
+      user = build(:user) |> Map.put(:reputation, 4200) |> insert()
 
-    assert is_number(available) and available > 0
+      available =
+        user
+        |> build_authenticated_conn()
+        |> get("/users/me/available_flags")
+        |> json_response(:ok)
+        |> Map.get("flags_available")
+
+      assert is_number(available) and available > 0
+    end
   end
 
-  test "must be authenticated to update, delete and available_flags" do
+  test "must be authenticated to update and delete" do
     response(get(build_conn(), "/users/me"), 401) =~ "unauthorized"
     response(put(build_conn(), "/users/me"), 401) =~ "unauthorized"
-    response(get(build_conn(), "/users/me/available_flags"), 401) =~ "unauthorized"
     response(delete(build_conn(), "/users/me"), 401) =~ "unauthorized"
   end
 
   describe "post complete_onboarding_step" do
+    @describetag skip: "onboarding REST endpoints are disabled in router"
     test "returns 200 for valid value" do
       :user
       |> insert
@@ -265,6 +269,8 @@ defmodule CF.RestApi.UserControllerTest do
   end
 
   describe "post complete_onboarding_steps" do
+    @describetag skip: "onboarding REST endpoints are disabled in router"
+
     test "returns 200 for valid value" do
       :user
       |> insert
@@ -283,6 +289,8 @@ defmodule CF.RestApi.UserControllerTest do
   end
 
   describe "delete onboarding" do
+    @describetag skip: "onboarding REST endpoints are disabled in router"
+
     test "returns 200" do
       :user
       |> insert(completed_onboarding_steps: [1, 2])

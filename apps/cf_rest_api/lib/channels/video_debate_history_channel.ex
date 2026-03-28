@@ -19,7 +19,6 @@ defmodule CF.RestApi.VideoDebateHistoryChannel do
 
   alias CF.Accounts.UserPermissions
   alias CF.VideoDebate.History
-  alias CF.Graphql.Subscriptions, as: GraphqlSubscriptions
   alias CF.RestApi.{StatementView, SpeakerView, UserActionView}
 
   def join("video_debate_history:" <> video_hash_id, _payload, socket) do
@@ -73,8 +72,6 @@ defmodule CF.RestApi.VideoDebateHistoryChannel do
           |> View.render_one(UserActionView, "user_action.json")
 
         broadcast!(socket, "action_added", rendered_action)
-        GraphqlSubscriptions.publish_video_history_action(action, video_id)
-        GraphqlSubscriptions.publish_statement_history_action(action, statement.id)
 
         # Broadcast statement
         CF.RestApi.Endpoint.broadcast(
@@ -82,8 +79,6 @@ defmodule CF.RestApi.VideoDebateHistoryChannel do
           "statement_added",
           StatementView.render("show.json", statement: statement)
         )
-
-        GraphqlSubscriptions.publish_statement_added(statement)
 
         CF.Algolia.StatementsIndex.save_object(statement)
         {:reply, :ok, socket}
@@ -115,15 +110,12 @@ defmodule CF.RestApi.VideoDebateHistoryChannel do
           |> View.render_one(UserActionView, "user_action.json")
 
         broadcast!(socket, "action_added", rendered_action)
-        GraphqlSubscriptions.publish_video_history_action(action, video_id)
         # Broadcast the speaker
         CF.RestApi.Endpoint.broadcast(
           "video_debate:#{VideoHashId.encode(video_id)}",
           "speaker_added",
           SpeakerView.render("show.json", speaker: speaker)
         )
-
-        GraphqlSubscriptions.publish_speaker_added(speaker, video_id)
 
         CF.Algolia.VideosIndex.reindex_by_id(video_id)
         {:reply, :ok, socket}

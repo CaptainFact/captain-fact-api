@@ -1,6 +1,6 @@
 defmodule CF.Graphql.Subscriptions do
   @moduledoc """
-  Helpers to publish GraphQL subscription events alongside legacy Phoenix channels.
+  Helpers to publish GraphQL subscription events (Absinthe).
   """
 
   alias Absinthe.Subscription

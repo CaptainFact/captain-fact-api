@@ -56,12 +56,12 @@ defmodule CF.RestApi.Router do
           get("/", UserController, :show_me)
           put("/", UserController, :update)
           delete("/", UserController, :delete)
-          get("/available_flags", UserController, :available_flags)
+          # get("/available_flags", UserController, :available_flags)
           put("/confirm_email/:token", UserController, :confirm_email)
           put("/achievements/:achievement", UserController, :unlock_achievement)
-          post("/onboarding/complete_step", UserController, :complete_onboarding_step)
-          post("/onboarding/complete_steps", UserController, :complete_onboarding_steps)
-          delete("/onboarding", UserController, :delete_onboarding)
+          # post("/onboarding/complete_step", UserController, :complete_onboarding_step)
+          # post("/onboarding/complete_steps", UserController, :complete_onboarding_steps)
+          # delete("/onboarding", UserController, :delete_onboarding)
         end
       end
 
