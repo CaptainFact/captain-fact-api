@@ -3,19 +3,11 @@ defmodule CF.Graphql.Resolvers.Speakers do
   Resolver for speaker-related GraphQL operations
   """
 
-  import Ecto.Query
-  alias Kaur.Result
-  alias Ecto.Multi
   alias DB.Repo
   alias DB.Schema.Speaker
-  alias DB.Schema.VideoSpeaker
-  alias CF.Accounts.UserPermissions
-  alias CF.Actions.ActionCreator
-  alias CF.Graphql.Subscriptions
   alias CF.Algolia.SpeakersIndex
-
-  import CF.Actions.ActionCreator,
-    only: [action_add: 3, action_create: 2, action_remove: 3, action_restore: 3]
+  alias CF.Graphql.Subscriptions
+  alias CF.Speakers
 
   def picture(speaker, _, _) do
     {:ok, DB.Type.SpeakerPicture.full_url(speaker, :thumb)}
@@ -48,22 +40,11 @@ defmodule CF.Graphql.Resolvers.Speakers do
   end
 
   def search_speakers(_root, %{query: query, limit: limit}, _info) do
-    query_pattern = "%#{query}%"
-
-    speakers_query =
-      from(
-        s in Speaker,
-        where: fragment("unaccent(?) ILIKE unaccent(?)", s.full_name, ^query_pattern),
-        group_by: s.id,
-        select: %{id: s.id, full_name: s.full_name, slug: s.slug, picture: s.picture},
-        limit: ^limit
-      )
-
-    {:ok, Repo.all(speakers_query)}
+    Speakers.search_by_name(query, limit)
   end
 
-  def search_speakers(_root, %{query: query}, _info) do
-    search_speakers(_root, %{query: query, limit: 5}, _info)
+  def search_speakers(root, %{query: query}, info) do
+    search_speakers(root, %{query: query, limit: 5}, info)
   end
 
   @doc """
@@ -76,25 +57,19 @@ defmodule CF.Graphql.Resolvers.Speakers do
     video_id = String.to_integer(video_id)
     speaker_id = String.to_integer(speaker_id)
 
-    UserPermissions.check!(user_id, :add, :speaker)
-
     speaker = Repo.get!(Speaker, speaker_id)
-    changeset = VideoSpeaker.changeset(%VideoSpeaker{speaker_id: speaker.id, video_id: video_id})
 
-    Multi.new()
-    |> Multi.insert(:video_speaker, changeset)
-    |> Multi.insert(:action_add, action_add(user_id, video_id, speaker))
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{}} ->
+    case Speakers.add_speaker_to_video(user_id, video_id, speaker) do
+      {:ok, speaker} ->
         Subscriptions.publish_speaker_added(speaker, video_id)
         CF.Algolia.VideosIndex.reindex_by_id(video_id)
         {:ok, speaker}
 
-      {:error, _, %{errors: errors}, _} ->
-        if errors[:video] == {"has already been taken", []},
-          do: {:error, "Speaker already added to this video"},
-          else: {:error, "Failed to add speaker"}
+      {:error, :speaker_already_on_video} ->
+        {:error, "Speaker already added to this video"}
+
+      {:error, _} ->
+        {:error, "Failed to add speaker"}
     end
   end
 
@@ -107,36 +82,17 @@ defmodule CF.Graphql.Resolvers.Speakers do
     user_id = user.id
     video_id = String.to_integer(video_id)
 
-    UserPermissions.check!(user_id, :create, :speaker)
-
-    speaker_changeset = Speaker.changeset(%Speaker{}, %{full_name: full_name})
-
-    Multi.new()
-    |> Multi.insert(:speaker, speaker_changeset)
-    |> Multi.run(:video_speaker, fn _repo, %{speaker: speaker} ->
-      # Insert association between video and speaker
-      %VideoSpeaker{speaker_id: speaker.id, video_id: video_id}
-      |> VideoSpeaker.changeset()
-      |> Repo.insert()
-    end)
-    |> Multi.run(:action_create, fn _repo, %{speaker: speaker} ->
-      Repo.insert(action_create(user_id, speaker))
-    end)
-    |> Multi.run(:action_add, fn _repo, %{speaker: speaker} ->
-      Repo.insert(action_add(user_id, video_id, speaker))
-    end)
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{speaker: speaker}} ->
+    case Speakers.create_speaker_and_add_to_video(user_id, video_id, full_name) do
+      {:ok, speaker} ->
         Subscriptions.publish_speaker_added(speaker, video_id)
         CF.Algolia.VideosIndex.reindex_by_id(video_id)
         SpeakersIndex.save_object(speaker)
         {:ok, speaker}
 
-      {:error, :speaker, changeset, %{}} ->
+      {:error, :invalid_speaker} ->
         {:error, "Invalid speaker data"}
 
-      _ ->
+      {:error, _} ->
         {:error, "Failed to create speaker"}
     end
   end
@@ -152,21 +108,14 @@ defmodule CF.Graphql.Resolvers.Speakers do
     speaker_id = String.to_integer(speaker_id)
 
     speaker = Repo.get!(Speaker, speaker_id)
-    UserPermissions.check!(user_id, :remove, :speaker)
 
-    video_speaker = %VideoSpeaker{speaker_id: speaker.id, video_id: video_id}
-
-    Multi.new()
-    |> Multi.delete(:video_speaker, VideoSpeaker.changeset(video_speaker))
-    |> Multi.insert(:action_remove, action_remove(user_id, video_id, speaker))
-    |> Repo.transaction()
-    |> case do
-      {:ok, _} ->
+    case Speakers.remove_speaker_from_video(user_id, video_id, speaker) do
+      {:ok, speaker_id} ->
         Subscriptions.publish_speaker_removed(speaker_id, video_id)
         CF.Algolia.VideosIndex.reindex_by_id(video_id)
         {:ok, %{id: speaker_id}}
 
-      {:error, _operation, reason, _changes} ->
+      {:error, reason} ->
         {:error, reason}
     end
   end
@@ -177,36 +126,23 @@ defmodule CF.Graphql.Resolvers.Speakers do
   def update_speaker(_root, %{id: id} = args, %{context: %{user: user}}) do
     user_id = user.id
     speaker = Repo.get!(Speaker, id)
-    UserPermissions.check!(user_id, :update, :speaker)
-
-    # Remove id from args as it's not part of the changeset
     update_args = Map.delete(args, :id)
 
-    speaker
-    |> Speaker.changeset(update_args)
-    |> Repo.update()
-    |> case do
+    case Speakers.update_speaker(user_id, speaker, update_args) do
       {:ok, updated_speaker} ->
-        # Publish subscription updates asynchronously
         Task.start(fn ->
-          speaker_video_ids =
-            Repo.all(
-              from(vs in VideoSpeaker, where: vs.speaker_id == ^speaker.id, select: vs.video_id)
-            )
-
-          Enum.each(speaker_video_ids, fn video_id ->
+          Enum.each(Speakers.video_ids_for_speaker(speaker.id), fn video_id ->
             Subscriptions.publish_speaker_updated(updated_speaker, video_id)
           end)
         end)
 
-        # Update search index asynchronously
         Task.start(fn ->
           CF.Algolia.SpeakersIndex.save_object(updated_speaker)
         end)
 
         {:ok, updated_speaker}
 
-      {:error, changeset} ->
+      {:error, _changeset} ->
         {:error, "Failed to update speaker"}
     end
   end
@@ -222,22 +158,15 @@ defmodule CF.Graphql.Resolvers.Speakers do
     speaker_id = String.to_integer(speaker_id)
 
     speaker = Repo.get!(Speaker, speaker_id)
-    UserPermissions.check!(user_id, :restore, :speaker)
 
-    video_speaker = %VideoSpeaker{speaker_id: speaker.id, video_id: video_id}
-
-    Multi.new()
-    |> Multi.insert(:video_speaker, VideoSpeaker.changeset(video_speaker))
-    |> Multi.insert(:action_restore, action_restore(user_id, video_id, speaker))
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{action_restore: action}} ->
+    case Speakers.restore_speaker_to_video(user_id, video_id, speaker) do
+      {:ok, %{speaker: speaker, action: action}} ->
         Subscriptions.publish_video_history_action(action, video_id)
         Subscriptions.publish_speaker_added(speaker, video_id)
         CF.Algolia.VideosIndex.reindex_by_id(video_id)
         {:ok, speaker}
 
-      {:error, _operation, reason, _changes} ->
+      {:error, reason} ->
         {:error, reason}
     end
   end

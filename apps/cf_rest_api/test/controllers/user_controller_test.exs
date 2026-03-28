@@ -143,6 +143,8 @@ defmodule CF.RestApi.UserControllerTest do
   end
 
   describe "invitations" do
+    @describetag skip: "REST /users/request_invitation is disabled in router"
+
     test "should say ok everytime the user request with valid info" do
       email = "test@email.fr"
       response(request_invite(email), 204)

@@ -2,6 +2,8 @@ defmodule CF.RestApi.VideoControllerTest do
   use CF.RestApi.ConnCase
   import DB.Factory
 
+  @moduletag skip: "REST /videos routes are disabled in router"
+
   alias DB.Schema.Video
 
   describe "GET /videos" do

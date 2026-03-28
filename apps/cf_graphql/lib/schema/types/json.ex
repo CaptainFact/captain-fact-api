@@ -34,5 +34,3 @@ defmodule CF.Graphql.Schema.Types.JSON do
     :error
   end
 end
-
-

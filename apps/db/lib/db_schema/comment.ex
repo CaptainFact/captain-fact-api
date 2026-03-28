@@ -107,7 +107,11 @@ defmodule DB.Schema.Comment do
     text = get_field(changeset, :text)
     # Text cannot contains URLs
     if text && Regex.match?(@url_regex, text) do
-      add_error(changeset, :text, "Cannot include URL. Use source field instead")
+      add_error(
+        changeset,
+        :text,
+        "The comment body cannot contain URLs. Use the source field instead."
+      )
     else
       changeset
     end

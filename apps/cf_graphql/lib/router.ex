@@ -21,7 +21,7 @@ defmodule CF.GraphQLWeb.Router do
         Absinthe.Plug.GraphiQL,
         schema: CF.Graphql.Schema,
         analyze_complexity: true,
-        max_complexity: 400
+        max_complexity: 500
       )
     end
 
@@ -30,7 +30,7 @@ defmodule CF.GraphQLWeb.Router do
       CF.Graphql.CustomAbsinthePlug,
       schema: CF.Graphql.Schema,
       analyze_complexity: true,
-      max_complexity: 400
+      max_complexity: 500
     )
   end
 end

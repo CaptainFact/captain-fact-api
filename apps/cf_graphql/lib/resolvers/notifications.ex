@@ -31,6 +31,15 @@ defmodule CF.Graphql.Resolvers.Notifications do
     if user.id !== loggedin_user.id do
       {:error, "unauthorized"}
     else
+      params =
+        case params do
+          %{video_hash_id: vid} when not is_nil(vid) ->
+            Map.drop(params, [:is_subscribed])
+
+          _ ->
+            params
+        end
+
       {:ok, Subscriptions.all(user, Map.to_list(params))}
     end
   end

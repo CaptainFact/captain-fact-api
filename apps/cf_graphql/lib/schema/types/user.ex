@@ -57,6 +57,17 @@ defmodule CF.Graphql.Schema.Types.User do
     @desc "Whether the user is a publisher"
     field(:is_publisher, :boolean)
 
+    @desc "User's email address (only returned for the authenticated user's own profile)"
+    field :email, :string do
+      resolve(fn
+        user, _, %{context: %{user: current_user}} ->
+          if current_user.id == user.id, do: {:ok, user.email}, else: {:ok, nil}
+
+        _, _, _ ->
+          {:ok, nil}
+      end)
+    end
+
     @desc "User's registration datetime"
     field(:registered_at, non_null(:naive_datetime),
       do: resolve(fn u, _, _ -> {:ok, u.inserted_at} end)
@@ -94,6 +105,8 @@ defmodule CF.Graphql.Schema.Types.User do
       arg(:scopes, list_of(:string), default_value: ["video", "statement"])
       arg(:is_subscribed, :boolean, default_value: true)
       arg(:video_id, :integer)
+      @desc "Filter to subscriptions for the video with this hash id (same as URL segment)"
+      arg(:video_hash_id, :id)
       resolve(&Resolvers.Notifications.subscriptions/3)
     end
 
@@ -110,6 +123,13 @@ defmodule CF.Graphql.Schema.Types.User do
       arg(:video_hash_id, :id)
       arg(:video_id, :id)
       resolve(&Resolvers.Users.votes/3)
+    end
+
+    @desc "User's flags on comments as a map (commentId => true) for the given video"
+    field :flags, :json do
+      arg(:video_hash_id, :id)
+      arg(:video_id, :id)
+      resolve(&Resolvers.Users.flags/3)
     end
 
     @desc "Number of comment flags available for this user (-1 means unlimited)"

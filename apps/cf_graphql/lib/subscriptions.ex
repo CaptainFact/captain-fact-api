@@ -92,11 +92,3 @@ defmodule CF.Graphql.Subscriptions do
     Subscription.publish(Endpoint, payload, [{event, topic}])
   end
 end
-
-
-
-
-
-
-
-

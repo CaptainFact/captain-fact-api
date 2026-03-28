@@ -39,6 +39,7 @@ defmodule DB.Type.VideoHashId do
   def decode(hash) do
     case do_decode(hash) do
       {:ok, [id]} -> {:ok, id}
+      {:ok, _} -> {:error, :invalid_hash}
       error -> error
     end
   end

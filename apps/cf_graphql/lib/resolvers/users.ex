@@ -11,10 +11,7 @@ defmodule CF.Graphql.Resolvers.Users do
   alias Kaur.Result
 
   alias DB.Repo
-  alias DB.Schema.User
-  alias DB.Schema.UserAction
-  alias DB.Schema.Vote
-  alias DB.Schema.Video
+  alias DB.Schema.{Comment, Flag, Statement, User, UserAction, Video, Vote}
 
   @doc """
   Resolve a user by its id or username
@@ -145,6 +142,61 @@ defmodule CF.Graphql.Resolvers.Users do
       |> Enum.into(%{})
 
     {:ok, votes}
+  end
+
+  @spec flags(nil | %{:id => any(), optional(any()) => any()}, any(), any()) :: {:ok, map()}
+  @doc """
+  Get comment IDs the user has flagged for a specific video as a map (commentId => true).
+  Returns all flagged comment IDs if neither video_id nor video_hash_id are provided.
+  """
+  def flags(nil, _, _), do: {:ok, %{}}
+
+  def flags(user, args, _) do
+    video_id = Map.get(args, :video_id)
+    video_hash_id = Map.get(args, :video_hash_id)
+
+    query =
+      from(
+        f in Flag,
+        join: a in UserAction,
+        on: f.action_id == a.id,
+        where: f.source_user_id == ^user.id,
+        where: not is_nil(a.comment_id)
+      )
+
+    query =
+      cond do
+        video_id ->
+          from([f, a] in query,
+            join: c in Comment,
+            on: c.id == a.comment_id,
+            join: s in Statement,
+            on: c.statement_id == s.id,
+            where: s.video_id == ^video_id
+          )
+
+        video_hash_id ->
+          from([f, a] in query,
+            join: c in Comment,
+            on: c.id == a.comment_id,
+            join: s in Statement,
+            on: c.statement_id == s.id,
+            join: v in Video,
+            on: s.video_id == v.id,
+            where: v.hash_id == ^video_hash_id
+          )
+
+        true ->
+          query
+      end
+
+    flags =
+      query
+      |> select([_f, a], {a.comment_id, true})
+      |> Repo.all()
+      |> Enum.into(%{})
+
+    {:ok, flags}
   end
 
   defp filter_by_user_action_direction(query, user, direction) when direction == :all,

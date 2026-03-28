@@ -3,6 +3,8 @@ defmodule CF.RestApi.ModerationControllerTest do
   import DB.Factory
   import CF.TestUtils, only: [flag_comments: 2]
 
+  @moduletag skip: "REST /moderation routes are disabled in router"
+
   alias DB.Schema.UserAction
   alias DB.Schema.ModerationUserFeedback
 

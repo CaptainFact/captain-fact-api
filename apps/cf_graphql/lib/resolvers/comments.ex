@@ -59,7 +59,7 @@ defmodule CF.Graphql.Resolvers.Comments do
       end
     rescue
       exception ->
-        {:error, exception}
+        {:error, Exception.message(exception)}
     end
   end
 
@@ -102,6 +102,7 @@ defmodule CF.Graphql.Resolvers.Comments do
   def flag(_root, %{comment_id: comment_id_str, reason: reason}, %{context: %{user: user}}) do
     # Get comment and preload statement to access video_id
     comment_id = String.to_integer(comment_id_str)
+
     video_id =
       Comment
       |> join(:inner, [c], s in assoc(c, :statement))
@@ -109,7 +110,6 @@ defmodule CF.Graphql.Resolvers.Comments do
       |> where([c, s], c.id == ^comment_id)
       |> Repo.one!()
 
-    IO.inspect(%{comment_id: comment_id, reason: reason, video_id: video_id})
     Flagger.flag!(user.id, video_id, comment_id, reason)
     {:ok, %{id: comment_id, video_id: video_id}}
   end

@@ -17,9 +17,25 @@ defmodule CF.Graphql.ConnCase do
       import Plug.Conn
       import Phoenix.ConnTest
       import CF.GraphQLWeb.Router.Helpers
+      import DB.Factory
+
+      alias CF.Authenticator.GuardianImpl
 
       # The default endpoint for testing
       @endpoint CF.GraphQLWeb.Endpoint
+
+      def build_authenticated_conn(user) do
+        {:ok, token, _} = GuardianImpl.encode_and_sign(user)
+
+        Phoenix.ConnTest.build_conn()
+        |> Plug.Conn.put_req_header("authorization", "Bearer #{token}")
+      end
+
+      def graphql_post(conn, query, variables \\ %{}) do
+        conn
+        |> Plug.Conn.put_req_header("content-type", "application/json")
+        |> Phoenix.ConnTest.post("/", Jason.encode!(%{query: query, variables: variables}))
+      end
     end
   end
 

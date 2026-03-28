@@ -31,7 +31,11 @@ defmodule CF.RestApi.UserView do
   end
 
   def render("user.json", %{user: user}) do
-    {:ok, available_flags} = UserPermissions.check(user, :flag, :comment)
+    available_flags =
+      case UserPermissions.check(user, :flag, :comment) do
+        {:ok, n} -> n
+        {:error, _} -> 0
+      end
 
     %{
       id: user.id,

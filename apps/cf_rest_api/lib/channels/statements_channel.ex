@@ -3,14 +3,10 @@ defmodule CF.RestApi.StatementsChannel do
 
   import CF.RestApi.UserSocket, only: [handle_in_authenticated: 4]
 
-  import CF.Actions.ActionCreator, only: [action_create: 2, action_remove: 2]
-
-  alias Ecto.Multi
   alias DB.Type.VideoHashId
   alias DB.Schema.Statement
 
   alias CF.Statements
-  alias CF.Accounts.UserPermissions
   alias CF.Graphql.Subscriptions
 
   alias CF.RestApi.{StatementView, ErrorView}
@@ -37,24 +33,17 @@ defmodule CF.RestApi.StatementsChannel do
   """
   def handle_in_authenticated!("new_statement", params, socket) do
     %{user_id: user_id, video_id: video_id} = socket.assigns
-    UserPermissions.check!(user_id, :create, :statement)
-    changeset = Statement.changeset(%Statement{video_id: video_id}, params)
+    attrs = Map.put(params, "video_id", video_id)
 
-    Multi.new()
-    |> Multi.insert(:statement, changeset)
-    |> Multi.run(:action_create, fn _repo, %{statement: statement} ->
-      Repo.insert(action_create(user_id, statement))
-    end)
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{statement: statement}} ->
+    case Statements.create_statement(user_id, attrs) do
+      {:ok, statement} ->
         rendered_statement = StatementView.render("show.json", statement: statement)
         broadcast!(socket, "statement_added", rendered_statement)
         Subscriptions.publish_statement_added(statement)
         CF.Algolia.StatementsIndex.save_object(statement)
         {:reply, {:ok, rendered_statement}, socket}
 
-      {:error, _operation, reason, _changes} ->
+      {:error, reason} ->
         {:reply, {:error, ErrorView.render("error.json", reason: reason)}, socket}
     end
   end
@@ -77,21 +66,16 @@ defmodule CF.RestApi.StatementsChannel do
 
   def handle_in_authenticated!("remove_statement", %{"id" => id}, socket) do
     %{user_id: user_id} = socket.assigns
-    UserPermissions.check!(user_id, :remove, :statement)
     statement = Repo.get_by!(Statement, id: id, is_removed: false)
 
-    Multi.new()
-    |> Multi.update(:statement, Statement.changeset_remove(statement))
-    |> Multi.insert(:action_remove, action_remove(user_id, statement))
-    |> Repo.transaction()
-    |> case do
-      {:ok, _} ->
+    case Statements.remove_statement(user_id, statement) do
+      {:ok, statement} ->
         broadcast!(socket, "statement_removed", %{id: id})
         Subscriptions.publish_statement_removed(id, socket.assigns.video_id)
         CF.Algolia.StatementsIndex.delete_object(statement)
         {:reply, :ok, socket}
 
-      {:error, _, _reason, _} ->
+      {:error, _reason} ->
         {:reply, :error, socket}
     end
   end

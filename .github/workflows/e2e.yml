@@ -9,11 +9,15 @@ jobs:
   cypress:
     runs-on: ubuntu-22.04 # Remember to update this when changing Erlang version. See https://github.com/erlef/setup-beam
     services:
-      db:
-        image: captainfact/dev-db:latest
+      postgres:
+        image: postgres:16-alpine
         ports: ["5432:5432"]
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: captain_fact_test
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U postgres"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -62,7 +66,7 @@ jobs:
         run: mix compile
       - name: Prepare DB
         working-directory: api
-        run: mix ecto.create && mix ecto.migrate
+        run: mix ecto.create && mix ecto.migrate && mix ecto.seed
       # Setup Frontend
       - uses: actions/setup-node@v3
         with:

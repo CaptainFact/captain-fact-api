@@ -61,45 +61,51 @@ defmodule CF.Comments do
       source_url &&
         (Sources.get_by_url(source_url) || Source.changeset(%Source{}, %{url: source_url}))
 
-    comment_changeset =
-      user
-      |> Ecto.build_assoc(:comments)
-      |> Ecto.Changeset.change()
-      |> Ecto.Changeset.put_assoc(:source, source)
-      |> Comment.changeset(params)
+    # Validate source changeset before entering the transaction so we can
+    # return a readable error instead of letting Repo.insert! raise.
+    with :ok <- validate_source_changeset(source) do
+      comment_changeset =
+        user
+        |> Ecto.build_assoc(:comments)
+        |> Ecto.Changeset.change()
+        |> Ecto.Changeset.put_assoc(:source, source)
+        |> Comment.changeset(params)
 
-    Multi.new()
-    |> Multi.run(:comment, fn _repo, _changes ->
-      comment_changeset
-      |> Repo.insert!()
-      |> Map.put(:user, user)
-      |> Repo.preload([:source, :statement])
-      |> Map.put(:score, 0)
-      |> Result.ok()
-    end)
-    |> Multi.run(:action, fn _repo, %{comment: comment} ->
-      Repo.insert(action_create(user.id, video_id, comment, source_url))
-    end)
-    |> Multi.run(:suscription, fn _repo, %{comment: comment} ->
-      Subscriptions.subscribe(user, comment, :is_author)
-    end)
-    |> Repo.transaction()
-    |> case do
-      {:error, _operation, reason, _changes} ->
-        {:error, reason}
+      Multi.new()
+      |> Multi.run(:comment, fn _repo, _changes ->
+        case Repo.insert(comment_changeset) do
+          {:ok, comment} ->
+            comment
+            |> Map.put(:user, user)
+            |> Repo.preload([:source, :statement])
+            |> Map.put(:score, 0)
+            |> Result.ok()
 
-      {:ok, %{comment: comment}} ->
-        # Set default on comment
-        full_comment = comment
-
-        # If new source, fetch metadata
-        if source && is_nil(Map.get(source, :id)) do
-          callback = source_fetch_callback || fn _comment -> :ok end
-          fetch_source_metadata_and_update_comment(comment, callback)
+          {:error, changeset} ->
+            {:error, format_changeset_errors(changeset)}
         end
+      end)
+      |> Multi.run(:action, fn _repo, %{comment: comment} ->
+        Repo.insert(action_create(user.id, video_id, comment, source_url))
+      end)
+      |> Multi.run(:suscription, fn _repo, %{comment: comment} ->
+        Subscriptions.subscribe(user, comment, :is_author)
+      end)
+      |> Repo.transaction()
+      |> case do
+        {:error, _operation, reason, _changes} ->
+          {:error, reason}
 
-        # Return comment
-        full_comment
+        {:ok, %{comment: comment}} ->
+          full_comment = comment
+
+          if source && is_nil(Map.get(source, :id)) do
+            callback = source_fetch_callback || fn _comment -> :ok end
+            fetch_source_metadata_and_update_comment(comment, callback)
+          end
+
+          full_comment
+      end
     end
   end
 
@@ -267,6 +273,26 @@ defmodule CF.Comments do
   defp reverse_vote_type(:vote_up), do: :revert_vote_up
   defp reverse_vote_type(:vote_down), do: :revert_vote_down
   defp reverse_vote_type(:self_vote), do: :revert_self_vote
+
+  defp validate_source_changeset(nil), do: :ok
+  defp validate_source_changeset(%Source{}), do: :ok
+  defp validate_source_changeset(%Ecto.Changeset{valid?: true}), do: :ok
+
+  defp validate_source_changeset(changeset = %Ecto.Changeset{valid?: false}) do
+    {:error, "source #{format_changeset_errors(changeset)}"}
+  end
+
+  defp format_changeset_errors(changeset) do
+    changeset
+    |> Ecto.Changeset.traverse_errors(fn {msg, opts} ->
+      Regex.replace(~r/%{(\w+)}/, msg, fn _, key ->
+        opts |> Keyword.get(String.to_existing_atom(key), key) |> to_string()
+      end)
+    end)
+    |> Enum.map_join(", ", fn {field, errors} ->
+      "#{field} #{Enum.join(errors, ", ")}"
+    end)
+  end
 
   defp fetch_source_metadata_and_update_comment(%Comment{source: nil}, _callback), do: nil
 

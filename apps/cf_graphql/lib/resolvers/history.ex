@@ -13,8 +13,3 @@ defmodule CF.Graphql.Resolvers.History do
     {:ok, History.statement_history(statement_id)}
   end
 end
-
-
-
-
-

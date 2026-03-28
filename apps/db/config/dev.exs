@@ -1,6 +1,6 @@
 import Config
 
-# Configure your database
+# Configure your database (CF_DB_HOSTNAME defaults to localhost; devcontainer sets "database")
 config :db, DB.Repo,
   hostname:
     if(

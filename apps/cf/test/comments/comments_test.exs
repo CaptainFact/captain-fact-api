@@ -35,9 +35,7 @@ defmodule CF.Comments.CommentsTest do
       text = String.duplicate("x", Comment.max_length() + 1)
       params = %{statement_id: statement.id, text: text}
 
-      assert_raise Ecto.InvalidChangesetError, fn ->
-        Comments.add_comment(user, statement.video_id, params)
-      end
+      assert {:error, _reason} = Comments.add_comment(user, statement.video_id, params)
     end
 
     test "returns comment and call callback once updated" do

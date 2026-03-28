@@ -30,11 +30,3 @@ defmodule CF.GraphQLWeb.UserSocket do
   defp fetch_token(%{"Authorization" => "Bearer " <> token}), do: {:ok, token}
   defp fetch_token(_), do: :error
 end
-
-
-
-
-
-
-
-

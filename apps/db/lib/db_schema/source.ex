@@ -15,13 +15,6 @@ defmodule DB.Schema.Source do
 
   @url_max_length 2048
 
-  # Allow to add localhost urls as sources during tests
-  @url_regex if Application.compile_env(:db, :env, :prod) == :test,
-               do:
-                 ~r/(^https?:\/\/[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*))|localhost/,
-               else:
-                 ~r/^https?:\/\/[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/
-
   @doc """
   Get max URL length.
   See https://boutell.com/newfaq/misc/urllength.html
@@ -59,9 +52,47 @@ defmodule DB.Schema.Source do
     changeset
     |> validate_required([:url])
     |> unique_constraint(:url)
-    |> validate_format(:url, @url_regex)
     |> validate_length(:url, min: 10, max: @url_max_length)
+    |> validate_change(:url, &validate_url_field/2)
     |> validate_change(:file_mime_type, &validate_file_mime_type/2)
+  end
+
+  defp validate_url_field(:url, url) do
+    if url_valid?(url), do: [], else: [url: "has invalid format"]
+  end
+
+  defp url_valid?(url) when is_binary(url) do
+    uri = URI.parse(url)
+
+    with true <- uri.scheme in ["http", "https"],
+         host when is_binary(host) and host != "" <- uri.host,
+         true <- host_valid?(host) do
+      true
+    else
+      _ -> false
+    end
+  end
+
+  defp url_valid?(_), do: false
+
+  # Determined at compile time — allows localhost only in the test build.
+  @allow_localhost Application.compile_env(:db, :env, :prod) == :test
+
+  defp host_valid?(host) do
+    cond do
+      loopback_or_localhost_host?(host) -> @allow_localhost
+      not String.contains?(host, ".") -> false
+      true -> true
+    end
+  end
+
+  defp loopback_or_localhost_host?(host) do
+    host = String.downcase(host)
+
+    host == "localhost" or
+      String.ends_with?(host, ".localhost") or
+      Regex.match?(~r/^127\./, host) or
+      host in ["::1", "[::1]", "0:0:0:0:0:0:0:1"]
   end
 
   defp validate_file_mime_type(:file_mime_type, mime_type) do
