@@ -51,6 +51,10 @@ defmodule CF.ReverseProxy.PlugTest do
     end
   end
 
+  test "init/1 passes options through" do
+    assert CF.ReverseProxy.Plug.init(foo: 1) == [foo: 1]
+  end
+
   test "GET /status returns 200 Ok" do
     conn = call(:get, "/status")
     assert conn.status == 200
@@ -124,6 +128,16 @@ defmodule CF.ReverseProxy.PlugTest do
     test "unknown subdomain defaults to REST API (prod only)", %{routing: mode} do
       if mode == :prod do
         conn = call(:get, "/", host: "other.captainfact.io")
+        assert conn.status == 200
+        assert stub_role(conn) == "rest"
+      else
+        :ok
+      end
+    end
+
+    test "dev strips /rest path prefix and forwards to REST stub", %{routing: mode} do
+      if mode == :dev do
+        conn = call(:get, "/rest/foo")
         assert conn.status == 200
         assert stub_role(conn) == "rest"
       else
