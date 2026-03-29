@@ -2,7 +2,7 @@ defmodule DB.Schema.Vote do
   use Ecto.Schema
   import Ecto.{Changeset, Query}
 
-  alias DB.Schema.{User, Statement, Comment}
+  alias DB.Schema.{User, Statement, Comment, Video}
 
   @type vote_value :: -1 | 1
 
@@ -41,6 +41,19 @@ defmodule DB.Schema.Vote do
       join: s in Statement,
       on: c.statement_id == s.id,
       where: s.video_id == ^video_id
+    )
+  end
+
+  def video_votes(query, %{hash_id: video_hash_id}) do
+    from(
+      v in query,
+      join: c in Comment,
+      on: c.id == v.comment_id,
+      join: s in Statement,
+      on: c.statement_id == s.id,
+      join: vd in Video,
+      on: s.video_id == vd.id,
+      where: vd.hash_id == ^video_hash_id
     )
   end
 

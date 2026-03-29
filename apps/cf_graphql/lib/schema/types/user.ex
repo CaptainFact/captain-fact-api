@@ -5,6 +5,8 @@ defmodule CF.Graphql.Schema.Types.User do
 
   use Absinthe.Schema.Notation
 
+  import_types(Absinthe.Type.Custom)
+
   import CF.Graphql.Schema.Utils
   alias CF.Graphql.Schema.Middleware
   alias CF.Graphql.Resolvers
@@ -49,8 +51,27 @@ defmodule CF.Graphql.Schema.Types.User do
     @desc "A list of user's achievements as a list of integers"
     field(:achievements, list_of(:integer))
 
+    @desc "User's speaker ID (if any)"
+    field(:speaker_id, :string)
+
+    @desc "Whether the user is a publisher"
+    field(:is_publisher, :boolean)
+
+    @desc "User's email address (only returned for the authenticated user's own profile)"
+    field :email, :string do
+      resolve(fn
+        user, _, %{context: %{user: current_user}} ->
+          if current_user.id == user.id, do: {:ok, user.email}, else: {:ok, nil}
+
+        _, _, _ ->
+          {:ok, nil}
+      end)
+    end
+
     @desc "User's registration datetime"
-    field(:registered_at, :string, do: fn u, _, _ -> {:ok, u.inserted_at} end)
+    field(:registered_at, non_null(:naive_datetime),
+      do: resolve(fn u, _, _ -> {:ok, u.inserted_at} end)
+    )
 
     @desc "User activity log"
     field :actions, :activity_log do
@@ -84,6 +105,8 @@ defmodule CF.Graphql.Schema.Types.User do
       arg(:scopes, list_of(:string), default_value: ["video", "statement"])
       arg(:is_subscribed, :boolean, default_value: true)
       arg(:video_id, :integer)
+      @desc "Filter to subscriptions for the video with this hash id (same as URL segment)"
+      arg(:video_hash_id, :id)
       resolve(&Resolvers.Notifications.subscriptions/3)
     end
 
@@ -93,6 +116,26 @@ defmodule CF.Graphql.Schema.Types.User do
       arg(:offset, :integer, default_value: 1)
       arg(:limit, :integer, default_value: 10)
       resolve(&Resolvers.Users.videos_added/3)
+    end
+
+    @desc "User's votes on comments as a map (commentId => vote value)"
+    field :votes, :json do
+      arg(:video_hash_id, :id)
+      arg(:video_id, :id)
+      resolve(&Resolvers.Users.votes/3)
+    end
+
+    @desc "User's flags on comments as a map (commentId => true) for the given video"
+    field :flags, :json do
+      arg(:video_hash_id, :id)
+      arg(:video_id, :id)
+      resolve(&Resolvers.Users.flags/3)
+    end
+
+    @desc "Number of comment flags available for this user (-1 means unlimited)"
+    field :available_flags, :integer do
+      middleware(Middleware.RequireAuthentication)
+      resolve(&Resolvers.Users.available_flags/3)
     end
   end
 

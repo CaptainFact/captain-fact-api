@@ -37,6 +37,13 @@ defmodule CF.Graphql.Resolvers.Videos do
     end
   end
 
+  def search(_root, %{url: url}, _info) do
+    case CF.Videos.get_video_by_url(url) do
+      nil -> {:ok, nil}
+      video -> {:ok, video}
+    end
+  end
+
   # Deprecated: Use paginated_list/3 instead
   # Keeping for backward compatibility with deprecated all_videos field
   def list(_root, args, _info) do
@@ -102,6 +109,27 @@ defmodule CF.Graphql.Resolvers.Videos do
     |> Enum.group_by(& &1.video_id)
   end
 
+  def create(_root, %{url: url, unlisted: unlisted}, %{
+        context: %{user: user}
+      }) do
+    case CF.Videos.get_video_by_url(url) do
+      nil ->
+        case CF.Videos.create!(user, url, unlisted: unlisted) do
+          {:ok, video} ->
+            {:ok, video}
+
+          {:error, error} when is_binary(error) ->
+            {:error, error}
+
+          {:error, _reason} ->
+            {:error, "Failed to create video"}
+        end
+
+      existing_video ->
+        {:ok, existing_video}
+    end
+  end
+
   def start_automatic_statements_extraction(_root, %{video_id: video_id}, %{
         context: %{user: user}
       }) do
@@ -137,6 +165,18 @@ defmodule CF.Graphql.Resolvers.Videos do
 
       {:error, _} ->
         {:error, "Failed to update video"}
+    end
+  end
+
+  def shift_statements(_root, %{video_id: video_id, youtube_offset: youtube_offset}, %{
+        context: %{user: user}
+      }) do
+    case CF.Videos.shift_statements(user, video_id, %{youtube_offset: youtube_offset}) do
+      {:ok, video} ->
+        {:ok, video}
+
+      {:error, _reason} ->
+        {:error, "Failed to shift statements"}
     end
   end
 

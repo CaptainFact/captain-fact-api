@@ -1,6 +1,6 @@
 defmodule CF.Graphql.Schema do
   use Absinthe.Schema
-  alias CF.Graphql.Resolvers
+  alias CF.Graphql.{Resolvers, Subscriptions}
   alias CF.Graphql.Schema.Middleware
 
   import_types(Absinthe.Plug.Types)
@@ -8,6 +8,9 @@ defmodule CF.Graphql.Schema do
   import_types(CF.Graphql.Schema.Types.{
     AppInfo,
     Comment,
+    Flag,
+    JSON,
+    ModerationEntry,
     Notification,
     Paginated,
     Source,
@@ -15,6 +18,7 @@ defmodule CF.Graphql.Schema do
     Statement,
     Statistics,
     Subscription,
+    SubscriptionEvents,
     UserAction,
     User,
     Video,
@@ -94,6 +98,45 @@ defmodule CF.Graphql.Schema do
     field :all_statistics, :statistics do
       resolve(&Resolvers.Statistics.default/3)
     end
+
+    @desc "Search for speakers by name"
+    field :search_speakers, list_of(:speaker) do
+      arg(:query, non_null(:string))
+      arg(:limit, :integer, default_value: 5)
+
+      resolve(&Resolvers.Speakers.search_speakers/3)
+    end
+
+    @desc "Get a single speaker"
+    field :speaker, :speaker do
+      arg(:id, :id)
+      arg(:slug, :string)
+      resolve(&Resolvers.Speakers.get/3)
+    end
+
+    @desc "Get history actions for a video"
+    field :video_history_actions, list_of(:user_action) do
+      arg(:video_id, non_null(:id))
+      resolve(&Resolvers.History.video_history_actions/3)
+    end
+
+    @desc "Get history actions for a statement"
+    field :statement_history_actions, list_of(:user_action) do
+      arg(:statement_id, non_null(:id))
+      resolve(&Resolvers.History.statement_history_actions/3)
+    end
+
+    @desc "Search for a video by URL. Returns the video if it exists, null otherwise."
+    field :search_video, :video do
+      arg(:url, non_null(:string))
+      resolve(&Resolvers.Videos.search/3)
+    end
+
+    @desc "Get a random action requiring moderation"
+    field :random_moderation, :moderation_entry do
+      middleware(Middleware.RequireAuthentication)
+      resolve(&Resolvers.Moderation.random/3)
+    end
   end
 
   # Mutation API
@@ -131,6 +174,17 @@ defmodule CF.Graphql.Schema do
       resolve(&Resolvers.Videos.start_automatic_statements_extraction/3)
     end
 
+    @desc "Create a new video. If it already exists, returns the existing video."
+    field :create_video, :video do
+      middleware(Middleware.RequireAuthentication)
+      middleware(Middleware.RequireReputation, 75)
+
+      arg(:url, non_null(:string))
+      arg(:unlisted, non_null(:boolean))
+
+      resolve(&Resolvers.Videos.create/3)
+    end
+
     field :edit_video, :video do
       middleware(Middleware.RequireAuthentication)
       # MIN_REPUTATION_UPDATE_VIDEO
@@ -142,6 +196,17 @@ defmodule CF.Graphql.Schema do
       resolve(&Resolvers.Videos.edit/3)
     end
 
+    @desc "Shift all statements of a video by a given offset"
+    field :shift_statements, :video do
+      middleware(Middleware.RequireAuthentication)
+      middleware(Middleware.RequireReputation, 75)
+
+      arg(:video_id, non_null(:id))
+      arg(:youtube_offset, non_null(:integer))
+
+      resolve(&Resolvers.Videos.shift_statements/3)
+    end
+
     field :set_video_captions, :video do
       middleware(Middleware.RequireAuthentication)
       middleware(Middleware.RequireReputation, 450)
@@ -151,5 +216,247 @@ defmodule CF.Graphql.Schema do
 
       resolve(&Resolvers.Videos.set_captions/3)
     end
+
+    @desc "Create a new statement on a video"
+    field :create_statement, :statement do
+      middleware(Middleware.RequireAuthentication)
+
+      arg(:video_id, non_null(:id))
+      arg(:text, non_null(:string))
+      arg(:time, non_null(:integer))
+      arg(:speaker_id, :id)
+      arg(:is_draft, :boolean)
+
+      resolve(&Resolvers.Statements.create/3)
+    end
+
+    @desc "Update an existing statement"
+    field :update_statement, :statement do
+      middleware(Middleware.RequireAuthentication)
+
+      arg(:id, non_null(:id))
+      arg(:text, :string)
+      arg(:time, :integer)
+      arg(:speaker_id, :id)
+      arg(:is_draft, :boolean)
+
+      resolve(&Resolvers.Statements.update/3)
+    end
+
+    @desc "Delete an existing statement"
+    field :delete_statement, :statement_removed do
+      middleware(Middleware.RequireAuthentication)
+      middleware(Middleware.RequireReputation, 75)
+
+      arg(:id, non_null(:id))
+
+      resolve(&Resolvers.Statements.delete/3)
+    end
+
+    @desc "Restore a deleted statement"
+    field :restore_statement, :statement do
+      middleware(Middleware.RequireAuthentication)
+
+      arg(:id, non_null(:id))
+
+      resolve(&Resolvers.Statements.restore/3)
+    end
+
+    @desc "Create a new comment on a statement"
+    field :create_comment, :comment do
+      middleware(Middleware.RequireAuthentication)
+
+      arg(:statement_id, non_null(:id))
+      arg(:text, :string)
+      arg(:source, :string)
+      arg(:reply_to_id, :id)
+      arg(:approve, :boolean)
+
+      resolve(&Resolvers.Comments.create/3)
+    end
+
+    @desc "Delete an existing comment"
+    field :delete_comment, :comment_removed do
+      middleware(Middleware.RequireAuthentication)
+
+      arg(:id, non_null(:id))
+
+      resolve(&Resolvers.Comments.delete/3)
+    end
+
+    @desc "Vote on a comment"
+    field :vote_comment, :comment do
+      middleware(Middleware.RequireAuthentication)
+
+      arg(:comment_id, non_null(:id))
+      arg(:value, non_null(:integer))
+
+      resolve(&Resolvers.Comments.vote/3)
+    end
+
+    @desc "Flag a comment"
+    field :flag_comment, :comment_flagged do
+      middleware(Middleware.RequireAuthentication)
+
+      arg(:comment_id, non_null(:id))
+      arg(:reason, non_null(:flag_reason))
+
+      resolve(&Resolvers.Comments.flag/3)
+    end
+
+    @desc "Add an existing speaker to a video"
+    field :add_speaker_to_video, :speaker do
+      middleware(Middleware.RequireAuthentication)
+
+      arg(:video_id, non_null(:id))
+      arg(:speaker_id, non_null(:id))
+
+      resolve(&Resolvers.Speakers.add_speaker_to_video/3)
+    end
+
+    @desc "Create a new speaker and add it to a video"
+    field :create_speaker, :speaker do
+      middleware(Middleware.RequireAuthentication)
+
+      arg(:video_id, non_null(:id))
+      arg(:full_name, non_null(:string))
+
+      resolve(&Resolvers.Speakers.create_speaker/3)
+    end
+
+    @desc "Remove a speaker from a video"
+    field :remove_speaker_from_video, :speaker_removed do
+      middleware(Middleware.RequireAuthentication)
+
+      arg(:video_id, non_null(:id))
+      arg(:speaker_id, non_null(:id))
+
+      resolve(&Resolvers.Speakers.remove_speaker_from_video/3)
+    end
+
+    @desc "Restore a removed speaker"
+    field :restore_speaker, :speaker do
+      middleware(Middleware.RequireAuthentication)
+
+      arg(:speaker_id, non_null(:id))
+      arg(:video_id, non_null(:id))
+
+      resolve(&Resolvers.Speakers.restore_speaker/3)
+    end
+
+    @desc "Update an existing speaker"
+    field :update_speaker, :speaker do
+      middleware(Middleware.RequireAuthentication)
+
+      arg(:id, non_null(:id))
+      arg(:full_name, :string)
+      arg(:title, :string)
+      arg(:wikidata_item_id, :string)
+
+      resolve(&Resolvers.Speakers.update_speaker/3)
+    end
+
+    @desc "Moderate a flagged action"
+    field :moderate_action, :moderation_feedback do
+      middleware(Middleware.RequireAuthentication)
+
+      arg(:action_id, non_null(:id))
+      arg(:reason, non_null(:integer))
+      arg(:value, non_null(:integer))
+
+      resolve(&Resolvers.Moderation.moderate_action/3)
+    end
+  end
+
+  subscription do
+    @desc "Listen for statements added on a video"
+    field :statement_added, :statement do
+      arg(:video_id, non_null(:id))
+      config(&topic_by_video/2)
+    end
+
+    @desc "Listen for statements updated on a video"
+    field :statement_updated, :statement do
+      arg(:video_id, non_null(:id))
+      config(&topic_by_video/2)
+    end
+
+    @desc "Listen for statements removed on a video"
+    field :statement_removed, :statement_removed do
+      arg(:video_id, non_null(:id))
+      config(&topic_by_video/2)
+    end
+
+    @desc "Listen for comments added on a video"
+    field :comment_added, :comment do
+      arg(:video_id, non_null(:id))
+      config(&topic_by_video/2)
+    end
+
+    @desc "Listen for comments updated on a video"
+    field :comment_updated, :comment do
+      arg(:video_id, non_null(:id))
+      config(&topic_by_video/2)
+    end
+
+    @desc "Listen for comments removed on a video"
+    field :comment_removed, :comment_removed do
+      arg(:video_id, non_null(:id))
+      config(&topic_by_video/2)
+    end
+
+    @desc "Listen for comment score changes on a video"
+    field :comment_score_diff, :comment_score_diff do
+      arg(:video_id, non_null(:id))
+      config(&topic_by_video/2)
+    end
+
+    @desc "Listen for video updates"
+    field :video_updated, :video do
+      arg(:video_id, non_null(:id))
+      config(&topic_by_video/2)
+    end
+
+    @desc "Listen for speakers added on a video"
+    field :speaker_added, :speaker do
+      arg(:video_id, non_null(:id))
+      config(&topic_by_video/2)
+    end
+
+    @desc "Listen for speakers updated on a video"
+    field :speaker_updated, :speaker do
+      arg(:video_id, non_null(:id))
+      config(&topic_by_video/2)
+    end
+
+    @desc "Listen for speakers removed on a video"
+    field :speaker_removed, :speaker_removed do
+      arg(:video_id, non_null(:id))
+      config(&topic_by_video/2)
+    end
+
+    @desc "Listen for actions added to a video history"
+    field :video_history_action_added, :user_action do
+      arg(:video_id, non_null(:id))
+      config(&topic_by_video_history/2)
+    end
+
+    @desc "Listen for actions added to a statement history"
+    field :statement_history_action_added, :user_action do
+      arg(:statement_id, non_null(:id))
+      config(&topic_by_statement_history/2)
+    end
+  end
+
+  defp topic_by_video(%{video_id: video_id}, _resolution) do
+    {:ok, topic: Subscriptions.video_topic(video_id)}
+  end
+
+  defp topic_by_video_history(%{video_id: video_id}, _resolution) do
+    {:ok, topic: Subscriptions.video_history_topic(video_id)}
+  end
+
+  defp topic_by_statement_history(%{statement_id: statement_id}, _resolution) do
+    {:ok, topic: Subscriptions.statement_history_topic(statement_id)}
   end
 end

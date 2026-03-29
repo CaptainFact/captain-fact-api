@@ -1,2 +1,2 @@
-Ecto.Adapters.SQL.Sandbox.mode(DB.Repo, {:shared, self()})
+{:ok, _} = Application.ensure_all_started(:cf_graphql)
 ExUnit.start()

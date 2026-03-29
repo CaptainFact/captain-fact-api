@@ -22,6 +22,36 @@ defmodule DB.Schema.SourceTest do
     refute Source.changeset(%Source{}, %{@valid_attrs | url: "http://"}).valid?
     refute Source.changeset(%Source{}, %{@valid_attrs | url: "https://x"}).valid?
     refute Source.changeset(%Source{}, %{@valid_attrs | url: "https://xxxxxx"}).valid?
+    refute Source.changeset(%Source{}, %{@valid_attrs | url: "ftp://example.com/doc"}).valid?
+    refute Source.changeset(%Source{}, %{@valid_attrs | url: "not-a-url"}).valid?
+  end
+
+  describe "url validation (URI.parse)" do
+    test "accepts long public suffix / TLD (e.g. .institute)" do
+      url =
+        "https://manhattan.institute/article/new-study-finds-political-bias-embedded-in-wikipedia-articles"
+
+      assert Source.changeset(%Source{}, %{@valid_attrs | url: url}).valid?
+    end
+
+    test "accepts multi-label hosts with common TLDs" do
+      assert Source.changeset(%Source{}, %{
+               @valid_attrs
+               | url: "https://www.lemonde.fr/article/123"
+             }).valid?
+
+      assert Source.changeset(%Source{}, %{
+               @valid_attrs
+               | url: "https://en.wikipedia.org/wiki/Fact-checking"
+             }).valid?
+    end
+
+    test "allows localhost and loopback addresses in test build" do
+      # @allow_localhost is a compile-time constant (true when MIX_ENV == :test).
+      assert Source.changeset(%Source{}, %{@valid_attrs | url: "http://localhost:4000/page"}).valid?
+      assert Source.changeset(%Source{}, %{@valid_attrs | url: "http://localhost/path"}).valid?
+      assert Source.changeset(%Source{}, %{@valid_attrs | url: "http://127.0.0.1:8080/"}).valid?
+    end
   end
 
   test "changeset_fetched" do

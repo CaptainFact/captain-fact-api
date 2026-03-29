@@ -6,12 +6,12 @@ defmodule CF.Graphql.Resolvers.Users do
   import Ecto.Query
 
   alias CF.Moderation
+  alias CF.Accounts.UserPermissions
 
   alias Kaur.Result
 
   alias DB.Repo
-  alias DB.Schema.User
-  alias DB.Schema.UserAction
+  alias DB.Schema.{Comment, Flag, Statement, User, UserAction, Video, Vote}
 
   @doc """
   Resolve a user by its id or username
@@ -86,11 +86,117 @@ defmodule CF.Graphql.Resolvers.Users do
     |> Result.ok()
   end
 
+  @spec videos_added(
+          atom() | %{:id => any(), optional(any()) => any()},
+          %{:limit => any(), :offset => any(), optional(any()) => any()},
+          any()
+        ) :: {:ok, Scrivener.Page.t()}
   @doc """
   Get videos added by this user
   """
   def videos_added(user, %{offset: offset, limit: limit}, _) do
     {:ok, CF.Videos.added_by_user(user, page: offset, page_size: limit)}
+  end
+
+  @doc """
+  Get the number of available flags for this user.
+  Returns -1 for unlimited flags (publishers) or the remaining number of flags.
+  Returns 0 if the user cannot flag comments.
+  """
+  def available_flags(user, _, _) do
+    case UserPermissions.check(user, :flag, :comment) do
+      {:ok, num_available} -> {:ok, num_available}
+      {:error, _reason} -> {:ok, 0}
+    end
+  end
+
+  @spec votes(nil | %{:id => any(), optional(any()) => any()}, any(), any()) :: {:ok, any()}
+  @doc """
+  Get user's votes on comments for a specific video as a map (commentId => vote value).
+  Returns all votes if neither video_id nor video_hash_id are provided.
+  """
+  def votes(nil, _, _), do: {:ok, %{}}
+
+  def votes(user, args, _) do
+    video_id = Map.get(args, :video_id)
+    video_hash_id = Map.get(args, :video_hash_id)
+
+    query = Vote.user_votes(Vote, user)
+
+    query =
+      cond do
+        video_id ->
+          Vote.video_votes(query, %{id: video_id})
+
+        video_hash_id ->
+          Vote.video_votes(query, %{hash_id: video_hash_id})
+
+        true ->
+          query
+      end
+
+    votes =
+      query
+      |> select([v], {v.comment_id, v.value})
+      |> Repo.all()
+      |> Enum.into(%{})
+
+    {:ok, votes}
+  end
+
+  @spec flags(nil | %{:id => any(), optional(any()) => any()}, any(), any()) :: {:ok, map()}
+  @doc """
+  Get comment IDs the user has flagged for a specific video as a map (commentId => true).
+  Returns all flagged comment IDs if neither video_id nor video_hash_id are provided.
+  """
+  def flags(nil, _, _), do: {:ok, %{}}
+
+  def flags(user, args, _) do
+    video_id = Map.get(args, :video_id)
+    video_hash_id = Map.get(args, :video_hash_id)
+
+    query =
+      from(
+        f in Flag,
+        join: a in UserAction,
+        on: f.action_id == a.id,
+        where: f.source_user_id == ^user.id,
+        where: not is_nil(a.comment_id)
+      )
+
+    query =
+      cond do
+        video_id ->
+          from([f, a] in query,
+            join: c in Comment,
+            on: c.id == a.comment_id,
+            join: s in Statement,
+            on: c.statement_id == s.id,
+            where: s.video_id == ^video_id
+          )
+
+        video_hash_id ->
+          from([f, a] in query,
+            join: c in Comment,
+            on: c.id == a.comment_id,
+            join: s in Statement,
+            on: c.statement_id == s.id,
+            join: v in Video,
+            on: s.video_id == v.id,
+            where: v.hash_id == ^video_hash_id
+          )
+
+        true ->
+          query
+      end
+
+    flags =
+      query
+      |> select([_f, a], {a.comment_id, true})
+      |> Repo.all()
+      |> Enum.into(%{})
+
+    {:ok, flags}
   end
 
   defp filter_by_user_action_direction(query, user, direction) when direction == :all,

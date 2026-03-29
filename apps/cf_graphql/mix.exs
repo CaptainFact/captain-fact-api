@@ -39,6 +39,7 @@ defmodule CF.Graphql.Mixfile do
       {:cowboy, "~> 2.0"},
       {:corsica, "~> 2.1"},
       {:absinthe_plug, "~> 1.5"},
+      {:absinthe_phoenix, "~> 2.0"},
       {:dataloader, "~> 2.0.2"},
       {:kaur, "~> 1.1"},
       {:poison, "~> 3.1"},

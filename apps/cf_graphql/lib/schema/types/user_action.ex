@@ -34,7 +34,7 @@ defmodule CF.Graphql.Schema.Types.UserAction do
     @desc "Entity type"
     field(:entity, non_null(:string))
     @desc "Datetime at which the action has been done"
-    field(:time, :string, do: resolve(fn a, _, _ -> {:ok, a.inserted_at} end))
+    field(:time, :naive_datetime, do: resolve(fn a, _, _ -> {:ok, a.inserted_at} end))
     @desc "Reputation change for the author of the action"
     field(:author_reputation_change, :integer)
     @desc "Reputation change for the target of the action"

@@ -1,10 +1,10 @@
 defmodule DB.StatisticsTest do
+  use DB.DataCase, async: false
+
   alias DB.{Repo, Statistics, Schema}
   alias Schema.User
 
   import DB.Factory, only: [insert: 1, insert: 2]
-
-  use ExUnit.Case
 
   describe "user_count/0" do
     test "it returns an integer" do

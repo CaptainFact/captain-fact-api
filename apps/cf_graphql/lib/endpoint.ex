@@ -1,5 +1,8 @@
 defmodule CF.GraphQLWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :cf_graphql
+  use Absinthe.Phoenix.Endpoint
+
+  socket("/socket", CF.GraphQLWeb.UserSocket, websocket: true, longpoll: false)
 
   plug(Plug.RequestId)
   plug(Plug.Logger)

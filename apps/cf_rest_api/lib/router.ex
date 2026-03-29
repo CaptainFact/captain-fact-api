@@ -23,10 +23,10 @@ defmodule CF.RestApi.Router do
 
     # ---- Public endpoints ----
     get("/", ApiInfoController, :get)
-    get("/videos", VideoController, :index)
-    get("/speakers/:slug_or_id", SpeakerController, :show)
-    post("/search/video", VideoController, :search)
-    get("/videos/:video_id/statements", StatementController, :get)
+    # get("/videos", VideoController, :index)
+    # get("/speakers/:slug_or_id", SpeakerController, :show)
+    # post("/search/video", VideoController, :search)
+    # get("/videos/:video_id/statements", StatementController, :get)
     get("/newsletter/unsubscribe/:token", UserController, :newsletter_unsubscribe)
 
     # ---- Authenticathed endpoints ----
@@ -43,7 +43,7 @@ defmodule CF.RestApi.Router do
       # Users
       scope "/users" do
         post("/", UserController, :create)
-        post("/request_invitation", UserController, :request_invitation)
+        # post("/request_invitation", UserController, :request_invitation)
         get("/username/:username", UserController, :show)
 
         scope "/reset_password" do
@@ -56,21 +56,21 @@ defmodule CF.RestApi.Router do
           get("/", UserController, :show_me)
           put("/", UserController, :update)
           delete("/", UserController, :delete)
-          get("/available_flags", UserController, :available_flags)
+          # get("/available_flags", UserController, :available_flags)
           put("/confirm_email/:token", UserController, :confirm_email)
           put("/achievements/:achievement", UserController, :unlock_achievement)
-          post("/onboarding/complete_step", UserController, :complete_onboarding_step)
-          post("/onboarding/complete_steps", UserController, :complete_onboarding_steps)
-          delete("/onboarding", UserController, :delete_onboarding)
+          # post("/onboarding/complete_step", UserController, :complete_onboarding_step)
+          # post("/onboarding/complete_steps", UserController, :complete_onboarding_steps)
+          # delete("/onboarding", UserController, :delete_onboarding)
         end
       end
 
-      # Videos
-      post("/videos", VideoController, :get_or_create)
+      # # Videos
+      # post("/videos", VideoController, :get_or_create)
 
-      # Moderation
-      get("/moderation/random", ModerationController, :random)
-      post("/moderation/feedback", ModerationController, :post_feedback)
+      # # Moderation
+      # get("/moderation/random", ModerationController, :random)
+      # post("/moderation/feedback", ModerationController, :post_feedback)
     end
   end
 

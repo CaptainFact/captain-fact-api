@@ -2,8 +2,10 @@
 
 cd "$(dirname "$(realpath "$0")")"/..
 
+# Cypress expects /videos/Jzqg (seeded in apps/db/priv/repo/seeds.exs when MIX_ENV=dev)
+mix ecto.seed
+
 # Start API
-cd ./api
 mix run --no-halt &
 
 # Start Frontend

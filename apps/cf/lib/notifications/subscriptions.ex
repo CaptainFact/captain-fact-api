@@ -11,6 +11,7 @@ defmodule CF.Notifications.Subscriptions do
   alias DB.Schema.Video
   alias DB.Schema.Statement
   alias DB.Schema.Comment
+  alias DB.Type.VideoHashId
 
   @type subscribable_entities :: Video.t() | Statement.t() | Comment.t()
 
@@ -85,6 +86,12 @@ defmodule CF.Notifications.Subscriptions do
 
         :video_id ->
           where(query, [s], s.video_id == ^value)
+
+        :video_hash_id ->
+          case VideoHashId.decode(to_string(value)) do
+            {:ok, video_id} -> where(query, [s], s.video_id == ^video_id)
+            _ -> query
+          end
 
         _ ->
           query

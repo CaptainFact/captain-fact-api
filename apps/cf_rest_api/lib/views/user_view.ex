@@ -2,6 +2,7 @@ defmodule CF.RestApi.UserView do
   use CF.RestApi, :view
 
   alias CF.RestApi.UserView
+  alias CF.Accounts.UserPermissions
 
   def render("index_public.json", %{users: users}) do
     render_many(users, UserView, "public_user.json")
@@ -30,6 +31,12 @@ defmodule CF.RestApi.UserView do
   end
 
   def render("user.json", %{user: user}) do
+    available_flags =
+      case UserPermissions.check(user, :flag, :comment) do
+        {:ok, n} -> n
+        {:error, _} -> 0
+      end
+
     %{
       id: user.id,
       email: user.email,
@@ -43,7 +50,8 @@ defmodule CF.RestApi.UserView do
       registered_at: user.inserted_at,
       achievements: user.achievements,
       is_publisher: user.is_publisher,
-      speaker_id: user.speaker_id
+      speaker_id: user.speaker_id,
+      available_flags: available_flags
     }
   end
 

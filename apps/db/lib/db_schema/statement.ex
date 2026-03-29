@@ -85,6 +85,24 @@ defmodule DB.Schema.Statement do
   end
 
   @doc """
+  Builds a changeset for updating an existing statement.
+  Makes time optional since it may not be changed in every update.
+  """
+  def changeset_update(struct, params \\ %{}) do
+    # For updates, only text is required
+    # time is optional since it may not be updated
+    struct
+    |> cast(params, [:text, :time, :speaker_id, :is_draft])
+    |> validate_required([:text])
+    |> validate_number(:time,
+      greater_than_or_equal_to: 0,
+      message: "must be greater than or equal to 0"
+    )
+    |> validate_length(:text, min: 10, max: 280)
+    |> cast_assoc(:speaker)
+  end
+
+  @doc """
   Builds a deletion changeset for `struct`
   """
   def changeset_remove(struct) do

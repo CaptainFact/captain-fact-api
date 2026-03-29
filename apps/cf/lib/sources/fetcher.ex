@@ -77,7 +77,7 @@ defmodule CF.Sources.Fetcher do
   defp do_fetch_source_metadata(url, mime_types) when mime_types in @fetchable_mime_types do
     case HTTPoison.get(
            url,
-           [{"User-Agent", "CaptainFact/2.0"}],
+           [{"User-Agent", "CaptainFact/#{CF.Application.version()}"}],
            follow_redirect: true,
            max_redirect: 5,
            hackney: [pool: pool_name()]

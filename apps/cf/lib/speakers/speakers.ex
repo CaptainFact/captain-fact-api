@@ -10,6 +10,12 @@ defmodule CF.Speakers do
   alias DB.Schema.Speaker
   alias DB.Schema.VideoSpeaker
   alias DB.Type.SpeakerPicture
+  alias Ecto.Multi
+
+  alias CF.Accounts.UserPermissions
+
+  import CF.Actions.ActionCreator,
+    only: [action_add: 3, action_create: 2, action_remove: 3, action_restore: 3]
 
   @doc """
   Fetch speaker's picture, overriding the existing picture if there's one
@@ -67,6 +73,148 @@ defmodule CF.Speakers do
     |> where([s], is_nil(s.slug))
     |> Repo.all()
     |> Enum.map(&generate_slug/1)
+  end
+
+  @doc """
+  Search speakers by name (minimum 3 characters). Caller may enforce stricter rules.
+  """
+  def search_by_name(query, _limit) when byte_size(query) < 3, do: {:ok, []}
+
+  def search_by_name(query, limit) do
+    query_pattern = "%#{escape_like(query)}%"
+
+    speakers_query =
+      from(
+        s in Speaker,
+        where: fragment("unaccent(?) ILIKE unaccent(?)", s.full_name, ^query_pattern),
+        group_by: s.id,
+        select: %{id: s.id, full_name: s.full_name, slug: s.slug, picture: s.picture},
+        limit: ^limit
+      )
+
+    {:ok, Repo.all(speakers_query)}
+  end
+
+  @doc """
+  Adds an existing speaker to a video. Caller must load the speaker.
+  """
+  def add_speaker_to_video(user_id, video_id, %Speaker{} = speaker)
+      when is_integer(user_id) and is_integer(video_id) do
+    UserPermissions.check!(user_id, :add, :speaker)
+
+    changeset = VideoSpeaker.changeset(%VideoSpeaker{speaker_id: speaker.id, video_id: video_id})
+
+    Multi.new()
+    |> Multi.insert(:video_speaker, changeset)
+    |> Multi.insert(:action_add, action_add(user_id, video_id, speaker))
+    |> Repo.transaction()
+    |> case do
+      {:ok, _} ->
+        {:ok, speaker}
+
+      {:error, _, %{errors: errors}, _} ->
+        if errors[:video] == {"has already been taken", []},
+          do: {:error, :speaker_already_on_video},
+          else: {:error, :failed_to_add_speaker}
+    end
+  end
+
+  @doc """
+  Creates a new speaker and links them to a video.
+  """
+  def create_speaker_and_add_to_video(user_id, video_id, full_name)
+      when is_integer(user_id) and is_integer(video_id) and is_binary(full_name) do
+    UserPermissions.check!(user_id, :create, :speaker)
+
+    speaker_changeset = Speaker.changeset(%Speaker{}, %{full_name: full_name})
+
+    Multi.new()
+    |> Multi.insert(:speaker, speaker_changeset)
+    |> Multi.run(:video_speaker, fn _repo, %{speaker: speaker} ->
+      %VideoSpeaker{speaker_id: speaker.id, video_id: video_id}
+      |> VideoSpeaker.changeset()
+      |> Repo.insert()
+    end)
+    |> Multi.run(:action_create, fn _repo, %{speaker: speaker} ->
+      Repo.insert(action_create(user_id, speaker))
+    end)
+    |> Multi.run(:action_add, fn _repo, %{speaker: speaker} ->
+      Repo.insert(action_add(user_id, video_id, speaker))
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{speaker: speaker}} ->
+        {:ok, speaker}
+
+      {:error, :speaker, _changeset, %{}} ->
+        {:error, :invalid_speaker}
+
+      _ ->
+        {:error, :failed_to_create_speaker}
+    end
+  end
+
+  @doc """
+  Removes a speaker from a video. Caller must load the speaker.
+  """
+  def remove_speaker_from_video(user_id, video_id, %Speaker{} = speaker)
+      when is_integer(user_id) and is_integer(video_id) do
+    UserPermissions.check!(user_id, :remove, :speaker)
+
+    video_speaker = %VideoSpeaker{speaker_id: speaker.id, video_id: video_id}
+
+    Multi.new()
+    |> Multi.delete(:video_speaker, VideoSpeaker.changeset(video_speaker))
+    |> Multi.insert(:action_remove, action_remove(user_id, video_id, speaker))
+    |> Repo.transaction()
+    |> case do
+      {:ok, _} ->
+        {:ok, speaker.id}
+
+      {:error, _operation, reason, _changes} ->
+        {:error, reason}
+    end
+  end
+
+  @doc """
+  Updates a speaker's attributes.
+  """
+  def update_speaker(user_id, %Speaker{} = speaker, attrs)
+      when is_integer(user_id) and is_map(attrs) do
+    UserPermissions.check!(user_id, :update, :speaker)
+
+    speaker
+    |> Speaker.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Lists video IDs a speaker is associated with.
+  """
+  def video_ids_for_speaker(speaker_id) when is_integer(speaker_id) do
+    Repo.all(from(vs in VideoSpeaker, where: vs.speaker_id == ^speaker_id, select: vs.video_id))
+  end
+
+  @doc """
+  Restores a speaker link to a video after removal. Caller must load the speaker.
+  """
+  def restore_speaker_to_video(user_id, video_id, %Speaker{} = speaker)
+      when is_integer(user_id) and is_integer(video_id) do
+    UserPermissions.check!(user_id, :restore, :speaker)
+
+    video_speaker = %VideoSpeaker{speaker_id: speaker.id, video_id: video_id}
+
+    Multi.new()
+    |> Multi.insert(:video_speaker, VideoSpeaker.changeset(video_speaker))
+    |> Multi.insert(:action_restore, action_restore(user_id, video_id, speaker))
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{action_restore: action}} ->
+        {:ok, %{speaker: speaker, action: action}}
+
+      {:error, _operation, reason, _changes} ->
+        {:error, reason}
+    end
   end
 
   def retrieve_wikimedia_picture_url(%Speaker{wikidata_item_id: nil}) do
@@ -142,6 +290,15 @@ defmodule CF.Speakers do
     |> Map.from_struct()
     |> Enum.filter(fn {_, v} -> v != nil end)
     |> Enum.into(%{})
+  end
+
+  # Escape PostgreSQL LIKE/ILIKE wildcards so user input is treated as literal text.
+  # Must be applied before wrapping with the surrounding `%` delimiters.
+  defp escape_like(query) do
+    query
+    |> String.replace("\\", "\\\\")
+    |> String.replace("%", "\\%")
+    |> String.replace("_", "\\_")
   end
 
   defp picture_filename_from_response(%{"claims" => %{"P18" => images}}) do
