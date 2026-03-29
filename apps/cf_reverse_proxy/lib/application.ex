@@ -15,8 +15,8 @@ defmodule CF.ReverseProxy.Application do
        dispatch: [
          {:_,
           [
-            {"/socket/websocket", Phoenix.Endpoint.Cowboy2Handler, {CF.RestApi.Endpoint, []}},
-            {"/socket/longpoll", Phoenix.Endpoint.Cowboy2Handler, {CF.RestApi.Endpoint, []}},
+            {"/socket/websocket", Phoenix.Endpoint.Cowboy2Handler, {CF.GraphQLWeb.Endpoint, []}},
+            {"/socket/longpoll", Phoenix.Endpoint.Cowboy2Handler, {CF.GraphQLWeb.Endpoint, []}},
             {:_, Plug.Cowboy.Handler, {CF.ReverseProxy.Plug, []}}
           ]}
        ]}

@@ -25,3 +25,4 @@ apps/*/priv/secrets/*
 
 # IDE
 .history
+cover/excoveralls.html
