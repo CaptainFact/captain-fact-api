@@ -12,6 +12,18 @@ defmodule CF.ReverseProxy.Plug do
 
   def init(opts), do: opts
 
+  defp rest_target do
+    Application.get_env(:cf_reverse_proxy, :rest_target, CF.RestApi.Endpoint)
+  end
+
+  defp graphql_target do
+    Application.get_env(:cf_reverse_proxy, :graphql_target, CF.GraphQLWeb.Endpoint)
+  end
+
+  defp feed_target do
+    Application.get_env(:cf_reverse_proxy, :feed_target, CF.AtomFeed.Router)
+  end
+
   # See https://github.com/wojtekmach/acme_bank/blob/master/apps/master_proxy/lib/master_proxy/plug.ex
   # Or CaddyServer
   # https://elixirforum.com/t/umbrella-with-2-phoenix-apps-how-to-forward-request-from-1-to-2-and-vice-versa/1797/18?u=betree
@@ -25,10 +37,10 @@ defmodule CF.ReverseProxy.Plug do
       else
         [path_info, endpoint] =
           case conn.path_info do
-            ["rest" | _] -> [tl(conn.path_info), CF.RestApi.Endpoint]
-            ["graphql" | _] -> [tl(conn.path_info), CF.GraphQLWeb.Endpoint]
-            ["feed" | _] -> [tl(conn.path_info), CF.AtomFeed.Router]
-            path_info -> [path_info, CF.RestApi.Endpoint]
+            ["rest" | _] -> [tl(conn.path_info), rest_target()]
+            ["graphql" | _] -> [tl(conn.path_info), graphql_target()]
+            ["feed" | _] -> [tl(conn.path_info), feed_target()]
+            path_info -> [path_info, rest_target()]
           end
 
         conn
@@ -44,13 +56,21 @@ defmodule CF.ReverseProxy.Plug do
         send_resp(conn, 200, "Ok")
       else
         subdomain = get_domain_from_host(conn.host)
-        endpoint = Map.get(@subdomains, subdomain, @default_host)
+
+        endpoint =
+          case subdomain do
+            "graphql" -> graphql_target()
+            "rest" -> rest_target()
+            "feed" -> feed_target()
+            _ -> rest_target()
+          end
+
         endpoint.call(conn, endpoint.init(nil))
       end
     end
 
     defp get_domain_from_host(host) do
-      @base_host_regex
+      ~r/^(?<service>rest|graphql|feed)\./
       |> Regex.named_captures(host)
       |> case do
         %{"service" => service} -> service
