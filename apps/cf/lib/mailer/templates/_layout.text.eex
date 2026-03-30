@@ -6,7 +6,6 @@
 <%= gettext_mail("CaptainFact is a free and open source project.") %>
 <%= gettext_mail("If you like it, please share the word!") %>
 
-Forum: https://forum.captainfact.io/
 Discord: https://discord.captainfact.io
 Github: https://github.com/CaptainFact
 Facebook: https://www.facebook.com/CaptainFact.io/
