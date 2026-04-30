@@ -1,14 +1,17 @@
 defmodule CF.ReverseProxy.Plug do
   @moduledoc false
 
-  use Plug.Builder
+  @behaviour Plug
 
-  plug(
-    Corsica,
-    max_age: 3600,
-    allow_headers: ~w(Accept Content-Type Authorization Origin),
-    origins: [~r/(.*)\.captainfact\.io$/]
-  )
+  import Plug.Conn
+
+  # Matches the leading service label in a hostname:
+  #   graphql.captainfact.io        → "graphql"
+  #   graphql.staging.captainfact.io → "graphql"
+  @service_subdomain ~r/^(?<service>rest|graphql|feed)\./
+
+  # CORS is handled by each downstream endpoint (CF.RestApi.Endpoint and
+  # CF.GraphQLWeb.Endpoint both plug Corsica with their own allowed origins).
 
   def init(opts), do: opts
 
@@ -24,58 +27,94 @@ defmodule CF.ReverseProxy.Plug do
     Application.get_env(:cf_reverse_proxy, :feed_target, CF.AtomFeed.Router)
   end
 
-  # See https://github.com/wojtekmach/acme_bank/blob/master/apps/master_proxy/lib/master_proxy/plug.ex
-  # Or CaddyServer
-  # https://elixirforum.com/t/umbrella-with-2-phoenix-apps-how-to-forward-request-from-1-to-2-and-vice-versa/1797/18?u=betree
-  # https://github.com/jesseshieh/master_proxy
+  # Routing strategy
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Primary (staging/production): host-based.
+  #   graphql.<anything>.captainfact.io → GraphQL endpoint
+  #   rest.<anything>.captainfact.io    → REST endpoint
+  #   feed.<anything>.captainfact.io    → Atom feed
+  #
+  # Some ingress layers (e.g. Knative/Scaleway activator) preserve the original
+  # public hostname in X-Forwarded-Host even if they rewrite Host internally;
+  # routing_host/1 handles that fallback.
+  #
+  # Fallback (local dev, host = localhost / no service subdomain): path-based.
+  #   /graphql/* → GraphQL   /feed/* → Atom feed   /* → REST
+  #   The leading path segment is stripped before forwarding.
+  # ─────────────────────────────────────────────────────────────────────────────
 
-  if Application.compile_env(:cf, :env, :prod) == :dev do
-    # Dev requests are routed through here
-    def call(conn, _) do
-      if conn.request_path == "/status" do
-        send_resp(conn, 200, "Ok")
-      else
-        [path_info, endpoint] =
-          case conn.path_info do
-            ["rest" | _] -> [tl(conn.path_info), rest_target()]
-            ["graphql" | _] -> [tl(conn.path_info), graphql_target()]
-            ["feed" | _] -> [tl(conn.path_info), feed_target()]
-            path_info -> [path_info, rest_target()]
-          end
+  def call(conn, _) do
+    if conn.request_path == "/status" do
+      send_resp(conn, 200, "Ok")
+    else
+      {conn, endpoint} =
+        case conn |> routing_host() |> service_from_host() do
+          "graphql" -> {conn, graphql_target()}
+          "rest" -> {conn, rest_target()}
+          "feed" -> {conn, feed_target()}
+          nil -> path_based_routing(conn)
+        end
 
-        conn
-        |> Map.replace!(:path_info, path_info)
-        |> Map.replace!(:request_path, Enum.join(path_info, "/"))
-        |> endpoint.call(endpoint.init(nil))
+      endpoint.call(conn, endpoint.init(nil))
+    end
+  end
+
+  # Determines the effective hostname for routing.  Prefers conn.host when it
+  # starts with a known service label; otherwise checks X-Forwarded-Host (set
+  # by some ingress proxies when they rewrite Host internally).
+  defp routing_host(conn) do
+    host = String.downcase(conn.host)
+
+    if Regex.match?(@service_subdomain, host) do
+      host
+    else
+      case first_x_forwarded_host(conn) do
+        nil -> host
+        forwarded -> String.downcase(forwarded)
       end
     end
-  else
-    # Prod requests are routed through here
-    def call(conn, _) do
-      if conn.request_path == "/status" do
-        send_resp(conn, 200, "Ok")
-      else
-        subdomain = get_domain_from_host(conn.host)
+  end
 
-        endpoint =
-          case subdomain do
-            "graphql" -> graphql_target()
-            "rest" -> rest_target()
-            "feed" -> feed_target()
-            _ -> rest_target()
-          end
-
-        endpoint.call(conn, endpoint.init(nil))
-      end
+  # Returns "graphql" | "rest" | "feed" | nil
+  defp service_from_host(host) do
+    case Regex.named_captures(@service_subdomain, host) do
+      %{"service" => service} -> service
+      _ -> nil
     end
+  end
 
-    defp get_domain_from_host(host) do
-      ~r/^(?<service>rest|graphql|feed)\./
-      |> Regex.named_captures(host)
-      |> case do
-        %{"service" => service} -> service
-        _ -> "rest"
-      end
+  # Fallback for local dev: route by the first path segment and strip it.
+  defp path_based_routing(conn) do
+    case conn.path_info do
+      ["graphql" | rest] -> {strip_prefix(conn, rest), graphql_target()}
+      ["feed" | rest] -> {strip_prefix(conn, rest), feed_target()}
+      ["rest" | rest] -> {strip_prefix(conn, rest), rest_target()}
+      _ -> {conn, rest_target()}
+    end
+  end
+
+  defp strip_prefix(conn, path_info) do
+    %{conn | path_info: path_info, request_path: "/" <> Enum.join(path_info, "/")}
+  end
+
+  defp first_x_forwarded_host(conn) do
+    case get_req_header(conn, "x-forwarded-host") do
+      [] ->
+        nil
+
+      [value | _] ->
+        value
+        |> String.split(",")
+        |> List.first()
+        |> String.trim()
+        |> host_without_port()
+    end
+  end
+
+  defp host_without_port(host) do
+    case String.split(host, ":", parts: 2) do
+      [h, _port] -> h
+      [h] -> h
     end
   end
 end

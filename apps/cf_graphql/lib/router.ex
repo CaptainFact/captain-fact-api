@@ -4,11 +4,13 @@ defmodule CF.GraphQLWeb.Router do
   @graphiql_route "/graphiql"
 
   pipeline :api do
-    plug(:accepts, ["json"])
+    # html + json so browser traffic to /graphiql, favicon, etc. does not hit
+    # plug :accepts only ["json"] → Phoenix.NotAcceptableError and huge error logs.
+    plug(:accepts, ["html", "json"])
   end
 
   pipeline :api_auth do
-    plug(:accepts, ["json"])
+    plug(:accepts, ["html", "json"])
     plug(CF.Graphql.AuthPipeline)
   end
 
