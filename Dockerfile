@@ -6,7 +6,7 @@ ARG MIX_ENV=prod
 ENV HOME=/opt/app/ SHELL=/bin/bash MIX_ENV=$MIX_ENV
 WORKDIR /opt/build
 
-# Cache dependencies
+# Build & cache dependencies
 COPY mix.exs mix.lock ./
 COPY apps/cf/mix.exs ./apps/cf/
 COPY apps/cf_atom_feed/mix.exs ./apps/cf_atom_feed/
@@ -18,12 +18,10 @@ COPY apps/db/mix.exs ./apps/db/
 RUN mix local.hex --force
 RUN mix local.rebar --force
 RUN HEX_HTTP_CONCURRENCY=4 HEX_HTTP_TIMEOUT=180 mix deps.get --only $MIX_ENV
-
-# Build dependencies
-COPY . .
 RUN mix deps.compile
 
 # Build app
+COPY . .
 RUN mix compile
 RUN mix release
 

@@ -5,7 +5,20 @@ defmodule DB.Application do
   require Logger
 
   def start(_type, _args) do
-    # Define workers and child supervisors to be supervised
+    case DB.Repo.ensure_storage_created() do
+      :ok ->
+        start_repo_and_migrate()
+
+      {:error, reason} ->
+        Logger.error(
+          "Could not create or reach Postgres database #{inspect(DB.Repo.config()[:database])}: #{reason}"
+        )
+
+        {:error, {:could_not_create_database, reason}}
+    end
+  end
+
+  defp start_repo_and_migrate do
     children = [
       # Starts a worker by calling: DB.Worker.start_link(arg1, arg2, arg3)
       # {DB.Worker, [arg1, arg2, arg3]},
