@@ -17,8 +17,16 @@ defmodule DB.Seeds do
   before the admin user so the video keeps `id == 1` and `hash_id == "Jzqg"`.
   """
   def seed_dev_data(repo \\ Repo) do
-    seed_cypress_video_and_statement(repo)
-    seed_dev_admin_user(repo)
+    env = Application.get_env(:db, :env)
+
+    if env != :dev and env != :test do
+      Logger.warning("API is running in non-dev mode. Skipping dev seeds.")
+      :ok
+    else
+      seed_cypress_video_and_statement(repo)
+      seed_dev_admin_user(repo)
+    end
+
     :ok
   end
 

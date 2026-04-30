@@ -12,6 +12,7 @@ defmodule DB.ReleaseTasks do
     :ssl,
     :postgrex,
     :ecto,
+    :ecto_sql,
     :logger
   ]
 
@@ -24,6 +25,17 @@ defmodule DB.ReleaseTasks do
     Logger.info("Loading captainfact for migrations..")
     Enum.each(@myapps, &run_migrations_for/1)
     Logger.info("Success!")
+    :init.stop()
+  end
+
+  @doc """
+  Loads dev seed data (Cypress video + admin user) via `DB.Seeds.seed_dev_data/0`.
+  For local integration tests against a prod release — not for production containers.
+  """
+  def seed_dev_data_release do
+    init()
+    {:ok, _} = Application.ensure_all_started(:bcrypt_elixir)
+    DB.Seeds.seed_dev_data()
     :init.stop()
   end
 
@@ -68,17 +80,29 @@ defmodule DB.ReleaseTasks do
   def priv_dir(app), do: "#{:code.priv_dir(app)}"
 
   defp init do
-    # Load the code, but don't start it
-    :ok = Application.load(:db)
+    # Load the code, but don't start it (eval may already have :db loaded)
+    case Application.load(:db) do
+      :ok -> :ok
+      {:error, {:already_loaded, :db}} -> :ok
+      {:error, reason} -> raise "Application.load(:db) failed: #{inspect(reason)}"
+    end
 
     # Start apps necessary for executing migrations
     Enum.each(@start_apps, &Application.ensure_all_started/1)
 
     Logger.info("Dependencies started, loading runtime configuration...")
 
+    case DB.Repo.ensure_storage_created() do
+      :ok ->
+        :ok
+
+      {:error, reason} ->
+        raise "Could not ensure Postgres database exists: #{reason}"
+    end
+
     # Start the Repo(s) for myapp
     Logger.info("Starting repos..")
-    Enum.each(@repos, & &1.start_link(pool_size: 1))
+    Enum.each(@repos, & &1.start_link(pool_size: 2))
   end
 
   defp run_migrations_for(app) do
