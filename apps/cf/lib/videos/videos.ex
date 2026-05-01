@@ -29,13 +29,21 @@ defmodule CF.Videos do
     * language: two characters identifier string (fr,en,es...etc) or
                 "unknown" to list videos with unknown language
   """
-  def videos_list(filters \\ [], with_speakers \\ true)
+  def videos_list(filters \\ [], with_speakers \\ true, with_categories \\ true) do
+    with_speakers = fn q ->
+      if with_speakers, do: Video.with_speakers(q), else: q
+    end
 
-  def videos_list(filters, true),
-    do: Repo.all(Video.query_list(Video.with_speakers(Video), filters))
+    with_categories = fn q ->
+      if with_categories, do: Video.with_categories(q), else: q
+    end
 
-  def videos_list(filters, false),
-    do: Repo.all(Video.query_list(Video, filters))
+    Video
+    |> Video.query_list(filters)
+    |> with_speakers.()
+    |> with_categories.()
+    |> Repo.all()
+  end
 
   @doc """
   Get videos added by given user. This will return all videos, included the ones
@@ -58,6 +66,7 @@ defmodule CF.Videos do
       {:youtube, id} ->
         Video
         |> Video.with_speakers()
+        |> Video.with_categories()
         |> Repo.get_by(youtube_id: id)
 
       {:facebook, id} ->
