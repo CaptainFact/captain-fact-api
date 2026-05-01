@@ -137,7 +137,13 @@ end
 
 config :cf_graphql, CF.GraphQLWeb.Endpoint,
   url: [host: load_secret.("host")],
-  secret_key_base: [host: load_secret.("secret_key_base")]
+  secret_key_base: load_secret.("secret_key_base"),
+  render_errors: [
+    view: Phoenix.ErrorView,
+    accepts: ~w(html json),
+    layout: false,
+    log: false
+  ]
 
 # ---- [APP CONFIG] :cf_reverse_proxy ----
 

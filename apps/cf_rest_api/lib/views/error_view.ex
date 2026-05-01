@@ -32,8 +32,11 @@ defmodule CF.RestApi.ErrorView do
     %{error: "unexpected"}
   end
 
-  def render(_, assigns) do
-    IO.inspect(assigns)
+  def render(other, assigns) do
+    Logger.debug(
+      "unexpected ErrorView render template=#{inspect(other)} assign_keys=#{inspect(Map.keys(assigns))}"
+    )
+
     %{error: "unexpected"}
   end
 end
