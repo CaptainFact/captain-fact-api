@@ -38,7 +38,7 @@ defmodule CF.Mixfile do
   defp deps do
     [
       {:phoenix, "~> 1.5.14", override: true},
-      {:phoenix_html, "~> 2.14.3"},
+      {:phoenix_html, "~> 3.3.4"},
       {:gettext, "~> 0.13.1"},
       {:google_api_you_tube, "~> 0.42.0"},
       {:kaur, "~> 1.1"},
