@@ -295,15 +295,17 @@ defmodule DB.Schema.Video do
 
         from(
           v in query,
+          # Less than 3 days old
+          # Or there are at least 3 comments
           where:
-            v.is_partner == true or
-              v.inserted_at >= datetime_add(^now, -3, "day") or
+            v.inserted_at >= datetime_add(^now, -3, "day") or
               v.id in fragment("""
                 SELECT popular_videos.id
                 FROM videos popular_videos
                 INNER JOIN statements ON statements.video_id = popular_videos.id
+                INNER JOIN comments ON comments.statement_id = statements.id
                 GROUP BY popular_videos.id
-                HAVING COUNT(statements.id) >= 3
+                HAVING COUNT(comments.id) >= 3
               """)
         )
     end)
